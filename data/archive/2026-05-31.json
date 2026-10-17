@@ -1,0 +1,257 @@
+{
+    "date": "2026-05-31",
+    "gti": 65,
+    "sitrep": "U.S., Iran trade drafts of deal as Israel expands Lebanon assault . China EV makers shift focus from price wars to AI capability: Morgan Stanley . Iran says does not trust US as Trump toughens terms .",
+    "top_keywords": {
+        "china": {
+            "count": 21,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 20,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 19,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 17,
+            "type": "PER"
+        },
+        "psg": {
+            "count": 15,
+            "type": "ORG"
+        },
+        "ukraine": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "colombia": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "france": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "myanmar": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "syria": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "drc": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "congo": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "beaufort": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "beaufort castle": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "mamdani": {
+            "count": 3,
+            "type": "PER"
+        },
+        "who": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "iaea": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "nepal": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "malta": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "aukus": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "zaporizhzhia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "liban": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "colombians": {
+            "count": 3,
+            "type": "PER"
+        },
+        "gobierno": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "beaufort ridge": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "south korea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "africa": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "espriella": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "cepeda": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "abelardo de la espriella": {
+            "count": 2,
+            "type": "PER"
+        },
+        "iv\u00e1n cepeda": {
+            "count": 2,
+            "type": "PER"
+        },
+        "pezeshkian": {
+            "count": 2,
+            "type": "PER"
+        },
+        "canada": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "australia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u062d\u0631\u0628": {
+            "count": 2,
+            "type": "PER"
+        },
+        "pakistan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "brooklyn rivera": {
+            "count": 2,
+            "type": "PER"
+        },
+        "washington": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "singapur": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "ecuador": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "peru": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pacific": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "labour party": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "uganda": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 110,
+        "www.scmp.com": 57,
+        "www.straitstimes.com": 40,
+        "timesofindia.indiatimes.com": 38,
+        "www.jpost.com": 30,
+        "www.japantimes.co.jp": 29,
+        "www.thehindu.com": 29,
+        "www.lemonde.fr": 27
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "last_updated": "2026-09-05T08:00:06.070235",
+    "global_tension_index": 37,
+    "gti_components": {
+        "base": 5.0,
+        "narrative": 9.6,
+        "market": 6.4,
+        "telemetry": 16.5
+    },
+    "gti_history": [
+        {
+            "timestamp": "2026-09-05T08:00:06.070235",
+            "score": 37
+        }
+    ],
+    "gti_forecast": [],
+    "forecast_confidence": "low"
+}

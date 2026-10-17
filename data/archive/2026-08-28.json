@@ -1,0 +1,253 @@
+{
+    "date": "2026-08-28",
+    "gti": 30,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: RCH5050. Aerial Anomalas: CFC4508. Aerial anomaly: AFR8F, AFR378E and AFR647 .",
+    "top_keywords": {
+        "nepal": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 7,
+            "type": "PER"
+        },
+        "japan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "hamas": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "iran": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "norway": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "watch": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "idf": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "london": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "brussels": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "video": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "fed": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "etats-unis": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "reuters": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "berlin": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 2,
+            "type": "PER"
+        },
+        "uzbekistan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "congo": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "ruben rada": {
+            "count": 2,
+            "type": "PER"
+        },
+        "jenin": {
+            "count": 1,
+            "type": "PER"
+        },
+        "west bank": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hatzalah": {
+            "count": 1,
+            "type": "PER"
+        },
+        "inside afghanistan": {
+            "count": 1,
+            "type": "PER"
+        },
+        "n\u00e9pal": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "tibet": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "s\u2019alourdit": {
+            "count": 1,
+            "type": "PER"
+        },
+        "belgium": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "sweden": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "finland": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "north macedonia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "jerusalem": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "rattansi": {
+            "count": 1,
+            "type": "PER"
+        },
+        "sweeney": {
+            "count": 1,
+            "type": "PER"
+        },
+        "dubenskij": {
+            "count": 1,
+            "type": "PER"
+        },
+        "hilal": {
+            "count": 1,
+            "type": "PER"
+        },
+        "maloof": {
+            "count": 1,
+            "type": "PER"
+        },
+        "videos": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "kentucky": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "asad zahir": {
+            "count": 1,
+            "type": "PER"
+        },
+        "france": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "warsh": {
+            "count": 1,
+            "type": "PER"
+        },
+        "us fed": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "e.u.": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "kevin warsh": {
+            "count": 1,
+            "type": "PER"
+        },
+        "serbia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "vucic": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "mladic": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u2018hormuz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "harald v": {
+            "count": 1,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "rss.nytimes.com": 10,
+        "www.thehindu.com": 10,
+        "www.straitstimes.com": 10,
+        "www.lemonde.fr": 10,
+        "www.rt.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "feeds.bbci.co.uk": 10
+    }
+}

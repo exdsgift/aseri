@@ -1,0 +1,257 @@
+{
+    "date": "2026-06-09",
+    "gti": 79,
+    "sitrep": "US launches strikes against Iran in retaliation for the downing of an Apache helicopter . Uruguay sheep produce exports from July25 to May26 reached US$ 281 million .",
+    "top_keywords": {
+        "trump": {
+            "count": 34,
+            "type": "PER"
+        },
+        "iran": {
+            "count": 32,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 9,
+            "type": "ORG"
+        },
+        "belfast": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 7,
+            "type": "PER"
+        },
+        "kenya": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "peru": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "icc": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "germany": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "ir\u00e1n": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "barcelona": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 4,
+            "type": "PER"
+        },
+        "papa": {
+            "count": 4,
+            "type": "PER"
+        },
+        "netanyahu": {
+            "count": 4,
+            "type": "PER"
+        },
+        "byd": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "alibaba": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "mexico": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "cuba": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "papa le\u00f3n xiv": {
+            "count": 3,
+            "type": "PER"
+        },
+        "gaza": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nasa": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "nato": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "us ebola": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "afghanistan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "leo": {
+            "count": 3,
+            "type": "PER"
+        },
+        "north korea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "espa\u00f1a": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "new york": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "baidu": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hamas": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "kharkiv": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "xi jinping": {
+            "count": 3,
+            "type": "PER"
+        },
+        "karim khan": {
+            "count": 3,
+            "type": "PER"
+        },
+        "uruguay": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "volodymyr zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "kim jong un": {
+            "count": 2,
+            "type": "PER"
+        },
+        "meta": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "india": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "texas": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "artan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 69,
+        "www.straitstimes.com": 49,
+        "www.lemonde.fr": 45,
+        "www.scmp.com": 41,
+        "www.france24.com": 40,
+        "timesofindia.indiatimes.com": 39,
+        "www.jpost.com": 39,
+        "feeds.bbci.co.uk": 29
+    }
+}

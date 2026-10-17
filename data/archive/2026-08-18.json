@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-18",
+    "gti": 42,
+    "sitrep": "Intelligence Synthesis Active: Multi-domain nodes reporting normal operational baseline.",
+    "top_keywords": {
+        "trump": {
+            "count": 11,
+            "type": "PER"
+        },
+        "ceuta": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "syria": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "west bank": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "brazil": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "juan tamariz": {
+            "count": 3,
+            "type": "PER"
+        },
+        "zimbabwe": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "tomoko akane": {
+            "count": 2,
+            "type": "PER"
+        },
+        "france": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "granada": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "iaea": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "earthquake": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "spain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "volodymyr zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "hormuz": {
+            "count": 2,
+            "type": "PER"
+        },
+        "colombia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "natalie harp": {
+            "count": 2,
+            "type": "PER"
+        },
+        "sophie adenot": {
+            "count": 2,
+            "type": "PER"
+        },
+        "lula": {
+            "count": 2,
+            "type": "PER"
+        },
+        "falklands": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "b'tselem": {
+            "count": 1,
+            "type": "PER"
+        },
+        "palestinian": {
+            "count": 1,
+            "type": "PER"
+        },
+        "illegaly": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "kuwaiti": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "iaf": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "uk green party": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "zionists": {
+            "count": 1,
+            "type": "PER"
+        },
+        "doj": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "bbc": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "gaza city": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hamas": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "israel strikes air base": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "drawing ire from": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "international criminal court": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "vivas": {
+            "count": 1,
+            "type": "PER"
+        },
+        "turkey": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "katz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "bolsonaro": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "sachsida": {
+            "count": 1,
+            "type": "PER"
+        },
+        "liberia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "la france": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "san francisco": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bolivia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "paz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "pentagon": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "greenland": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "south korea": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "afghanes": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "imran khan": {
+            "count": 1,
+            "type": "PER"
+        },
+        "lindsay clancy": {
+            "count": 1,
+            "type": "PER"
+        },
+        "international space station": {
+            "count": 1,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "www.straitstimes.com": 10,
+        "feeds.bbci.co.uk": 10,
+        "rss.nytimes.com": 10,
+        "www.scmp.com": 10,
+        "feeds.elpais.com": 10,
+        "www.france24.com": 10
+    }
+}

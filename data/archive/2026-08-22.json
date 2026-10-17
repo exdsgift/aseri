@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-22",
+    "gti": 29,
+    "sitrep": "Intelligence Synthesis Active: Multi-domain nodes reporting normal operational baseline.",
+    "top_keywords": {
+        "iran": {
+            "count": 19,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 12,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "icc": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "france": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ceuta": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "togo": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "syria": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "washington": {
+            "count": 2,
+            "type": "PER"
+        },
+        "china": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nordkorea": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "mark carney": {
+            "count": 2,
+            "type": "PER"
+        },
+        "usa": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nigeria": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 2,
+            "type": "PER"
+        },
+        "putin": {
+            "count": 2,
+            "type": "PER"
+        },
+        "fifa": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "jd vance": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "colombia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "uruguay": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kh\u1eafc nghi\u1ec7t nh\u1ea5t": {
+            "count": 2,
+            "type": "PER"
+        },
+        "espanyol - real madrid": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "calatrava": {
+            "count": 1,
+            "type": "PER"
+        },
+        "matteo salvini": {
+            "count": 1,
+            "type": "PER"
+        },
+        "italien": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "schweden": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "fagersta": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "miami international airport": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "nancy kassebaum baker": {
+            "count": 1,
+            "type": "PER"
+        },
+        "kansas": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "damascus": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "palestinian": {
+            "count": 1,
+            "type": "PER"
+        },
+        "loser": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "maastricht": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "gr\u00fcnen haut": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "miami beach": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "california": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "national park service": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "tokyo": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "kanto": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "pm carney": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "kanada": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "sowjetunion": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "moskau": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "vladimir poutine": {
+            "count": 1,
+            "type": "PER"
+        },
+        "kiev": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "pandore": {
+            "count": 1,
+            "type": "PER"
+        },
+        "pretend": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lom\u00e9": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "espagne": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "zelenskiy": {
+            "count": 1,
+            "type": "PER"
+        },
+        "pandora": {
+            "count": 1,
+            "type": "PER"
+        },
+        "fontainebleau": {
+            "count": 1,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "feeds.elpais.com": 10,
+        "www.spiegel.de": 10,
+        "www.thehindu.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "www.france24.com": 10,
+        "www.straitstimes.com": 10,
+        "www.rt.com": 10,
+        "www.lemonde.fr": 10
+    }
+}

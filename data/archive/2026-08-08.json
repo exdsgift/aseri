@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-08",
+    "gti": 31,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: AFR64UF, AFR16CM, UBD431 and AFR470 . Aerial Anomalas: SAMU13, AHY185, AFL2173 and AFL2165 .",
+    "top_keywords": {
+        "iran": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "ceuta": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 4,
+            "type": "PER"
+        },
+        "spain": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 3,
+            "type": "PER"
+        },
+        "turkey": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "oman": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "kosovo": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "italy": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 3,
+            "type": "PER"
+        },
+        "typhoon dolphin": {
+            "count": 3,
+            "type": "PER"
+        },
+        "falklands": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "paris": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kyiv": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "colombia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "bulgaria": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "parliament": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "serbia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "espagne": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "todd blanche": {
+            "count": 2,
+            "type": "PER"
+        },
+        "hong kong": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "espriella": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "cali": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hormuzit": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "palestinian": {
+            "count": 1,
+            "type": "PER"
+        },
+        "islamic republic": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "iranians": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "nypd": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "mamdani": {
+            "count": 1,
+            "type": "PER"
+        },
+        "netanyahu": {
+            "count": 1,
+            "type": "PER"
+        },
+        "manila": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "black sea": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "joe biden": {
+            "count": 1,
+            "type": "PER"
+        },
+        "colombie": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "farc": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "saudi arabia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "beirut": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "tha\u00eflande": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "madonna": {
+            "count": 1,
+            "type": "PER"
+        },
+        "william orbit": {
+            "count": 1,
+            "type": "PER"
+        },
+        "direct": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "kiev": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bulgarie": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "\u062a\u0642\u062f\u064a\u0631\u0627\u062a \u0627\u0633\u062a\u062e\u0628\u0627\u0631\u064a\u0629": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0643\u0648\u062a \u062f\u064a\u0641\u0648\u0627\u0631": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0641\u0645\u0627 \u0627\u0644\u0630\u064a": {
+            "count": 1,
+            "type": "PER"
+        },
+        "italia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "english channel": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "unesco": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "judea": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "samaria - opinion": {
+            "count": 1,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "feeds.bbci.co.uk": 10,
+        "www.france24.com": 10,
+        "www.straitstimes.com": 10,
+        "www.lemonde.fr": 10,
+        "www.scmp.com": 10,
+        "feeds.elpais.com": 10,
+        "www.aljazeera.net": 10
+    }
+}

@@ -1,0 +1,257 @@
+{
+    "date": "2026-06-18",
+    "gti": 65,
+    "sitrep": "Intelligence Synthesis Active: Multi-domain nodes reporting normal operational baseline.",
+    "top_keywords": {
+        "iran": {
+            "count": 58,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 37,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 9,
+            "type": "ORG"
+        },
+        "hong kong": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "us-iran": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "japan": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "moscow": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 7,
+            "type": "PER"
+        },
+        "cuba": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "niger": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "versailles": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "usa": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 4,
+            "type": "PER"
+        },
+        "new york": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "taiwan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 4,
+            "type": "PER"
+        },
+        "texas": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "moscou": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "starmer": {
+            "count": 4,
+            "type": "PER"
+        },
+        "lula": {
+            "count": 3,
+            "type": "PER"
+        },
+        "volodymyr zelensky": {
+            "count": 3,
+            "type": "PER"
+        },
+        "france": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "liban": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "obama": {
+            "count": 3,
+            "type": "PER"
+        },
+        "switzerland": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ghana": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "vance": {
+            "count": 3,
+            "type": "PER"
+        },
+        "strait of hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "britain": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "jd vance": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "russland": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "u.k.": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "tehran": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 2,
+            "type": "PER"
+        },
+        "niamey": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "william ruto": {
+            "count": 2,
+            "type": "PER"
+        },
+        "kenya": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "mojtaba khamenei": {
+            "count": 2,
+            "type": "PER"
+        },
+        "chicago": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "beijing": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "afghanistan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "poland": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "moskau": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 60,
+        "www.scmp.com": 55,
+        "timesofindia.indiatimes.com": 51,
+        "www.france24.com": 43,
+        "www.lemonde.fr": 42,
+        "www.straitstimes.com": 40,
+        "www.japantimes.co.jp": 32,
+        "www.jpost.com": 28
+    }
+}

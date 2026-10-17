@@ -1,0 +1,257 @@
+{
+    "date": "2026-07-27",
+    "gti": 36,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: SAMU44 . Aerial Anomalas: CFC3863. Aerial Anomatics: AFR51N. AFR358P.",
+    "top_keywords": {
+        "iran": {
+            "count": 33,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 21,
+            "type": "PER"
+        },
+        "france": {
+            "count": 19,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 9,
+            "type": "ORG"
+        },
+        "netanyahu": {
+            "count": 9,
+            "type": "PER"
+        },
+        "berlin": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "bordeaux": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 7,
+            "type": "PER"
+        },
+        "brazil": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "\u0645\u0627\u0630\u0627": {
+            "count": 6,
+            "type": "PER"
+        },
+        "hong kong": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "saudi arabia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 5,
+            "type": "PER"
+        },
+        "russia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "toronto": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "houthis": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "syria": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "seattle": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 3,
+            "type": "PER"
+        },
+        "red sea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "cuba": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nicaragua": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "icc": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "argentina": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "wildfire": {
+            "count": 3,
+            "type": "PER"
+        },
+        "shots": {
+            "count": 3,
+            "type": "PER"
+        },
+        "frankreich": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "iraq": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "al jazeera": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "caspian sea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "north korea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "macron": {
+            "count": 3,
+            "type": "PER"
+        },
+        "washington": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "indonesia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "honduras": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kyiv": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pentagon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "beijing": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "un security council": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "marco rubio": {
+            "count": 2,
+            "type": "PER"
+        },
+        "espriella": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "turkey": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "australia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "mamdani": {
+            "count": 2,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 93,
+        "www.jpost.com": 52,
+        "www.straitstimes.com": 50,
+        "www.scmp.com": 44,
+        "timesofindia.indiatimes.com": 38,
+        "www.thehindu.com": 35,
+        "www.france24.com": 32,
+        "www.lemonde.fr": 29
+    }
+}

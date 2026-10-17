@@ -1,0 +1,257 @@
+{
+    "date": "2026-09-02",
+    "gti": 28,
+    "sitrep": "Intelligence Synthesis Active: Multi-domain nodes reporting normal operational baseline.",
+    "top_keywords": {
+        "trump": {
+            "count": 8,
+            "type": "PER"
+        },
+        "ceuta": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "nepal": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "polic\u00eda": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 2,
+            "type": "PER"
+        },
+        "middle east": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "wisconsin": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 2,
+            "type": "PER"
+        },
+        "china": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "londres": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "emmanuel macron": {
+            "count": 2,
+            "type": "PER"
+        },
+        "tumbler ridge": {
+            "count": 2,
+            "type": "PER"
+        },
+        "mansour abbas": {
+            "count": 1,
+            "type": "PER"
+        },
+        "yoav segalovich": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "direct": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "vladimir poutine": {
+            "count": 1,
+            "type": "PER"
+        },
+        "brussels airlines": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "zelensky": {
+            "count": 1,
+            "type": "PER"
+        },
+        "us-iran": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "tehran": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "argentine": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lake ontario": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lake america\u2019 for": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "haley stevens": {
+            "count": 1,
+            "type": "PER"
+        },
+        "america": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "rafa j\u00f3dar": {
+            "count": 1,
+            "type": "PER"
+        },
+        "brazilian supreme court": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "camilo s\u00e9ptimo": {
+            "count": 1,
+            "type": "PER"
+        },
+        "m\u00e9xico": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "sara netanyahu": {
+            "count": 1,
+            "type": "PER"
+        },
+        "texas": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "feij\u00f3o": {
+            "count": 1,
+            "type": "PER"
+        },
+        "abascal": {
+            "count": 1,
+            "type": "PER"
+        },
+        "s\u00e1nchez": {
+            "count": 1,
+            "type": "PER"
+        },
+        "mamdani": {
+            "count": 1,
+            "type": "PER"
+        },
+        "new york": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "u.s. fed": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "malte": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "yorgen fenech": {
+            "count": 1,
+            "type": "PER"
+        },
+        "daphne caruana galizia": {
+            "count": 1,
+            "type": "PER"
+        },
+        "british museum": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "california": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "tony blair": {
+            "count": 1,
+            "type": "PER"
+        },
+        "uk un": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "palestine": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "interior": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "google": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "royaume-uni": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "new york times": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "houston": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "art deco": {
+            "count": 1,
+            "type": "PER"
+        },
+        "afrique du sud": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "isra\u00ebl": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "7-octobre": {
+            "count": 1,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "www.straitstimes.com": 10,
+        "www.lemonde.fr": 10,
+        "timesofindia.indiatimes.com": 10,
+        "en.mercopress.com": 10,
+        "www.theguardian.com": 10,
+        "feeds.elpais.com": 10,
+        "www.thehindu.com": 10
+    }
+}

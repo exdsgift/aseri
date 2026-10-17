@@ -1,0 +1,257 @@
+{
+    "date": "2026-06-03",
+    "gti": 73,
+    "sitrep": "Intelligence Synthesis Active: Multi-domain nodes reporting normal operational baseline.",
+    "top_keywords": {
+        "iran": {
+            "count": 28,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 26,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 19,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 10,
+            "type": "ORG"
+        },
+        "netanyahu": {
+            "count": 9,
+            "type": "PER"
+        },
+        "lebanon": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "kuwait": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "henry nowak": {
+            "count": 6,
+            "type": "PER"
+        },
+        "donald trump": {
+            "count": 6,
+            "type": "PER"
+        },
+        "putin": {
+            "count": 5,
+            "type": "PER"
+        },
+        "california": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "saint-p\u00e9tersbourg": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "denmark": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "rwanda": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "us-iran": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "beirut": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "wim wenders": {
+            "count": 3,
+            "type": "PER"
+        },
+        "europe": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "video": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "germany": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "south africa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kenya": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mexico": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "volodymyr zelensky": {
+            "count": 3,
+            "type": "PER"
+        },
+        "taiwan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "david s\u00e1nchez": {
+            "count": 3,
+            "type": "PER"
+        },
+        "ebola": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "malaysia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "us house": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "dr congo": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "italy": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nastassja kinski": {
+            "count": 2,
+            "type": "PER"
+        },
+        "beijing": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hungary": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kiev": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "who": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "bolivia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "petersburg": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "portugal": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "rubio": {
+            "count": 2,
+            "type": "PER"
+        },
+        "nigeria": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gro\u00dfbritannien": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.scmp.com": 55,
+        "www.lemonde.fr": 46,
+        "www.france24.com": 43,
+        "www.aljazeera.net": 40,
+        "www.straitstimes.com": 34,
+        "www.thehindu.com": 33,
+        "www.jpost.com": 32,
+        "timesofindia.indiatimes.com": 32
+    }
+}

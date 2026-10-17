@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-15",
+    "gti": 27,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: AFR35BM. AFR36FH. Aerial Anomalas: SPAR13. Aerial anomaly: RCH145. Aerial anomalies: CFC4243, AFL5806 .",
+    "top_keywords": {
+        "ceuta": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "liechtenstein": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "indonesia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "qatar": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "myanmar": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "zimbabwe": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 2,
+            "type": "PER"
+        },
+        "west asia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "granada": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "huanggang": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "rabat": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "efe": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "tve": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "chris pratt": {
+            "count": 1,
+            "type": "PER"
+        },
+        "pacific palisades": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "iran says qatar captured its pilots months ago": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "claim qatar rejects": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "virginia state university": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "scheitert": {
+            "count": 1,
+            "type": "PER"
+        },
+        "trump-familie an massenprotesten": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "morocco": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "marokko": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "grenz\u00fcbertrittsversuch": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "pete hoekstra takes off": {
+            "count": 1,
+            "type": "PER"
+        },
+        "lac kariba": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "sizilien": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "catania": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "\u00e4tna-ausbruch": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "samara": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "kyiv": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "naturschutzgebiet hohes venn: waldbrand": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "belgien": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lebanese state": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "taliban": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "afghanistan": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "houthi": {
+            "count": 1,
+            "type": "PER"
+        },
+        "l\u00e9on marchand": {
+            "count": 1,
+            "type": "PER"
+        },
+        "european swimming championships": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "marruecos": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "australien": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "new south wales": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bondi-beach-attentat": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "meet jamie bell": {
+            "count": 1,
+            "type": "PER"
+        },
+        "london": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "russie": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "israeli strikes": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "isra\u00ebl": {
+            "count": 1,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "feeds.bbci.co.uk": 10,
+        "feeds.elpais.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "rss.nytimes.com": 10,
+        "www.spiegel.de": 10,
+        "www.scmp.com": 10,
+        "www.thehindu.com": 10,
+        "www.lemonde.fr": 10
+    }
+}

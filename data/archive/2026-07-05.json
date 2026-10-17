@@ -1,0 +1,253 @@
+{
+    "date": "2026-07-05",
+    "gti": 72,
+    "sitrep": "Narrative Spike: 19 morts dans l\u2019Etat du New Jersey . S\u00e9isme au Venezuela: le bilan s\u2019\u00e9l\u00e8ve d\u00e9sormais \u00e0 plus de 3,300 morts .",
+    "top_keywords": {
+        "trump": {
+            "count": 40,
+            "type": "PER"
+        },
+        "iran": {
+            "count": 28,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 19,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 11,
+            "type": "PER"
+        },
+        "etats-unis": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "america": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "france": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "washington": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "paraguay": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "putin": {
+            "count": 7,
+            "type": "PER"
+        },
+        "new york": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "khamenei": {
+            "count": 5,
+            "type": "PER"
+        },
+        "syria": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "marine le pen": {
+            "count": 5,
+            "type": "PER"
+        },
+        "tehran": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "fifa": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "zelensky": {
+            "count": 4,
+            "type": "PER"
+        },
+        "taylor swift": {
+            "count": 4,
+            "type": "PER"
+        },
+        "travis kelce": {
+            "count": 4,
+            "type": "PER"
+        },
+        "hamas": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "russia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "charlie kirk": {
+            "count": 4,
+            "type": "PER"
+        },
+        "hezbollah": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "kim": {
+            "count": 4,
+            "type": "PER"
+        },
+        "kiev": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "crim\u00e9e": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "turkey": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "cape verde": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "farage": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "india": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "british military": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "yemen": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "supreme leader": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "lebanon": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "britain": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ali khamenei": {
+            "count": 3,
+            "type": "PER"
+        },
+        "strait of hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "4-juillet": {
+            "count": 3,
+            "type": "PER"
+        },
+        "rodr\u00edguez": {
+            "count": 2,
+            "type": "PER"
+        },
+        "supreme court": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "white": {
+            "count": 2,
+            "type": "PER"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "frankreich": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gro\u00dfbritannien": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nigel farage": {
+            "count": 2,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 91,
+        "www.scmp.com": 49,
+        "timesofindia.indiatimes.com": 43,
+        "www.jpost.com": 40,
+        "www.straitstimes.com": 39,
+        "www.france24.com": 34,
+        "www.lemonde.fr": 32,
+        "feeds.elpais.com": 25
+    }
+}

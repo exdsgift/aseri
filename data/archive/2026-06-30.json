@@ -1,0 +1,257 @@
+{
+    "date": "2026-06-30",
+    "gti": 65,
+    "sitrep": "Trump reports more than US$1.4 billion in income from crypto ventures . Hong Kong, mainland China to start sharing data this year: tech minister Sun Dong . US, China should de-escalate from tit-for-tat actions, US lawmaker says .",
+    "top_keywords": {
+        "venezuela": {
+            "count": 24,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 20,
+            "type": "PER"
+        },
+        "iran": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "supreme court": {
+            "count": 9,
+            "type": "ORG"
+        },
+        "germany": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "monaco": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "us supreme court": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "qatar": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "paraguay": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "keiko fujimori": {
+            "count": 6,
+            "type": "PER"
+        },
+        "hong kong": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "south africa": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "netanyahu": {
+            "count": 5,
+            "type": "PER"
+        },
+        "doha": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "peru": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "sweden": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "marruecos": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 4,
+            "type": "PER"
+        },
+        "pakistan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "direct": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "spain": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "mbapp\u00e9": {
+            "count": 3,
+            "type": "PER"
+        },
+        "russia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "africa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "norway": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "fujimori": {
+            "count": 3,
+            "type": "PER"
+        },
+        "dan sullivan": {
+            "count": 3,
+            "type": "PER"
+        },
+        "hamas": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "alemania": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "poland": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "netherlands": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mercosur": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "argentina": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "alaska": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "nazi": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "unrwa": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "singapore": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "australia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "putin": {
+            "count": 2,
+            "type": "PER"
+        },
+        "paramount": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "white house": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "lahore": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "moscow": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "who": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 60,
+        "www.france24.com": 47,
+        "www.lemonde.fr": 47,
+        "www.straitstimes.com": 44,
+        "www.scmp.com": 41,
+        "www.jpost.com": 38,
+        "www.japantimes.co.jp": 35,
+        "www.thehindu.com": 30
+    }
+}

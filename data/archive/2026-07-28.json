@@ -1,0 +1,253 @@
+{
+    "date": "2026-07-28",
+    "gti": 30,
+    "sitrep": "Iran launched missiles at US bases in Middle East in attempted 'surprise attack,' US CENTCOM said . Iran launched missile strikes at U.S. bases in Mideast in an 'attempted surprise attack,' U.N. military said . Aerial Anomaly: THY4JD.",
+    "top_keywords": {
+        "iran": {
+            "count": 35,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 33,
+            "type": "PER"
+        },
+        "france": {
+            "count": 23,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 15,
+            "type": "PER"
+        },
+        "japan": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "zelensky": {
+            "count": 8,
+            "type": "PER"
+        },
+        "lindsey graham": {
+            "count": 8,
+            "type": "PER"
+        },
+        "india": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 7,
+            "type": "PER"
+        },
+        "white house": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "bordeaux": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "zinedine zidane": {
+            "count": 7,
+            "type": "PER"
+        },
+        "spain": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "oman": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "fujimori": {
+            "count": 5,
+            "type": "PER"
+        },
+        "peru": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 5,
+            "type": "PER"
+        },
+        "volodymyr zelensky": {
+            "count": 4,
+            "type": "PER"
+        },
+        "houthis": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "red sea": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "chad": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "singapore": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "georgia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "saudi arabia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "indonesia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "international criminal court": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "madrid": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u0645\u0627\u0630\u0627": {
+            "count": 3,
+            "type": "PER"
+        },
+        "gaza": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "zidane": {
+            "count": 3,
+            "type": "PER"
+        },
+        "germany": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "malaysia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "faa": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "myanmar": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mamdani": {
+            "count": 2,
+            "type": "PER"
+        },
+        "israelis": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "milei": {
+            "count": 2,
+            "type": "PER"
+        },
+        "lima": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kumamoto mall": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "twitch": {
+            "count": 2,
+            "type": "PER"
+        },
+        "idf": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "west bank": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "trump-regierung": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "yemen": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gulf-": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "zelenskyy": {
+            "count": 2,
+            "type": "PER"
+        },
+        "egypt": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 82,
+        "www.straitstimes.com": 66,
+        "www.scmp.com": 55,
+        "www.france24.com": 45,
+        "www.jpost.com": 41,
+        "www.lemonde.fr": 35,
+        "timesofindia.indiatimes.com": 32,
+        "www.japantimes.co.jp": 31
+    }
+}

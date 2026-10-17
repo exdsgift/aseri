@@ -1,0 +1,253 @@
+{
+    "date": "2026-07-26",
+    "gti": 48,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: CFC0516. Aerial Anomalas: VSV817. Aerial anomaly: AFR5U.",
+    "top_keywords": {
+        "iran": {
+            "count": 38,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 22,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 19,
+            "type": "PER"
+        },
+        "israel": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "berlin": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 11,
+            "type": "ORG"
+        },
+        "hong kong": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 7,
+            "type": "PER"
+        },
+        "berlin pride": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "madrid": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "south china sea": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 5,
+            "type": "PER"
+        },
+        "gaza": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "honduras": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "typhoon noul": {
+            "count": 5,
+            "type": "PER"
+        },
+        "britain": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "syria": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "bordeaux": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 4,
+            "type": "PER"
+        },
+        "etats-unis": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "flavio bolsonaro": {
+            "count": 4,
+            "type": "PER"
+        },
+        "unesco": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "russie": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "icc": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "middle east": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "hernandez": {
+            "count": 3,
+            "type": "PER"
+        },
+        "oman": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "north korean": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "zohran mamdani": {
+            "count": 3,
+            "type": "PER"
+        },
+        "strait of hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u00e1vila": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "modi": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "houthis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "colombia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "rzp": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "volodymyr zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "andy burnham": {
+            "count": 2,
+            "type": "PER"
+        },
+        "burnham": {
+            "count": 2,
+            "type": "PER"
+        },
+        "caspian sea": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pentagon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "romania": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "golfe": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "north korea": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u0645\u0627\u0630\u0627": {
+            "count": 2,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 128,
+        "www.jpost.com": 61,
+        "www.straitstimes.com": 49,
+        "www.scmp.com": 46,
+        "timesofindia.indiatimes.com": 37,
+        "www.lemonde.fr": 36,
+        "www.japantimes.co.jp": 28,
+        "www.thehindu.com": 25
+    }
+}

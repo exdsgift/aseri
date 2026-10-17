@@ -1,0 +1,253 @@
+{
+    "date": "2026-07-19",
+    "gti": 80,
+    "sitrep": "Narrative Spike: Trump personally presents World Cup trophy to Spain (VIDEOS) US military reports another soldier killed in northern Iraq . US military says another soldier has been killed in Iraq .",
+    "top_keywords": {
+        "iran": {
+            "count": 37,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 22,
+            "type": "PER"
+        },
+        "china": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "espa\u00f1a": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "kyiv": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "england": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "miami": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "andrew tate": {
+            "count": 6,
+            "type": "PER"
+        },
+        "guyana": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "\u0645\u0627\u0630\u0627": {
+            "count": 5,
+            "type": "PER"
+        },
+        "india": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "jordan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 5,
+            "type": "PER"
+        },
+        "peru": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "kuwait": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "tristan tate": {
+            "count": 5,
+            "type": "PER"
+        },
+        "idf": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "hezbollah": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "lebanon": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "lamine yamal": {
+            "count": 4,
+            "type": "PER"
+        },
+        "lamine": {
+            "count": 3,
+            "type": "PER"
+        },
+        "new york": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russland": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "andy burnham": {
+            "count": 3,
+            "type": "PER"
+        },
+        "kiev": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "saudi arabia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mali": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ferry": {
+            "count": 2,
+            "type": "PER"
+        },
+        "iraq": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "messi": {
+            "count": 2,
+            "type": "PER"
+        },
+        "ontario": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u062d\u0645\u0649": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "bts": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "zohran mamdani": {
+            "count": 2,
+            "type": "PER"
+        },
+        "aqaba": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "fifa": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "hungary": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "supreme leader": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "putin": {
+            "count": 2,
+            "type": "PER"
+        },
+        "wildfire": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "centcom": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 88,
+        "www.scmp.com": 58,
+        "www.france24.com": 44,
+        "www.lemonde.fr": 37,
+        "timesofindia.indiatimes.com": 37,
+        "www.straitstimes.com": 34,
+        "www.jpost.com": 32,
+        "feeds.elpais.com": 29
+    }
+}

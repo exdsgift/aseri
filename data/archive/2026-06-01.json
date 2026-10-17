@@ -1,0 +1,257 @@
+{
+    "date": "2026-06-01",
+    "gti": 74,
+    "sitrep": "Lebanon says Hezbollah agrees reciprocal halt to attacks on Israel . OpenAI let ChatGPT aid and abet mass shooters, Florida lawsuit claims . Hungarian PM threatens to oust Orb\u00e1n-era president .",
+    "top_keywords": {
+        "israel": {
+            "count": 34,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 26,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 24,
+            "type": "PER"
+        },
+        "lebanon": {
+            "count": 22,
+            "type": "LOC"
+        },
+        "colombia": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 11,
+            "type": "ORG"
+        },
+        "u.s.": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "myanmar": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "psg": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "france": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "beirut": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "abelardo de la espriella": {
+            "count": 6,
+            "type": "PER"
+        },
+        "netanyahu": {
+            "count": 6,
+            "type": "PER"
+        },
+        "congo": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 5,
+            "type": "PER"
+        },
+        "japan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "iv\u00e1n cepeda": {
+            "count": 4,
+            "type": "PER"
+        },
+        "hasan piker": {
+            "count": 4,
+            "type": "PER"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "africa": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "u.k.": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "beaufort": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "australia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "drc": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "ir\u00e1n": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "l\u00edbano": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ethiopia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "taiwan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kuwait": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "brooklyn rivera": {
+            "count": 3,
+            "type": "PER"
+        },
+        "mamdani": {
+            "count": 3,
+            "type": "PER"
+        },
+        "florida": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "tehran": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "green card": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "chile": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "denmark": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u062d\u0631\u0628": {
+            "count": 2,
+            "type": "PER"
+        },
+        "su\u00e8de": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "beyrouth": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "seul(e": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "john lee": {
+            "count": 2,
+            "type": "PER"
+        },
+        "malta": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "rwanda": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "us-iran": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "mossad": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 79,
+        "www.straitstimes.com": 42,
+        "www.scmp.com": 39,
+        "www.jpost.com": 37,
+        "www.lemonde.fr": 35,
+        "www.thehindu.com": 35,
+        "timesofindia.indiatimes.com": 32,
+        "feeds.elpais.com": 28
+    }
+}

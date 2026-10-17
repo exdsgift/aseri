@@ -1,0 +1,253 @@
+{
+    "date": "2026-06-06",
+    "gti": 80,
+    "sitrep": "Russian Defence Ministry: anti-aircraft units intercepted 339 Ukrainian drones over 13-hour period . Nordkorea: Kims Schwester bezeichnet Atomstatus als nicht verhandelbar .",
+    "top_keywords": {
+        "iran": {
+            "count": 24,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 15,
+            "type": "PER"
+        },
+        "israel": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "putin": {
+            "count": 9,
+            "type": "PER"
+        },
+        "russia": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "papa": {
+            "count": 8,
+            "type": "PER"
+        },
+        "west bank": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "leo": {
+            "count": 8,
+            "type": "PER"
+        },
+        "spain": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "palestinian": {
+            "count": 6,
+            "type": "PER"
+        },
+        "europe": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 5,
+            "type": "PER"
+        },
+        "bernadette chirac": {
+            "count": 5,
+            "type": "PER"
+        },
+        "france": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 5,
+            "type": "PER"
+        },
+        "idf": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "madrid": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "papa le\u00f3n xiv": {
+            "count": 4,
+            "type": "PER"
+        },
+        "direct": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "moyen-orient": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "saint-p\u00e9tersbourg": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "kuwait": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "bahrain": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "gulf": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "jerusalem": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "london": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "who": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "taiwan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "video": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "real madrid": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "espagne": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "new york": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "congress": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "st petersburg": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "le\u00f3n xiv": {
+            "count": 3,
+            "type": "PER"
+        },
+        "espa\u00f1a": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "armenia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "trump ai": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "tehran": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "southampton": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "toronto": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "montreal": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "mirra andreeva": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "chicago": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u062d\u0631\u0628": {
+            "count": 2,
+            "type": "PER"
+        },
+        "pete hegseth": {
+            "count": 2,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 91,
+        "www.straitstimes.com": 50,
+        "www.jpost.com": 39,
+        "www.scmp.com": 37,
+        "www.lemonde.fr": 35,
+        "www.thehindu.com": 34,
+        "timesofindia.indiatimes.com": 31,
+        "feeds.elpais.com": 30
+    }
+}

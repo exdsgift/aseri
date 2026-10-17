@@ -1,0 +1,253 @@
+{
+    "date": "2026-06-14",
+    "gti": 69,
+    "sitrep": "Narrative Spike: EN DIRECT, guerre au Moyen-Orient\u00a0: la signature d\u2019un accord de paix annonc\u00e9e pour le 19juin, les Europ\u00e9ens pr\u00eats \u00e0 lever certaines sanctions sur l'Iran .",
+    "top_keywords": {
+        "iran": {
+            "count": 37,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "israel": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 11,
+            "type": "PER"
+        },
+        "china": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 9,
+            "type": "ORG"
+        },
+        "hong kong": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "brazil": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "beirut": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "australia": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "putin": {
+            "count": 7,
+            "type": "PER"
+        },
+        "idf": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "pakistan": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "geneva": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "lebanon": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "white house": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "nba": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "us-iran": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "switzerland": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "oliver tree": {
+            "count": 5,
+            "type": "PER"
+        },
+        "etats-unis": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 5,
+            "type": "PER"
+        },
+        "knicks": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "gaza": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "new york knicks": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "missouri": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mitch mcconnell": {
+            "count": 3,
+            "type": "PER"
+        },
+        "congo": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nigeria": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "elon musk": {
+            "count": 3,
+            "type": "PER"
+        },
+        "rio de janeiro": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "ir\u00e1n": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "london": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "channel": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "manhattan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "england": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "turkey": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "haiti": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "netherlands": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "tommy robinson": {
+            "count": 2,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaspi": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "tesla": {
+            "count": 2,
+            "type": "PER"
+        },
+        "libanon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "schweiz": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "cuba": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gen\u00e8ve": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "liban": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pok": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 88,
+        "www.scmp.com": 47,
+        "www.straitstimes.com": 46,
+        "www.france24.com": 40,
+        "timesofindia.indiatimes.com": 39,
+        "www.lemonde.fr": 37,
+        "www.jpost.com": 33,
+        "www.thehindu.com": 25
+    }
+}
