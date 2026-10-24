@@ -1,0 +1,253 @@
+{
+    "date": "2026-06-07",
+    "gti": 80,
+    "sitrep": "Israel army says Iran committed \u2018grave mistake\u2019 by firing missiles . Trump says he will press Israel to hold back after Iran retaliates for Beirut attack . U.K., France, Germany back direct Ukraine-Russia talks . Moldova's president pushes for develo",
+    "top_keywords": {
+        "iran": {
+            "count": 34,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 34,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 17,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "beirut": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "peru": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "china": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "papa": {
+            "count": 6,
+            "type": "PER"
+        },
+        "leo": {
+            "count": 6,
+            "type": "PER"
+        },
+        "russia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "nbc": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "direct": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "moyen-orient": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "donald trump": {
+            "count": 5,
+            "type": "PER"
+        },
+        "armenia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "taiwan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 4,
+            "type": "PER"
+        },
+        "hamas": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "\u0645\u0627\u0630\u0627": {
+            "count": 4,
+            "type": "PER"
+        },
+        "papa le\u00f3n xiv": {
+            "count": 4,
+            "type": "PER"
+        },
+        "europe": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "pentagon": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "gulf": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "chagos islands": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "roland garros": {
+            "count": 3,
+            "type": "PER"
+        },
+        "philadelphia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "tehran": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "trump ai": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "spain": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kosovo": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "palestinian": {
+            "count": 3,
+            "type": "PER"
+        },
+        "zelensky": {
+            "count": 3,
+            "type": "PER"
+        },
+        "hezbollah": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "india": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "north korea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "dubai": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nigeria": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "la france": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "volodymyr zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "u.k.": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "watch": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "video": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "\u062d\u0631\u0628": {
+            "count": 2,
+            "type": "PER"
+        },
+        "le\u00f3n xiv": {
+            "count": 2,
+            "type": "PER"
+        },
+        "espa\u00f1a": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 100,
+        "www.straitstimes.com": 49,
+        "www.jpost.com": 41,
+        "www.lemonde.fr": 36,
+        "timesofindia.indiatimes.com": 34,
+        "www.scmp.com": 34,
+        "feeds.elpais.com": 31,
+        "www.thehindu.com": 30
+    }
+}

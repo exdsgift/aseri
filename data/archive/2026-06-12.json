@@ -1,0 +1,257 @@
+{
+    "date": "2026-06-12",
+    "gti": 72,
+    "sitrep": "Narrative Spike: Texas: Zahlreiche Verletzte und ein Toter bei Schie\u00dferei . U.S. plans to slash fighter jets, warships to NATO in Europe: report .",
+    "top_keywords": {
+        "iran": {
+            "count": 40,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 30,
+            "type": "PER"
+        },
+        "china": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 11,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "spacex": {
+            "count": 9,
+            "type": "ORG"
+        },
+        "israel": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "mexico": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "direct": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "david hockney": {
+            "count": 7,
+            "type": "PER"
+        },
+        "europe": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "belfast": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "zapatero": {
+            "count": 6,
+            "type": "PER"
+        },
+        "south africa": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "cuba": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "hong kong": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "texas": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "elon musk": {
+            "count": 4,
+            "type": "PER"
+        },
+        "paris": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "france": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "t\u00e9h\u00e9ran": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "toronto": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hungary": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "britain": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "us-iran": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "lebanon": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "m\u00e9xico": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "papa": {
+            "count": 3,
+            "type": "PER"
+        },
+        "starmer": {
+            "count": 3,
+            "type": "PER"
+        },
+        "south korea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "video": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "fifa": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "colombia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nyc": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "canaries": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kiev": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "america": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "warren buffett": {
+            "count": 2,
+            "type": "PER"
+        },
+        "dubai": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "air india": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "hamas": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "kenya": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "estados unidos": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "ir\u00e1n": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "central african republic": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "poland": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kabul": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 70,
+        "www.france24.com": 53,
+        "www.straitstimes.com": 46,
+        "timesofindia.indiatimes.com": 46,
+        "www.lemonde.fr": 42,
+        "www.scmp.com": 36,
+        "www.jpost.com": 35,
+        "feeds.elpais.com": 27
+    }
+}

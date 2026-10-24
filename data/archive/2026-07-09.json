@@ -1,0 +1,253 @@
+{
+    "date": "2026-07-09",
+    "gti": 68,
+    "sitrep": "Narrative Spike:   \u00a0\u00a0\u00a0- \u00a0- 2026. Tactical Alerts: Narrative . Spike: \"\u0646\u0631\u064a\u062f\u0647 \u00a0\" - \"Nari\" - \u00a0\u201cNari\u201d .",
+    "top_keywords": {
+        "trump": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 35,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 21,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 14,
+            "type": "ORG"
+        },
+        "israel": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "russia": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "charlie kirk": {
+            "count": 5,
+            "type": "PER"
+        },
+        "direct": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "argentina": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 4,
+            "type": "PER"
+        },
+        "turkey": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "espa\u00f1a": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "gulf": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "otan": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "bonnie tyler": {
+            "count": 4,
+            "type": "PER"
+        },
+        "australia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "graham platner": {
+            "count": 4,
+            "type": "PER"
+        },
+        "donald trump": {
+            "count": 4,
+            "type": "PER"
+        },
+        "francia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "marruecos": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "connor murphy": {
+            "count": 3,
+            "type": "PER"
+        },
+        "syria": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "taiwan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mbapp\u00e9": {
+            "count": 3,
+            "type": "PER"
+        },
+        "france-morocco": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ankara": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "us senate": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "pm modi": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "maine": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nato-gipfel": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "platner": {
+            "count": 3,
+            "type": "PER"
+        },
+        "mashhad": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "owens": {
+            "count": 2,
+            "type": "PER"
+        },
+        "russland": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 2,
+            "type": "PER"
+        },
+        "us-iran": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "france-maroc": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "lions": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "sudan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "rahm emanuel": {
+            "count": 2,
+            "type": "PER"
+        },
+        "macron": {
+            "count": 2,
+            "type": "PER"
+        },
+        "florida": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hungary": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "osce": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "moscow": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "texas": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 95,
+        "www.straitstimes.com": 56,
+        "www.scmp.com": 40,
+        "timesofindia.indiatimes.com": 35,
+        "www.lemonde.fr": 32,
+        "www.france24.com": 32,
+        "www.jpost.com": 31,
+        "www.thehindu.com": 29
+    }
+}

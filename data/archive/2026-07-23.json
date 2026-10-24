@@ -1,0 +1,257 @@
+{
+    "date": "2026-07-23",
+    "gti": 48,
+    "sitrep": "U.S. House of Representatives again passes resolution seeking to halt military action in Iran as some Republicans defect . More Americans think China is world leader in AI, new survey reveals .",
+    "top_keywords": {
+        "trump": {
+            "count": 36,
+            "type": "PER"
+        },
+        "iran": {
+            "count": 30,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 22,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "red sea": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "usa": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "zapatero": {
+            "count": 6,
+            "type": "PER"
+        },
+        "spain": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "google": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "video": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "marco rubio": {
+            "count": 4,
+            "type": "PER"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "houthis": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "us house": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "west asia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "kenya": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "jerusalem": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "manila": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "new york times": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "west bank": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "florida": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "yemen": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "us-china": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "malaysia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "rubio": {
+            "count": 3,
+            "type": "PER"
+        },
+        "strait of hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "us education department": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "gobierno": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "white house": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "taiwan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "volodymyr zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "ghana": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u0639\u0627\u062c\u0644": {
+            "count": 2,
+            "type": "PER"
+        },
+        "idf": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "paris": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "iran - report": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "minnesota": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "america": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kowe\u00eft": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "greece": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kuwait": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "taiwan strait": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "indien": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nicaragua": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 89,
+        "www.straitstimes.com": 72,
+        "www.scmp.com": 50,
+        "timesofindia.indiatimes.com": 49,
+        "www.jpost.com": 35,
+        "www.lemonde.fr": 33,
+        "feeds.elpais.com": 30,
+        "www.france24.com": 30
+    }
+}

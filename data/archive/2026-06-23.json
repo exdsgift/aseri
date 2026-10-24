@@ -1,0 +1,253 @@
+{
+    "date": "2026-06-23",
+    "gti": 80,
+    "sitrep": "Narrative Spike: Rabbi, Jewish lawyer in race for NYC Democratic primary face referendum on Mamdani, buffer zones . E-commerce giant Alibaba sues US government over defence blacklist .",
+    "top_keywords": {
+        "iran": {
+            "count": 39,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "brexit": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "montreal": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "direct": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "tehran": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "liban": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "starmer": {
+            "count": 5,
+            "type": "PER"
+        },
+        "andy burnham": {
+            "count": 5,
+            "type": "PER"
+        },
+        "donald trump": {
+            "count": 5,
+            "type": "PER"
+        },
+        "taliban": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "strait of hormuz": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 5,
+            "type": "PER"
+        },
+        "lebanon": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "ir\u00e1n": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "colombia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "netanyahu": {
+            "count": 4,
+            "type": "PER"
+        },
+        "ebola": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ghana": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "england": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "marc bloch": {
+            "count": 3,
+            "type": "PER"
+        },
+        "messi": {
+            "count": 3,
+            "type": "PER"
+        },
+        "burnham": {
+            "count": 3,
+            "type": "PER"
+        },
+        "keir starmer": {
+            "count": 3,
+            "type": "PER"
+        },
+        "hezbollah": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "cristiano ronaldo": {
+            "count": 3,
+            "type": "PER"
+        },
+        "pentagon": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nancy guthrie": {
+            "count": 3,
+            "type": "PER"
+        },
+        "espa\u00f1a": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "texas": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u00e1balos": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hamas": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "hongrie": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pantheon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "labour": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "espriella": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "s\u00e1nchez": {
+            "count": 2,
+            "type": "PER"
+        },
+        "cuba": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "xqc": {
+            "count": 2,
+            "type": "PER"
+        },
+        "fifa": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "brussels": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "sudan": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 60,
+        "www.lemonde.fr": 49,
+        "www.straitstimes.com": 45,
+        "www.france24.com": 42,
+        "www.thehindu.com": 42,
+        "www.scmp.com": 38,
+        "www.jpost.com": 37,
+        "www.japantimes.co.jp": 28
+    }
+}

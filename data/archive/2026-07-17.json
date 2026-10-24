@@ -1,0 +1,257 @@
+{
+    "date": "2026-07-17",
+    "gti": 80,
+    "sitrep": "IRGC claims strikes on US drone depot and AI hub in Bahrain . Boeing autoris\u00e9 \u00e0 d\u00e9livrer \u00e0 nouveau les certificats de navigabilit\u00e9 de ses mod\u00e8les 737 et 787 Dreamliner . Trump blames Canada for wildfire smoke, says he\u2019ll add cost to tariffs .",
+    "top_keywords": {
+        "trump": {
+            "count": 40,
+            "type": "PER"
+        },
+        "china": {
+            "count": 32,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "andy burnham": {
+            "count": 13,
+            "type": "PER"
+        },
+        "israel": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 11,
+            "type": "PER"
+        },
+        "japan": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "fifa": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "ukraine": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "russia": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "labour": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "trump media": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "kuwait": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "yemen": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "britain": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "guatemala": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "england": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "uganda": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "kenya ebola": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "poland": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "syria": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "putin": {
+            "count": 3,
+            "type": "PER"
+        },
+        "espa\u00f1a": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "xi jinping": {
+            "count": 3,
+            "type": "PER"
+        },
+        "malaysia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "la chine": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "bahrain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "white house": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "etats-unis": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "argentina-england": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "fda": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "venezuela": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "bbc": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "venice": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "norway": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nba": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "mexico": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "zelenskiy": {
+            "count": 2,
+            "type": "PER"
+        },
+        "gro\u00dfbritannien": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "am\u00e9ricains": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hongkong": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "volodymyr zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "henry nowak": {
+            "count": 2,
+            "type": "PER"
+        },
+        "parliament": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.straitstimes.com": 69,
+        "www.aljazeera.net": 55,
+        "www.lemonde.fr": 49,
+        "www.scmp.com": 46,
+        "timesofindia.indiatimes.com": 40,
+        "www.jpost.com": 28,
+        "feeds.elpais.com": 25,
+        "www.spiegel.de": 24
+    }
+}

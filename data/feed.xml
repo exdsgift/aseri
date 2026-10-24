@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>tensionr: splits shown to follow a country line</title>
+  <subtitle>One entry when a story's naming split is first shown to align with the country of publication. Nothing else is an event.</subtitle>
+  <link rel="alternate" type="text/html" href="https://exdsgift.github.io/tensionr/"/>
+  <link rel="self" type="application/atom+xml" href="https://exdsgift.github.io/tensionr/data/feed.xml"/>
+  <id>tag:tensionr,2026:shown</id>
+  <updated>2026-10-24T22:27:32Z</updated>
+  <author><name>tensionr</name><uri>https://exdsgift.github.io/tensionr/</uri></author>
+  <entry>
+    <title>Winter time or summer time? What the science says about the best option for health</title>
+    <id>tag:tensionr,2026-10-24:s-408276869fd5</id>
+    <updated>2026-10-24T22:27:32Z</updated>
+    <link rel="alternate" type="text/html" href="https://exdsgift.github.io/tensionr/actor/india/"/>
+    <category term="india" label="India"/>
+    <summary>27 of 56 sources named India, and which ones did follows where they publish: p = 0.0285 across 55 sources in 2 countries.</summary>
+  </entry>
+  <entry>
+    <title>Северный промышленный узел Омской области подвергся атаке БПЛА ::  Новости дня  / ВЗГЛЯД</title>
+    <id>tag:tensionr,2026-10-24:s-9e6fdc09f521</id>
+    <updated>2026-10-24T22:27:32Z</updated>
+    <link rel="alternate" type="text/html" href="https://exdsgift.github.io/tensionr/actor/ukraine/"/>
+    <category term="ukraine" label="Ukraine"/>
+    <summary>6 of 30 sources named Ukraine, and which ones did follows where they publish: p = 0.0295 across 30 sources in 7 countries.</summary>
+  </entry>
+  <entry>
+    <title>Lula acusa a Flávio Bolsonaro de &quot;lamer las botas&quot; de Trump y este lo llama &quot;nueve dedos&quot; en el último debate antes de las elecciones</title>
+    <id>tag:tensionr,2026-10-24:s-60d605912757</id>
+    <updated>2026-10-24T22:27:32Z</updated>
+    <link rel="alternate" type="text/html" href="https://exdsgift.github.io/tensionr/actor/argentina/"/>
+    <category term="argentina" label="Argentina"/>
+    <summary>15 of 144 sources named Argentina, and which ones did follows where they publish: p = 0.003 across 138 sources in 21 countries.</summary>
+  </entry>
+  <entry>
+    <title>В Ростовской области пострадал человек из-за падения обломков беспилотника ::  Новости дня  / ВЗГЛЯД</title>
+    <id>tag:tensionr,2026-10-24:s-11b915ba4079</id>
+    <updated>2026-10-24T22:27:32Z</updated>
+    <link rel="alternate" type="text/html" href="https://exdsgift.github.io/tensionr/actor/russia/"/>
+    <category term="russia" label="Russia"/>
+    <summary>6 of 50 sources named Russia, and which ones did follows where they publish: p = 0.0105 across 48 sources in 4 countries.</summary>
+  </entry>
+  <entry>
+    <title>Tumore prostata ad alto rischio recidiva, nuova terapia riduce del 58% rischio morte o metastasi - il Fatto Nisseno</title>
+    <id>tag:tensionr,2026-10-24:s-340177220f89</id>
+    <updated>2026-10-24T22:27:32Z</updated>
+    <link rel="alternate" type="text/html" href="https://exdsgift.github.io/tensionr/actor/china/"/>
+    <category term="china" label="People's Republic of China"/>
+    <summary>4 of 42 sources named People's Republic of China, and which ones did follows where they publish: p = 0.0065 across 41 sources in 10 countries.</summary>
+  </entry>
+</feed>

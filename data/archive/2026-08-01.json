@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-01",
+    "gti": 26,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: ASY709. Aerial Anomalies: AFR256. AFR454. A FR3T. AFF5U. CFC4098.",
+    "top_keywords": {
+        "ceuta": {
+            "count": 58,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 24,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 16,
+            "type": "PER"
+        },
+        "iran": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 10,
+            "type": "ORG"
+        },
+        "india": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "hamas": {
+            "count": 9,
+            "type": "ORG"
+        },
+        "italy": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "peru": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "fifa": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "kyiv": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "moscow": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "morocco": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 4,
+            "type": "PER"
+        },
+        "kiev": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "africa": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "oman": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "greece": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "dr congo": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "nazca lines": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "spanien": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "middle east": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "andy burnham": {
+            "count": 3,
+            "type": "PER"
+        },
+        "berlin": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "minnesota": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nirmal purja": {
+            "count": 3,
+            "type": "PER"
+        },
+        "gianni infantino": {
+            "count": 3,
+            "type": "PER"
+        },
+        "russia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "marokko": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "singapore": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "palestinian": {
+            "count": 3,
+            "type": "PER"
+        },
+        "patriot": {
+            "count": 3,
+            "type": "PER"
+        },
+        "uganda": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "vincent pastore": {
+            "count": 2,
+            "type": "PER"
+        },
+        "bande de gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "\u0639\u0627\u062c\u0644": {
+            "count": 2,
+            "type": "PER"
+        },
+        "spaniens": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "justice department": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "twitch": {
+            "count": 2,
+            "type": "PER"
+        },
+        "green card": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "lebanon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "south china sea": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "west asia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nepal": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "who": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 81,
+        "www.straitstimes.com": 60,
+        "www.scmp.com": 51,
+        "timesofindia.indiatimes.com": 49,
+        "www.jpost.com": 47,
+        "www.france24.com": 35,
+        "www.lemonde.fr": 33,
+        "www.spiegel.de": 27
+    }
+}

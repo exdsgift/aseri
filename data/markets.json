@@ -1,0 +1,59 @@
+{
+    "market_intel": [
+        {
+            "symbol": "VIX (VOLATILITY)",
+            "price": 14.53,
+            "change": 1.47
+        },
+        {
+            "symbol": "GOLD (XAU)",
+            "price": 4429.8,
+            "change": -1.38
+        },
+        {
+            "symbol": "CRUDE OIL",
+            "price": 91.48,
+            "change": 0.2
+        },
+        {
+            "symbol": "RAYTHEON (RTX)",
+            "price": 200.79,
+            "change": -0.66
+        },
+        {
+            "symbol": "LOCKHEED (LMT)",
+            "price": 525.28,
+            "change": -1.44
+        },
+        {
+            "symbol": "NORTHROP (NOC)",
+            "price": 514.98,
+            "change": -2.51
+        },
+        {
+            "symbol": "GEN DYNAMICS (GD)",
+            "price": 359.39,
+            "change": -1.77
+        },
+        {
+            "symbol": "BTC/USD",
+            "price": 79726.8,
+            "change": 0.07
+        },
+        {
+            "symbol": "EUR/USD",
+            "price": 1.16,
+            "change": 0.31
+        },
+        {
+            "symbol": "S&P 500",
+            "price": 7718.6,
+            "change": -0.38
+        },
+        {
+            "symbol": "NASDAQ 100",
+            "price": 26506.99,
+            "change": -0.29
+        }
+    ]
+}

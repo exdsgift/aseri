@@ -1,0 +1,257 @@
+{
+    "date": "2026-07-11",
+    "gti": 65,
+    "sitrep": "Tactical Alerts: Narrative Spike:   \u00a0\u2018I\u2019ve got a message to you: \u2018I want you to hear what you need to hear\u2019   \u2018\"\u2019. \u2018We\u2019ll hear what we need to do to get the message out to you.\u2019",
+    "top_keywords": {
+        "iran": {
+            "count": 39,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 20,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 18,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "israel": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "typhoon bavi": {
+            "count": 7,
+            "type": "PER"
+        },
+        "west bank": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "india": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "ro khanna": {
+            "count": 6,
+            "type": "PER"
+        },
+        "supreme leader": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "espa\u00f1a": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "new zealand": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 5,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "los gallardos": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "b\u00e9lgica": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "pakistan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "air force one": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "cuba": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "turkey": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "mojtaba khamenei": {
+            "count": 4,
+            "type": "PER"
+        },
+        "vietnam": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "uruguay": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "us democrat": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "new york times": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "germany": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "espagne": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kyiv": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u0639\u0627\u062c\u0644": {
+            "count": 3,
+            "type": "PER"
+        },
+        "almer\u00eda": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "merino": {
+            "count": 3,
+            "type": "PER"
+        },
+        "direct": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "paris": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "england": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "pm modi": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "video": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "kiev": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "apple": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "\u0645\u0627\u0630\u0627 \u064a\u0639\u0646\u064a": {
+            "count": 2,
+            "type": "PER"
+        },
+        "etats-unis": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "poland": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "may": {
+            "count": 2,
+            "type": "PER"
+        },
+        "nigeria": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "taylor swift": {
+            "count": 2,
+            "type": "PER"
+        },
+        "new york": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "balochistan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "cnn": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 111,
+        "www.scmp.com": 47,
+        "www.straitstimes.com": 38,
+        "timesofindia.indiatimes.com": 37,
+        "www.france24.com": 35,
+        "www.jpost.com": 34,
+        "www.thehindu.com": 31,
+        "www.lemonde.fr": 29
+    }
+}

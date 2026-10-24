@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-11",
+    "gti": 32,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: CFC3871, AFR090, FIN6AK and AFR50N . Aerial Anomalas: AFR1U, AFF1530, AFL797, AFL799, AFL1530 and AFL1515 .",
+    "top_keywords": {
+        "colombia": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 3,
+            "type": "PER"
+        },
+        "russie": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "black sea": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "bashar al-assad": {
+            "count": 2,
+            "type": "PER"
+        },
+        "trump on air force one": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "amia": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "national security council": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "defense ministry": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "francesca hong": {
+            "count": 1,
+            "type": "PER"
+        },
+        "wisconsin": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lebanese army": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "hezbollah": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "nyc": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "mamdani": {
+            "count": 1,
+            "type": "PER"
+        },
+        "west bank": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "pereira": {
+            "count": 1,
+            "type": "PER"
+        },
+        "gulf of oman": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bolsonaro": {
+            "count": 1,
+            "type": "PER"
+        },
+        "brazil": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "robert gilman is freed": {
+            "count": 1,
+            "type": "PER"
+        },
+        "prison": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "liban": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "l\u2019arm\u00e9e": {
+            "count": 1,
+            "type": "PER"
+        },
+        "manus ai": {
+            "count": 1,
+            "type": "PER"
+        },
+        "beijing": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "greenland": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "volodymyr zelensky": {
+            "count": 1,
+            "type": "PER"
+        },
+        "marruecos": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "ceuta": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "airbus": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "boeing": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "yemeni government says": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "rhine": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "indonesia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "taiwan": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "robert gilman": {
+            "count": 1,
+            "type": "PER"
+        },
+        "romania": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "haftar": {
+            "count": 1,
+            "type": "PER"
+        },
+        "carlo masala": {
+            "count": 1,
+            "type": "PER"
+        },
+        "nigeria": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "kebbi": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "allemagne": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hanovre": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "baltic": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bruno foucher": {
+            "count": 1,
+            "type": "PER"
+        },
+        "de france": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "centrafrique": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "quai": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "taliban": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "pkk": {
+            "count": 1,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "www.straitstimes.com": 10,
+        "www.rt.com": 10,
+        "www.scmp.com": 10,
+        "feeds.elpais.com": 10,
+        "rss.nytimes.com": 10,
+        "www.lemonde.fr": 10,
+        "www.thehindu.com": 10
+    }
+}

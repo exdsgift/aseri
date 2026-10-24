@@ -1,0 +1,253 @@
+{
+    "date": "2026-07-25",
+    "gti": 34,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: AFR256. AFR51N. A FR358P. Aerial Anomalas: RCH5093. Aerial anomaly: AFL660. Aerial anomalies: AFL1450.",
+    "top_keywords": {
+        "iran": {
+            "count": 29,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 27,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 25,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 13,
+            "type": "PER"
+        },
+        "china": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 12,
+            "type": "ORG"
+        },
+        "india": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "karim khan": {
+            "count": 8,
+            "type": "PER"
+        },
+        "israel": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "icc": {
+            "count": 7,
+            "type": "ORG"
+        },
+        "berlin": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 6,
+            "type": "PER"
+        },
+        "syria": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "yemen": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "saudi arabia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "bordeaux": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "spacex": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "google": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "houthis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "flavio bolsonaro": {
+            "count": 3,
+            "type": "PER"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "troy jackson": {
+            "count": 3,
+            "type": "PER"
+        },
+        "putin": {
+            "count": 3,
+            "type": "PER"
+        },
+        "unesco": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "romania": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "beijing": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "y\u00e9men": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "zohran mamdani": {
+            "count": 2,
+            "type": "PER"
+        },
+        "kyiv": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "israelis": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "saudis": {
+            "count": 2,
+            "type": "PER"
+        },
+        "videos": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "mamdani": {
+            "count": 2,
+            "type": "PER"
+        },
+        "maine democrats": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "pickaxe mountain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "wladimir putin": {
+            "count": 2,
+            "type": "PER"
+        },
+        "frankreich": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kazakh": {
+            "count": 2,
+            "type": "PER"
+        },
+        "yemeni": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "tehran": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "america": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kazakhstan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "italy": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "lebanese": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "indien": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 70,
+        "www.straitstimes.com": 69,
+        "www.jpost.com": 50,
+        "timesofindia.indiatimes.com": 48,
+        "www.lemonde.fr": 41,
+        "www.scmp.com": 40,
+        "www.france24.com": 34,
+        "www.thehindu.com": 29
+    }
+}

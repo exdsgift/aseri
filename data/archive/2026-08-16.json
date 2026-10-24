@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-16",
+    "gti": 28,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: N518WD. Aerial Anomalas: AFR718. Aerial anomaly: ETD3JC.",
+    "top_keywords": {
+        "israel": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "trump": {
+            "count": 3,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kushner": {
+            "count": 3,
+            "type": "PER"
+        },
+        "hamas": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "iran": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "colombia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "south korea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "likud": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "spain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "argentina": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "lebanon-israel": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "post": {
+            "count": 1,
+            "type": "PER"
+        },
+        "knesset": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "new jersey": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "zohran mamdani": {
+            "count": 1,
+            "type": "PER"
+        },
+        "yoseph haddad": {
+            "count": 1,
+            "type": "PER"
+        },
+        "islamic republic of britain": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "soldier": {
+            "count": 1,
+            "type": "PER"
+        },
+        "aragon": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "mamdani": {
+            "count": 1,
+            "type": "PER"
+        },
+        "erdogan": {
+            "count": 1,
+            "type": "PER"
+        },
+        "khamenei": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "qassem": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "drone": {
+            "count": 1,
+            "type": "PER"
+        },
+        "thieves": {
+            "count": 1,
+            "type": "PER"
+        },
+        "sicilian museum": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hawaii": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lala": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "calls for": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "ex-cambridge": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "l\u00e9on marchand": {
+            "count": 1,
+            "type": "PER"
+        },
+        "euros": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "jason arday": {
+            "count": 1,
+            "type": "PER"
+        },
+        "hungary": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "chengdu": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "indonesia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lynne cox": {
+            "count": 1,
+            "type": "PER"
+        },
+        "english channel": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "video": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "belgium": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "romania": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "ceuta": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bbc": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "\u0635\u0641\u0642\u0629 \u0631\u0648\u062f\u0631\u064a": {
+            "count": 1,
+            "type": "PER"
+        },
+        "ben gvir": {
+            "count": 1,
+            "type": "PER"
+        },
+        "opatra": {
+            "count": 1,
+            "type": "PER"
+        },
+        "zambia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hichilema": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "concentration camp ukraine": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "\u0639\u0627\u0645 \u0645\u0646 \u0642\u0645\u0629 \u0623\u0644\u0627\u0633\u0643\u0627": {
+            "count": 1,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "www.straitstimes.com": 10,
+        "www.scmp.com": 10,
+        "www.thehindu.com": 10,
+        "www.rt.com": 10,
+        "www.aljazeera.net": 10,
+        "www.japantimes.co.jp": 10
+    }
+}

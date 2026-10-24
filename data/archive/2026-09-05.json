@@ -1,0 +1,257 @@
+{
+    "date": "2026-09-05",
+    "gti": 37,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: AFL5919. Aerial Anomalas: AFR62HP. Tactical Alert: TCGVB. Aerial anomaly: GAF133.",
+    "top_keywords": {
+        "iran": {
+            "count": 20,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 12,
+            "type": "PER"
+        },
+        "falklands": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "ceuta": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "nepal": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "white house": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "video": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "witkoff": {
+            "count": 2,
+            "type": "PER"
+        },
+        "kushner": {
+            "count": 2,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "africa": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "moscow": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pentagon": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "cuba": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "bienvenidos": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "milei": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "argentine": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "chi\u1ebfn": {
+            "count": 2,
+            "type": "PER"
+        },
+        "\u70ed\u6218\u65e0\u679c": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "cu\u1ed9c t\u1ea5n c\u00f4ng": {
+            "count": 2,
+            "type": "PER"
+        },
+        "can fatah": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "democratic reform": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "israel": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hamas": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "middle east": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "israel - report": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "air force one": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "rosh hashanah": {
+            "count": 1,
+            "type": "PER"
+        },
+        "new york city": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "duterte-carpio": {
+            "count": 1,
+            "type": "PER"
+        },
+        "north carolina": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "michigan": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "indian tunnel": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "chilime": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "malaysia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "umno": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "unga": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "lindsay clancy": {
+            "count": 1,
+            "type": "PER"
+        },
+        "hongkongers": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "u.n.": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "pickaxe mountain": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "kyiv": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "massachusetts": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "old concrete powers upgrade": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "udot": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "hong kong": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "egypt": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "kiev": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "jurassic": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "canada": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "\u2013 reuters": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "takaichi": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0645\u0643\u0627\u0633\u0628 \u0623\u0633\u0628\u0648\u0639\u064a\u0629 \u0642\u0648\u064a\u0629 \u0644\u0644\u0646\u0641\u0637": {
+            "count": 1,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "www.thehindu.com": 10,
+        "www.scmp.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "www.japantimes.co.jp": 10,
+        "rss.nytimes.com": 10,
+        "www.rt.com": 10,
+        "www.aljazeera.net": 10
+    }
+}

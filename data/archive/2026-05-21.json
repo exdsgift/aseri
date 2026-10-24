@@ -1,0 +1,253 @@
+{
+    "date": "2026-05-21",
+    "gti": 72,
+    "sitrep": "Judge orders ChudTheBuilder to wear GPS monitor and restrict social media use if released on bond . Trump returns to more definitive tone on controlling Iran's uranium . Rubio denounces NATO refusal to help on Iran ahead of alliance talks .",
+    "top_keywords": {
+        "iran": {
+            "count": 27,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 26,
+            "type": "PER"
+        },
+        "china": {
+            "count": 24,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 9,
+            "type": "PER"
+        },
+        "france": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "cuba": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "poland": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "taiwan": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "air france": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "airbus": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "zapatero": {
+            "count": 5,
+            "type": "PER"
+        },
+        "japan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "t\u00fcrkei": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "dr congo": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "video": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "ra\u00fal castro": {
+            "count": 4,
+            "type": "PER"
+        },
+        "itamar ben-gvir": {
+            "count": 4,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "rio-paris": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 4,
+            "type": "PER"
+        },
+        "congo": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "cannes": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "falklands": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "palestinian un": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "drc": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "musk": {
+            "count": 3,
+            "type": "PER"
+        },
+        "paris": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "united states": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "putin": {
+            "count": 3,
+            "type": "PER"
+        },
+        "ben-gvir": {
+            "count": 3,
+            "type": "PER"
+        },
+        "flottille": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "britain": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "raul castro": {
+            "count": 3,
+            "type": "PER"
+        },
+        "johann wadephul": {
+            "count": 2,
+            "type": "PER"
+        },
+        "nato": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "rubio": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "albanese": {
+            "count": 2,
+            "type": "PER"
+        },
+        "xinjiang": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "uruguay": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "minnesota": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "fbi": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "jeff bezos": {
+            "count": 2,
+            "type": "PER"
+        },
+        "maroc": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "bi\u00e9lorussie": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 60,
+        "www.scmp.com": 52,
+        "www.straitstimes.com": 50,
+        "www.france24.com": 45,
+        "timesofindia.indiatimes.com": 41,
+        "www.lemonde.fr": 40,
+        "www.jpost.com": 38,
+        "www.thehindu.com": 26
+    }
+}

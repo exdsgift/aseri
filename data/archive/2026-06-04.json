@@ -1,0 +1,253 @@
+{
+    "date": "2026-06-04",
+    "gti": 68,
+    "sitrep": "Argentine Senate approves judge Milei opposed over ties to investigative journalist . Colombian judge orders De la Espriella to stop using national team jersey in campaign . EU considers limiting protection for Ukrainian men of fighting age .",
+    "top_keywords": {
+        "trump": {
+            "count": 26,
+            "type": "PER"
+        },
+        "iran": {
+            "count": 25,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 25,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 18,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "hezbollah": {
+            "count": 13,
+            "type": "ORG"
+        },
+        "israel": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "henry nowak": {
+            "count": 8,
+            "type": "PER"
+        },
+        "liban": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "marjane satrapi": {
+            "count": 7,
+            "type": "PER"
+        },
+        "japan": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 6,
+            "type": "PER"
+        },
+        "kuwait": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "moyen-orient": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "putin": {
+            "count": 5,
+            "type": "PER"
+        },
+        "hong kong": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 5,
+            "type": "PER"
+        },
+        "ungarn": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "taiwan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "us house": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "germany": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "dubai": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "tiananmen": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "beijing": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "libanon": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "marco rubio": {
+            "count": 4,
+            "type": "PER"
+        },
+        "isra\u00ebl": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "sweden": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "south korea": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "north korea": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "emmanuel macron": {
+            "count": 3,
+            "type": "PER"
+        },
+        "dr congo": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "john bolton": {
+            "count": 3,
+            "type": "PER"
+        },
+        "canada": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "persepolis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ebola": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "budapest": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "south africa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "who": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "usa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kim jong un": {
+            "count": 3,
+            "type": "PER"
+        },
+        "flughafen von": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "un security council": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "spacex": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "rubio": {
+            "count": 3,
+            "type": "PER"
+        },
+        "california": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "wim wenders": {
+            "count": 3,
+            "type": "PER"
+        },
+        "us-iran": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "labour": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "treasury": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.scmp.com": 57,
+        "www.aljazeera.net": 50,
+        "timesofindia.indiatimes.com": 44,
+        "www.spiegel.de": 42,
+        "www.lemonde.fr": 42,
+        "www.jpost.com": 35,
+        "www.thehindu.com": 31,
+        "www.straitstimes.com": 30
+    }
+}

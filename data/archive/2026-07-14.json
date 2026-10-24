@@ -1,0 +1,253 @@
+{
+    "date": "2026-07-14",
+    "gti": 68,
+    "sitrep": "Narrative Spike: US issues general license for wind-down activities in Hormuz as new Iran sanctions imposed . Mahmoud Khalil files lawsuit alleging Betar, Canary Mission \u2018conspired\u2019 with US gov't against him .",
+    "top_keywords": {
+        "iran": {
+            "count": 28,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 22,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 21,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 10,
+            "type": "ORG"
+        },
+        "spain": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 8,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "fontainebleau": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "paris": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "britain": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "argentina": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "epstein": {
+            "count": 5,
+            "type": "PER"
+        },
+        "singapore": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "who": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "ebola": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "mexico": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "warren buffett": {
+            "count": 4,
+            "type": "PER"
+        },
+        "e. jean carroll": {
+            "count": 4,
+            "type": "PER"
+        },
+        "cuba": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "west asia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "bangkok": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "espa\u00f1a": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nigeria": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ann widdecombe": {
+            "count": 3,
+            "type": "PER"
+        },
+        "nasa": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "gulf": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "us-iran": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "bloomberg": {
+            "count": 3,
+            "type": "PER"
+        },
+        "maine": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "david s\u00e1nchez": {
+            "count": 3,
+            "type": "PER"
+        },
+        "s\u00e1nchez": {
+            "count": 3,
+            "type": "PER"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mahmoud khalil": {
+            "count": 2,
+            "type": "PER"
+        },
+        "new york": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "colombie": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "l\u2019eln": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "south china sea": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "francia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "boko haram": {
+            "count": 2,
+            "type": "PER"
+        },
+        "bill gates": {
+            "count": 2,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 70,
+        "www.straitstimes.com": 63,
+        "www.scmp.com": 52,
+        "www.lemonde.fr": 40,
+        "timesofindia.indiatimes.com": 37,
+        "www.france24.com": 35,
+        "www.jpost.com": 33,
+        "www.thehindu.com": 27
+    }
+}

@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-04",
+    "gti": 42,
+    "sitrep": "Intelligence Synthesis Active: Multi-domain nodes reporting normal operational baseline.",
+    "top_keywords": {
+        "ceuta": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "red sea": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "cape town": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "channel": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "yemen": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 2,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "jan": {
+            "count": 1,
+            "type": "PER"
+        },
+        "oath keepers": {
+            "count": 1,
+            "type": "PER"
+        },
+        "democrats": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "florida": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "warren buffett": {
+            "count": 1,
+            "type": "PER"
+        },
+        "qatar": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "us-iran": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "chandrika kumaratunga": {
+            "count": 1,
+            "type": "PER"
+        },
+        "nigeria": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "tinubu": {
+            "count": 1,
+            "type": "PER"
+        },
+        "egypt": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bachelet": {
+            "count": 1,
+            "type": "PER"
+        },
+        "latin america": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "us-china": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "photos": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "who": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "ebola": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "laura loomer": {
+            "count": 1,
+            "type": "PER"
+        },
+        "indian-flagged": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "\u0645\u0647\u0631\u062c\u0627\u0646": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0643\u0627\u0645\u064a\u0631\u0627\u062a \u0648\u0628\u064a\u0627\u0646\u0627\u062a \u0648\u0627\u0633\u062a\u062f\u0639\u0627\u0621\u0627\u062a": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "\u0628\u064a\u0646 \u0633\u0628\u062a\u0629 \u0648\u0627\u0644\u0643\u0627\u0631\u064a\u0628\u064a": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0627\u0644\u064a\u0627\u0628\u0627\u0646 \u0627\u0644\u0639\u0633\u0643\u0631\u064a\u0629": {
+            "count": 1,
+            "type": "PER"
+        },
+        "bangladesh": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "west asia live": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "guatemala": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "new york": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "hong kong": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "houthis": {
+            "count": 1,
+            "type": "PER"
+        },
+        "government": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "sheikh hasina": {
+            "count": 1,
+            "type": "PER"
+        },
+        "us ai": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "world bank": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "gaza": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "vip": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "app": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "\u2013 times": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "israel": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "martin jay": {
+            "count": 1,
+            "type": "PER"
+        },
+        "video": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "dissanayake": {
+            "count": 1,
+            "type": "PER"
+        },
+        "india": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "bangladesh pm rahman": {
+            "count": 1,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.straitstimes.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "www.rt.com": 10,
+        "www.thehindu.com": 10,
+        "www.scmp.com": 10,
+        "feeds.bbci.co.uk": 10,
+        "www.aljazeera.net": 10,
+        "www.theguardian.com": 10
+    }
+}

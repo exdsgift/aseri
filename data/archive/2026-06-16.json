@@ -1,0 +1,249 @@
+{
+    "date": "2026-06-16",
+    "gti": 74,
+    "sitrep": "FBI foils drone attack plot at Trump\u2019s White House UFC event using explosive drones, snipers . Chinese, Russian and Indian ministers meet in Washington .",
+    "top_keywords": {
+        "iran": {
+            "count": 50,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 35,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 20,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 17,
+            "type": "PER"
+        },
+        "china": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 12,
+            "type": "ORG"
+        },
+        "us-iran": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "california": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "lebanon": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 8,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "gavin newsom": {
+            "count": 7,
+            "type": "PER"
+        },
+        "senegal": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "fbi": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "hezbollah": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "white house ufc": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "strait of hormuz": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "russland": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "polen": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "tehran": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "australia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "europe": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "mbapp\u00e9": {
+            "count": 3,
+            "type": "PER"
+        },
+        "manche": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "liban": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "moscow": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "nigel farage": {
+            "count": 3,
+            "type": "PER"
+        },
+        "espa\u00f1a": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "u.k.": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 3,
+            "type": "PER"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "oliver tree": {
+            "count": 3,
+            "type": "PER"
+        },
+        "brazil": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "isra\u00ebl": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "uruguay": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 3,
+            "type": "PER"
+        },
+        "volodymyr zelensky": {
+            "count": 3,
+            "type": "PER"
+        },
+        "emmanuel macron": {
+            "count": 3,
+            "type": "PER"
+        },
+        "fifa": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "beijing": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "channel": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "vietnam": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "can": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "white britain": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "elon musk": {
+            "count": 2,
+            "type": "PER"
+        },
+        "toronto": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "paris": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "english channel": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.lemonde.fr": 52,
+        "www.scmp.com": 48,
+        "timesofindia.indiatimes.com": 40,
+        "www.aljazeera.net": 40,
+        "www.jpost.com": 39,
+        "www.france24.com": 37,
+        "www.spiegel.de": 34,
+        "www.straitstimes.com": 33
+    }
+}

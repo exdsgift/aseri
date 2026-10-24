@@ -1,0 +1,253 @@
+{
+    "date": "2026-05-23",
+    "gti": 65,
+    "sitrep": "Trump says framework of Iran deal \u2019largely negotiated,\u2019 with provision to reopen strait . Trump says agreement with Iran 'largely . negotiated,' includes opening strait. Narrative Spike: SpaceX's Starship flight hits most targets in pre-IPO test .",
+    "top_keywords": {
+        "iran": {
+            "count": 37,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 28,
+            "type": "PER"
+        },
+        "china": {
+            "count": 27,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 11,
+            "type": "PER"
+        },
+        "israel": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 10,
+            "type": "ORG"
+        },
+        "ebola": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "uganda": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "india": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "drc": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "spacex": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "cannes": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "canada": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "cuba": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "dr congo": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "madrid": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "senegal": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "taiwan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "tehran": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "white house": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "itamar ben-gvir": {
+            "count": 4,
+            "type": "PER"
+        },
+        "leo": {
+            "count": 4,
+            "type": "PER"
+        },
+        "rubio": {
+            "count": 4,
+            "type": "PER"
+        },
+        "lebanon": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "zapatero": {
+            "count": 3,
+            "type": "PER"
+        },
+        "chine": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "california": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "who": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "france": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "pakistan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "tulsi gabbard": {
+            "count": 3,
+            "type": "PER"
+        },
+        "shehbaz sharif": {
+            "count": 3,
+            "type": "PER"
+        },
+        "us-iran": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "\u0639\u0627\u062c\u0644": {
+            "count": 3,
+            "type": "PER"
+        },
+        "pakistan army": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "kiev": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "caracas": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 2,
+            "type": "PER"
+        },
+        "cristian mungiu": {
+            "count": 2,
+            "type": "PER"
+        },
+        "s\u00e9n\u00e9gal": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "putin": {
+            "count": 2,
+            "type": "PER"
+        },
+        "alberta": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "green cards": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "united states": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "red cross": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "spanien": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "pedro s\u00e1nchez": {
+            "count": 2,
+            "type": "PER"
+        },
+        "frankreich": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u00e1balos": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "ben-gvir": {
+            "count": 2,
+            "type": "PER"
+        },
+        "spain": {
+            "count": 2,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 83,
+        "www.scmp.com": 51,
+        "www.straitstimes.com": 49,
+        "www.lemonde.fr": 34,
+        "www.thehindu.com": 33,
+        "timesofindia.indiatimes.com": 32,
+        "www.france24.com": 30,
+        "www.jpost.com": 29
+    }
+}

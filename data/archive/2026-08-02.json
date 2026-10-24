@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-02",
+    "gti": 28,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: AFR257. AFR358P. Aerial Anomalies: CFC4098, AFL294 and AFR454 .",
+    "top_keywords": {
+        "iran": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 14,
+            "type": "PER"
+        },
+        "ceuta": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "europe": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "japan": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "marruecos": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hamas": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "russia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "bangladesh": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "athens": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "espa\u00f1a": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "peru": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hormuzit": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "us-iran": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "strait of hormuz": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "katz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "idf central command": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "japanese yen": {
+            "count": 1,
+            "type": "PER"
+        },
+        "trump's": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "hezbollah": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "bop": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "mladenov": {
+            "count": 1,
+            "type": "PER"
+        },
+        "u.k.": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "burnham": {
+            "count": 1,
+            "type": "PER"
+        },
+        "governors": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "moscow mayor": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "greece": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "mamdani": {
+            "count": 1,
+            "type": "PER"
+        },
+        "israeli consul-general ofir akunis": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "astrazeneca": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "bristol myers squibb": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "japan times": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "koizumi": {
+            "count": 1,
+            "type": "PER"
+        },
+        "yasukuni": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0627\u0646\u0642\u0633\u0627\u0645": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "jerusalem": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "old city": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "brasilien": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "lula da silva": {
+            "count": 1,
+            "type": "PER"
+        },
+        "sohn": {
+            "count": 1,
+            "type": "PER"
+        },
+        "jair bolsonaro": {
+            "count": 1,
+            "type": "PER"
+        },
+        "hormuz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "oman": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hindu": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "\u062d\u0631\u0628 \u0623\u0648\u0643\u0631\u0627\u0646\u064a\u0627": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0645\u0627\u0630\u0627": {
+            "count": 1,
+            "type": "PER"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "west asia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "tehran": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "sheikh hasina": {
+            "count": 1,
+            "type": "PER"
+        },
+        "tarique rahman": {
+            "count": 1,
+            "type": "PER"
+        },
+        "ireland": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "pm rahman": {
+            "count": 1,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "www.straitstimes.com": 10,
+        "www.japantimes.co.jp": 10,
+        "www.france24.com": 10,
+        "www.rt.com": 10,
+        "www.thehindu.com": 10,
+        "feeds.bbci.co.uk": 10,
+        "feeds.elpais.com": 10
+    }
+}

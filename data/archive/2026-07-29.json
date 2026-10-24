@@ -1,0 +1,257 @@
+{
+    "date": "2026-07-29",
+    "gti": 50,
+    "sitrep": "Aerial Anomaly: SAMU37. Aerial Anomalas: AFR8F, AFR668 and AFR256 . Aerial anomalies: TCATS, AAF8F and AAFM8F .",
+    "top_keywords": {
+        "iran": {
+            "count": 32,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 19,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 17,
+            "type": "PER"
+        },
+        "russia": {
+            "count": 15,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 14,
+            "type": "PER"
+        },
+        "ukraine": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 11,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "iraq": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "u.s.": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 6,
+            "type": "PER"
+        },
+        "india": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "zelensky": {
+            "count": 5,
+            "type": "PER"
+        },
+        "pavel durov": {
+            "count": 5,
+            "type": "PER"
+        },
+        "fifa": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "salman rushdie": {
+            "count": 4,
+            "type": "PER"
+        },
+        "egypt": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "saudi arabia": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "red sea": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "houthis": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "frankreich": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "bordeaux": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "hezbollah": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "madrid": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "peru": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "fujimori": {
+            "count": 4,
+            "type": "PER"
+        },
+        "strait of hormuz": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "fed": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "mamdani": {
+            "count": 3,
+            "type": "PER"
+        },
+        "bts": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "anthony fauci": {
+            "count": 3,
+            "type": "PER"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "jay clayton": {
+            "count": 3,
+            "type": "PER"
+        },
+        "xenia fedorova": {
+            "count": 3,
+            "type": "PER"
+        },
+        "volodymyr zelensky": {
+            "count": 3,
+            "type": "PER"
+        },
+        "benjamin netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "us senate": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "paris": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "durov": {
+            "count": 3,
+            "type": "PER"
+        },
+        "wildberries": {
+            "count": 3,
+            "type": "PER"
+        },
+        "russie": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "irak": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "bangladesh": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kumamoto": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "lindsey graham": {
+            "count": 3,
+            "type": "PER"
+        },
+        "georgia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "centcom": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "pakistan": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "can china": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "drone": {
+            "count": 2,
+            "type": "PER"
+        },
+        "middle east": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 72,
+        "www.scmp.com": 64,
+        "www.straitstimes.com": 59,
+        "www.jpost.com": 43,
+        "www.france24.com": 38,
+        "timesofindia.indiatimes.com": 34,
+        "www.lemonde.fr": 32,
+        "www.japantimes.co.jp": 28
+    }
+}

@@ -1,0 +1,249 @@
+{
+    "date": "2026-07-03",
+    "gti": 71,
+    "sitrep": "China\u2019s ByteDance discovers new scaling law that could sustain AI boom . Fallout from Venezuela's quakes turns political, as opposition leader Machado seeks return .",
+    "top_keywords": {
+        "iran": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 16,
+            "type": "PER"
+        },
+        "israel": {
+            "count": 13,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 10,
+            "type": "LOC"
+        },
+        "nato": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "france": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "portugal": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "usa": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "japan": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "america": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "donald trump": {
+            "count": 6,
+            "type": "PER"
+        },
+        "taylor swift": {
+            "count": 5,
+            "type": "PER"
+        },
+        "tehran": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "sudan": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "new york": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "nigeria": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "monaco": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "croatia": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "europe": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "strait of hormuz": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "interpol": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "argentina": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "kiev": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "khamenei": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "kyiv": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 4,
+            "type": "ORG"
+        },
+        "travis kelce": {
+            "count": 3,
+            "type": "PER"
+        },
+        "london": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "brazil": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "etats-unis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "keiko fujimori": {
+            "count": 3,
+            "type": "PER"
+        },
+        "palestinian": {
+            "count": 3,
+            "type": "PER"
+        },
+        "spain": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "u.s.": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "isis": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "africom": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "belgium": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "erdogan": {
+            "count": 3,
+            "type": "PER"
+        },
+        "pakistan": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "ankara": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "washington": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "madison square garden": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "nasa": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "ebola": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "australia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "p\u00e9rou": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "espa\u00f1a": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "austria": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "england": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "ali khamenei": {
+            "count": 2,
+            "type": "PER"
+        },
+        "\u0645\u0627\u0630\u0627": {
+            "count": 2,
+            "type": "PER"
+        }
+    },
+    "top_domains": {
+        "www.aljazeera.net": 76,
+        "www.straitstimes.com": 58,
+        "www.france24.com": 47,
+        "timesofindia.indiatimes.com": 43,
+        "www.scmp.com": 39,
+        "www.lemonde.fr": 38,
+        "www.jpost.com": 35,
+        "www.spiegel.de": 27
+    }
+}

@@ -1,0 +1,257 @@
+{
+    "date": "2026-08-12",
+    "gti": 27,
+    "sitrep": "Tactical Alerts: Aerial Anomaly: SPAR11. Aerial Anomalas: SAM518. Aerial anomaly: AFR031. Aerial anomalies: CFC4099, AFL1530, AFL1227 and AFL1890 .",
+    "top_keywords": {
+        "china": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "iran": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "trump": {
+            "count": 4,
+            "type": "PER"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "donald trump": {
+            "count": 3,
+            "type": "PER"
+        },
+        "karoline leavitt": {
+            "count": 3,
+            "type": "PER"
+        },
+        "espa\u00f1a": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "zhu rongji": {
+            "count": 3,
+            "type": "PER"
+        },
+        "colombia": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "likud": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "en espa\u00f1a": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "video": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "florida": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "idf": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "black sea": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "zimbabwe": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "middle east": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "ohana": {
+            "count": 1,
+            "type": "PER"
+        },
+        "atl\u00e1ntico": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "voltaire": {
+            "count": 1,
+            "type": "PER"
+        },
+        "wei\u00dfen haus": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "white house": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "zohran mamdani": {
+            "count": 1,
+            "type": "PER"
+        },
+        "us-china": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "board of investment\u2019": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "trump-xi": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "montesquieu": {
+            "count": 1,
+            "type": "PER"
+        },
+        "who": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "donald trumps dekret": {
+            "count": 1,
+            "type": "PER"
+        },
+        "catalu\u00f1a": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "dan bilzerian": {
+            "count": 1,
+            "type": "PER"
+        },
+        "discord": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "br\u00e9sil": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "new york": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "david goggins": {
+            "count": 1,
+            "type": "PER"
+        },
+        "truth social": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "israelis": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hunter biden": {
+            "count": 1,
+            "type": "PER"
+        },
+        "rick sanchez": {
+            "count": 1,
+            "type": "PER"
+        },
+        "pakistan": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "maryland": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "marco rubio": {
+            "count": 1,
+            "type": "PER"
+        },
+        "paraguay": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 1,
+            "type": "ORG"
+        },
+        "russie": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "hormuz": {
+            "count": 1,
+            "type": "PER"
+        },
+        "iraq": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "poles": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "gautam rangarajan": {
+            "count": 1,
+            "type": "PER"
+        },
+        "andy burnham": {
+            "count": 1,
+            "type": "PER"
+        },
+        "mount etna": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "pentagon": {
+            "count": 1,
+            "type": "LOC"
+        },
+        "libye": {
+            "count": 1,
+            "type": "LOC"
+        }
+    },
+    "top_domains": {
+        "www.jpost.com": 10,
+        "feeds.elpais.com": 10,
+        "www.rt.com": 10,
+        "timesofindia.indiatimes.com": 10,
+        "www.lemonde.fr": 10,
+        "www.spiegel.de": 10,
+        "feeds.bbci.co.uk": 10,
+        "www.scmp.com": 10
+    }
+}

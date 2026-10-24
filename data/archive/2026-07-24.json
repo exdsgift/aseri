@@ -1,0 +1,257 @@
+{
+    "date": "2026-07-24",
+    "gti": 34,
+    "sitrep": "Narrative Spike: Zelensky tries to fix crisis over removal of defence minister and counts the cost . Lula leads Flavio Bolsonaro in Brazil election poll .",
+    "top_keywords": {
+        "trump": {
+            "count": 32,
+            "type": "PER"
+        },
+        "iran": {
+            "count": 30,
+            "type": "LOC"
+        },
+        "china": {
+            "count": 20,
+            "type": "LOC"
+        },
+        "ukraine": {
+            "count": 17,
+            "type": "LOC"
+        },
+        "israel": {
+            "count": 16,
+            "type": "LOC"
+        },
+        "madrid": {
+            "count": 14,
+            "type": "LOC"
+        },
+        "france": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "spain": {
+            "count": 12,
+            "type": "LOC"
+        },
+        "direct": {
+            "count": 10,
+            "type": "ORG"
+        },
+        "japan": {
+            "count": 9,
+            "type": "LOC"
+        },
+        "icc": {
+            "count": 8,
+            "type": "ORG"
+        },
+        "donald trump": {
+            "count": 8,
+            "type": "PER"
+        },
+        "india": {
+            "count": 8,
+            "type": "LOC"
+        },
+        "hong kong": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "russia": {
+            "count": 7,
+            "type": "LOC"
+        },
+        "venezuela": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "karim khan": {
+            "count": 6,
+            "type": "PER"
+        },
+        "canada": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "west bank": {
+            "count": 6,
+            "type": "ORG"
+        },
+        "u.s.": {
+            "count": 6,
+            "type": "LOC"
+        },
+        "yemen": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "new york": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "bahrain": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "google": {
+            "count": 5,
+            "type": "ORG"
+        },
+        "europe": {
+            "count": 5,
+            "type": "LOC"
+        },
+        "russie": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "germany": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "bangladesh": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "frankreich": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "italy": {
+            "count": 4,
+            "type": "LOC"
+        },
+        "south africa": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "\u0643\u064a\u0641": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "netanyahu": {
+            "count": 3,
+            "type": "PER"
+        },
+        "israelis": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "spanien": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "avila": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "gaza": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "giorgia meloni": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "idf": {
+            "count": 3,
+            "type": "ORG"
+        },
+        "florida": {
+            "count": 3,
+            "type": "LOC"
+        },
+        "zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "brazil": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "hungary": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "state department": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "saudi arabia": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "cpi": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "tehran": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "singapore": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "kuwait": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "beijing": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "\u0643\u0623\u0633": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "john cena": {
+            "count": 2,
+            "type": "PER"
+        },
+        "volodymyr zelensky": {
+            "count": 2,
+            "type": "PER"
+        },
+        "kyiv": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "videos": {
+            "count": 2,
+            "type": "ORG"
+        },
+        "gulf": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "drones": {
+            "count": 2,
+            "type": "PER"
+        },
+        "iraq": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "la chine": {
+            "count": 2,
+            "type": "LOC"
+        },
+        "video": {
+            "count": 2,
+            "type": "ORG"
+        }
+    },
+    "top_domains": {
+        "www.straitstimes.com": 65,
+        "www.scmp.com": 59,
+        "www.jpost.com": 53,
+        "timesofindia.indiatimes.com": 45,
+        "www.lemonde.fr": 43,
+        "www.aljazeera.net": 40,
+        "www.france24.com": 32,
+        "www.thehindu.com": 31
+    }
+}
