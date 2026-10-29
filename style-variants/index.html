@@ -1,0 +1,708 @@
+<title>aseri style prototypes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jacquard+24&family=Jacquarda+Bastarda+9&family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap">
+<!-- PROTOTYPE, throwaway: four style directions for the aseri front page in the dos-age.com language
+     (docs/research/design-dos-age.md), switchable from the bottom bar or with the arrow keys.
+     Data is real (GPR daily, IMF PortWatch, fetched 2026-10-29); the forecast is a placeholder method, not Timestral. -->
+<style>
+/* Layout: one centred column per variant on deep navy; one tone per screen; pixel type at whole sizes; dither instead of alpha. */
+:root {
+  color-scheme: dark;
+  --bg: #071324;
+  --night: #253a56;
+  --row: #222034;
+  --text: #cbdbfc;
+  --label: #9badb7;
+  --dim: #696a6a;
+  --gold: #ffd23f;
+  --gold-muted: #917d3c;
+  --gold-2: #d9a066;
+  --focus: #5b6ee1;
+  --red: #d95763;
+  --go: #37946e;
+  --blue-3: #306082;
+  --play: #78c283;
+  --white: #ffffff;
+  --backing: rgba(7, 19, 36, 0.9);
+  --ink: #ac3232; --orb: #d95763; --tone-dim: #45283c;
+  --f-display: "Jacquard 24", "Times New Roman", serif;
+  --f-display-sm: "Jacquarda Bastarda 9", "Jacquard 24", serif;
+  --f-pixel: "Press Start 2P", ui-monospace, monospace;
+  --f-caps: "Silkscreen", "Press Start 2P", ui-monospace, monospace;
+  --f-term: "VT323", ui-monospace, monospace;
+  --f-sans: "Pixelify Sans", system-ui, sans-serif;
+}
+[data-tone="red"] { --ink: #ac3232; --orb: #d95763; --tone-dim: #45283c; }
+[data-tone="green"] { --ink: #4b692f; --orb: #78c283; --tone-dim: #323c39; }
+[data-tone="gold"] { --ink: #8a6f30; --orb: #d9a066; --tone-dim: #3d3524; }
+[data-tone="grey"] { --ink: #696a6a; --orb: #9badb7; --tone-dim: #2f3238; }
+[data-tone="sun"] { --ink: #917d3c; --orb: #ffd23f; --tone-dim: #3d3524; }
+
+html, body { background: var(--bg); color: var(--text); }
+body {
+  font-family: var(--f-sans); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 112px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+h1, h2, p { margin: 0; font-weight: 400; }
+.view { max-width: 1120px; margin: 0 auto; padding-block: 20px 32px; }
+.px { font-family: var(--f-pixel); font-size: 12px; line-height: 18px; text-transform: uppercase; }
+.px8 { font-family: var(--f-pixel); font-size: 8px; line-height: 12px; text-transform: uppercase; }
+.key { color: var(--gold-2); }
+.frame { border: 2px solid var(--night); }
+.chip { clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px); }
+.pill { border: 2px solid var(--night); padding: 4px 8px; color: var(--label); white-space: nowrap; }
+.pill b { color: var(--red); font-weight: inherit; }
+.src { color: var(--dim); }
+.icon { display: block; color: var(--orb); flex: none; }
+.btn {
+  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 6px 8px; border: 0; border-radius: 0; cursor: pointer; text-align: left;
+  background: var(--gold); color: var(--bg);
+  font-family: var(--f-pixel); font-size: 12px; line-height: 18px; text-transform: uppercase;
+  transition: background-color 160ms, color 160ms;
+}
+.btn:hover { background: var(--white); }
+.btn.muted { background: var(--gold-muted); }
+
+/* charts */
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; overflow: visible; }
+.chart text.tick { font-family: var(--f-term); font-size: 16px; fill: var(--label); }
+.chart text.xl { font-family: var(--f-pixel); font-size: 8px; fill: var(--label); }
+.chart text.today { font-family: var(--f-pixel); font-size: 8px; fill: var(--focus); }
+.tip {
+  position: absolute; z-index: 3; pointer-events: none; white-space: nowrap;
+  background: var(--backing); border: 2px solid var(--night); padding: 4px 8px;
+  font-family: var(--f-term); font-size: 18px; line-height: 20px; color: var(--text);
+}
+.tip .t { display: block; margin-bottom: 2px; font-family: var(--f-pixel); font-size: 8px; line-height: 12px; color: var(--gold-2); }
+
+/* A: title screen */
+.va-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.va-brand { display: flex; align-items: center; gap: 8px; color: var(--label); }
+.va-stage { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 8px; text-align: center; }
+.orb { width: 240px; height: 240px; image-rendering: pixelated; }
+.va-word { margin-top: -48px; font-family: var(--f-display); font-size: 96px; line-height: 0.8; letter-spacing: 0.04em; color: var(--orb); }
+.va-line { max-width: 52ch; padding: 6px 8px; background: var(--backing); color: var(--text); text-wrap: balance; }
+.va-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: min(100%, 760px); }
+.kpi { display: flex; flex-direction: column; gap: 8px; padding: 8px 12px; background: var(--backing); text-align: left; }
+.kpi .px8 { color: var(--label); }
+.kpi .v { font-family: var(--f-pixel); font-size: 16px; line-height: 24px; font-variant-numeric: tabular-nums; }
+.kpi .v.big { font-size: 24px; color: var(--orb); }
+.va-panel { display: flex; flex-direction: column; gap: 8px; width: min(100%, 760px); padding: 8px 12px 12px; background: var(--backing); text-align: left; }
+.va-panel-title { display: flex; justify-content: space-between; gap: 8px; color: var(--gold-2); }
+.va-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+.card {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px 10px; align-items: start;
+  padding: 8px; background: transparent; border: 2px solid var(--night); text-align: left; cursor: pointer;
+  transition: border-color 160ms, background-color 160ms;
+}
+.card:hover { border-color: var(--label); }
+.card[aria-checked="true"] { border-color: var(--focus); background: var(--tone-dim); }
+.card .icon { grid-row: span 3; }
+.card .name { font-family: var(--f-sans); font-weight: 600; font-size: 20px; line-height: 24px; color: var(--text); }
+.card .l1, .card .l2 { grid-column: 2 / 4; font-family: var(--f-sans); font-size: 17px; line-height: 22px; }
+.card .l1 { color: var(--orb); }
+.card .l2 { color: var(--label); }
+.va-foot { margin-top: 24px; text-align: center; color: var(--dim); }
+
+/* B: instrument panel */
+.vb-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 2px solid var(--night); }
+.vb-word { margin-right: auto; font-family: var(--f-display-sm); font-size: 36px; line-height: 1; color: var(--gold-2); }
+.vb-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 8px; margin-top: 12px; }
+.vb-main { grid-row: span 2; }
+.vb-record { grid-column: 1 / -1; }
+.panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 8px 12px 12px; border: 2px solid var(--night); }
+.panel-title {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding-bottom: 8px; border-bottom: 2px solid var(--night);
+  font-family: var(--f-caps); font-size: 16px; line-height: 16px; text-transform: uppercase; color: var(--gold-2);
+}
+.tabs { display: flex; gap: 2px; }
+.tabs button { padding: 4px 8px; border: 0; cursor: pointer; background: var(--row); color: var(--blue-3); font-family: var(--f-caps); font-size: 16px; line-height: 16px; }
+.tabs button[aria-selected="true"] { background: var(--go); color: var(--text); }
+.vb-kpi { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.vb-big { font-family: var(--f-term); font-size: 96px; line-height: 0.75; color: var(--white); }
+.vb-deltas { display: flex; flex-direction: column; gap: 4px; font-family: var(--f-term); font-size: 22px; line-height: 22px; color: var(--label); }
+.vb-deltas b { font-weight: 400; color: var(--text); }
+.vb-num { font-family: var(--f-term); font-size: 56px; line-height: 0.8; color: var(--orb); }
+.vb-mid { display: flex; align-items: flex-end; gap: 10px; }
+.vb-mid .px8 { color: var(--label); }
+.vb-delta { font-family: var(--f-term); font-size: 20px; line-height: 20px; color: var(--label); }
+.tbl { overflow-x: auto; }
+.tbl table { width: 100%; border-collapse: separate; border-spacing: 0 2px; font-family: var(--f-term); font-size: 20px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.tbl th { padding: 4px 8px; font-family: var(--f-pixel); font-size: 8px; line-height: 12px; font-weight: 400; text-transform: uppercase; text-align: right; color: var(--label); white-space: nowrap; }
+.tbl td { padding: 6px 8px; background: var(--row); text-align: right; white-space: nowrap; color: var(--text); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl td.in { color: var(--play); }
+.tbl td.out { color: var(--red); }
+.vb-sum { color: var(--text); font-family: var(--f-term); font-size: 20px; text-transform: none; }
+
+/* C: statement */
+.vc { position: relative; }
+.vc-sun {
+  position: absolute; inset: 0 0 auto 0; width: 100%; height: 360px; pointer-events: none; image-rendering: pixelated;
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 100%); mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+}
+.vc-side { position: fixed; left: max(24px, env(safe-area-inset-left, 0px)); top: 50%; z-index: 2; display: none; flex-direction: column; gap: 28px; transform: translateY(-50%); }
+.vc-side button { display: flex; align-items: center; gap: 12px; padding: 0; border: 0; background: none; cursor: pointer; opacity: 0.3; transition: opacity 160ms; color: var(--label); text-align: left; }
+.vc-side button:hover, .vc-side button[aria-current="true"] { opacity: 1; }
+.vc-side .icon { color: var(--label); }
+#vc-risk { justify-content: flex-start; padding-top: 300px; }
+.vc-part { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; min-height: 86svh; padding-block: 56px; text-align: center; }
+.vc-kicker, .vc-pitch { color: var(--gold); }
+.vc-pitch { max-width: 44ch; text-wrap: balance; }
+.vc-num { font-family: var(--f-display); font-size: 192px; line-height: 0.75; letter-spacing: 0.02em; color: var(--gold); }
+.vc-chart { display: flex; flex-direction: column; gap: 8px; width: min(100%, 640px); }
+.vc-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.vc-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 320px)); gap: 56px; text-align: left; }
+.vc-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.vc-h2 { font-family: var(--f-display); font-size: 48px; line-height: 1; letter-spacing: 0.04em; color: var(--gold-muted); }
+.vc-col .n { font-family: var(--f-pixel); font-size: 24px; line-height: 24px; color: var(--gold); }
+.vc-text { font-family: var(--f-pixel); font-size: 8px; line-height: 14px; color: var(--label); }
+.vc-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.vc-dot { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--label); }
+.vc-dot i { display: block; width: 24px; height: 24px; }
+.vc-dot.in i { background: var(--play); }
+.vc-dot.out i { background: var(--red); }
+
+/* D: specimen */
+.vd-h { margin-block: 8px 12px; color: var(--gold-2); }
+.vd-type, .vd-charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.vd-charts { margin-top: 8px; }
+.spec { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 12px; }
+.spec .meta { color: var(--dim); }
+.s1-d { font-family: var(--f-display); font-size: 72px; line-height: 0.8; color: var(--red); }
+.s1-n { font-family: var(--f-pixel); font-size: 24px; line-height: 24px; }
+.s1-l { color: var(--label); }
+.s1-b { font-family: var(--f-sans); font-size: 18px; line-height: 1.4; }
+.s2-d { font-family: var(--f-display-sm); font-size: 36px; line-height: 1; color: var(--gold-2); }
+.s2-n { font-family: var(--f-term); font-size: 96px; line-height: 0.75; color: var(--white); }
+.s2-l { font-family: var(--f-caps); font-size: 16px; line-height: 16px; text-transform: uppercase; color: var(--gold-2); }
+.s2-b { font-family: var(--f-term); font-size: 22px; line-height: 1.2; color: var(--label); }
+.s3-d { font-family: var(--f-display); font-size: 96px; line-height: 0.75; color: var(--gold); }
+.s3-l { color: var(--gold); }
+.s3-b { font-family: var(--f-pixel); font-size: 8px; line-height: 14px; color: var(--label); }
+
+/* prototype switcher: deliberately not part of the design */
+.switcher {
+  position: fixed; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  display: flex; align-items: center; gap: 4px; max-width: calc(100vw - 24px); padding: 6px;
+  transform: translateX(-50%); border-radius: 999px; background: #f4f4f5; color: #18181b;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); font: 500 13px/1.25 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.switcher button { flex: none; width: 36px; height: 36px; border: 0; border-radius: 999px; background: #18181b; color: #fff; font-size: 16px; cursor: pointer; }
+.switcher .lab { min-width: 0; padding: 0 10px; text-align: center; }
+.switcher .lab b { display: block; white-space: nowrap; }
+.switcher .lab span { display: block; overflow: hidden; font-size: 11px; color: #52525b; white-space: nowrap; text-overflow: ellipsis; }
+
+@media (max-width: 860px) {
+  .vd-type, .vd-charts { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .va-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .va-kpis { grid-template-columns: minmax(0, 1fr); }
+  .kpi { flex-direction: row; justify-content: space-between; align-items: center; }
+  .vb-grid { grid-template-columns: minmax(0, 1fr); }
+  .vb-main { grid-row: auto; }
+  .vc-cols { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .vc-num { font-size: 144px; }
+}
+@media (max-width: 480px) {
+  .orb { width: 160px; height: 160px; }
+  .va-word { margin-top: -32px; font-size: 72px; }
+  .va-cards { grid-template-columns: minmax(0, 1fr); }
+  .vb-big { font-size: 72px; }
+}
+@media (min-width: 1180px) {
+  .vc-side { display: flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+
+<!-- A: title screen (dos-age.com game title) -->
+<section class="view va" id="view-title" data-tone="red" hidden>
+  <header class="va-top">
+    <div class="va-brand px"><span>aseri v0.1</span><span class="pill"><span class="key">[?]</span> About</span></div>
+    <div class="pill px">Next update in <b data-countdown></b></div>
+  </header>
+  <div class="va-stage" id="va-stage">
+    <canvas class="orb" id="va-orb" width="80" height="80" aria-hidden="true"></canvas>
+    <h1 class="va-word">ASERI</h1>
+    <p class="va-line px" id="va-sentence"></p>
+    <div class="va-kpis" id="va-kpis"></div>
+    <div class="va-panel frame chip">
+      <div class="va-panel-title px8"><span id="va-ptitle"></span><span id="va-pright"></span></div>
+      <div class="chart" id="va-chart"></div>
+      <p class="src px8" id="va-src"></p>
+    </div>
+  </div>
+  <div class="va-cards" id="va-cards" role="radiogroup" aria-label="Series"></div>
+  <p class="va-foot px8">Updated daily from public data · Orb size = today vs 1-year average</p>
+</section>
+
+<!-- B: instrument panel (game panels and leaderboard) -->
+<section class="view vb" id="view-panel" data-tone="gold" hidden>
+  <header class="vb-head">
+    <span class="vb-word">aseri</span>
+    <span class="pill px8" id="vb-data"></span>
+    <span class="pill px8">Next update <b data-countdown></b></span>
+  </header>
+  <div class="vb-grid">
+    <article class="panel vb-main">
+      <div class="panel-title">
+        <span><span class="key">[R]</span> Geopolitical risk</span>
+        <span class="tabs" role="tablist">
+          <button role="tab" data-range="90">[1] 90D</button>
+          <button role="tab" data-range="365">[2] 1Y</button>
+        </span>
+      </div>
+      <div class="vb-kpi"><span class="vb-big" id="vb-big"></span><div class="vb-deltas" id="vb-deltas"></div></div>
+      <div class="chart" id="vb-chart"></div>
+      <p class="src px8" id="vb-src"></p>
+    </article>
+    <article class="panel vb-side" data-tone="green" data-series="suez">
+      <div class="panel-title"><span><span class="key">[S]</span> Suez Canal</span></div>
+      <div class="vb-mid"><span class="vb-num"></span><span class="px8">ships a day<br>7-day avg</span></div>
+      <p class="vb-delta"></p>
+      <div class="chart"></div>
+      <p class="src px8"></p>
+    </article>
+    <article class="panel vb-side" data-tone="red" data-series="hormuz">
+      <div class="panel-title"><span><span class="key">[H]</span> Strait of Hormuz</span></div>
+      <div class="vb-mid"><span class="vb-num"></span><span class="px8">ships a day<br>7-day avg</span></div>
+      <p class="vb-delta"></p>
+      <div class="chart"></div>
+      <p class="src px8"></p>
+    </article>
+    <article class="panel vb-record">
+      <div class="panel-title"><span><span class="key">[T]</span> Track record · risk, 7 days ahead</span><span class="vb-sum" id="vb-sum"></span></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Forecast made</th><th>For</th><th>Median</th><th>80% band</th><th>Actual</th><th>Error</th><th>Band</th></tr></thead>
+        <tbody id="vb-rows"></tbody>
+      </table></div>
+      <p class="src px8">Method: placeholder (7-day mean, past errors as bands). Timestral replaces it.</p>
+    </article>
+  </div>
+</section>
+
+<!-- C: statement (about.dos-age.com) -->
+<section class="view vc" id="view-statement" data-tone="sun" hidden>
+  <canvas class="vc-sun" id="vc-sun" aria-hidden="true"></canvas>
+  <nav class="vc-side" aria-label="Sections" id="vc-side"></nav>
+  <div class="vc-part" id="vc-risk">
+    <p class="px vc-kicker">Geopolitical risk · today</p>
+    <p class="vc-num" id="vc-num"></p>
+    <p class="px vc-pitch" id="vc-pitch"></p>
+    <div class="vc-chart"><div class="chart" id="vc-chart"></div><p class="src px8" id="vc-src"></p></div>
+    <div class="vc-cta">
+      <button class="btn" data-go="vc-record"><span>→ *</span><span>See the record</span></button>
+      <button class="btn muted" data-go="vc-ships"><span>[2]</span><span>Ships &amp; straits</span></button>
+    </div>
+  </div>
+  <div class="vc-part" id="vc-ships">
+    <div class="vc-cols">
+      <div class="vc-col" data-series="suez"><h2 class="vc-h2">Suez</h2><p class="n"></p><p class="vc-text"></p><div class="chart"></div></div>
+      <div class="vc-col" data-series="hormuz"><h2 class="vc-h2">Hormuz</h2><p class="n"></p><p class="vc-text"></p><div class="chart"></div></div>
+    </div>
+  </div>
+  <div class="vc-part" id="vc-record">
+    <h2 class="vc-h2">The record</h2>
+    <p class="px vc-pitch" id="vc-rec"></p>
+    <div class="vc-dots" id="vc-dots"></div>
+    <p class="vc-text" style="max-width: 44ch">Each square is one forecast made 7 days before. Green: the real value fell inside the 80% band. Red: it did not.</p>
+  </div>
+</section>
+
+<!-- D: type and chart specimen -->
+<section class="view vd" id="view-specimen" data-tone="sun" hidden>
+  <h2 class="px vd-h">Type pairings</h2>
+  <div class="vd-type">
+    <div class="spec frame">
+      <p class="px8 meta">1 · used in A</p>
+      <p class="s1-d">ASERI</p>
+      <p class="s1-n" data-now></p>
+      <p class="px8 s1-l">Geopolitical risk · 7-day avg</p>
+      <p class="s1-b" data-sentence></p>
+      <p class="px8 meta">Jacquard 24 · Press Start 2P · Pixelify Sans. All OFL.</p>
+    </div>
+    <div class="spec frame">
+      <p class="px8 meta">2 · used in B</p>
+      <p class="s2-d">aseri</p>
+      <p class="s2-n" data-now></p>
+      <p class="s2-l">Geopolitical risk</p>
+      <p class="s2-b" data-sentence></p>
+      <p class="px8 meta">Jacquarda Bastarda 9 · VT323 · Silkscreen. All OFL.</p>
+    </div>
+    <div class="spec frame">
+      <p class="px8 meta">3 · used in C</p>
+      <p class="s3-d" data-now></p>
+      <p class="px s3-l">Geopolitical risk · today</p>
+      <p class="s3-b" data-sentence></p>
+      <p class="px8 meta">Jacquard 24 · Press Start 2P only, like about.dos-age.com. All OFL.</p>
+    </div>
+  </div>
+  <h2 class="px vd-h" style="margin-top: 32px">Chart styles · same data</h2>
+  <div class="vd-charts">
+    <div class="spec frame" data-tone="red"><p class="px8 meta">Line + dithered band (A)</p><div class="chart" data-style="line"></div></div>
+    <div class="spec frame" data-tone="gold"><p class="px8 meta">Steps + hatched future (B)</p><div class="chart" data-style="step"></div></div>
+    <div class="spec frame" data-tone="sun"><p class="px8 meta">Pixel columns (C)</p><div class="chart" data-style="columns"></div></div>
+  </div>
+</section>
+
+<nav class="switcher" aria-label="Prototype variants">
+  <button id="sw-prev" aria-label="Previous variant">←</button>
+  <div class="lab"><b id="sw-label"></b><span id="sw-note"></span></div>
+  <button id="sw-next" aria-label="Next variant">→</button>
+</nav>
+
+<script>
+const RAW = {"gpr":[["2025-10-27",163.1],["2025-10-28",129.7],["2025-10-29",101.0],["2025-10-30",132.0],["2025-10-31",158.8],["2025-11-01",64.5],["2025-11-02",57.3],["2025-11-03",236.6],["2025-11-04",107.1],["2025-11-05",141.0],["2025-11-06",82.1],["2025-11-07",99.2],["2025-11-08",85.8],["2025-11-09",24.7],["2025-11-10",105.2],["2025-11-11",104.4],["2025-11-12",77.4],["2025-11-13",71.0],["2025-11-14",81.9],["2025-11-15",76.3],["2025-11-16",79.6],["2025-11-17",111.8],["2025-11-18",81.3],["2025-11-19",59.5],["2025-11-20",84.8],["2025-11-21",163.0],["2025-11-22",38.5],["2025-11-23",113.4],["2025-11-24",173.3],["2025-11-25",188.1],["2025-11-26",118.3],["2025-11-27",181.4],["2025-11-28",151.4],["2025-11-29",75.8],["2025-11-30",77.0],["2025-12-01",150.0],["2025-12-02",110.0],["2025-12-03",106.5],["2025-12-04",154.6],["2025-12-05",150.3],["2025-12-06",82.4],["2025-12-07",40.9],["2025-12-08",110.6],["2025-12-09",104.5],["2025-12-10",95.7],["2025-12-11",142.2],["2025-12-12",175.3],["2025-12-13",75.3],["2025-12-14",185.3],["2025-12-15",202.2],["2025-12-16",145.1],["2025-12-17",125.1],["2025-12-18",209.3],["2025-12-19",100.2],["2025-12-20",134.8],["2025-12-21",113.1],["2025-12-22",106.6],["2025-12-23",97.6],["2025-12-24",134.3],["2025-12-25",147.2],["2025-12-26",144.0],["2025-12-27",223.7],["2025-12-28",79.8],["2025-12-29",62.9],["2025-12-30",218.9],["2025-12-31",161.8],["2026-01-01",164.7],["2026-01-02",175.1],["2026-01-03",198.0],["2026-01-04",135.6],["2026-01-05",263.3],["2026-01-06",255.3],["2026-01-07",242.2],["2026-01-08",267.4],["2026-01-09",131.6],["2026-01-10",192.2],["2026-01-11",127.1],["2026-01-12",186.3],["2026-01-13",167.4],["2026-01-14",119.9],["2026-01-15",153.0],["2026-01-16",194.9],["2026-01-17",71.5],["2026-01-18",89.3],["2026-01-19",191.9],["2026-01-20",251.4],["2026-01-21",180.4],["2026-01-22",133.7],["2026-01-23",193.2],["2026-01-24",123.5],["2026-01-25",85.2],["2026-01-26",80.8],["2026-01-27",206.3],["2026-01-28",134.1],["2026-01-29",177.6],["2026-01-30",161.5],["2026-01-31",129.2],["2026-02-01",106.9],["2026-02-02",109.2],["2026-02-03",141.5],["2026-02-04",239.6],["2026-02-05",139.3],["2026-02-06",114.8],["2026-02-07",132.3],["2026-02-08",64.2],["2026-02-09",114.0],["2026-02-10",59.3],["2026-02-11",107.0],["2026-02-12",125.6],["2026-02-13",116.8],["2026-02-14",69.0],["2026-02-15",21.5],["2026-02-16",73.0],["2026-02-17",76.6],["2026-02-18",122.0],["2026-02-19",113.3],["2026-02-20",153.7],["2026-02-21",78.1],["2026-02-22",62.1],["2026-02-23",139.3],["2026-02-24",197.7],["2026-02-25",138.3],["2026-02-26",167.3],["2026-02-27",197.1],["2026-02-28",110.6],["2026-03-01",273.9],["2026-03-02",500.8],["2026-03-03",391.1],["2026-03-04",465.9],["2026-03-05",413.4],["2026-03-06",314.7],["2026-03-07",176.9],["2026-03-08",213.7],["2026-03-09",372.1],["2026-03-10",457.1],["2026-03-11",368.7],["2026-03-12",313.3],["2026-03-13",322.3],["2026-03-14",270.5],["2026-03-15",236.6],["2026-03-16",259.9],["2026-03-17",354.1],["2026-03-18",337.8],["2026-03-19",375.7],["2026-03-20",328.5],["2026-03-21",300.2],["2026-03-22",174.8],["2026-03-23",300.6],["2026-03-24",402.1],["2026-03-25",316.8],["2026-03-26",310.6],["2026-03-27",294.2],["2026-03-28",241.2],["2026-03-29",233.6],["2026-03-30",266.5],["2026-03-31",447.8],["2026-04-01",282.6],["2026-04-02",271.8],["2026-04-03",274.5],["2026-04-04",220.8],["2026-04-05",138.0],["2026-04-06",305.3],["2026-04-07",265.8],["2026-04-08",294.5],["2026-04-09",447.0],["2026-04-10",321.3],["2026-04-11",267.5],["2026-04-12",206.0],["2026-04-13",374.4],["2026-04-14",371.9],["2026-04-15",256.5],["2026-04-16",285.9],["2026-04-17",305.1],["2026-04-18",204.6],["2026-04-19",175.7],["2026-04-20",218.8],["2026-04-21",164.7],["2026-04-22",224.5],["2026-04-23",241.4],["2026-04-24",257.9],["2026-04-25",178.5],["2026-04-26",139.5],["2026-04-27",124.9],["2026-04-28",203.5],["2026-04-29",248.3],["2026-04-30",193.5],["2026-05-01",249.8],["2026-05-02",131.7],["2026-05-03",145.1],["2026-05-04",207.0],["2026-05-05",287.2],["2026-05-06",284.8],["2026-05-07",298.7],["2026-05-08",251.0],["2026-05-09",174.6],["2026-05-10",139.8],["2026-05-11",274.9],["2026-05-12",218.4],["2026-05-13",238.8],["2026-05-14",207.8],["2026-05-15",223.0],["2026-05-16",168.6],["2026-05-17",130.3],["2026-05-18",225.3],["2026-05-19",222.4],["2026-05-20",256.7],["2026-05-21",190.4],["2026-05-22",149.3],["2026-05-23",137.8],["2026-05-24",179.1],["2026-05-25",198.4],["2026-05-26",163.7],["2026-05-27",181.5],["2026-05-28",184.4],["2026-05-29",193.2],["2026-05-30",204.3],["2026-05-31",109.5],["2026-06-01",152.7],["2026-06-02",198.8],["2026-06-03",242.8],["2026-06-04",190.7],["2026-06-05",127.9],["2026-06-06",110.4],["2026-06-07",111.7],["2026-06-08",237.1],["2026-06-09",219.7],["2026-06-10",168.0],["2026-06-11",173.8],["2026-06-12",168.3],["2026-06-13",176.1],["2026-06-14",214.5],["2026-06-15",208.7],["2026-06-16",280.6],["2026-06-17",254.4],["2026-06-18",249.3],["2026-06-19",152.6],["2026-06-20",190.3],["2026-06-21",78.5],["2026-06-22",180.9],["2026-06-23",168.5],["2026-06-24",116.8],["2026-06-25",227.0],["2026-06-26",124.1],["2026-06-27",128.8],["2026-06-28",113.3],["2026-06-29",174.0],["2026-06-30",139.6],["2026-07-01",152.9],["2026-07-02",89.2],["2026-07-03",56.8],["2026-07-04",61.8],["2026-07-05",36.0],["2026-07-06",95.9],["2026-07-07",158.4],["2026-07-08",191.5],["2026-07-09",185.8],["2026-07-10",155.0],["2026-07-11",145.0],["2026-07-12",163.4],["2026-07-13",191.1],["2026-07-14",333.2],["2026-07-15",163.5],["2026-07-16",209.5],["2026-07-17",165.9],["2026-07-18",148.1],["2026-07-19",127.7],["2026-07-20",221.8],["2026-07-21",143.4],["2026-07-22",209.0],["2026-07-23",270.2],["2026-07-24",309.0],["2026-07-25",134.3],["2026-07-26",167.7],["2026-07-27",187.4],["2026-07-28",152.9],["2026-07-29",139.1],["2026-07-30",226.7],["2026-07-31",186.5],["2026-08-01",119.3],["2026-08-02",81.9],["2026-08-03",179.1],["2026-08-04",166.6],["2026-08-05",138.3],["2026-08-06",125.1],["2026-08-07",167.9],["2026-08-08",104.8],["2026-08-09",61.5],["2026-08-10",88.1],["2026-08-11",97.4],["2026-08-12",141.4],["2026-08-13",109.1],["2026-08-14",109.8],["2026-08-15",38.5],["2026-08-16",46.8],["2026-08-17",156.7],["2026-08-18",200.6],["2026-08-19",97.0],["2026-08-20",168.5],["2026-08-21",159.3],["2026-08-22",127.4],["2026-08-23",46.8],["2026-08-24",154.2],["2026-08-25",166.7],["2026-08-26",155.6],["2026-08-27",157.4],["2026-08-28",148.6],["2026-08-29",91.2],["2026-08-30",69.7],["2026-08-31",150.6],["2026-09-01",174.3],["2026-09-02",216.0],["2026-09-03",172.0],["2026-09-04",171.3],["2026-09-05",122.7],["2026-09-06",92.7],["2026-09-07",166.5],["2026-09-08",111.1],["2026-09-09",209.1],["2026-09-10",162.0],["2026-09-11",190.0],["2026-09-12",108.4],["2026-09-13",120.9],["2026-09-14",176.1],["2026-09-15",167.8],["2026-09-16",205.4],["2026-09-17",128.6],["2026-09-18",101.2],["2026-09-19",98.5],["2026-09-20",125.3],["2026-09-21",166.0],["2026-09-22",180.1],["2026-09-23",197.9],["2026-09-24",136.5],["2026-09-25",223.6],["2026-09-26",114.2],["2026-09-27",140.6],["2026-09-28",207.0],["2026-09-29",198.4],["2026-09-30",156.5],["2026-10-01",177.5],["2026-10-02",264.7],["2026-10-03",161.4],["2026-10-04",146.4],["2026-10-05",158.1],["2026-10-06",201.4],["2026-10-07",130.3],["2026-10-08",166.7],["2026-10-09",180.0],["2026-10-10",156.1],["2026-10-11",123.7],["2026-10-12",221.9],["2026-10-13",311.6],["2026-10-14",133.6],["2026-10-15",202.5],["2026-10-16",95.6],["2026-10-17",114.5],["2026-10-18",124.0],["2026-10-19",220.8],["2026-10-20",194.4],["2026-10-21",244.9],["2026-10-22",240.4],["2026-10-23",179.1],["2026-10-24",164.3],["2026-10-25",81.6],["2026-10-26",165.3]],"suez":[["2025-10-26",50],["2025-10-27",45],["2025-10-28",39],["2025-10-29",36],["2025-10-30",37],["2025-10-31",35],["2025-11-01",45],["2025-11-02",36],["2025-11-03",49],["2025-11-04",39],["2025-11-05",46],["2025-11-06",37],["2025-11-07",52],["2025-11-08",38],["2025-11-09",48],["2025-11-10",48],["2025-11-11",48],["2025-11-12",43],["2025-11-13",44],["2025-11-14",47],["2025-11-15",40],["2025-11-16",45],["2025-11-17",38],["2025-11-18",28],["2025-11-19",44],["2025-11-20",50],["2025-11-21",45],["2025-11-22",34],["2025-11-23",41],["2025-11-24",49],["2025-11-25",47],["2025-11-26",40],["2025-11-27",51],["2025-11-28",44],["2025-11-29",28],["2025-11-30",44],["2025-12-01",54],["2025-12-02",32],["2025-12-03",40],["2025-12-04",44],["2025-12-05",36],["2025-12-06",44],["2025-12-07",34],["2025-12-08",45],["2025-12-09",38],["2025-12-10",31],["2025-12-11",41],["2025-12-12",43],["2025-12-13",43],["2025-12-14",50],["2025-12-15",48],["2025-12-16",34],["2025-12-17",32],["2025-12-18",44],["2025-12-19",51],["2025-12-20",38],["2025-12-21",42],["2025-12-22",45],["2025-12-23",39],["2025-12-24",36],["2025-12-25",46],["2025-12-26",37],["2025-12-27",33],["2025-12-28",33],["2025-12-29",32],["2025-12-30",39],["2025-12-31",38],["2026-01-01",27],["2026-01-02",28],["2026-01-03",38],["2026-01-04",44],["2026-01-05",44],["2026-01-06",41],["2026-01-07",29],["2026-01-08",43],["2026-01-09",39],["2026-01-10",35],["2026-01-11",35],["2026-01-12",36],["2026-01-13",34],["2026-01-14",27],["2026-01-15",37],["2026-01-16",51],["2026-01-17",49],["2026-01-18",45],["2026-01-19",40],["2026-01-20",40],["2026-01-21",26],["2026-01-22",44],["2026-01-23",38],["2026-01-24",37],["2026-01-25",44],["2026-01-26",43],["2026-01-27",50],["2026-01-28",38],["2026-01-29",46],["2026-01-30",41],["2026-01-31",42],["2026-02-01",39],["2026-02-02",38],["2026-02-03",31],["2026-02-04",36],["2026-02-05",36],["2026-02-06",45],["2026-02-07",48],["2026-02-08",49],["2026-02-09",44],["2026-02-10",39],["2026-02-11",45],["2026-02-12",48],["2026-02-13",41],["2026-02-14",44],["2026-02-15",38],["2026-02-16",51],["2026-02-17",42],["2026-02-18",41],["2026-02-19",36],["2026-02-20",34],["2026-02-21",42],["2026-02-22",36],["2026-02-23",44],["2026-02-24",36],["2026-02-25",45],["2026-02-26",46],["2026-02-27",47],["2026-02-28",37],["2026-03-01",36],["2026-03-02",40],["2026-03-03",55],["2026-03-04",42],["2026-03-05",38],["2026-03-06",38],["2026-03-07",51],["2026-03-08",35],["2026-03-09",42],["2026-03-10",37],["2026-03-11",51],["2026-03-12",38],["2026-03-13",40],["2026-03-14",25],["2026-03-15",48],["2026-03-16",33],["2026-03-17",42],["2026-03-18",43],["2026-03-19",43],["2026-03-20",32],["2026-03-21",38],["2026-03-22",47],["2026-03-23",40],["2026-03-24",41],["2026-03-25",51],["2026-03-26",41],["2026-03-27",42],["2026-03-28",45],["2026-03-29",37],["2026-03-30",37],["2026-03-31",43],["2026-04-01",51],["2026-04-02",48],["2026-04-03",35],["2026-04-04",52],["2026-04-05",48],["2026-04-06",37],["2026-04-07",39],["2026-04-08",40],["2026-04-09",34],["2026-04-10",46],["2026-04-11",47],["2026-04-12",43],["2026-04-13",42],["2026-04-14",35],["2026-04-15",43],["2026-04-16",37],["2026-04-17",34],["2026-04-18",35],["2026-04-19",43],["2026-04-20",47],["2026-04-21",47],["2026-04-22",50],["2026-04-23",47],["2026-04-24",32],["2026-04-25",43],["2026-04-26",43],["2026-04-27",34],["2026-04-28",38],["2026-04-29",45],["2026-04-30",49],["2026-05-01",39],["2026-05-02",23],["2026-05-03",33],["2026-05-04",35],["2026-05-05",36],["2026-05-06",40],["2026-05-07",46],["2026-05-08",46],["2026-05-09",44],["2026-05-10",31],["2026-05-11",47],["2026-05-12",41],["2026-05-13",32],["2026-05-14",37],["2026-05-15",42],["2026-05-16",42],["2026-05-17",33],["2026-05-18",38],["2026-05-19",43],["2026-05-20",41],["2026-05-21",37],["2026-05-22",42],["2026-05-23",49],["2026-05-24",37],["2026-05-25",49],["2026-05-26",37],["2026-05-27",29],["2026-05-28",45],["2026-05-29",43],["2026-05-30",44],["2026-05-31",31],["2026-06-01",43],["2026-06-02",45],["2026-06-03",25],["2026-06-04",46],["2026-06-05",44],["2026-06-06",43],["2026-06-07",43],["2026-06-08",49],["2026-06-09",46],["2026-06-10",39],["2026-06-11",36],["2026-06-12",29],["2026-06-13",40],["2026-06-14",40],["2026-06-15",39],["2026-06-16",22],["2026-06-17",30],["2026-06-18",38],["2026-06-19",47],["2026-06-20",41],["2026-06-21",48],["2026-06-22",40],["2026-06-23",48],["2026-06-24",37],["2026-06-25",51],["2026-06-26",39],["2026-06-27",39],["2026-06-28",44],["2026-06-29",34],["2026-06-30",47],["2026-07-01",34],["2026-07-02",44],["2026-07-03",49],["2026-07-04",41],["2026-07-05",46],["2026-07-06",36],["2026-07-07",41],["2026-07-08",44],["2026-07-09",37],["2026-07-10",44],["2026-07-11",48],["2026-07-12",39],["2026-07-13",43],["2026-07-14",34],["2026-07-15",42],["2026-07-16",39],["2026-07-17",44],["2026-07-18",46],["2026-07-19",43],["2026-07-20",36],["2026-07-21",40],["2026-07-22",44],["2026-07-23",46],["2026-07-24",46],["2026-07-25",37],["2026-07-26",37],["2026-07-27",51],["2026-07-28",43],["2026-07-29",39],["2026-07-30",47],["2026-07-31",38],["2026-08-01",42],["2026-08-02",31],["2026-08-03",44],["2026-08-04",35],["2026-08-05",43],["2026-08-06",39],["2026-08-07",43],["2026-08-08",35],["2026-08-09",48],["2026-08-10",43],["2026-08-11",57],["2026-08-12",27],["2026-08-13",40],["2026-08-14",39],["2026-08-15",39],["2026-08-16",41],["2026-08-17",46],["2026-08-18",39],["2026-08-19",45],["2026-08-20",33],["2026-08-21",55],["2026-08-22",39],["2026-08-23",37],["2026-08-24",46],["2026-08-25",51],["2026-08-26",41],["2026-08-27",33],["2026-08-28",39],["2026-08-29",38],["2026-08-30",53],["2026-08-31",30],["2026-09-01",51],["2026-09-02",41],["2026-09-03",41],["2026-09-04",56],["2026-09-05",42],["2026-09-06",30],["2026-09-07",39],["2026-09-08",43],["2026-09-09",37],["2026-09-10",37],["2026-09-11",48],["2026-09-12",40],["2026-09-13",21],["2026-09-14",51],["2026-09-15",32],["2026-09-16",37],["2026-09-17",37],["2026-09-18",51],["2026-09-19",43],["2026-09-20",42],["2026-09-21",38],["2026-09-22",47],["2026-09-23",32],["2026-09-24",41],["2026-09-25",37],["2026-09-26",48],["2026-09-27",37],["2026-09-28",28],["2026-09-29",40],["2026-09-30",45],["2026-10-01",55],["2026-10-02",42],["2026-10-03",46],["2026-10-04",46],["2026-10-05",36],["2026-10-06",48],["2026-10-07",32],["2026-10-08",37],["2026-10-09",55],["2026-10-10",41],["2026-10-11",43],["2026-10-12",50],["2026-10-13",36],["2026-10-14",54],["2026-10-15",42],["2026-10-16",43],["2026-10-17",42],["2026-10-18",43],["2026-10-19",36],["2026-10-20",39],["2026-10-21",40],["2026-10-22",43],["2026-10-23",44],["2026-10-24",41],["2026-10-25",46]],"hormuz":[["2025-10-26",99],["2025-10-27",106],["2025-10-28",103],["2025-10-29",114],["2025-10-30",95],["2025-10-31",80],["2025-11-01",74],["2025-11-02",60],["2025-11-03",51],["2025-11-04",74],["2025-11-05",78],["2025-11-06",69],["2025-11-07",77],["2025-11-08",107],["2025-11-09",71],["2025-11-10",67],["2025-11-11",100],["2025-11-12",70],["2025-11-13",100],["2025-11-14",83],["2025-11-15",69],["2025-11-16",70],["2025-11-17",60],["2025-11-18",72],["2025-11-19",64],["2025-11-20",67],["2025-11-21",49],["2025-11-22",51],["2025-11-23",61],["2025-11-24",46],["2025-11-25",67],["2025-11-26",51],["2025-11-27",49],["2025-11-28",50],["2025-11-29",57],["2025-11-30",57],["2025-12-01",65],["2025-12-02",59],["2025-12-03",51],["2025-12-04",45],["2025-12-05",44],["2025-12-06",68],["2025-12-07",64],["2025-12-08",59],["2025-12-09",82],["2025-12-10",52],["2025-12-11",50],["2025-12-12",41],["2025-12-13",46],["2025-12-14",49],["2025-12-15",47],["2025-12-16",55],["2025-12-17",50],["2025-12-18",55],["2025-12-19",31],["2025-12-20",48],["2025-12-21",54],["2025-12-22",46],["2025-12-23",58],["2025-12-24",65],["2025-12-25",68],["2025-12-26",62],["2025-12-27",66],["2025-12-28",55],["2025-12-29",50],["2025-12-30",66],["2025-12-31",71],["2026-01-01",64],["2026-01-02",51],["2026-01-03",59],["2026-01-04",49],["2026-01-05",61],["2026-01-06",61],["2026-01-07",66],["2026-01-08",62],["2026-01-09",74],["2026-01-10",63],["2026-01-11",64],["2026-01-12",52],["2026-01-13",53],["2026-01-14",61],["2026-01-15",62],["2026-01-16",53],["2026-01-17",38],["2026-01-18",54],["2026-01-19",58],["2026-01-20",58],["2026-01-21",56],["2026-01-22",64],["2026-01-23",48],["2026-01-24",46],["2026-01-25",64],["2026-01-26",43],["2026-01-27",61],["2026-01-28",54],["2026-01-29",72],["2026-01-30",71],["2026-01-31",70],["2026-02-01",49],["2026-02-02",67],["2026-02-03",66],["2026-02-04",43],["2026-02-05",71],["2026-02-06",60],["2026-02-07",60],["2026-02-08",58],["2026-02-09",53],["2026-02-10",65],["2026-02-11",81],["2026-02-12",68],["2026-02-13",103],["2026-02-14",91],["2026-02-15",74],["2026-02-16",54],["2026-02-17",75],["2026-02-18",109],["2026-02-19",115],["2026-02-20",94],["2026-02-21",86],["2026-02-22",127],["2026-02-23",104],["2026-02-24",93],["2026-02-25",116],["2026-02-26",89],["2026-02-27",64],["2026-02-28",57],["2026-03-01",20],["2026-03-02",4],["2026-03-03",4],["2026-03-04",0],["2026-03-05",3],["2026-03-06",2],["2026-03-07",3],["2026-03-08",2],["2026-03-09",2],["2026-03-10",2],["2026-03-11",2],["2026-03-12",1],["2026-03-13",0],["2026-03-14",1],["2026-03-15",7],["2026-03-16",4],["2026-03-17",1],["2026-03-18",0],["2026-03-19",0],["2026-03-20",3],["2026-03-21",0],["2026-03-22",2],["2026-03-23",4],["2026-03-24",2],["2026-03-25",2],["2026-03-26",4],["2026-03-27",2],["2026-03-28",6],["2026-03-29",5],["2026-03-30",6],["2026-03-31",5],["2026-04-01",7],["2026-04-02",1],["2026-04-03",3],["2026-04-04",11],["2026-04-05",4],["2026-04-06",5],["2026-04-07",3],["2026-04-08",3],["2026-04-09",8],["2026-04-10",3],["2026-04-11",7],["2026-04-12",12],["2026-04-13",7],["2026-04-14",5],["2026-04-15",7],["2026-04-16",3],["2026-04-17",8],["2026-04-18",20],["2026-04-19",2],["2026-04-20",3],["2026-04-21",4],["2026-04-22",5],["2026-04-23",3],["2026-04-24",6],["2026-04-25",4],["2026-04-26",3],["2026-04-27",7],["2026-04-28",10],["2026-04-29",39],["2026-04-30",11],["2026-05-01",7],["2026-05-02",6],["2026-05-03",6],["2026-05-04",2],["2026-05-05",0],["2026-05-06",0],["2026-05-07",0],["2026-05-08",0],["2026-05-09",1],["2026-05-10",7],["2026-05-11",7],["2026-05-12",3],["2026-05-13",4],["2026-05-14",10],["2026-05-15",4],["2026-05-16",7],["2026-05-17",3],["2026-05-18",4],["2026-05-19",4],["2026-05-20",8],["2026-05-21",5],["2026-05-22",2],["2026-05-23",6],["2026-05-24",5],["2026-05-25",4],["2026-05-26",4],["2026-05-27",1],["2026-05-28",2],["2026-05-29",1],["2026-05-30",4],["2026-05-31",5],["2026-06-01",2],["2026-06-02",11],["2026-06-03",9],["2026-06-04",3],["2026-06-05",2],["2026-06-06",2],["2026-06-07",2],["2026-06-08",7],["2026-06-09",4],["2026-06-10",3],["2026-06-11",2],["2026-06-12",1],["2026-06-13",0],["2026-06-14",0],["2026-06-15",7],["2026-06-16",10],["2026-06-17",8],["2026-06-18",20],["2026-06-19",9],["2026-06-20",25],["2026-06-21",6],["2026-06-22",16],["2026-06-23",29],["2026-06-24",51],["2026-06-25",46],["2026-06-26",30],["2026-06-27",25],["2026-06-28",16],["2026-06-29",26],["2026-06-30",16],["2026-07-01",29],["2026-07-02",28],["2026-07-03",24],["2026-07-04",17],["2026-07-05",22],["2026-07-06",25],["2026-07-07",26],["2026-07-08",20],["2026-07-09",10],["2026-07-10",7],["2026-07-11",6],["2026-07-12",4],["2026-07-13",10],["2026-07-14",8],["2026-07-15",9],["2026-07-16",6],["2026-07-17",1],["2026-07-18",6],["2026-07-19",4],["2026-07-20",5],["2026-07-21",6],["2026-07-22",6],["2026-07-23",0],["2026-07-24",3],["2026-07-25",2],["2026-07-26",3],["2026-07-27",5],["2026-07-28",5],["2026-07-29",7],["2026-07-30",4],["2026-07-31",8],["2026-08-01",5],["2026-08-02",3],["2026-08-03",6],["2026-08-04",7],["2026-08-05",5],["2026-08-06",2],["2026-08-07",6],["2026-08-08",10],["2026-08-09",3],["2026-08-10",4],["2026-08-11",9],["2026-08-12",3],["2026-08-13",6],["2026-08-14",7],["2026-08-15",1],["2026-08-16",1],["2026-08-17",4],["2026-08-18",6],["2026-08-19",6],["2026-08-20",5],["2026-08-21",4],["2026-08-22",7],["2026-08-23",3],["2026-08-24",3],["2026-08-25",4],["2026-08-26",5],["2026-08-27",2],["2026-08-28",7],["2026-08-29",3],["2026-08-30",6],["2026-08-31",3],["2026-09-01",4],["2026-09-02",3],["2026-09-03",2],["2026-09-04",2],["2026-09-05",2],["2026-09-06",6],["2026-09-07",5],["2026-09-08",6],["2026-09-09",3],["2026-09-10",5],["2026-09-11",8],["2026-09-12",2],["2026-09-13",8],["2026-09-14",2],["2026-09-15",2],["2026-09-16",1],["2026-09-17",3],["2026-09-18",7],["2026-09-19",6],["2026-09-20",1],["2026-09-21",2],["2026-09-22",3],["2026-09-23",4],["2026-09-24",5],["2026-09-25",3],["2026-09-26",4],["2026-09-27",1],["2026-09-28",4],["2026-09-29",1],["2026-09-30",4],["2026-10-01",0],["2026-10-02",4],["2026-10-03",2],["2026-10-04",4],["2026-10-05",8],["2026-10-06",2],["2026-10-07",6],["2026-10-08",4],["2026-10-09",3],["2026-10-10",4],["2026-10-11",2],["2026-10-12",3],["2026-10-13",7],["2026-10-14",3],["2026-10-15",2],["2026-10-16",7],["2026-10-17",0],["2026-10-18",4],["2026-10-19",4],["2026-10-20",3],["2026-10-21",3],["2026-10-22",4],["2026-10-23",5],["2026-10-24",2],["2026-10-25",2]]};
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const QS = [0.1, 0.25, 0.5, 0.75, 0.9];
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+const avg = a => a.reduce((s, v) => s + v, 0) / a.length;
+const quantile = (s, p) => { const i = (s.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i); return s[lo] + (s[hi] - s[lo]) * (i - lo); };
+const addDays = (iso, d) => { const t = new Date(iso + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + d); return t.toISOString().slice(0, 10); };
+const fmtDate = iso => MONTHS[+iso.slice(5, 7) - 1] + ' ' + iso.slice(8, 10);
+const r0 = v => Math.round(v);
+const pct = (a, b) => Math.round((a / b - 1) * 100);
+const signed = p => (p > 0 ? '+' : p < 0 ? '−' : '±') + Math.abs(p) + '%';
+
+// shortcut: placeholder forecast (random walk on the 7-day mean, bands = empirical quantiles of past h-day changes), replace with Timestral output from the spike.
+function forecast(m, origin, H) {
+  const out = [];
+  for (let h = 1; h <= H; h++) {
+    const e = [];
+    for (let s = 6; s + h <= origin; s++) e.push(m[s + h] - m[s]);
+    e.sort((a, b) => a - b);
+    out.push(QS.map(p => Math.max(0, m[origin] + quantile(e, p))));
+  }
+  return out;
+}
+
+const META = {
+  gpr: { name: 'Geopolitical risk', src: 'Caldara & Iacoviello, GPR daily (CC BY)', base: 100, baseLabel: 'its 1985–2019 average' },
+  suez: { name: 'Suez Canal', src: 'IMF PortWatch, UN Global Platform AIS' },
+  hormuz: { name: 'Strait of Hormuz', src: 'IMF PortWatch, UN Global Platform AIS' },
+};
+const STATS = {};
+for (const k of Object.keys(META)) {
+  const dates = RAW[k].map(r => r[0]), vals = RAW[k].map(r => r[1]);
+  const m = vals.map((_, i) => (i < 6 ? null : avg(vals.slice(i - 6, i + 1))));
+  const last = m.length - 1;
+  const rec = [];
+  for (let w = 7; w >= 0; w--) {
+    const o = last - 7 - 7 * w, q = forecast(m, o, 7)[6], a = m[o + 7];
+    rec.push({ o, from: dates[o], to: dates[o + 7], q, a, inside: a >= q[0] && a <= q[4] });
+  }
+  const mean1y = avg(vals);
+  STATS[k] = { ...META[k], k, dates, vals, m, last, rec, mean1y, now: m[last], ma30: avg(m.slice(-30)),
+    fc: forecast(m, last, 30), lastDate: dates[last], base: META[k].base ?? mean1y, baseLabel: META[k].baseLabel ?? 'its 1-year average' };
+}
+
+function facts(k) {
+  const s = STATS[k], f14 = s.fc[13], vs = pct(s.now, s.base);
+  const dir = `${Math.abs(vs)}% ${vs >= 0 ? 'above' : 'below'} ${s.baseLabel}`;
+  return {
+    now: r0(s.now), vs, dir, vs30: signed(pct(s.now, s.ma30)), range: `${r0(f14[0])}–${r0(f14[4])}`,
+    inside: s.rec.filter(r => r.inside).length,
+    sentence: k === 'gpr' ? `Geopolitical risk is ${dir}.` : `${s.name}: ${r0(s.now)} ships a day, ${dir}.`,
+    src: `Source: ${s.src} · data to ${fmtDate(s.lastDate)} · forecast: placeholder`,
+  };
+}
+
+// 8x12 pictograms knocked out of a solid block, like the dos-age stat icons
+const ICONS = {
+  risk: ['........', '...##...', '...##...', '...##...', '...##...', '...##...', '...##...', '........', '...##...', '...##...', '........', '........'],
+  ship: ['........', '........', '....#...', '....##..', '....###.', '....#...', '.######.', '.######.', '..####..', '........', '#.#.#.#.', '........'],
+  waves: ['........', '........', '.##..##.', '#..##..#', '........', '.##..##.', '#..##..#', '........', '.##..##.', '#..##..#', '........', '........'],
+  check: ['........', '........', '........', '......##', '.....##.', '#...##..', '##.##...', '.###....', '..#.....', '........', '........', '........'],
+};
+function icon(name, scale = 3) {
+  let r = '';
+  ICONS[name].forEach((row, y) => {
+    let x0 = -1;
+    [...row, '#'].forEach((c, x) => {
+      if (c !== '#' && x0 < 0) x0 = x;
+      if (c === '#' && x0 >= 0) { r += `<rect x="${x0}" y="${y}" width="${x - x0}" height="1"/>`; x0 = -1; }
+    });
+  });
+  return `<svg class="icon" width="${8 * scale}" height="${12 * scale}" viewBox="0 0 8 12" shape-rendering="crispEdges" aria-hidden="true"><g fill="currentColor">${r}</g></svg>`;
+}
+
+function renderChart(el, o) {
+  const w = Math.floor(el.clientWidth);
+  if (!w) return;
+  const s = STATS[o.series], compact = !!o.compact, style = o.style || 'line';
+  const css = getComputedStyle(el), C = n => css.getPropertyValue(n).trim();
+  const orb = C('--orb'), ink = C('--ink'), night = C('--night'), focus = C('--focus'), label = C('--label');
+  const H = o.height || (compact ? 64 : w < 480 ? 200 : 260);
+  const pl = compact ? 0 : 40, pr = compact ? 0 : 8, pt = compact ? 4 : 14, pb = compact ? 0 : 24;
+  const start = Math.max(6, s.last - o.days + 1);
+  const hist = s.m.slice(start), fc = s.fc.slice(0, o.horizon);
+  const t0 = hist.length - 1, N = hist.length + fc.length, step = (w - pl - pr) / (N - 1);
+  const X = i => pl + Math.round(i * step);
+  let lo = Math.min(...hist, ...fc.map(q => q[0])), hi = Math.max(...hist, ...fc.map(q => q[4]));
+  if (o.record) for (const r of s.rec) { lo = Math.min(lo, r.q[0]); hi = Math.max(hi, r.q[4]); }
+  const sp = hi - lo || 1;
+  lo = style === 'columns' ? 0 : Math.max(0, lo - sp * 0.1);
+  hi += sp * 0.1;
+  const Y = v => pt + Math.round(((hi - v) / (hi - lo)) * (H - pt - pb));
+  const id = 'c' + Math.random().toString(36).slice(2, 8);
+  let g = '';
+  if (!compact) {
+    const raw = (hi - lo) / 3, mag = 10 ** Math.floor(Math.log10(raw)), st = [1, 2, 5, 10].find(c => c * mag >= raw) * mag;
+    for (let j = Math.ceil(lo / st); j * st <= hi; j++) {
+      const y = Y(j * st);
+      g += `<line x1="${pl}" x2="${w - pr}" y1="${y}" y2="${y}" stroke="${night}" stroke-dasharray="3 3"/><text class="tick" x="${pl - 6}" y="${y + 5}" text-anchor="end">${r0(j * st)}</text>`;
+    }
+  }
+  if (style === 'step') g += `<rect x="${X(t0)}" y="${pt}" width="${w - pr - X(t0)}" height="${H - pt - pb}" fill="url(#${id}-h)"/>`;
+  if (style === 'columns') {
+    const bw = Math.max(1, Math.floor(step) - 1), b = Y(lo);
+    hist.forEach((v, i) => { g += `<rect x="${X(i) - (bw >> 1)}" y="${Y(v)}" width="${bw}" height="${b - Y(v)}" fill="${i === t0 ? orb : ink}"/>`; });
+    fc.forEach((q, h) => {
+      const x = X(t0 + h + 1) - (bw >> 1);
+      g += `<rect x="${x}" y="${Y(q[4])}" width="${bw}" height="${Math.max(1, Y(q[0]) - Y(q[4]))}" fill="url(#${id}-d25)"/>`;
+      g += `<rect x="${x}" y="${Y(q[3])}" width="${bw}" height="${Math.max(1, Y(q[1]) - Y(q[3]))}" fill="url(#${id}-d50)"/>`;
+      g += `<rect x="${x}" y="${Y(q[2]) - 1}" width="${bw}" height="2" fill="${orb}"/>`;
+    });
+  } else {
+    const band = (a, b) => {
+      let up = `${X(t0)},${Y(hist[t0])}`, dn = '';
+      fc.forEach((q, h) => { up += ` ${X(t0 + h + 1)},${Y(q[b])}`; });
+      for (let h = fc.length - 1; h >= 0; h--) dn += ` ${X(t0 + h + 1)},${Y(fc[h][a])}`;
+      return up + dn;
+    };
+    g += `<polygon points="${band(0, 4)}" fill="url(#${id}-d25)"/><polygon points="${band(1, 3)}" fill="url(#${id}-d50)"/>`;
+    const seg = (x, y, first) => (first ? `M${x} ${y}` : style === 'step' ? ` H${x} V${y}` : ` L${x} ${y}`);
+    let d = '';
+    hist.forEach((v, i) => { d += seg(X(i), Y(v), i === 0); });
+    let f = `M${X(t0)} ${Y(hist[t0])}`;
+    fc.forEach((q, h) => { f += seg(X(t0 + h + 1), Y(q[2]), false); });
+    g += `<path d="${d}" fill="none" stroke="${orb}" stroke-width="2"/><path d="${f}" fill="none" stroke="${orb}" stroke-width="2" stroke-dasharray="4 4"/>`;
+  }
+  if (o.record) for (const r of s.rec) {
+    const i = r.o + 7 - start;
+    if (i < 0 || i > t0) continue;
+    const c = r.inside ? C('--play') : C('--red'), x = X(i);
+    g += `<rect x="${x - 1}" y="${Y(r.q[4])}" width="2" height="${Math.max(2, Y(r.q[0]) - Y(r.q[4]))}" fill="${c}"/><rect x="${x - 3}" y="${Y(r.q[2]) - 3}" width="6" height="6" fill="none" stroke="${c}" stroke-width="2"/>`;
+  }
+  if (!compact) {
+    g += `<line x1="${X(t0)}" x2="${X(t0)}" y1="${pt}" y2="${H - pb}" stroke="${focus}" stroke-width="2"/><text class="today" x="${X(t0) - 4}" y="${pt + 8}" text-anchor="end">TODAY</text>`;
+    g += `<line x1="${pl}" x2="${w - pr}" y1="${H - pb}" y2="${H - pb}" stroke="${night}" stroke-width="2"/>`;
+    g += `<text class="xl" x="${pl}" y="${H - 6}">${fmtDate(s.dates[start])}</text><text class="xl" x="${w - pr}" y="${H - 6}" text-anchor="end">${fmtDate(addDays(s.lastDate, fc.length))}</text>`;
+  }
+  const defs = `<pattern id="${id}-d25" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="${orb}"/></pattern>`
+    + `<pattern id="${id}-d50" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="${orb}"/><rect x="3" y="3" width="3" height="3" fill="${orb}"/></pattern>`
+    + `<pattern id="${id}-h" width="6" height="6" patternUnits="userSpaceOnUse"><rect x="0" y="5" width="1" height="1" fill="${night}"/><rect x="1" y="4" width="1" height="1" fill="${night}"/><rect x="2" y="3" width="1" height="1" fill="${night}"/><rect x="3" y="2" width="1" height="1" fill="${night}"/><rect x="4" y="1" width="1" height="1" fill="${night}"/><rect x="5" y="0" width="1" height="1" fill="${night}"/></pattern>`;
+  el.innerHTML = `<svg width="${w}" height="${H}" viewBox="0 0 ${w} ${H}" shape-rendering="crispEdges" role="img" aria-label="${s.name}: 7-day average over ${hist.length} days and a ${fc.length}-day forecast"><defs>${defs}</defs>${g}`
+    + `<line class="cur" y1="${pt}" y2="${H - pb}" stroke="${label}" stroke-dasharray="1 2" visibility="hidden"/><rect x="${pl}" y="0" width="${w - pl - pr}" height="${H}" fill="transparent"/></svg>`
+    + (compact ? '' : '<div class="tip" hidden></div>');
+  if (compact) return;
+  const svg = el.firstChild, cur = $('.cur', svg), tip = $('.tip', el);
+  svg.onpointermove = svg.onpointerdown = e => {
+    const x = e.clientX - svg.getBoundingClientRect().left;
+    const i = Math.max(0, Math.min(N - 1, Math.round((x - pl) / step)));
+    cur.setAttribute('x1', X(i)); cur.setAttribute('x2', X(i)); cur.setAttribute('visibility', 'visible');
+    if (i <= t0) {
+      const k = start + i;
+      tip.innerHTML = `<span class="t">${fmtDate(s.dates[k])}</span>7-day avg ${r0(s.m[k])}<br>that day ${r0(s.vals[k])}`;
+    } else {
+      const h = i - t0, q = fc[h - 1];
+      tip.innerHTML = `<span class="t">${fmtDate(addDays(s.lastDate, h))} · +${h} days</span>median ${r0(q[2])}<br>80% band ${r0(q[0])}–${r0(q[4])}`;
+    }
+    tip.hidden = false;
+    let left = X(i) + 10;
+    if (left + tip.offsetWidth > w) left = X(i) - tip.offsetWidth - 10;
+    tip.style.left = Math.max(0, left) + 'px';
+    tip.style.top = pt + 'px';
+  };
+  svg.onpointerleave = () => { tip.hidden = true; cur.setAttribute('visibility', 'hidden'); };
+}
+
+// ordered-dither disc with a glow whose density falls off with distance (the dos-age orb)
+function drawDisc(cv, cx, cy, r, glow, color, level, ring) {
+  const g = cv.getContext('2d');
+  g.fillStyle = color;
+  for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) {
+    const d = Math.hypot(x + 0.5 - cx, y + 0.5 - cy);
+    const lit = d <= r || (d < r + glow && (BAYER[(y & 3) * 4 + (x & 3)] + 0.5) / 16 < (1 - (d - r) / glow) * level);
+    if (lit || (ring && Math.abs(d - ring.r) < 0.6)) { g.fillStyle = lit ? color : ring.color; g.fillRect(x, y, 1, 1); }
+  }
+}
+
+// dither transition masks: 8 steps of a 4x4 Bayer matrix with 3 px dots, 30 ms each
+const MASKS = Array.from({ length: 8 }, (_, k) => {
+  const c = document.createElement('canvas'); c.width = c.height = 12;
+  const g = c.getContext('2d'); g.fillStyle = '#000';
+  for (let i = 0; i < 16; i++) if (BAYER[i] < (k + 1) * 2) g.fillRect((i % 4) * 3, Math.floor(i / 4) * 3, 3, 3);
+  return `url(${c.toDataURL()})`;
+});
+function ditherIn(el) {
+  if (REDUCED) return;
+  let k = 0;
+  const tick = () => {
+    const done = k >= MASKS.length;
+    el.style.webkitMaskImage = el.style.maskImage = done ? '' : MASKS[k];
+    el.style.webkitMaskSize = el.style.maskSize = done ? '' : '12px 12px';
+    if (!done) { k++; setTimeout(tick, 30); }
+  };
+  tick();
+}
+
+/* A */
+let pick = 'gpr', orbLevel = 0, orbTimer = 0;
+const CARDS = [
+  { pick: 'gpr', icon: 'risk', tone: 'red', name: 'Risk', key: 1, l1: 'GPR index', l2: () => `${r0(STATS.gpr.now)} · ${signed(facts('gpr').vs)} vs 1985–2019` },
+  { pick: 'suez', icon: 'ship', tone: 'green', name: 'Suez', key: 2, l1: 'Ships a day', l2: () => `${r0(STATS.suez.now)} · ${signed(facts('suez').vs)} vs 1 year` },
+  { pick: 'hormuz', icon: 'waves', tone: 'gold', name: 'Hormuz', key: 3, l1: 'Ships a day', l2: () => `${r0(STATS.hormuz.now)} · ${signed(facts('hormuz').vs)} vs 1 year` },
+  { pick: 'record', icon: 'check', tone: 'grey', name: 'Record', key: 4, l1: 'Forecast vs reality', l2: () => `${facts('gpr').inside}/8 inside the band` },
+];
+$('#va-cards').innerHTML = CARDS.map(c => `<button class="card" role="radio" data-tone="${c.tone}" data-pick="${c.pick}">${icon(c.icon)}<span class="name">${c.name}</span><span class="px key">[${c.key}]</span><span class="l1">${c.l1}</span><span class="l2">${c.l2()}</span></button>`).join('');
+$$('#va-cards .card').forEach(b => b.addEventListener('click', () => { pick = b.dataset.pick; renderTitle(); ditherIn($('#va-stage')); }));
+
+function drawOrb() {
+  const cv = $('#va-orb'), k = pick === 'record' ? 'gpr' : pick, s = STATS[k];
+  const ratio = pick === 'record' ? 1 : s.now / s.mean1y;
+  const levels = [0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 0.85, 0.75, 0.65, 0.55];
+  cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+  drawDisc(cv, 40, 40, Math.round(5 + 12 * Math.min(ratio, 1.8)), 16, getComputedStyle(cv).getPropertyValue('--orb').trim(), REDUCED ? 0.7 : levels[orbLevel % levels.length]);
+}
+function renderTitle() {
+  const view = $('#view-title'), rec = pick === 'record', k = rec ? 'gpr' : pick, s = STATS[k], f = facts(k);
+  view.dataset.tone = CARDS.find(c => c.pick === pick).tone;
+  $('#va-sentence').textContent = rec ? `${f.inside} of the last 8 weekly forecasts landed inside the 80% band.` : f.sentence;
+  const unit = k === 'gpr' ? '' : ' /day';
+  const kpis = rec
+    ? [['Inside the band', `${f.inside}/8`, true], ['Band', '80%'], ['Horizon', '7 days']]
+    : [['7-day average', f.now + unit, true], ['vs 30-day avg', f.vs30], ['In 14 days · 80%', f.range]];
+  $('#va-kpis').innerHTML = kpis.map(([l, v, big]) => `<div class="kpi frame chip"><span class="px8">${l}</span><span class="v${big ? ' big' : ''}">${v}</span></div>`).join('');
+  $('#va-ptitle').innerHTML = `<span class="key">[F]</span> ${s.name} · 7-day average`;
+  $('#va-pright').textContent = rec ? 'past forecasts' : 'forecast 14 days';
+  $('#va-src').textContent = f.src;
+  $$('#va-cards .card').forEach(b => b.setAttribute('aria-checked', b.dataset.pick === pick));
+  renderChart($('#va-chart'), { series: k, style: 'line', days: rec ? 90 : 120, horizon: rec ? 7 : 14, record: rec });
+  drawOrb();
+}
+
+/* B */
+let range = 90;
+$$('#view-panel .tabs button').forEach(b => b.addEventListener('click', () => { range = +b.dataset.range; renderPanel(); }));
+function renderPanel() {
+  const s = STATS.gpr, f = facts('gpr');
+  $('#vb-data').textContent = `Data to ${fmtDate(s.lastDate)}`;
+  $('#vb-big').textContent = f.now;
+  $('#vb-deltas').innerHTML = `<span><b>${f.vs30}</b> vs 30 days</span><span><b>${signed(f.vs)}</b> vs 1985–2019</span><span>next 14 days · 80% <b>${f.range}</b></span>`;
+  $('#vb-src').textContent = f.src;
+  $$('#view-panel .tabs button').forEach(b => b.setAttribute('aria-selected', +b.dataset.range === range));
+  renderChart($('#vb-chart'), { series: 'gpr', style: 'step', days: range, horizon: 14, record: true });
+  for (const p of $$('#view-panel .vb-side')) {
+    const k = p.dataset.series, ff = facts(k);
+    $('.vb-num', p).textContent = ff.now;
+    $('.vb-delta', p).textContent = `${signed(ff.vs)} vs 1 year · 14 days: ${ff.range}`;
+    $('.src', p).textContent = `IMF PortWatch · to ${fmtDate(STATS[k].lastDate)}`;
+    renderChart($('.chart', p), { series: k, style: 'line', days: 90, horizon: 14, compact: true, height: 56 });
+  }
+  $('#vb-sum').textContent = `${f.inside}/8 in the 80% band`;
+  $('#vb-rows').innerHTML = [...s.rec].reverse().map(r => `<tr><td>${fmtDate(r.from)}</td><td>${fmtDate(r.to)}</td><td>${r0(r.q[2])}</td><td>${r0(r.q[0])}–${r0(r.q[4])}</td><td>${r0(r.a)}</td><td>${r0(r.a - r.q[2]) > 0 ? '+' : ''}${r0(r.a - r.q[2])}</td><td class="${r.inside ? 'in' : 'out'}">${r.inside ? 'IN' : 'OUT'}</td></tr>`).join('');
+}
+
+/* C */
+$('#vc-side').innerHTML = [['vc-risk', 'risk', 'Risk<br>today'], ['vc-ships', 'ship', 'Ships &amp;<br>straits'], ['vc-record', 'check', 'The<br>record']]
+  .map(([id, ic, l]) => `<button data-go="${id}">${icon(ic)}<span class="px">${l}</span></button>`).join('');
+$$('#view-statement [data-go]').forEach(b => b.addEventListener('click', () => $('#' + b.dataset.go).scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' })));
+const spy = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) $$('#vc-side button').forEach(b => b.setAttribute('aria-current', b.dataset.go === e.target.id));
+}), { threshold: 0.5 });
+$$('.vc-part').forEach(p => spy.observe(p));
+function renderStatement() {
+  const s = STATS.gpr, f = facts('gpr');
+  $('#vc-num').textContent = f.now;
+  $('#vc-pitch').innerHTML = `${f.dir.toUpperCase()}<br>Next 14 days: ${f.range} (80%)`;
+  $('#vc-src').textContent = f.src;
+  renderChart($('#vc-chart'), { series: 'gpr', style: 'columns', days: 120, horizon: 14 });
+  for (const c of $$('#vc-ships .vc-col')) {
+    const k = c.dataset.series, ff = facts(k);
+    $('.n', c).textContent = `${ff.now} ships a day`;
+    $('.vc-text', c).textContent = `${ff.dir.charAt(0).toUpperCase() + ff.dir.slice(1)}. Next 14 days: ${ff.range}. IMF PortWatch, to ${fmtDate(STATS[k].lastDate)}.`;
+    renderChart($('.chart', c), { series: k, style: 'columns', days: 90, horizon: 14, compact: true, height: 72 });
+  }
+  $('#vc-rec').textContent = `${f.inside} of the last 8 weekly forecasts landed inside the 80% band`;
+  $('#vc-dots').innerHTML = s.rec.map(r => `<span class="vc-dot ${r.inside ? 'in' : 'out'}"><i></i><span class="px8">${fmtDate(r.to)}</span></span>`).join('');
+  const cv = $('#vc-sun'), wArt = Math.ceil(cv.clientWidth / 4);
+  if (wArt) {
+    cv.width = wArt; cv.height = 90;
+    const sun = getComputedStyle(cv);
+    drawDisc(cv, wArt / 2, 34, Math.round(6 + 3 * Math.min(s.now / 100, 3)), 20, sun.getPropertyValue('--gold-muted').trim(), 0.6, { r: 26, color: sun.getPropertyValue('--gold').trim() });
+  }
+}
+
+/* D */
+function renderSpecimen() {
+  const f = facts('gpr');
+  $$('#view-specimen [data-now]').forEach(e => { e.textContent = f.now; });
+  $$('#view-specimen [data-sentence]').forEach(e => { e.textContent = `${f.sentence} Next 14 days: ${f.range} (80% band).`; });
+  $$('#view-specimen .chart').forEach(c => renderChart(c, { series: 'gpr', style: c.dataset.style, days: 120, horizon: 14, height: 180 }));
+}
+
+/* router + switcher */
+const VIEWS = [
+  { id: 'title', label: 'A · Schermata titolo', note: 'dos-age.com: orb, wordmark, carte che cambiano tono', render: renderTitle },
+  { id: 'panel', label: 'B · Pannello strumenti', note: 'pannelli e classifica del gioco, storico in tabella', render: renderPanel },
+  { id: 'statement', label: 'C · Manifesto', note: 'about.dos-age.com: oro, una idea per schermata', render: renderStatement },
+  { id: 'specimen', label: 'D · Font e grafici', note: 'tre coppie di font, tre stili di grafico', render: renderSpecimen },
+];
+let current = 0;
+function show() {
+  const i = VIEWS.findIndex(v => v.id === location.hash.slice(1));
+  current = i < 0 ? 0 : i;
+  VIEWS.forEach((v, j) => { $('#view-' + v.id).hidden = j !== current; });
+  $('#sw-label').textContent = VIEWS[current].label;
+  $('#sw-note').textContent = VIEWS[current].note + ' · dati veri, previsione segnaposto';
+  VIEWS[current].render();
+  clearInterval(orbTimer);
+  if (VIEWS[current].id === 'title' && !REDUCED) orbTimer = setInterval(() => { orbLevel++; drawOrb(); }, 260);
+}
+const go = d => { location.hash = VIEWS[(current + d + VIEWS.length) % VIEWS.length].id; window.scrollTo(0, 0); };
+$('#sw-prev').addEventListener('click', () => go(-1));
+$('#sw-next').addEventListener('click', () => go(1));
+addEventListener('hashchange', show);
+addEventListener('keydown', e => {
+  if (e.target.closest('input, textarea, [contenteditable]') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'ArrowLeft') go(-1);
+  else if (e.key === 'ArrowRight') go(1);
+  else if (/^[1-4]$/.test(e.key)) {
+    const id = VIEWS[current].id, n = +e.key;
+    if (id === 'title') $$('#va-cards .card')[n - 1].click();
+    if (id === 'panel' && n <= 2) $$('#view-panel .tabs button')[n - 1].click();
+    if (id === 'statement' && n <= 3) $$('#vc-side button')[n - 1].click();
+  }
+});
+const tickClock = () => {
+  const now = new Date(), next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 6));
+  if (next <= now) next.setUTCDate(next.getUTCDate() + 1);
+  const m = Math.round((next - now) / 60000);
+  $$('[data-countdown]').forEach(e => { e.textContent = `${Math.floor(m / 60)}h ${m % 60}m`; });
+};
+tickClock(); setInterval(tickClock, 30000);
+let raf = 0;
+addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => VIEWS[current].render()); });
+show();
+document.fonts?.ready.then(() => VIEWS[current].render());
+</script>
