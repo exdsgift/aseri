@@ -1,0 +1,46 @@
+name: daily
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One run at a time: a queued run waits rather than cancelling a deploy halfway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          working-directory: pipeline
+      - run: uv sync --locked
+      - name: Test, so a broken pipeline never publishes
+        run: uv run pytest
+      - name: Cache the Timestral weights (837 MB) by their pinned revision
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/huggingface/hub
+          key: timestral-209m-9874d252ab0aae16f7f7c999f98f98d6ad7d8365
+      - name: Fetch, forecast and publish
+        run: uv run python -m aseri ../site/api/v1
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v5
