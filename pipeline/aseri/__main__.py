@@ -31,6 +31,7 @@ def main(api_dir: Path) -> None:
         api_dir,
         GPR_DAILY,
         result,
+        observed=observed,
         as_of=as_of,
         code_commit=code_commit,
         run_url=run_url,

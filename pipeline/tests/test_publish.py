@@ -10,24 +10,34 @@ from aseri.publish import publish
 from aseri.series import GPR_DAILY
 
 
-@pytest.fixture
-def api_dir(tmp_path):
+def publish_gpr(api_dir, observed):
     forecast = Forecast(
-        reference_date=pd.Timestamp("2026-10-26"),
+        reference_date=observed.index[-1],
         levels=(0.1, 0.5, 0.9),
         quantiles=np.array(
             [[90.1, 100.2, 110.3], [85.4, 101.5, 120.6]], dtype=np.float32
         ),
     )
     publish(
-        tmp_path,
+        api_dir,
         GPR_DAILY,
         forecast,
+        observed=observed,
         as_of=date(2026, 10, 29),
         code_commit="0123abc",
         run_url="https://github.com/exdsgift/aseri/actions/runs/1",
         generated_at=datetime(2026, 10, 29, 7, 3, 12, tzinfo=UTC),
     )
+
+
+def days_to(last_day, values, dtype=float):
+    dates = pd.date_range(end=last_day, periods=len(values), freq="D")
+    return pd.Series(values, index=dates, dtype=dtype).astype(float)
+
+
+@pytest.fixture
+def api_dir(tmp_path):
+    publish_gpr(tmp_path, days_to("2026-10-26", [120.5, 98.23, 101.3], "float32"))
     return tmp_path
 
 
@@ -96,6 +106,31 @@ def test_latest_forecast_credits_the_source_and_the_model(api_dir):
     )
 
 
+def test_actuals_list_the_observed_values_by_date_without_float_noise(api_dir):
+    actuals = read(api_dir / "series" / "gpr_daily" / "actuals.json")
+
+    assert actuals == {
+        "schema_version": "1.0.0",
+        "series_id": "gpr_daily",
+        "unit": "index (1985-2019 average = 100)",
+        "as_of": "2026-10-29",
+        "date": ["2026-10-24", "2026-10-25", "2026-10-26"],
+        "observation": [120.5, 98.23, 101.3],
+        "attribution": GPR_DAILY.license["attribution"],
+        "generated_at": "2026-10-29T07:03:12Z",
+    }
+
+
+def test_actuals_keep_the_last_400_days(tmp_path):
+    publish_gpr(tmp_path, days_to("2026-10-26", range(500)))
+
+    actuals = read(tmp_path / "series" / "gpr_daily" / "actuals.json")
+
+    assert len(actuals["date"]) == len(actuals["observation"]) == 400
+    assert actuals["date"][0] == "2025-09-22"
+    assert actuals["observation"][0] == 100
+
+
 def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
     catalog = read(api_dir / "series.json")
 
@@ -112,6 +147,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "series_id": "gpr_daily",
             "title": "Geopolitical risk",
             "unit": "index (1985-2019 average = 100)",
+            "baseline": 100,
             "horizon_unit": "day",
             "horizon_max": 28,
             "interval_steps": [7, 14, 28],
@@ -120,7 +156,10 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "latest_forecast_date": "2026-10-29",
             "source": GPR_DAILY.source,
             "license": GPR_DAILY.license,
-            "links": {"latest": "series/gpr_daily/latest.json"},
+            "links": {
+                "latest": "series/gpr_daily/latest.json",
+                "actuals": "series/gpr_daily/actuals.json",
+            },
         }
     ]
 

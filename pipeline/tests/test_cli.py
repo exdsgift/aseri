@@ -31,7 +31,7 @@ class StubModel:
         )
 
 
-def test_a_daily_run_publishes_the_catalog_and_the_latest_gpr_forecast(
+def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actuals(
     tmp_path, monkeypatch
 ):
     monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
@@ -43,6 +43,14 @@ def test_a_daily_run_publishes_the_catalog_and_the_latest_gpr_forecast(
     latest = json.loads(
         (tmp_path / "series" / "gpr_daily" / "latest.json").read_text(encoding="utf-8")
     )
+    actuals = json.loads(
+        (tmp_path / "series" / "gpr_daily" / "actuals.json").read_text(encoding="utf-8")
+    )
+    assert catalog["series"][0]["links"]["actuals"] == "series/gpr_daily/actuals.json"
+    assert len(actuals["date"]) == len(actuals["observation"]) == 60
+    assert actuals["date"][-1] == latest["reference_date"]
+    assert actuals["observation"][-3:] == [164.2596, 81.5903, 165.2528]
+    assert actuals["as_of"] == datetime.now(UTC).date().isoformat()
     assert catalog["series"][0]["latest_reference_date"] == "2026-10-26"
     assert len(catalog["quantile_levels"]) == 21
     assert latest["reference_date"] == "2026-10-26"

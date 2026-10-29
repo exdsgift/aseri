@@ -26,20 +26,25 @@ def publish(
     series: Series,
     forecast: Forecast,
     *,
+    observed: pd.Series,
     as_of: date,
     code_commit: str,
     run_url: str | None,
     generated_at: datetime,
 ) -> None:
-    """Write the catalog and the latest forecast of `series` under `api_dir`."""
-    latest_path = f"series/{series.id}/latest.json"
+    """Write the catalog, and the latest forecast and the observed values of `series`, under `api_dir`."""
+    links = {
+        "latest": f"series/{series.id}/latest.json",
+        "actuals": f"series/{series.id}/actuals.json",
+    }
     _write(
-        api_dir / latest_path,
+        api_dir / links["latest"],
         _latest(series, forecast, as_of, code_commit, run_url, generated_at),
     )
+    _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
     _write(
         api_dir / "series.json",
-        _catalog(series, forecast, latest_path, generated_at),
+        _catalog(series, forecast, links, generated_at),
     )
 
 
@@ -87,7 +92,23 @@ def _latest(series, forecast, as_of, code_commit, run_url, generated_at) -> dict
     }
 
 
-def _catalog(series, forecast, latest_path, generated_at) -> dict:
+def _actuals(series, observed, as_of, generated_at) -> dict:
+    # shortcut: the last 400 days, enough for the page; the full history comes with the bulk files (#136).
+    observed = observed.iloc[-400:]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "series_id": series.id,
+        "unit": series.unit,
+        "as_of": as_of.isoformat(),
+        "date": observed.index.strftime("%Y-%m-%d").tolist(),
+        # Four decimals drop the float32 noise of the upstream file.
+        "observation": [round(float(v), 4) for v in observed],
+        "attribution": series.license["attribution"],
+        "generated_at": _timestamp(generated_at),
+    }
+
+
+def _catalog(series, forecast, links, generated_at) -> dict:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _timestamp(generated_at),
@@ -108,6 +129,7 @@ def _catalog(series, forecast, latest_path, generated_at) -> dict:
                 "series_id": series.id,
                 "title": series.title,
                 "unit": series.unit,
+                "baseline": series.baseline,
                 "horizon_unit": "day",
                 "horizon_max": series.horizon,
                 "interval_steps": list(series.interval_steps),
@@ -116,7 +138,7 @@ def _catalog(series, forecast, latest_path, generated_at) -> dict:
                 "latest_forecast_date": generated_at.date().isoformat(),
                 "source": series.source,
                 "license": series.license,
-                "links": {"latest": latest_path},
+                "links": links,
             }
         ],
     }
