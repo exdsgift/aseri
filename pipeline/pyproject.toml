@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Daily Timestral forecasts of public risk signals, published as a static API."
 requires-python = "==3.12.*"
 dependencies = [
+    "numpy>=2.5.4",
     "pandas>=3.1.0",
     "timestral",
     "torch>=2.15.0",

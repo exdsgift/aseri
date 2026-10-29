@@ -26,6 +26,7 @@ name = "aseri"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "numpy" },
     { name = "pandas" },
     { name = "timestral" },
     { name = "torch", version = "2.15.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
@@ -40,6 +41,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "numpy", specifier = ">=2.5.4" },
     { name = "pandas", specifier = ">=3.1.0" },
     { name = "timestral", git = "https://github.com/mistralai/timestral.git?rev=a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff" },
     { name = "torch", specifier = ">=2.15.0", index = "https://download.pytorch.org/whl/cpu" },

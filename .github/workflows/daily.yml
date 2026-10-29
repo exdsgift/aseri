@@ -36,6 +36,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/huggingface/hub
+          # Keep in step with WEIGHTS_REVISION in pipeline/aseri/forecast.py.
           key: timestral-209m-9874d252ab0aae16f7f7c999f98f98d6ad7d8365
       - name: Fetch, forecast and publish
         run: uv run python -m aseri ../site/api/v1
