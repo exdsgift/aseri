@@ -31,20 +31,28 @@ def publish(
     generated_at: datetime,
 ) -> None:
     """Write the catalog and the latest forecast of `series` under `api_dir`."""
-    steps = len(forecast.quantiles)
-    reference_date = forecast.reference_date.date().isoformat()
-    forecast_date = generated_at.date().isoformat()
-    generated = generated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     latest_path = f"series/{series.id}/latest.json"
+    _write(
+        api_dir / latest_path,
+        _latest(series, forecast, as_of, code_commit, generated_at),
+    )
+    _write(
+        api_dir / "series.json",
+        _catalog(series, forecast, latest_path, generated_at),
+    )
+
+
+def _latest(series, forecast, as_of, code_commit, generated_at) -> dict:
+    steps = len(forecast.quantiles)
     target_end_dates = pd.date_range(
         forecast.reference_date + pd.Timedelta(days=1), periods=steps, freq="D"
     )
-    latest = {
+    return {
         "schema_version": SCHEMA_VERSION,
         "series_id": series.id,
         "model_id": MODEL_ID,
-        "forecast_date": forecast_date,
-        "reference_date": reference_date,
+        "forecast_date": generated_at.date().isoformat(),
+        "reference_date": forecast.reference_date.date().isoformat(),
         "forecast_mode": "live",
         "unit": series.unit,
         "horizon_unit": "day",
@@ -69,16 +77,19 @@ def publish(
                 "source_url": series.source["data_url"],
                 "as_of": as_of.isoformat(),
             },
-            "generated_at": generated,
+            "generated_at": _timestamp(generated_at),
             "forecast_mode": "live",
             "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic.",
         },
         "links": {"catalog": "../../series.json"},
-        "generated_at": generated,
+        "generated_at": _timestamp(generated_at),
     }
-    catalog = {
+
+
+def _catalog(series, forecast, latest_path, generated_at) -> dict:
+    return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": generated,
+        "generated_at": _timestamp(generated_at),
         "model": {
             "model_id": MODEL_ID,
             "hf_id": WEIGHTS,
@@ -99,17 +110,19 @@ def publish(
                 "horizon_unit": "day",
                 "horizon_max": series.horizon,
                 "interval_steps": list(series.interval_steps),
-                "last_observation_date": reference_date,
-                "latest_reference_date": reference_date,
-                "latest_forecast_date": forecast_date,
+                "last_observation_date": forecast.reference_date.date().isoformat(),
+                "latest_reference_date": forecast.reference_date.date().isoformat(),
+                "latest_forecast_date": generated_at.date().isoformat(),
                 "source": series.source,
                 "license": series.license,
                 "links": {"latest": latest_path},
             }
         ],
     }
-    _write(api_dir / latest_path, latest)
-    _write(api_dir / "series.json", catalog)
+
+
+def _timestamp(moment: datetime) -> str:
+    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _write(path: Path, document: dict) -> None:
