@@ -1,0 +1,31 @@
+[project]
+name = "aseri"
+version = "0.1.0"
+description = "Daily Timestral forecasts of public risk signals, published as a static API."
+requires-python = "==3.12.*"
+dependencies = [
+    "pandas>=3.1.0",
+    "timestral",
+    "torch>=2.15.0",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+timestral = { git = "https://github.com/mistralai/timestral.git", rev = "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff" }
+
+# The default Linux torch wheel pulls about 2 GB of CUDA the runner cannot use.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-m 'not slow'"
+markers = ["slow: runs the real model; opt in with pytest -m slow"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+]
