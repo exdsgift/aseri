@@ -14,8 +14,8 @@ MODEL_ID = "aseri-timestral209m"
 WEIGHTS = "mistralai/Timestral-209M"
 WEIGHTS_REVISION = "9874d252ab0aae16f7f7c999f98f98d6ad7d8365"
 # The pin lives in pyproject.toml; this reads back the commit actually installed.
-_installed = json.loads(distribution("timestral").read_text("direct_url.json"))
-PACKAGE_COMMIT = _installed["vcs_info"]["commit_id"]
+_installed = json.loads(distribution("timestral").read_text("direct_url.json") or "{}")
+PACKAGE_COMMIT = _installed.get("vcs_info", {}).get("commit_id", "unknown")
 
 
 @dataclass(frozen=True)
@@ -32,7 +32,8 @@ def forecast(model, observed: pd.Series, horizon: int) -> Forecast:
     return Forecast(
         reference_date=observed.index[-1],
         levels=tuple(result.quantile_levels),
-        quantiles=result.quantiles[0, 0].numpy(),
+        # The API promises non-decreasing quantiles; a no-op unless the model ever crosses them.
+        quantiles=np.sort(result.quantiles[0, 0].numpy(), axis=1),
     )
 
 

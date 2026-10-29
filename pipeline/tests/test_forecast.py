@@ -39,3 +39,17 @@ def test_reads_the_whole_history():
     result = forecast(StubModel(), observed("2026-10-26", days=400), horizon=3)
 
     assert (result.quantiles == 400).all()
+
+
+class CrossingModel:
+    """Returns a band whose 0.5 quantile sits above its 0.9 quantile."""
+
+    def forecast(self, context, prediction_length):
+        crossed = torch.tensor([[[[1.0, 5.0, 3.0]] * prediction_length]])
+        return SimpleNamespace(quantiles=crossed, quantile_levels=(0.1, 0.5, 0.9))
+
+
+def test_quantiles_never_decrease_across_levels():
+    result = forecast(CrossingModel(), observed("2026-10-26", days=10), horizon=2)
+
+    assert result.quantiles.tolist() == [[1.0, 3.0, 5.0], [1.0, 3.0, 5.0]]

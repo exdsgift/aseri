@@ -25,6 +25,7 @@ def api_dir(tmp_path):
         forecast,
         as_of=date(2026, 10, 29),
         code_commit="0123abc",
+        run_url="https://github.com/exdsgift/aseri/actions/runs/1",
         generated_at=datetime(2026, 10, 29, 7, 3, 12, tzinfo=UTC),
     )
     return tmp_path
@@ -70,7 +71,10 @@ def test_latest_forecast_carries_its_provenance(api_dir):
             "package": "timestral",
             "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff",
         },
-        "code": {"commit": "0123abc"},
+        "code": {
+            "commit": "0123abc",
+            "run": "https://github.com/exdsgift/aseri/actions/runs/1",
+        },
         "data": {
             "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
             "as_of": "2026-10-29",

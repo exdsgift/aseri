@@ -4,6 +4,8 @@ import io
 import time
 import urllib.request
 from datetime import UTC, date, datetime
+from http.client import HTTPException
+from urllib.error import HTTPError
 
 import pandas as pd
 
@@ -20,8 +22,9 @@ def download(url: str) -> bytes:
         try:
             with urllib.request.urlopen(url, timeout=60) as response:
                 return response.read()
-        except OSError:
-            if attempt == 4:
+        except (OSError, HTTPException) as error:
+            # A 4xx will not fix itself; a 5xx, a timeout or a cut connection may.
+            if attempt == 4 or (isinstance(error, HTTPError) and error.code < 500):
                 raise
             time.sleep(10 * 2**attempt)
 

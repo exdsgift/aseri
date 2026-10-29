@@ -59,3 +59,22 @@ def test_a_daily_run_publishes_the_catalog_and_the_latest_gpr_forecast(
     assert provenance["inference"]["package_commit"]
     assert provenance["model"]["revision"]
     assert provenance["generated_at"].startswith(latest["forecast_date"])
+
+
+def test_a_run_in_github_actions_records_its_commit_and_run(tmp_path, monkeypatch):
+    monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
+    monkeypatch.setattr(cli, "load_model", StubModel)
+    monkeypatch.setenv("GITHUB_SHA", "f" * 40)
+    monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "exdsgift/aseri")
+    monkeypatch.setenv("GITHUB_RUN_ID", "42")
+
+    cli.main(tmp_path)
+
+    latest = json.loads(
+        (tmp_path / "series" / "gpr_daily" / "latest.json").read_text(encoding="utf-8")
+    )
+    assert latest["provenance"]["code"] == {
+        "commit": "f" * 40,
+        "run": "https://github.com/exdsgift/aseri/actions/runs/42",
+    }

@@ -17,7 +17,7 @@ from aseri.series import Series
 
 SCHEMA_VERSION = "1.0.0"
 FORECAST_CREDIT = (
-    "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)."
+    f"Forecasts: aseri (model {MODEL_ID}, {WEIGHTS.split('/')[1]} by Mistral AI)."
 )
 
 
@@ -28,13 +28,14 @@ def publish(
     *,
     as_of: date,
     code_commit: str,
+    run_url: str | None,
     generated_at: datetime,
 ) -> None:
     """Write the catalog and the latest forecast of `series` under `api_dir`."""
     latest_path = f"series/{series.id}/latest.json"
     _write(
         api_dir / latest_path,
-        _latest(series, forecast, as_of, code_commit, generated_at),
+        _latest(series, forecast, as_of, code_commit, run_url, generated_at),
     )
     _write(
         api_dir / "series.json",
@@ -42,7 +43,7 @@ def publish(
     )
 
 
-def _latest(series, forecast, as_of, code_commit, generated_at) -> dict:
+def _latest(series, forecast, as_of, code_commit, run_url, generated_at) -> dict:
     steps = len(forecast.quantiles)
     target_end_dates = pd.date_range(
         forecast.reference_date + pd.Timedelta(days=1), periods=steps, freq="D"
@@ -72,7 +73,7 @@ def _latest(series, forecast, as_of, code_commit, generated_at) -> dict:
                 "url": f"https://huggingface.co/{WEIGHTS}",
             },
             "inference": {"package": "timestral", "package_commit": PACKAGE_COMMIT},
-            "code": {"commit": code_commit},
+            "code": {"commit": code_commit, "run": run_url},
             "data": {
                 "source_url": series.source["data_url"],
                 "as_of": as_of.isoformat(),

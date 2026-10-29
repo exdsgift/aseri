@@ -1,4 +1,6 @@
 import io
+from http.client import IncompleteRead
+from urllib.error import HTTPError
 
 import pandas as pd
 import pytest
@@ -54,3 +56,40 @@ def test_rejects_an_implausible_value(value):
 
     with pytest.raises(ValueError, match="implausible"):
         gpr.parse(raw)
+
+
+def test_download_does_not_retry_a_client_error(monkeypatch):
+    calls = []
+
+    def refuse(url, timeout):
+        calls.append(url)
+        raise HTTPError(url, 404, "Not Found", None, None)
+
+    monkeypatch.setattr(gpr.urllib.request, "urlopen", refuse)
+    monkeypatch.setattr(gpr.time, "sleep", lambda seconds: None)
+
+    with pytest.raises(HTTPError):
+        gpr.download("https://example.org/gpr.dta")
+    assert len(calls) == 1
+
+
+def test_download_retries_a_connection_cut_mid_body(monkeypatch):
+    attempts = iter([IncompleteRead(b"partial"), b"whole file"])
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            outcome = next(attempts)
+            if isinstance(outcome, Exception):
+                raise outcome
+            return outcome
+
+    monkeypatch.setattr(gpr.urllib.request, "urlopen", lambda url, timeout: Response())
+    monkeypatch.setattr(gpr.time, "sleep", lambda seconds: None)
+
+    assert gpr.download("https://example.org/gpr.dta") == b"whole file"
