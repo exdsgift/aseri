@@ -403,20 +403,25 @@ it("groups a card for each series in the catalog, with its 7-day average, its ch
 
   render(<App />)
 
-  const cards = await signals(5)
+  const cards = await signals(9)
   expect(
     cards.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)
-  ).toEqual(["Risk, attention and oil", "Sea lanes"])
+  ).toEqual(["Risk, attention and oil", "Sea lanes", "War in Ukraine"])
   expect(cards.getAllByRole("button").map((b) => b.textContent)).toEqual([
     "Geopolitical risk [1] 181 index (1985-2019 average = 100) 7-day average to Oct 26 81% above its 1985-2019 average In 28 days: 111-251 8 in 10 for Nov 23 alone",
-    "Suez Canal [2] 41 ships a day 7-day average to Oct 25 1% above its 365-day mean In 28 days: 33-51 8 in 10 for Nov 22 alone",
-    "Strait of Hormuz [3] 3 ships a day 7-day average to Oct 25 88% below its 365-day mean In 14 days: 0-6 8 in 10 for Nov 08 alone",
-    "Bab el-Mandeb [4] 29 ships a day 7-day average to Oct 25 14% below its 365-day mean In 14 days: 20-36 8 in 10 for Nov 08 alone",
-    "Taiwan Strait [5] 190 ships a day 7-day average to Oct 25 18% below its 365-day mean In 28 days: 183-268 8 in 10 for Nov 22 alone",
+    '"World War III" [2] 1,833 Wikipedia views a day 7-day average to Oct 29 61% below its 365-day mean In 14 days: 1,456-4,571 8 in 10 for Nov 12 alone',
+    // Brent's week has 5 prices, and its 14 steps are trading days: Nov 16 is 20 days on.
+    "Brent oil [3] 124 $ a barrel 7-day average to Oct 27 38% above its 365-day mean In 14 trading days: 102-145 8 in 10 for Nov 16 alone",
+    "Suez Canal [4] 41 ships a day 7-day average to Oct 25 1% above its 365-day mean In 28 days: 33-51 8 in 10 for Nov 22 alone",
+    "Strait of Hormuz [5] 3 ships a day 7-day average to Oct 25 88% below its 365-day mean In 14 days: 0-6 8 in 10 for Nov 08 alone",
+    "Bab el-Mandeb [6] 29 ships a day 7-day average to Oct 25 14% below its 365-day mean In 14 days: 20-36 8 in 10 for Nov 08 alone",
+    "Taiwan Strait [7] 190 ships a day 7-day average to Oct 25 18% below its 365-day mean In 28 days: 183-268 8 in 10 for Nov 22 alone",
+    "Air-raid alerts [8] 66 alert hours a day, all regions 7-day average to Oct 29 6% above its 365-day mean In 7 days: 49-88 8 in 10 for Nov 05 alone",
+    "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures 7-day average to Oct 30 20% above its 365-day mean In 7 days: 1,158-1,968 8 in 10 for Nov 06 alone",
   ])
   // The key hint is for the eye: the button says it as a shortcut.
   const suez = cards.getByRole("button", { name: /^Suez Canal 41 ships/ })
-  expect(suez.getAttribute("aria-keyshortcuts")).toBe("2")
+  expect(suez.getAttribute("aria-keyshortcuts")).toBe("4")
 })
 
 it("cautions on a stale series' card, in words as well as in colour", async () => {
@@ -450,10 +455,10 @@ it("leaves out the card of a series whose files are broken, and keeps the page",
 
   render(<App />)
 
-  const cards = await signals(4)
+  const cards = await signals(8)
   expect(
     cards.getAllByRole("button").map((b) => b.getAttribute("aria-keyshortcuts"))
-  ).toEqual(["1", "2", "3", "4"])
+  ).toEqual(["1", "2", "3", "4", "5", "6", "7", "8"])
   expect(cards.queryByRole("button", { name: /^Strait of Hormuz/ })).toBeNull()
 })
 
@@ -467,8 +472,8 @@ it("shows GPR as soon as it loads, while another series' files are still on thei
   render(<App />)
 
   await screen.findByText("181", { selector: "p" })
-  const cards = await signals(4)
-  expect(cards.getAllByRole("button")).toHaveLength(4)
+  const cards = await signals(8)
+  expect(cards.getAllByRole("button")).toHaveLength(8)
   expect(cards.queryByRole("button", { name: /^Taiwan Strait/ })).toBeNull()
 })
 
@@ -495,7 +500,7 @@ it("opens a picked card's series in the panel and brings it into view, then load
   const fetch = vi.fn(async (url: string) => Response.json(published[url]))
   vi.stubGlobal("fetch", fetch)
   render(<App />)
-  await signals(5)
+  await signals(9)
 
   fireEvent.click(card(/^Suez Canal/))
 
@@ -537,11 +542,11 @@ it("asks for a series' replay once, however often its card is picked, even when 
 it("opens a series with its card's key, unless a field has the focus", async () => {
   serve(published)
   render(<App />)
-  await signals(5)
+  await signals(9)
   const press = (key: string, target: Element = document.body) =>
     fireEvent.keyDown(target, { key })
 
-  press("3")
+  press("5")
   expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
   expect(scrollIntoView).toHaveBeenCalled()
 
@@ -551,8 +556,8 @@ it("opens a series with its card's key, unless a field has the focus", async () 
   press("1", slider)
   expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
 
-  // No sixth card, and no shortcut with a modifier.
-  press("6")
+  // No tenth card, and no shortcut with a modifier.
+  press("0")
   press("1", document.body)
   fireEvent.keyDown(document.body, { key: "2", ctrlKey: true })
   expect(panelTitle()).toBe("[F] Geopolitical risk · forecast made today")

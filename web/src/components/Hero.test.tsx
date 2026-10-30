@@ -10,6 +10,7 @@ const today: Today = {
   baseline: 100,
   baselineLabel: "its 1985-2019 average",
   daysAhead: 28,
+  horizonUnit: "day",
   referenceDate: "2026-10-26",
   referenceValue: 165,
   asOf: "2026-10-30",

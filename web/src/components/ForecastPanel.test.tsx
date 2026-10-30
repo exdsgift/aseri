@@ -11,9 +11,18 @@ import catalog from "@/fixtures/series.json"
 import actuals from "@/fixtures/series/gpr_daily/actuals.json"
 import latest from "@/fixtures/series/gpr_daily/latest.json"
 import replay from "@/fixtures/series/gpr_daily/replay.json"
+import brentActuals from "@/fixtures/series/brent_spot/actuals.json"
+import brentLatest from "@/fixtures/series/brent_spot/latest.json"
+import brentReplay from "@/fixtures/series/brent_spot/replay.json"
 import hormuzActuals from "@/fixtures/series/hormuz_transits/actuals.json"
 import hormuzLatest from "@/fixtures/series/hormuz_transits/latest.json"
 import hormuzReplay from "@/fixtures/series/hormuz_transits/replay.json"
+import dronesActuals from "@/fixtures/series/ua_drones_downed_claimed/actuals.json"
+import dronesLatest from "@/fixtures/series/ua_drones_downed_claimed/latest.json"
+import dronesReplay from "@/fixtures/series/ua_drones_downed_claimed/replay.json"
+import viewsActuals from "@/fixtures/series/wiki_ww3_views/actuals.json"
+import viewsLatest from "@/fixtures/series/wiki_ww3_views/latest.json"
+import viewsReplay from "@/fixtures/series/wiki_ww3_views/replay.json"
 import { loadSeries, type Series } from "@/lib/api"
 import { monthDay } from "@/lib/format"
 
@@ -30,6 +39,15 @@ const published: Record<string, unknown> = {
   "api/v1/series/hormuz_transits/latest.json": hormuzLatest,
   "api/v1/series/hormuz_transits/actuals.json": hormuzActuals,
   "api/v1/series/hormuz_transits/replay.json": hormuzReplay,
+  "api/v1/series/brent_spot/latest.json": brentLatest,
+  "api/v1/series/brent_spot/actuals.json": brentActuals,
+  "api/v1/series/brent_spot/replay.json": brentReplay,
+  "api/v1/series/wiki_ww3_views/latest.json": viewsLatest,
+  "api/v1/series/wiki_ww3_views/actuals.json": viewsActuals,
+  "api/v1/series/wiki_ww3_views/replay.json": viewsReplay,
+  "api/v1/series/ua_drones_downed_claimed/latest.json": dronesLatest,
+  "api/v1/series/ua_drones_downed_claimed/actuals.json": dronesActuals,
+  "api/v1/series/ua_drones_downed_claimed/replay.json": dronesReplay,
 }
 const serve = (files: Record<string, unknown>) =>
   vi.stubGlobal("fetch", async (url: string) => Response.json(files[url]))
@@ -249,7 +267,7 @@ it("shows a sea lane with its own horizon, steps and baseline", async () => {
   expect(screen.getByText(/^Data as of/).textContent).toBe(
     `Data as of ${monthDay(hormuzActuals.as_of)}.`
   )
-  // No weekday note: the sea lanes have no weekly cycle, only GPR does.
+  // No weekday note: the sea lanes have no weekly cycle.
   expect(screen.getByText(/^The 8 in 10 band/).textContent).toBe(
     "The 8 in 10 band: where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call."
   )
@@ -265,5 +283,72 @@ it("shows a sea lane with its own horizon, steps and baseline", async () => {
   // PortWatch's own citation starts with "Sources:": no second label before it.
   expect(screen.getByText(/^Sources?:/).textContent).toBe(
     hormuzLatest.attribution
+  )
+})
+
+const weekend = (date: string) =>
+  [0, 6].includes(new Date(`${date}T00:00:00Z`).getUTCDay())
+
+it("shows Brent on trading days, today and in every replay, with no weekend date", async () => {
+  const brent = await loadSeries(entry("brent_spot"), { replay: true })
+  render(<ForecastPanel series={brent} />)
+
+  expect(intervals().map((row) => row.split(" · ")[0])).toEqual([
+    "Today",
+    "In 3 trading days",
+    "In 7 trading days",
+    "In 14 trading days",
+  ])
+  expect(brent.forecasts.length).toBeGreaterThan(60)
+  for (const forecast of brent.forecasts)
+    expect(forecast.targetDates.filter(weekend)).toEqual([])
+  // A past forecast's steps are the prints after it, as it is scored: holidays have none.
+  const past = brent.forecasts[0]
+  const made = brentActuals.date.indexOf(past.dates.at(-1)!)
+  expect(past.targetDates).toEqual(
+    brentActuals.date.slice(made + 1, made + 1 + 14)
+  )
+  // The average of a week of prices: the prints of the 7 days to the reference date.
+  const reference = Date.parse(brentLatest.reference_date)
+  const week = brentActuals.observation.filter((_, i) => {
+    const t = Date.parse(brentActuals.date[i])
+    return t > reference - 7 * 86_400_000 && t <= reference
+  })
+  expect(week.length).toBeLessThanOrEqual(5)
+  expect(brent.today.sevenDayAverage).toBeCloseTo(
+    week.reduce((sum, v) => sum + v, 0) / week.length
+  )
+  expect(screen.getByText(/^Note:/).textContent).toMatch(/trading days only/)
+  expect(screen.getByText(/^The 8 in 10 band/).textContent).not.toMatch(
+    /weekday/
+  )
+})
+
+it("tells to compare a weekday with the same weekday where the catalog says the values follow the week", async () => {
+  const views = await loadSeries(entry("wiki_ww3_views"), { replay: true })
+  render(<ForecastPanel series={views} />)
+
+  expect(title()).toBe('[F] "World War III" · forecast made today')
+  expect(screen.getByText(/^The 8 in 10 band/).textContent).toMatch(
+    / Daily values can follow the week: compare a day with the same weekday\.$/
+  )
+  expect(screen.getByText(/^Note:/).textContent).toBe(
+    "Note: Counts attention, not events: views of the English Wikipedia article by people, not bots."
+  )
+})
+
+it("labels the drones as one side's claims wherever their unit shows", async () => {
+  const drones = await loadSeries(entry("ua_drones_downed_claimed"), {
+    replay: true,
+  })
+  render(<ForecastPanel series={drones} />)
+
+  expect(screen.getByText(/^drones a day/).textContent).toMatch(
+    /^drones a day, claimed by Ukraine's General Staff, one side's figures · data to /
+  )
+  expect(source()).toBe(`Source: ${dronesLatest.attribution}`)
+  expect(source()).toMatch(/claimed by Ukraine's General Staff, one side's figures/)
+  expect(screen.getByText(/^The 8 in 10 band/).textContent).not.toMatch(
+    /weekday/
   )
 })

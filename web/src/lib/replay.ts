@@ -15,9 +15,11 @@ export function insideSoFar({ actuals, quantiles }: Forecast) {
 }
 
 // The daily value's range over the last year, the backdrop of every interval row:
-// the rows forecast daily values, so the range is of the same quantity.
-export function yearRange(values: number[]) {
-  const year = values.slice(-365)
+// the rows forecast daily values, so the range is of the same quantity. 365 days, not
+// values: Brent has about 253 a year.
+export function yearRange(dates: string[], values: number[]) {
+  const since = Date.parse(dates.at(-1)!) - 365 * 86_400_000
+  const year = values.filter((_, i) => Date.parse(dates[i]) > since)
   return [Math.min(...year), Math.max(...year)]
 }
 

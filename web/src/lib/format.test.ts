@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { dayLabel, formatValue, versusBaseline, weekday } from "./format"
+import {
+  dayLabel,
+  daysAhead,
+  formatValue,
+  versusBaseline,
+  weekday,
+} from "./format"
 
 describe("formatValue", () => {
   it("rounds to a whole number with thousands separators", () => {
@@ -32,5 +38,12 @@ describe("dates", () => {
   it("labels a date as weekday, month and two-digit day", () => {
     expect(dayLabel("2026-11-23")).toBe("Monday Nov 23")
     expect(dayLabel("2027-03-07")).toBe("Sunday Mar 07")
+  })
+
+  it("counts days ahead, and Brent's in trading days", () => {
+    expect(daysAhead(1, "day")).toBe("1 day")
+    expect(daysAhead(14, "day")).toBe("14 days")
+    expect(daysAhead(1, "trading_day")).toBe("1 trading day")
+    expect(daysAhead(14, "trading_day")).toBe("14 trading days")
   })
 })

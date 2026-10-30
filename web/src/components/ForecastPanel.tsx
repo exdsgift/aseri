@@ -22,7 +22,8 @@ const legend = [
 // its intervals and where the data comes from.
 export function ForecastPanel({ series }: { series: Series }) {
   const title = useId()
-  const { id, forecasts, steps, today, staleSince, madeOn, note } = series
+  const { id, forecasts, steps, today, staleSince, madeOn, note, weekly } =
+    series
   // UTC, like every date the pipeline writes.
   const madeToday = madeOn === new Date().toISOString().slice(0, 10)
   const last = forecasts.length - 1
@@ -63,8 +64,8 @@ export function ForecastPanel({ series }: { series: Series }) {
         </p>
       </div>
       {/* The real values of a replay are as read that day; GPR's source revises its last month.
-          shortcut: GPR's notes key on its id; read catalog flags (revised, weekly) once #133 adds
-          Wikipedia views, which follow the week. */}
+          shortcut: the note keys on GPR's id, the one source that calls its recent weeks
+          preliminary; make it a catalog flag if another source ever does. */}
       <p className="text-muted-foreground">
         Data as of {monthDay(today.asOf)}
         {id === "gpr_daily" && ", preliminary for about 4 weeks"}.
@@ -136,13 +137,13 @@ export function ForecastPanel({ series }: { series: Series }) {
       </ul>
       {/* Text, not the legend, prevents the known misreadings of a band: a high and a low,
           a swing, a weekly dip taken for a fall. The same whatever the day, so that the
-          slider under it never moves during a replay. Only GPR has a weekly cycle (lag-7
-          autocorrelation 0.62); the sea lanes have none. */}
+          slider under it never moves during a replay. The catalog says which series follow
+          the week: GPR and Wikipedia views do; the sea lanes, Brent and Ukraine's do not. */}
       <p className="text-muted-foreground">
         The 8 in 10 band: where the daily value should land 8 days in 10,
         outside it about 2 in 10. Not a high and a low, nor volatility: it
         widens because later days are harder to call.
-        {id === "gpr_daily" &&
+        {weekly &&
           " Daily values can follow the week: compare a day with the same weekday."}
       </p>
       {last > 0 && (
@@ -152,7 +153,8 @@ export function ForecastPanel({ series }: { series: Series }) {
         forecast={forecast}
         today={live}
         steps={steps}
-        year={yearRange(forecasts[last].values)}
+        horizonUnit={today.horizonUnit}
+        year={yearRange(forecasts[last].dates, forecasts[last].values)}
         baseline={today.baseline}
         baselineLabel={today.baselineLabel}
       />

@@ -5,12 +5,16 @@ export type CatalogEntry = {
   unit: string
   baseline: number
   baseline_label: string
+  // "trading_day" for Brent, whose steps skip weekends and market holidays, else "day".
+  horizon_unit: string
   horizon_max: number
   interval_steps: number[]
   // Set when the day's run skipped the series and kept its last good files.
   stale_since?: string | null
   // What a reader must know about the data, such as Taiwan's tracking dropouts.
   note?: string | null
+  // Whether its values follow the week: GPR's and Wikipedia's do.
+  weekly?: boolean
   links: { latest: string; actuals: string; replay: string }
 }
 type Latest = {
@@ -37,10 +41,11 @@ export type Today = {
   sevenDayAverage: number
   baseline: number
   baselineLabel: string
-  // The horizon, a whole number of weeks.
+  // The horizon, in steps of `horizonUnit`: a whole number of weeks, but for Brent's trading days.
   daysAhead: number
+  horizonUnit: string
   referenceDate: string
-  // The daily value on the reference date, the same weekday as the target date.
+  // The daily value on the reference date: for GPR, the same weekday as the target date.
   referenceValue: number
   // The day the data was read from its source, which may revise it later.
   asOf: string
@@ -72,6 +77,7 @@ export type Forecast = {
 // `steps` are the days ahead of the intervals block: 7, 14 and 28 for GPR.
 // `staleSince` is the day the data fell behind, while the pipeline cannot refresh it.
 // `madeOn` is the day today's forecast was made: GPR moves weekly, so often not today.
+// `weekly` says its values follow the week.
 export type Series = {
   id: string
   today: Today
@@ -80,6 +86,7 @@ export type Series = {
   staleSince: string | null
   madeOn: string
   note: string | null
+  weekly: boolean
 }
 
 // Relative to the page, which Pages serves under /aseri/.
@@ -92,9 +99,8 @@ async function read<T>(path: string): Promise<T> {
 const mean = (values: number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length
 
-// API dates are calendar days, so the arithmetic stays in UTC.
-const daysAfter = (isoDate: string, days: number) =>
-  new Date(Date.parse(isoDate) + days * 86_400_000).toISOString().slice(0, 10)
+// API dates are calendar days, read in UTC.
+const day = 86_400_000
 
 // `generated_at` is when the daily run last wrote the site.
 export const loadCatalog = () =>
@@ -120,6 +126,10 @@ export async function loadSeries(
   ])
   const days = entry.horizon_max
   const reference = actuals.date.indexOf(latest.reference_date)
+  const time = actuals.date.map((date) => Date.parse(date))
+  // From the first day with a whole week of actuals before it, so that every day has a full
+  // week for its average: the 7th day, or Brent's 5th or so, as it has no weekend prices.
+  const first = time.findIndex((t) => t >= time[0] + 6 * day)
   // The chart draws every day ahead up to the hero's, at the five levels it reads.
   const everyDay = (horizon: number[], quantiles: Record<string, number[]>) =>
     horizon.length === days &&
@@ -132,22 +142,35 @@ export async function loadSeries(
   const past = replay.forecasts
     .filter((f) => f.reference_date < latest.reference_date)
     .map((f) => ({ ...f, origin: actuals.date.indexOf(f.reference_date) }))
-    .filter((f) => f.origin >= 6 && everyDay(replay.horizon, f.quantiles))
+    .filter((f) => f.origin >= first && everyDay(replay.horizon, f.quantiles))
   if (
     !everyDay(latest.horizon, latest.quantiles) ||
-    reference < 6 ||
+    first < 0 ||
+    reference < first ||
     !entry.interval_steps.every((step) => step >= 1 && step <= days)
   ) {
     throw new Error(`The published ${entry.series_id} files are incomplete`)
   }
-  // horizon_max is a whole number of weeks, so the target date falls on the weekday of the last data.
+  // The hero's step, the last.
   const step = days - 1
-  // From the 7th day, so that every day has a full week for its average.
-  const dates = actuals.date.slice(6)
-  const values = actuals.observation.slice(6)
-  const averages = values.map((_, day) =>
-    mean(actuals.observation.slice(day, day + 7))
-  )
+  const dates = actuals.date.slice(first)
+  const values = actuals.observation.slice(first)
+  // Each day's average of the values of the 7 calendar days that end on it.
+  const averages = values.map((_, i) => {
+    const end = first + i
+    const from = Math.max(0, end - 6)
+    return mean(
+      actuals.observation
+        .slice(from, end + 1)
+        .filter((_, k) => time[from + k] > time[end] - 7 * day)
+    )
+  })
+  // The days the steps fall on, by position: the actuals', then today's forecast's. A step is
+  // the next value after the one before it, so Brent's skip weekends and market holidays.
+  const calendar = [
+    ...actuals.date,
+    ...latest.target_end_date.filter((date) => date > actuals.date.at(-1)!),
+  ]
   // A forecast made on day `origin` of the actuals: the days up to it, and the real values after it.
   const madeOn = (
     origin: number,
@@ -158,9 +181,9 @@ export async function loadSeries(
     series: entry.title,
     unit: entry.unit,
     attribution: latest.attribution,
-    dates: dates.slice(0, origin - 5),
-    values: values.slice(0, origin - 5),
-    averages: averages.slice(0, origin - 5),
+    dates: dates.slice(0, origin - first + 1),
+    values: values.slice(0, origin - first + 1),
+    averages: averages.slice(0, origin - first + 1),
     targetDates,
     quantiles,
     actuals: actuals.observation.slice(origin + 1, origin + 1 + days),
@@ -169,10 +192,11 @@ export async function loadSeries(
   return {
     id: entry.series_id,
     today: {
-      sevenDayAverage: averages[reference - 6],
+      sevenDayAverage: averages[reference - first],
       baseline: entry.baseline,
       baselineLabel: entry.baseline_label,
       daysAhead: days,
+      horizonUnit: entry.horizon_unit,
       referenceDate: latest.reference_date,
       referenceValue: actuals.observation[reference],
       asOf: actuals.as_of,
@@ -185,7 +209,7 @@ export async function loadSeries(
       ...past.map((f) =>
         madeOn(
           f.origin,
-          replay.horizon.map((h) => daysAfter(f.reference_date, h)),
+          calendar.slice(f.origin + 1, f.origin + 1 + days),
           f.quantiles,
           f.forecast_mode
         )
@@ -205,5 +229,6 @@ export async function loadSeries(
     staleSince: entry.stale_since ?? null,
     madeOn: latest.forecast_date,
     note: entry.note ?? null,
+    weekly: entry.weekly ?? false,
   }
 }

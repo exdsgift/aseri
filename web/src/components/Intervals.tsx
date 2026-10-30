@@ -2,7 +2,7 @@ import { useId, type ReactNode } from "react"
 
 import { type Forecast } from "@/lib/api"
 import { valueTicks } from "@/lib/chart"
-import { formatValue, monthDay } from "@/lib/format"
+import { daysAhead, formatValue, monthDay } from "@/lib/format"
 import { intervalScale, stepRows } from "@/lib/replay"
 
 // How sure the model is: the day the forecast was made, then each step ahead, as text
@@ -11,6 +11,7 @@ export function Intervals({
   forecast,
   today,
   steps,
+  horizonUnit,
   year,
   baseline,
   baselineLabel,
@@ -18,6 +19,7 @@ export function Intervals({
   forecast: Forecast
   today: boolean
   steps: number[]
+  horizonUnit: string
   year: number[]
   baseline: number
   baselineLabel: string
@@ -86,7 +88,7 @@ export function Intervals({
             className="flex flex-col gap-1.5 bg-muted px-2 py-1.5"
           >
             <p className="text-muted-foreground">
-              In {row.step} {row.step === 1 ? "day" : "days"} ·{" "}
+              In {daysAhead(row.step, horizonUnit)} ·{" "}
               {monthDay(row.date)}
             </p>
             {/* The ranges first: a median alone reads as a promise. */}

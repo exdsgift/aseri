@@ -66,7 +66,16 @@ describe("yearRange", () => {
   it("is the lowest and the highest of the last 365 days", () => {
     // 366 days: the first one is more than a year old.
     const values = [5, ...Array(362).fill(100), 50, 300, 120]
-    expect(yearRange(values)).toEqual([50, 300])
+    const dates = values.map((_, i) =>
+      new Date(Date.UTC(2025, 9, 30 + i)).toISOString().slice(0, 10)
+    )
+    expect(yearRange(dates, values)).toEqual([50, 300])
+  })
+
+  it("reads 365 days, not 365 values, for Brent's trading days", () => {
+    // A price a year and a day old, then a few up to the newest.
+    const dates = ["2025-10-22", "2025-10-24", "2026-06-01", "2026-10-23"]
+    expect(yearRange(dates, [50, 80, 120, 100])).toEqual([80, 120])
   })
 })
 
