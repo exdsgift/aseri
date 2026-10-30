@@ -6,7 +6,8 @@ import { daysAhead, formatValue, monthDay } from "@/lib/format"
 import { intervalScale, stepRows } from "@/lib/replay"
 
 // How sure the model is: the day the forecast was made, then each step ahead, as text
-// and as lanes on one value scale, with the 1-year range and the baseline behind them.
+// and as lanes on one value scale, with the 1-year range (cut at the lanes' edges) and the
+// baseline behind them.
 export function Intervals({
   forecast,
   today,
@@ -28,8 +29,8 @@ export function Intervals({
   const rows = stepRows(forecast, steps)
   const thatDay = forecast.values.at(-1)!
   // Real values too: one pinned to the edge would hide how far outside the range it fell.
+  // Not the year: a spike in it (Wikipedia's 171,260 views) would squash every range to a sliver.
   const scale = intervalScale([
-    ...year,
     baseline,
     thatDay,
     ...rows.flatMap((row) => [
@@ -44,9 +45,18 @@ export function Intervals({
   })
   // A 2 px mark centred on its value.
   const mark = "absolute top-0 -ml-px h-4 w-0.5"
+  // The year's thin line stops at the lane's edge, with an arrowhead where it runs on past it.
+  const runsOn = (side: "low" | "high") => (
+    <i
+      data-runs-on={side}
+      className={`absolute top-[5px] border-y-[3px] border-y-transparent ${side === "low" ? "left-0 border-r-4 border-r-border" : "right-0 border-l-4 border-l-border"}`}
+    />
+  )
   const lane = (marks: ReactNode) => (
     <div aria-hidden className="relative h-4">
       <i className="absolute top-[7px] h-0.5 bg-border" style={span(year)} />
+      {year[0] < scale.lo && runsOn("low")}
+      {year[1] > scale.hi && runsOn("high")}
       <i className={`${mark} bg-secondary`} style={{ left: at(baseline) }} />
       <i
         className="absolute top-0 -ml-px h-4 border-l-2 border-dotted border-focus"
@@ -88,8 +98,7 @@ export function Intervals({
             className="flex flex-col gap-1.5 bg-muted px-2 py-1.5"
           >
             <p className="text-muted-foreground">
-              In {daysAhead(row.step, horizonUnit)} ·{" "}
-              {monthDay(row.date)}
+              In {daysAhead(row.step, horizonUnit)} · {monthDay(row.date)}
             </p>
             {/* The ranges first: a median alone reads as a promise. */}
             <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -155,9 +164,10 @@ export function Intervals({
             {formatValue(tick)}
           </span>
         ))}
-        {/* The catalog's label follows a value: "its 1985-2019 average". */}
+        {/* The catalog's label follows a value: "its 1985-2019 average". It ends on a
+            baseline in the right half, which can end the scale, so it stays in the panel. */}
         <span
-          className="absolute top-4 whitespace-nowrap text-secondary"
+          className={`absolute top-4 whitespace-nowrap text-secondary ${scale.at(baseline) > 50 ? "-translate-x-full" : ""}`}
           style={{ left: at(baseline) }}
         >
           {baselineLabel.replace(/^its /, "")}
