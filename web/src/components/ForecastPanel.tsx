@@ -19,14 +19,24 @@ const legend = [
 ]
 
 // A game sheet: today's forecast or a past one from the replay, its pixel chart,
-// its intervals and where the data comes from.
-export function ForecastPanel({ series }: { series: Series }) {
+// its intervals and where the data comes from. `opened` is the reference date of a
+// past forecast to start on, as the record's squares ask; today's otherwise.
+export function ForecastPanel({
+  series,
+  opened,
+}: {
+  series: Series
+  opened?: string
+}) {
   const title = useId()
   const { id, forecasts, steps, today, staleSince, madeOn, note } = series
   // UTC, like every date the pipeline writes.
   const madeToday = madeOn === new Date().toISOString().slice(0, 10)
   const last = forecasts.length - 1
-  const [shown, setShown] = useState(last)
+  const [shown, setShown] = useState(() => {
+    const start = forecasts.findIndex((f) => f.dates.at(-1) === opened)
+    return start < 0 ? last : start
+  })
   const forecast = forecasts[shown]
   const live = shown === last
   const end = forecast.targetDates.length - 1

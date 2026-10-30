@@ -94,6 +94,16 @@ it("replays the forecast of the day before with ←, then today's with → or T"
   expect(title()).toBe("[F] Geopolitical risk · forecast made today")
 })
 
+it("starts on the past forecast the record opened, or on today's when the replay lacks it", () => {
+  render(<ForecastPanel series={gpr} opened="2026-08-03" />)
+  expect(title()).toBe("[F] Geopolitical risk · backtest from Aug 03")
+  expect(slider().getAttribute("aria-valuetext")).toBe("Aug 03, backtest")
+  cleanup()
+
+  render(<ForecastPanel series={gpr} opened="2025-08-03" />)
+  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
+})
+
 it("goes 120 days back and no further, and no further than today", () => {
   render(<ForecastPanel series={gpr} />)
 

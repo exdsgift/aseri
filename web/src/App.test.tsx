@@ -134,6 +134,8 @@ it("keeps the copy honest, today and in replay, and in index.html's tags", async
   serve(published)
   render(<App />)
   const chart = await screen.findByRole("img")
+  // The record too, with its verdicts and its notes.
+  await screen.findByRole("region", { name: "Record" })
   // The text nodes, and the text alternatives a screen reader gets instead.
   const copy = () => {
     const walker = document.createTreeWalker(
@@ -532,6 +534,52 @@ it("asks for a series' replay once, however often its card is picked, even when 
 
   expect(fetch.mock.calls.filter(([url]) => url === replayUrl)).toHaveLength(1)
   expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
+})
+
+it("opens a square of the record in the panel's replay, loading that series' replay first", async () => {
+  serve(published)
+  render(<App />)
+  const record = within(await screen.findByRole("region", { name: "Record" }))
+  // The record of the run of 2026-10-31: no live forecast resolved yet, the backtest apart.
+  const suez = within(
+    record.getByRole("heading", { name: "Suez Canal" }).closest("li")!
+  )
+  expect(suez.getByText(/^Collecting live record/).textContent).toBe(
+    "Collecting live record: 0 of 30"
+  )
+  const backtest = within(
+    suez.getByRole("group", { name: "Backtest, not the live record" })
+  )
+  const squares = backtest.getAllByRole("button")
+  expect(squares).toHaveLength(8)
+
+  fireEvent.click(squares[0])
+
+  // Opened once Suez's replay is in, which today's panel did not have.
+  expect(
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "[F] Suez Canal · backtest from Aug 16",
+    })
+  ).toBeTruthy()
+  expect(screen.getByRole("slider").getAttribute("aria-valuetext")).toBe(
+    "Aug 16, backtest"
+  )
+  expect(scrollIntoView).toHaveBeenCalled()
+})
+
+it("shows the page without the record when the scores cannot be loaded", async () => {
+  vi.stubGlobal("fetch", async (url: string) =>
+    url === "api/v1/scores.json"
+      ? new Response("", { status: 404 })
+      : Response.json(published[url])
+  )
+  vi.spyOn(console, "error").mockImplementation(() => {})
+
+  render(<App />)
+
+  await signals(5)
+  expect(screen.queryByRole("region", { name: "Record" })).toBeNull()
 })
 
 it("opens a series with its card's key, unless a field has the focus", async () => {
