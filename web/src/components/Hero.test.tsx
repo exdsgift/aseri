@@ -1,15 +1,15 @@
 import { act, cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
-import { type GprToday } from "@/lib/api"
+import { type Today } from "@/lib/api"
 
 import { Hero } from "./Hero"
 
-const today: GprToday = {
+const today: Today = {
   sevenDayAverage: 181.2,
   baseline: 100,
   baselineLabel: "its 1985-2019 average",
-  weeksAhead: 4,
+  daysAhead: 28,
   referenceDate: "2026-10-26",
   referenceValue: 165,
   targetDate: "2026-11-23",
