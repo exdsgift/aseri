@@ -1,3 +1,4 @@
+import { Sun } from "@/components/Sun"
 import { Wordmark } from "@/components/Wordmark"
 import { type GprToday } from "@/lib/api"
 import {
@@ -7,17 +8,18 @@ import {
   versusBaseline,
   weekday,
 } from "@/lib/format"
+import { countUp, useSteps } from "@/lib/motion"
+import { sunRadius } from "@/lib/sun"
 
 export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
   return (
     <section className="flex min-h-svh flex-col items-center justify-center gap-9 px-4 py-14 text-center text-primary uppercase">
+      <Sun radius={today && sunRadius(today.sevenDayAverage, today.baseline)} />
       <Wordmark />
       <p>Geopolitical risk · today</p>
       {today && (
         <>
-          <p className="font-display text-[144px]/[108px] md:text-[192px]/[144px]">
-            {formatValue(today.sevenDayAverage)}
-          </p>
+          <CountUp value={today.sevenDayAverage} />
           <div className="flex max-w-[46ch] flex-col gap-[18px] text-balance">
             {/* The number is an average, and the data lags: say both. */}
             <p className="-mt-6 text-muted-foreground">
@@ -43,5 +45,20 @@ export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
         </p>
       )}
     </section>
+  )
+}
+
+// The giant number counts up on arrival, 40 ms a step. The count is drawn over the
+// number's own text (see index.css), so screen readers and copying get the real value.
+function CountUp({ value }: { value: number }) {
+  const shown = countUp(value)
+  const step = useSteps(shown.length, 40)
+  return (
+    <p
+      className="font-display text-[144px]/[108px] md:text-[192px]/[144px]"
+      data-count={step === undefined ? undefined : shown[step]}
+    >
+      {formatValue(value)}
+    </p>
   )
 }

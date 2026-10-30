@@ -53,6 +53,16 @@
     0 0 / 4px 4px;
 }
 
+/* The hero's art fades into the page at its edges. */
+@utility vignette {
+  background: radial-gradient(
+    55% 75% at 50% 50%,
+    transparent,
+    color-mix(in srgb, var(--background) 55%, transparent) 70%,
+    var(--background)
+  );
+}
+
 /* The replay slider: a pixel ruler with a gold block thumb, white on hover and press.
    No transition, so the thumb stays under the pointer. */
 @utility pixel-range {
@@ -99,6 +109,12 @@
   --font-sans: "Press Start 2P", "DotGothic16", monospace;
   --font-display: "Jacquard 24", serif;
   --font-wordmark: "DotGothic16", sans-serif;
+  --animate-breathe: breathe 6s ease-in-out infinite alternate;
+  @keyframes breathe {
+    from {
+      opacity: 0.35;
+    }
+  }
   --color-gold-pale: var(--gold-pale);
   --color-key: var(--key);
   --color-focus: var(--focus);
@@ -197,5 +213,17 @@
   }
   html {
     @apply font-sans;
+  }
+  /* A count-up is drawn over the number, whose own text stays the real value for screen
+     readers and copying: the empty alternative after the slash keeps the count unspoken. */
+  [data-count] {
+    position: relative;
+    color: transparent;
+    &::after {
+      content: attr(data-count) / "";
+      position: absolute;
+      inset: 0;
+      color: var(--primary);
+    }
   }
 }

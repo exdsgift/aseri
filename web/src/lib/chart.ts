@@ -133,7 +133,7 @@ type Colors = Record<
 >
 
 // The thresholds of a 4x4 Bayer matrix, the dither of the bands.
-const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
+export const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
 
 // Bresenham through each point in turn: lines stay one art pixel thick, with no smoothing.
 function polyline(plot: Plot, points: Point[], color: string) {
