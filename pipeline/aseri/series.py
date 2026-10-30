@@ -1,6 +1,7 @@
 """The series aseri forecasts, as data. `id` is public and permanent: it is the API path and the Hubverse target."""
 
 from dataclasses import dataclass
+from urllib.parse import urlencode
 
 
 @dataclass(frozen=True)
@@ -8,8 +9,8 @@ class Series:
     id: str
     title: str
     unit: str
-    # What the "vs" figures compare with.
-    baseline: float
+    # What the "vs" figures compare with; None is the mean of its last 365 days, as of each publish.
+    baseline: float | None
     baseline_label: str
     horizon: int
     interval_steps: tuple[int, ...]
@@ -23,6 +24,8 @@ class Series:
     kind: str = "index"
     # The edge check: a newest value more than this many IQRs outside its 28 days before waits a day. None turns it off.
     edge_iqr: float | None = None
+    # A standing caveat on the data, for the page to show with the series.
+    note: str | None = None
 
 
 GPR_DAILY = Series(
@@ -56,4 +59,82 @@ GPR_DAILY = Series(
             "Data: https://www.matteoiacoviello.com/gpr.htm"
         ),
     },
+)
+
+
+PORTWATCH_LAYER = "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0"
+
+
+def chokepoint(
+    id: str,
+    title: str,
+    portname: str,
+    horizon: int,
+    interval_steps: tuple[int, ...],
+    **extra,
+) -> Series:
+    """A chokepoint of IMF PortWatch: ships through it a day, all vessel types, one transit per ship per 48 h."""
+    return Series(
+        id=id,
+        title=title,
+        unit="ships a day",
+        baseline=None,
+        baseline_label="its 365-day mean",
+        horizon=horizon,
+        interval_steps=interval_steps,
+        # PortWatch's revisions are unmeasured: a late AIS fix within a month passes, a deeper rewrite waits for review.
+        revision_window=30,
+        # Weekly batches to a Sunday, edited Tuesday to Thursday after 07:00 UTC (dataLastEditDate, 8 edits
+        # logged from 2026-03 to 2026-10): the 07:00 run sees data 3 to 10 days old, 11 after a Thursday batch.
+        expected_lag=11,
+        kind="count",
+        source={
+            "title": "IMF PortWatch, Daily Chokepoints Data",
+            "url": "https://portwatch.imf.org/",
+            # The query the adapter pages through, ordered by date.
+            "data_url": f"{PORTWATCH_LAYER}/query?"
+            + urlencode(
+                {
+                    "where": f"portname='{portname}'",
+                    "outFields": "date,n_total",
+                    "orderByFields": "date",
+                    "f": "json",
+                }
+            ),
+            "field": "n_total",
+        },
+        license={
+            "name": "IMF Copyright and Usage",
+            "url": "https://www.imf.org/en/About/copyright-and-terms",
+            "attribution": "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org).",
+            "modifications": "aseri forecasts are model output derived from IMF PortWatch daily transit counts; they are not IMF data.",
+            "commercial_use": "permission required from the IMF (copyright@imf.org)",
+        },
+        **extra,
+    )
+
+
+# Edge check off: its largest departures are real, the Ever Given blockage of March 2021 first, and no error is known.
+SUEZ_TRANSITS = chokepoint("suez_transits", "Suez Canal", "Suez Canal", 28, (7, 14, 28))
+# Edge check off: its departures are the news, the fall from 78 a day to 3 in March 2026 and convoys of up to 51 since.
+HORMUZ_TRANSITS = chokepoint(
+    "hormuz_transits", "Strait of Hormuz", "Strait of Hormuz", 14, (3, 7, 14)
+)
+# Edge check off: no day since 2019 lies more than 4 IQRs outside its 28 days before, so it would hold nothing.
+BAB_EL_MANDEB_TRANSITS = chokepoint(
+    "bab_el_mandeb_transits", "Bab el-Mandeb", "Bab el-Mandeb Strait", 14, (3, 7, 14)
+)
+TAIWAN_STRAIT_TRANSITS = chokepoint(
+    "taiwan_strait_transits",
+    "Taiwan Strait",
+    "Taiwan Strait",
+    28,
+    (7, 14, 28),
+    # On: each of the 10 days since 2019 past 6 IQRs is a fall to 10-35% of the usual count, back within two days,
+    # and no high value reaches 6. A forecast from such a day would carry the fall into its whole band.
+    edge_iqr=6.0,
+    note=(
+        "Counted from AIS ship tracking, which misses ships on some days: a single day far below "
+        "the usual count can be a tracking gap rather than less traffic. Typhoons also cut traffic for a day or two."
+    ),
 )

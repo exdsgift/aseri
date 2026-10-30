@@ -1,0 +1,1 @@
+https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27+AND+date+%3E%3D+DATE+%272026-09-01%27&outFields=date%2Cn_total&orderByFields=date&f=json

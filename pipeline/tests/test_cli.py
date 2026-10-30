@@ -1,4 +1,4 @@
-"""The daily run end to end: fetch, forecast, archive and publish, with a recorded GPR file and a stub model."""
+"""The daily run end to end: fetch, forecast, archive and publish, with a recorded GPR file, a stand-in PortWatch layer and a stub model."""
 
 import hashlib
 import io
@@ -10,6 +10,8 @@ from dataclasses import replace
 from datetime import UTC, date, datetime
 from pathlib import Path
 from types import SimpleNamespace
+from urllib.error import URLError
+from urllib.parse import parse_qs, urlsplit
 
 import numpy as np
 import pandas as pd
@@ -19,8 +21,8 @@ import torch
 import aseri.__main__ as cli
 import aseri.forecast as forecast_module
 from aseri import archive
-from aseri.series import GPR_DAILY
-from aseri.sources import gpr
+from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
+from aseri.sources import gpr, portwatch
 
 # The last 60 days of the upstream file as downloaded on 2026-10-29.
 RECORDED_GPR = Path(__file__).parent / "fixtures" / "gpr_daily_recent.dta"
@@ -69,8 +71,20 @@ def run_on(monkeypatch, moment, gpr_file, api_dir, archive_dir):
     clock = SimpleNamespace(now=lambda tz: moment)
     monkeypatch.setattr(cli, "datetime", clock)
     monkeypatch.setattr(gpr, "datetime", clock)
+    monkeypatch.setattr(portwatch, "datetime", clock)
     monkeypatch.setattr(gpr, "download", lambda url: (gpr_file, HEADERS))
     cli.main(api_dir, archive_dir)
+
+
+def unreachable(request, timeout):
+    raise URLError("PortWatch is not reachable from the tests")
+
+
+@pytest.fixture(autouse=True)
+def portwatch_down(monkeypatch):
+    # Every test runs every series; the GPR tests see PortWatch down, so its four series publish nothing.
+    monkeypatch.setattr(portwatch.urllib.request, "urlopen", unreachable)
+    monkeypatch.setattr(portwatch.time, "sleep", lambda seconds: None)
 
 
 def read(path):
@@ -384,11 +398,15 @@ def test_a_later_run_backfills_the_days_before_an_archived_forecast_and_latest_s
     observed = gpr.parse(RECORDED_GPR.read_bytes())
     archive.write(
         archive_dir,
-        GPR_DAILY,
-        [cli.forecast(StubModel(), observed, GPR_DAILY.horizon)],
-        observed=observed,
-        as_of=date(2026, 10, 30),
-        upstream={},
+        [
+            archive.SeriesRun(
+                GPR_DAILY,
+                [cli.forecast(StubModel(), observed, GPR_DAILY.horizon)],
+                observed,
+                date(2026, 10, 30),
+                {},
+            )
+        ],
         code_commit="0" * 40,
         run_url=None,
         generated_at=datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
@@ -514,11 +532,11 @@ def test_a_rewrite_older_than_the_revision_window_stops_the_run_before_it_archiv
     history = pd.DataFrame({"date": days, "GPRD": 100.0 + np.arange(len(days)) % 50})
     archive.write(
         archive_dir,
-        GPR_DAILY,
-        [],
-        observed=history.set_index("date")["GPRD"],
-        as_of=date(2026, 10, 27),
-        upstream={},
+        [
+            archive.SeriesRun(
+                GPR_DAILY, [], history.set_index("date")["GPRD"], date(2026, 10, 27), {}
+            )
+        ],
         code_commit="0" * 40,
         run_url=None,
         generated_at=datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
@@ -551,11 +569,11 @@ def test_a_reviewed_rewrite_goes_through_once_it_is_accepted(
     history = pd.DataFrame({"date": days, "GPRD": 100.0 + np.arange(len(days)) % 50})
     archive.write(
         archive_dir,
-        GPR_DAILY,
-        [],
-        observed=history.set_index("date")["GPRD"],
-        as_of=date(2026, 10, 27),
-        upstream={},
+        [
+            archive.SeriesRun(
+                GPR_DAILY, [], history.set_index("date")["GPRD"], date(2026, 10, 27), {}
+            )
+        ],
         code_commit="0" * 40,
         run_url=None,
         generated_at=datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
@@ -722,3 +740,417 @@ def test_a_run_with_nothing_to_publish_fails_and_says_why(
 
     assert "| gpr_daily | failed | - |" in summary()
     assert not (tmp_path / "api").exists()
+
+
+# The four sea lanes, with GPR: every source of the daily run.
+
+PORTS = {
+    "suez_transits": "Suez Canal",
+    "hormuz_transits": "Strait of Hormuz",
+    "bab_el_mandeb_transits": "Bab el-Mandeb Strait",
+    "taiwan_strait_transits": "Taiwan Strait",
+}
+# The layer's edit stamps: 2026-10-28T07:51:08Z, as recorded, and the next weekly batch's.
+EDITED, NEXT_EDIT = 1793173868799, 1793778668799
+
+
+def chokepoint_days(level, last_day="2026-10-25"):
+    """Whole ships around `level`, with a weekly cycle, from a fixed first day: 400 days to 2026-10-25."""
+    days = pd.date_range("2025-09-21", last_day, freq="D")
+    return pd.Series(level + days.day_of_week % 3, index=days)
+
+
+def sea_lanes(last_day="2026-10-25"):
+    return {
+        "Suez Canal": chokepoint_days(41, last_day),
+        "Strait of Hormuz": chokepoint_days(3, last_day),
+        "Bab el-Mandeb Strait": chokepoint_days(33, last_day),
+        "Taiwan Strait": chokepoint_days(231, last_day),
+    }
+
+
+class Response:
+    """What urlopen returns, as far as the adapter reads it."""
+
+    def __init__(self, body):
+        self.body = body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self):
+        return self.body
+
+
+class PortWatch:
+    """Stands in for the PortWatch layer: `lanes` by portname, paged as ArcGIS pages them; the `down` ones answer error bodies."""
+
+    def __init__(self, lanes, edited=EDITED, down=()):
+        self.lanes, self.edited, self.down = lanes, edited, down
+
+    def __call__(self, request, timeout):
+        query = parse_qs(urlsplit(request.full_url).query)
+        if "where" not in query:
+            body = {"editingInfo": {"dataLastEditDate": self.edited}}
+        elif (
+            port := re.fullmatch("portname='(.+)'", query["where"][0])[1]
+        ) in self.down:
+            body = {"error": {"code": 400, "message": "Invalid query parameters."}}
+        elif "returnCountOnly" in query:
+            body = {"count": len(self.lanes[port])}
+        else:
+            offset, size = (
+                int(query["resultOffset"][0]),
+                int(query["resultRecordCount"][0]),
+            )
+            page = self.lanes[port].iloc[offset : offset + size]
+            body = {
+                "features": [
+                    {"attributes": {"date": f"{day:%Y-%m-%d}", "n_total": int(n)}}
+                    for day, n in page.items()
+                ],
+                "exceededTransferLimit": offset + size < len(self.lanes[port]),
+            }
+        return Response(json.dumps(body).encode())
+
+
+def serve(monkeypatch, lanes, **kwargs):
+    monkeypatch.setattr(portwatch.urllib.request, "urlopen", PortWatch(lanes, **kwargs))
+
+
+@pytest.fixture
+def short_backfill(monkeypatch):
+    # The tests of several runs need no 121-day backfill of five series; the first sea-lane test runs it whole.
+    monkeypatch.setattr(archive, "REPLAY_DAYS", 14)
+
+
+def test_one_run_forecasts_every_series_into_one_manifest_one_round_and_one_catalog(
+    tmp_path, monkeypatch, stub_model
+):
+    serve(monkeypatch, sea_lanes())
+    archive_dir = tmp_path / "archive"
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        archive_dir,
+    )
+
+    assert sorted(
+        p.relative_to(archive_dir).as_posix() for p in files(archive_dir)
+    ) == [
+        "model-output/aseri-timestral209m/2026-10-30-aseri-timestral209m.csv",
+        "runs/2026-10-30.json",
+        "target-data/deltas/2026-10-30.csv",
+    ]
+    manifest = read(archive_dir / "runs" / "2026-10-30.json")
+    issued = pd.DataFrame(manifest["forecasts"])
+    # GPR's 60 recorded days; each sea lane, a first run, backfills the 120 days before its newest.
+    assert issued.groupby("target", sort=False).size().to_dict() == {
+        "gpr_daily": 60,
+        **dict.fromkeys(PORTS, 121),
+    }
+    assert issued[issued["forecast_mode"] == "live"][
+        ["target", "reference_date"]
+    ].values.tolist() == [["gpr_daily", "2026-10-26"]] + [
+        [series_id, "2026-10-25"] for series_id in PORTS
+    ]
+    assert list(manifest["upstream"]) == ["gpr_daily", *PORTS]
+    assert manifest["upstream"]["taiwan_strait_transits"] == {
+        "source_url": TAIWAN_STRAIT_TRANSITS.source["data_url"],
+        "sha256": manifest["upstream"]["taiwan_strait_transits"]["sha256"],
+        "data_last_edit_date": "2026-10-28T07:51:08Z",
+    }
+    rounds = pd.read_csv(
+        archive_dir
+        / "model-output"
+        / "aseri-timestral209m"
+        / "2026-10-30-aseri-timestral209m.csv"
+    )
+    assert list(rounds["target"].unique()) == ["gpr_daily", *PORTS]
+    deltas = pd.read_csv(archive_dir / "target-data" / "deltas" / "2026-10-30.csv")
+    assert deltas.groupby("target", sort=False).size().to_dict() == {
+        "gpr_daily": 60,
+        **dict.fromkeys(PORTS, 400),
+    }
+
+    api = tmp_path / "api"
+    catalog = read(api / "series.json")
+    assert [s["series_id"] for s in catalog["series"]] == ["gpr_daily", *PORTS]
+    for entry in catalog["series"][1:]:
+        assert entry["last_observation_date"] == "2026-10-25"
+        assert entry["latest_reference_date"] == "2026-10-25"
+        assert entry["stale_since"] is None
+        assert entry["baseline_label"] == "its 365-day mean"
+    entries = {s["series_id"]: s for s in catalog["series"]}
+    # The newest 365 days of 41, 42 and 43 by weekday.
+    assert entries["suez_transits"]["baseline"] == pytest.approx(
+        chokepoint_days(41).iloc[-365:].mean(), abs=1e-4
+    )
+    assert entries["suez_transits"]["note"] is None
+    assert entries["taiwan_strait_transits"]["note"] == TAIWAN_STRAIT_TRANSITS.note
+    # Each series' files keep GPR's shape, under its own id.
+    gpr_latest = read(api / "series" / "gpr_daily" / "latest.json")
+    for series_id, port in PORTS.items():
+        series = api / "series" / series_id
+        latest = read(series / "latest.json")
+        assert latest.keys() == gpr_latest.keys()
+        assert latest["series_id"] == series_id
+        assert len(read(series / "forecasts.json")["forecasts"]) == 121
+        assert (
+            read(series / "replay.json").keys()
+            == read(api / "series" / "gpr_daily" / "replay.json").keys()
+        )
+        actuals = read(series / "actuals.json")
+        assert (
+            actuals["observation"]
+            == sea_lanes()[port].iloc[-400:].astype(float).tolist()
+        )
+        # Counts: a band that would reach below 0 stops at 0.
+        assert min(min(q) for q in latest["quantiles"].values()) >= 0
+    hormuz = read(api / "series" / "hormuz_transits" / "latest.json")
+    assert hormuz["quantiles"]["0.01"][-1] == 0
+
+
+def test_a_series_whose_source_fails_keeps_its_last_good_files_while_the_others_publish(
+    tmp_path, monkeypatch, stub_model, summary, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+
+    # The next weekly batch, with the Taiwan Strait query failing on every attempt.
+    serve(
+        monkeypatch,
+        sea_lanes("2026-11-01"),
+        edited=NEXT_EDIT,
+        down=("Taiwan Strait",),
+    )
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 5, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    manifest = read(archive_dir / "runs" / "2026-11-05.json")
+    assert "taiwan_strait_transits" not in manifest["upstream"]
+    assert {f["target"] for f in manifest["forecasts"]} == {
+        "suez_transits",
+        "hormuz_transits",
+        "bab_el_mandeb_transits",
+    }
+    row = [line for line in summary().splitlines() if "taiwan_strait" in line][-1]
+    assert row.startswith("| taiwan_strait_transits | failed | 2026-10-25 |")
+    assert "Invalid query parameters" in row
+    entries = {
+        s["series_id"]: s for s in read(tmp_path / "day2" / "series.json")["series"]
+    }
+    assert entries["suez_transits"]["latest_reference_date"] == "2026-11-01"
+    assert entries["taiwan_strait_transits"]["latest_reference_date"] == "2026-10-25"
+    day1 = tmp_path / "day1" / "series" / "taiwan_strait_transits"
+    day2 = tmp_path / "day2" / "series" / "taiwan_strait_transits"
+    assert read(day2 / "latest.json") == read(day1 / "latest.json")
+    assert (
+        read(day2 / "actuals.json")["observation"]
+        == read(day1 / "actuals.json")["observation"]
+    )
+
+
+class SuezBreaksTheModel(StubModel):
+    """The stub, except on Suez's contexts (only 41, 42 and 43 ships), where it returns NaN as a broken model might."""
+
+    def forecast(self, context, prediction_length):
+        result = super().forecast(context, prediction_length)
+        if set(np.unique(context[~np.isnan(context)])) <= {41, 42, 43}:
+            result.quantiles[:] = float("nan")
+        return result
+
+
+def test_a_model_error_in_one_series_fails_only_that_series_and_still_archives_its_data(
+    tmp_path, monkeypatch, summary, short_backfill
+):
+    monkeypatch.setattr(cli, "load_model", SuezBreaksTheModel)
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        archive_dir,
+    )
+
+    row = [line for line in summary().splitlines() if "suez" in line][-1]
+    assert row.startswith("| suez_transits | failed | - |")
+    assert "non-finite" in row
+    manifest = read(archive_dir / "runs" / "2026-10-30.json")
+    assert "suez_transits" not in {f["target"] for f in manifest["forecasts"]}
+    # Its vintage is kept all the same: PortWatch keeps none, and the next run forecasts the days missed.
+    assert (
+        len(archive.as_of_view(archive_dir, "suez_transits", date(2026, 10, 30))) == 400
+    )
+    catalog = read(tmp_path / "api" / "series.json")
+    assert [s["series_id"] for s in catalog["series"]] == [
+        "gpr_daily",
+        "hormuz_transits",
+        "bab_el_mandeb_transits",
+        "taiwan_strait_transits",
+    ]
+
+    # The next day the model is whole again: Suez forecasts every day of its window, the newest live.
+    monkeypatch.setattr(cli, "load_model", StubModel)
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 31, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "next",
+        archive_dir,
+    )
+
+    index = read(tmp_path / "next" / "series" / "suez_transits" / "forecasts.json")[
+        "forecasts"
+    ]
+    # The newest day and the 14 before it, in this test's short backfill.
+    assert len(index) == 15
+    assert [f["reference_date"] for f in index if f["forecast_mode"] == "live"] == [
+        "2026-10-25"
+    ]
+
+
+def with_day(lanes, port, day, ships):
+    lanes[port][pd.Timestamp(day)] = ships
+    return lanes
+
+
+def test_a_suspect_newest_value_moves_the_origin_back_a_day_and_the_note_says_so_only_while_it_does(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+
+    # Upstream revises the archived newest day to a dropout: its forecast exists, so nothing starts a day early.
+    serve(monkeypatch, with_day(sea_lanes(), "Taiwan Strait", "2026-10-25", 24))
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 31, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    entry = {
+        s["series_id"]: s for s in read(tmp_path / "day2" / "series.json")["series"]
+    }["taiwan_strait_transits"]
+    assert entry["latest_reference_date"] == "2026-10-25"
+    assert entry["note"] == TAIWAN_STRAIT_TRANSITS.note
+
+    # The next batch ends on a dropout: the latest forecast starts from the day before, and the note says why.
+    serve(
+        monkeypatch,
+        with_day(sea_lanes("2026-11-01"), "Taiwan Strait", "2026-11-01", 24),
+        edited=NEXT_EDIT,
+    )
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 5, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day3",
+        archive_dir,
+    )
+
+    entry = {
+        s["series_id"]: s for s in read(tmp_path / "day3" / "series.json")["series"]
+    }["taiwan_strait_transits"]
+    assert (entry["last_observation_date"], entry["latest_reference_date"]) == (
+        "2026-11-01",
+        "2026-10-31",
+    )
+    assert entry["note"].startswith("The value of 2026-11-01 is under review")
+    assert entry["note"].endswith(TAIWAN_STRAIT_TRANSITS.note)
+    # The other lanes are not held: their latest forecast starts from their newest day.
+    suez = {
+        s["series_id"]: s for s in read(tmp_path / "day3" / "series.json")["series"]
+    }["suez_transits"]
+    assert (suez["latest_reference_date"], suez["note"]) == ("2026-11-01", None)
+
+
+def test_an_archive_of_single_series_manifests_reads_and_stays_byte_identical_under_a_run_of_every_series(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    # As the archive branch began: one GPR run, written before the upstream stamps, one series in its manifest.
+    observed = gpr.parse(RECORDED_GPR.read_bytes())
+    archive.write(
+        archive_dir,
+        [
+            archive.SeriesRun(
+                GPR_DAILY,
+                [cli.forecast(StubModel(), observed, GPR_DAILY.horizon)],
+                observed,
+                date(2026, 10, 30),
+                {},
+            )
+        ],
+        code_commit="0" * 40,
+        run_url=None,
+        generated_at=datetime(2026, 10, 30, 0, 49, 14, tzinfo=UTC),
+    )
+    manifest_path = archive_dir / "runs" / "2026-10-30.json"
+    old = read(manifest_path)
+    del old["upstream"]
+    manifest_path.write_text(json.dumps(old, indent=2), encoding="utf-8", newline="\n")
+    archive_before = files(archive_dir)
+    serve(monkeypatch, sea_lanes())
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 31, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        archive_dir,
+    )
+
+    after = files(archive_dir)
+    assert {p: after[p] for p in archive_before} == archive_before
+    assert sorted(
+        p.relative_to(archive_dir).as_posix() for p in set(after) - set(archive_before)
+    ) == [
+        "model-output/aseri-timestral209m/2026-10-31-aseri-timestral209m.csv",
+        "runs/2026-10-31.json",
+        "target-data/deltas/2026-10-31.csv",
+    ]
+    index = read(tmp_path / "api" / "series" / "gpr_daily" / "forecasts.json")[
+        "forecasts"
+    ]
+    assert [
+        (f["reference_date"], f["forecast_date"], f["forecast_mode"]) for f in index
+    ][-1] == (
+        "2026-10-26",
+        "2026-10-30",
+        "live",
+    )
+    # The archived live forecast, and the 14 days before it backfilled.
+    assert len(index) == 15
+    catalog = read(tmp_path / "api" / "series.json")
+    assert [s["series_id"] for s in catalog["series"]] == ["gpr_daily", *PORTS]

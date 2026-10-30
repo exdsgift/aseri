@@ -89,12 +89,18 @@ def test_fetch_records_the_hash_of_the_file_and_its_upstream_stamps(monkeypatch)
         "Last-Modified": "Mon, 26 Oct 2026 17:55:26 GMT",
         "ETag": '"6adf940e-185ee0"',
     }
+    requests = []
     monkeypatch.setattr(
-        gpr.urllib.request, "urlopen", lambda url, timeout: Response(raw, headers)
+        gpr.urllib.request,
+        "urlopen",
+        lambda request, timeout: requests.append(request) or Response(raw, headers),
     )
 
     observed, _, upstream = gpr.fetch("https://example.org/gpr.dta")
 
+    assert requests[0].get_header("User-agent") == (
+        "aseri (+https://github.com/exdsgift/aseri)"
+    )
     assert observed.tolist() == [120.5, 98.25]
     assert upstream == {
         "source_url": "https://example.org/gpr.dta",

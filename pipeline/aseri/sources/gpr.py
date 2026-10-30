@@ -10,6 +10,8 @@ from urllib.error import HTTPError
 
 import pandas as pd
 
+from aseri.sources import USER_AGENT
+
 
 def fetch(url: str) -> tuple[pd.Series, date, dict]:
     """Today's vintage of the index, its as_of (the UTC date it was downloaded), and the file's hash and upstream stamps.
@@ -35,9 +37,10 @@ def fetch(url: str) -> tuple[pd.Series, date, dict]:
 
 def download(url: str) -> tuple[bytes, HTTPMessage]:
     """The file at `url` and its response headers, retried with exponential backoff (10 s to 80 s) before giving up."""
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     for attempt in range(5):
         try:
-            with urllib.request.urlopen(url, timeout=60) as response:
+            with urllib.request.urlopen(request, timeout=60) as response:
                 return response.read(), response.headers
         except (OSError, HTTPException) as error:
             # A 4xx will not fix itself; a 5xx, a timeout or a cut connection may.
