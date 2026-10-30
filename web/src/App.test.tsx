@@ -359,7 +359,7 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     "What happened",
     "8 in 10",
     "5 in 10",
-    "One possible path",
+    "Most likely",
     "Forecast made",
   ])
   // Text beside the chart, not the legend, says what the band is and is not.

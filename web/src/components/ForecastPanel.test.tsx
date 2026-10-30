@@ -288,11 +288,30 @@ const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))
 const pathShown = () => screen.getByText(/^Possible path/).textContent
 const button = (name: string) => screen.getByRole("button", { name })
 
-it("draws a new possible path every 1.2 s, 20 in turn, until paused", () => {
+const legendNames = () =>
+  screen
+    .getAllByRole("listitem")
+    .map((item) => item.textContent)
+    .filter((name) => /^(Most likely|One possible path)$/.test(name ?? ""))
+
+it("opens on the most likely value of each day, and turns no path until asked", () => {
   turning()
   render(<ForecastPanel series={gpr} />)
-  expect(pathShown()).toBe("Possible path 1 of 20")
 
+  wait(6000)
+  expect(screen.queryByText(/^Possible path/)).toBeNull()
+  expect(screen.queryByText(/^The line ahead/)).toBeNull()
+  expect(legendNames()).toEqual(["Most likely"])
+  expect(button("Show possible paths")).toBeTruthy()
+})
+
+it("shows the possible paths in order, one every 1.2 s, until paused or back on the most likely", () => {
+  turning()
+  render(<ForecastPanel series={gpr} />)
+
+  fireEvent.click(button("Show possible paths"))
+  expect(pathShown()).toBe("Possible path 1 of 20")
+  expect(legendNames()).toEqual(["One possible path"])
   wait(1200)
   expect(pathShown()).toBe("Possible path 2 of 20")
   wait(19 * 1200)
@@ -304,12 +323,18 @@ it("draws a new possible path every 1.2 s, 20 in turn, until paused", () => {
   fireEvent.click(button("Play"))
   wait(1200)
   expect(pathShown()).toBe("Possible path 2 of 20")
-  fireEvent.click(button("Another path"))
+  fireEvent.click(button("Next path"))
   expect(pathShown()).toBe("Possible path 3 of 20")
+
+  fireEvent.click(button("Most likely"))
+  wait(6000)
+  expect(screen.queryByText(/^Possible path/)).toBeNull()
+  expect(legendNames()).toEqual(["Most likely"])
 })
 
 it("says beside the chart that the line is one possible path, not the forecast", () => {
   render(<ForecastPanel series={gpr} />)
+  fireEvent.click(button("Show possible paths"))
   expect(screen.getByText(/^The line ahead/).textContent).toBe(
     "The line ahead is one possible path, not the forecast: no one knows which days turn out high."
   )
@@ -340,6 +365,7 @@ it("turns no path while the tab is hidden or the panel is off screen", () => {
   }
   turning()
   render(<ForecastPanel series={gpr} />)
+  fireEvent.click(button("Show possible paths"))
 
   hide(true)
   wait(6000)
@@ -356,16 +382,17 @@ it("turns no path while the tab is hidden or the panel is off screen", () => {
   expect(pathShown()).toBe("Possible path 3 of 20")
 })
 
-it("turns no path under reduced motion, and still shows another on demand", () => {
+it("turns no path under reduced motion, and still steps through them on demand", () => {
   prefers(true)
   turning()
   render(<ForecastPanel series={gpr} />)
 
+  fireEvent.click(button("Show possible paths"))
   wait(6000)
   expect(vi.getTimerCount()).toBe(0)
   expect(pathShown()).toBe("Possible path 1 of 20")
   expect(screen.queryByRole("button", { name: /^(Pause|Play)$/ })).toBeNull()
-  fireEvent.click(button("Another path"))
+  fireEvent.click(button("Next path"))
   expect(pathShown()).toBe("Possible path 2 of 20")
 })
 

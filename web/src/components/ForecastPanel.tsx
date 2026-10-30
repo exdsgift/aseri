@@ -15,7 +15,7 @@ const legend = [
   ["What happened", "size-1 bg-white"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
-  ["One possible path", "h-0.5 w-4 bg-gold-pale"],
+  ["Most likely", "h-0.5 w-4 bg-gold-pale"],
   ["Forecast made", "h-3 border-l-2 border-dotted border-focus"],
 ]
 
@@ -47,23 +47,25 @@ export function ForecastPanel({ series }: { series: Series }) {
   // The target day is the hero's step, the last one.
   const [targetDay] = stepRows(forecast, [end + 1])
   const sofar = insideSoFar(forecast)
-  // Which possible path the chart draws, the next one every 1.2 s: none turns under reduced
+  // The chart opens on the most likely value of each day, the most useful view. Asked, it
+  // draws the possible paths in order instead, the next every 1.2 s: none turns under reduced
   // motion, nor while nobody can see the panel.
-  const [drawn, setDrawn] = useState(0)
+  const [drawn, setDrawn] = useState<number>()
   // The same array until the path changes, so other renders do not repaint the chart.
   const drawnPath = useMemo(
-    () => path(forecast, rho, drawn),
+    () => (drawn === undefined ? undefined : path(forecast, rho, drawn)),
     [forecast, rho, drawn]
   )
-  const [paused, setPaused] = useState(false)
+  const [playing, setPlaying] = useState(false)
   const reduced = useReducedMotion()
   const panel = useRef<HTMLElement>(null)
   useEffect(() => {
-    if (reduced || paused) return
+    if (reduced || !playing) return
     return tickWhileShown(panel.current!, 1200, () =>
-      setDrawn((k) => (k + 1) % paths)
+      setDrawn((k) => ((k ?? 0) + 1) % paths)
     )
-  }, [reduced, paused])
+  }, [reduced, playing])
+  const next = () => setDrawn((k) => ((k ?? 0) + 1) % paths)
 
   return (
     <section
@@ -154,37 +156,67 @@ export function ForecastPanel({ series }: { series: Series }) {
         summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}.${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
       />
       <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-        {!reduced && (
+        {drawn === undefined ? (
           <button
             type="button"
-            onClick={() => setPaused(!paused)}
-            // As wide as either word, so the controls after it never move.
-            className={`min-w-14 ${control}`}
+            onClick={() => {
+              setDrawn(0)
+              setPlaying(true)
+            }}
+            className={control}
           >
-            {paused ? "Play" : "Pause"}
+            Show possible paths
           </button>
+        ) : (
+          <>
+            {!reduced && (
+              <button
+                type="button"
+                onClick={() => setPlaying(!playing)}
+                // As wide as either word, so the controls after it never move.
+                className={`min-w-14 ${control}`}
+              >
+                {playing ? "Pause" : "Play"}
+              </button>
+            )}
+            <button type="button" onClick={next} className={control}>
+              Next path
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDrawn(undefined)
+                setPlaying(false)
+              }}
+              className={control}
+            >
+              Most likely
+            </button>
+            <span>{`Possible path ${drawn + 1} of ${paths}`}</span>
+          </>
         )}
-        <button
-          type="button"
-          onClick={() => setDrawn((k) => (k + 1) % paths)}
-          className={control}
-        >
-          Another path
-        </button>
-        <span>{`Possible path ${drawn + 1} of ${paths}`}</span>
       </div>
       {/* A path drawn from the forecast reads like data: the words keep it from reading as the forecast. */}
-      <p className="text-muted-foreground">
-        The line ahead is one possible path, not the forecast: no one knows
-        which days turn out high.
-      </p>
+      {drawn !== undefined && (
+        <p className="text-muted-foreground">
+          The line ahead is one possible path, not the forecast: no one knows
+          which days turn out high.
+        </p>
+      )}
       <ul className="flex flex-wrap gap-x-4 gap-y-2 text-muted-foreground">
-        {legend.map(([name, swatch]) => (
-          <li key={name} className="flex items-center gap-2">
-            <span aria-hidden className={swatch} />
-            {name}
-          </li>
-        ))}
+        {legend
+          .map(([name, swatch]) => [
+            name === "Most likely" && drawn !== undefined
+              ? "One possible path"
+              : name,
+            swatch,
+          ])
+          .map(([name, swatch]) => (
+            <li key={name} className="flex items-center gap-2">
+              <span aria-hidden className={swatch} />
+              {name}
+            </li>
+          ))}
       </ul>
       {/* Text, not the legend, prevents the known misreadings of a band: a high and a low,
           a swing, a weekly dip taken for a fall. The same whatever the day, so that the

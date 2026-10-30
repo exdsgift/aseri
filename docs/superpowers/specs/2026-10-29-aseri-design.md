@@ -129,8 +129,8 @@ Notes:
 
 - **The model:** Timestral-209M, univariate, CPU, 4 torch threads, full history as context. The 28M model is as good on calm series but 10 to 20% worse on Hormuz's regime shift (spike).
 - **The target is the raw daily value,** validated in both spikes. The 7-day average is display context only, never forecast separately.
-- **Archive all 21 quantile levels** so WIS can be computed properly. The page shows 0.1, 0.25, 0.5, 0.75 and 0.9 as "8 in 10" and "5 in 10" ranges, and 0.5 as "most likely" in its text. The panel's chart draws a possible path instead of the median.
-- **The possible path (#147).** A flat median beside a jagged past reads as a promise, so the panel draws one possible path of the days ahead, from the last daily value:
+- **Archive all 21 quantile levels** so WIS can be computed properly. The page shows 0.1, 0.25, 0.5, 0.75 and 0.9 as "8 in 10" and "5 in 10" ranges, and 0.5 as "most likely". The panel's chart opens on the most likely value of each day and, asked, draws the possible paths instead.
+- **The possible paths (#147).** The panel opens on the most likely value of each day, the most useful view (owner's choice, 2026-10-30). "Show possible paths" then draws them one at a time, in order, from the last daily value, so the days ahead read like the past:
   - day h is that day's quantile function at u = Phi(z_h), read off the published levels by straight lines and held at the end levels, with z a Gaussian AR(1);
   - its rho, the series' day-to-day tie, is the lag-1 correlation, across consecutive horizons of the same forecast, of the normal scores of the real days' PITs. The PITs come from the 21 archived quantiles, clipped to [0.005, 0.995], over the resolved forecasts of the last 120 days, against the first vintage that resolved each day. Below 100 pairs it is 0. The catalog publishes it with its pair count;
   - 20 paths, seeded by series, reference date and index, so a path always looks the same.
@@ -297,8 +297,8 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
    The sun's size encodes today's GPR against the baseline.
 2. **The forecast panel,** a game-sheet frame with the title row `[F] {series} · forecast made today | {unit} · data to {date}`:
    - a readout line;
-   - the pixel chart (6.9), with one possible path (6.2) on the forecast side;
-   - under it, Pause or Play, "Another path" and "Possible path N of 20", then the line "The line ahead is one possible path, not the forecast: no one knows which days turn out high." One path at a time, never several: overlapping paths read as nothing;
+   - the pixel chart (6.9), opening on the most likely value of each day;
+   - under it, "Show possible paths". Once pressed: Pause or Play, "Next path", "Most likely" (back to the opening view) and "Possible path N of 20", then the line "The line ahead is one possible path, not the forecast: no one knows which days turn out high." One path at a time, in order, never several: overlapping paths read as nothing;
    - a legend;
    - the replay slider, in the look of Timestral's: a dotted track with one dot a week, a square handle with a vertical bar, and the day beside the handle ("Forecast" on today), on the side with room. 120 days, ←/→ for one day, T for today, "Back to today";
    - the intervals block: a row for "today, that day", then one row per interval step with the 5-in-10 and 8-in-10 ranges, then the most likely value and, in replay, the real value with inside or outside, all on one value scale with the 1-year range and the GPR baseline;
@@ -323,7 +323,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - pixel stars twinkle;
   - the vignette breathes (6 s);
   - the sun pulses (3.2 s, scale 1 to 1.04);
-  - the panel draws the next possible path every 1.2 s.
+  - once asked, the panel draws the next possible path every 1.2 s.
 
   The sun and the paths stop while the tab is hidden or they are off screen.
 - **UI transitions** take 160 ms. Panel changes use the 8-step Bayer dither (30 ms per step).
@@ -357,7 +357,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - Draw at 2 CSS px per art pixel with `image-rendering: pixelated`, and Bresenham lines.
   - Daily values: a gold line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
   - The 7-day average: a label-grey line that stops at the origin.
-  - The panel's forecast side: one possible path, a pale gold line from the last daily value, with no label at its end; the bands keep theirs. The cards' mini charts keep the median, a pale gold line to a 3x3 square.
+  - The forecast side: the most likely value of each day, a pale gold line from the last daily value with its end labelled, on the panel and on the cards' mini charts alike. Once asked, the panel draws a possible path in its place, with no label at its end; the bands keep theirs.
   - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in muted gold with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted blue line.
