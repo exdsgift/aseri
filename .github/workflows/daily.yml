@@ -8,15 +8,18 @@ on:
 permissions:
   contents: read
 
-# One run at a time: a queued run waits rather than cancelling a deploy halfway.
+# One run at a time: a queued run waits rather than cancelling a deploy halfway, and archive pushes never race.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  # Runs the tests, the model and third-party code, so it gets no deploy rights.
+  # Runs the tests, the model and third-party code, so it gets no write rights.
   build:
     runs-on: ubuntu-latest
+    outputs:
+      archive_exists: ${{ steps.archive.outputs.exists }}
+      archive_adds: ${{ steps.adds.outputs.any }}
     defaults:
       run:
         working-directory: pipeline
@@ -45,14 +48,99 @@ jobs:
         with:
           path: ~/.cache/huggingface/hub
           key: timestral-209m-${{ steps.weights.outputs.revision }}
-      - name: Fetch, forecast and publish
-        run: uv run python -m aseri ../site/api/v1
+      - name: Find the archive branch, or start from an empty archive
+        id: archive
+        run: |
+          status=0
+          git ls-remote --exit-code --heads origin archive > /dev/null || status=$?
+          # 2 means no archive branch yet; any other failure must not pass for an empty archive.
+          case $status in
+            0) echo "exists=true" >> "$GITHUB_OUTPUT" ;;
+            2) echo "exists=false" >> "$GITHUB_OUTPUT"; git init -q ../archive ;;
+            *) exit "$status" ;;
+          esac
+      - name: Check out the archive, shallow
+        if: steps.archive.outputs.exists == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: archive
+          path: archive
+      - name: Fetch, forecast, archive and publish
+        run: uv run python -m aseri ../site/api/v1 ../archive
+      - name: Collect the files this run adds to the archive
+        id: adds
+        working-directory: archive
+        run: |
+          mkdir "$RUNNER_TEMP/archive-adds"
+          git ls-files --others -z | xargs -0r cp --parents -t "$RUNNER_TEMP/archive-adds"
+          if [ -n "$(ls -A "$RUNNER_TEMP/archive-adds")" ]; then echo "any=true" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.adds.outputs.any == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: archive-adds
+          path: ${{ runner.temp }}/archive-adds
+          if-no-files-found: error
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
-  deploy:
+  # Holds the write rights, so it runs only git and shell: no Python packages, no model.
+  archive:
     needs: build
+    if: needs.build.outputs.archive_adds == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # On the very first run there is no archive branch: check out the default one and orphan it below.
+          ref: ${{ needs.build.outputs.archive_exists == 'true' && 'archive' || '' }}
+      - name: Start the orphan archive branch on the very first run
+        if: needs.build.outputs.archive_exists != 'true'
+        run: git switch --orphan archive
+      - uses: actions/download-artifact@v8
+        with:
+          name: archive-adds
+          path: ${{ runner.temp }}/archive-adds
+      - name: Add the new files, if they are all rounds, deltas or manifests
+        run: |
+          # The build job runs third-party code, so a file that is not one of these (a git hook, say) stops the run.
+          files=$(cd "$RUNNER_TEMP/archive-adds" && find . ! -type d -printf '%y %p\n')
+          if printf '%s\n' "$files" | grep -vE '^f \./(model-output/[a-z0-9-]+/[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+\.csv|target-data/deltas/[0-9]{4}-[0-9]{2}-[0-9]{2}\.csv|runs/[0-9]{4}-[0-9]{2}-[0-9]{2}\.json)$'; then
+            echo "::error::The build's archive files include something that is not a round, a delta or a manifest"
+            exit 1
+          fi
+          cp -r "$RUNNER_TEMP/archive-adds/." .
+          git add -A
+      - name: Refuse any change to an archived file
+        run: |
+          # Append-only: --diff-filter=a lists every staged change that is not a new file.
+          changed=$(git diff --cached --name-status --diff-filter=a)
+          if [ -n "$changed" ]; then
+            echo "::error::The archive is append-only, and this run would change: $changed"
+            exit 1
+          fi
+      - name: Refuse an archive over 50 MB
+        run: |
+          git count-objects -vH
+          # The shallow checkout holds the whole tip, which is the whole archive since no file is ever deleted.
+          # On the very first run it also counts the default branch, a few MB: an overestimate, never an underestimate.
+          kib=$(git count-objects -v | awk '$1 == "size:" || $1 == "size-pack:" { total += $2 } END { print total }')
+          if [ "$kib" -gt $((50 * 1024)) ]; then
+            echo "::error::The archive branch is ${kib} KiB, over its 50 MB budget"
+            exit 1
+          fi
+      - name: Commit and push
+        run: |
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Archive $(git diff --cached --name-only -- runs)"
+          git push origin archive
+
+  deploy:
+    needs: [build, archive]
+    # Also on a day with nothing new to archive, when archive is skipped; never after a failure.
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
