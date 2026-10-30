@@ -1,5 +1,7 @@
 # Spike: how far ahead does Timestral forecast our series usefully?
 
+> **Correction, 2026-10-30.** Read the GPR scores as an upper bound. Inputs and actuals came from a revised vintage (GPR revises its last 30 days by a median of 7.6 to 9.2%), and the bootstrap ignored overlapping origins. See [Best practice previsioni probabilistiche](reports/Best%20practice%20previsioni%20probabilistiche.md) and issue #145 for the real-time rebuild.
+
 Run on 2026-10-29. Prototype and rerun commands: `prototypes/timestral-backtest/` (see its README). Model background: [timestral-model.md](timestral-model.md). Data sources: [data-sources.md](data-sources.md).
 
 ## TL;DR
