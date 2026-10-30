@@ -86,8 +86,14 @@ function usePixelChart<L extends Layout>(
 
 // A card's chart: the same drawing, small and silent, since the card says it in words.
 // A span, as a button may hold only phrasing content.
-export function MiniForecastChart({ forecast }: { forecast: Forecast }) {
-  const { box, canvas, size } = usePixelChart(forecast, miniChartLayout)
+export function MiniForecastChart({
+  forecast,
+  path,
+}: {
+  forecast: Forecast
+  path: number[]
+}) {
+  const { box, canvas, size } = usePixelChart(forecast, miniChartLayout, path)
   return (
     <span ref={box} className="block">
       <canvas

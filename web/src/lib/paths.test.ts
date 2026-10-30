@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import latest from "@/fixtures/series/gpr_daily/latest.json"
 
 import { type Forecast } from "./api"
-import { path } from "./paths"
+import { path, ranked } from "./paths"
 
 // Today's GPR forecast, at its 21 published levels, made from a last daily value of 165.
 const gpr: Forecast = {
@@ -105,5 +105,48 @@ describe("path", () => {
   it("ties each day to the day before by rho", () => {
     expect(Math.abs(lagOne(many(standard, 0)))).toBeLessThan(0.03)
     expect(Math.abs(lagOne(many(standard, 0.5)) - 0.5)).toBeLessThan(0.03)
+  })
+})
+
+describe("ranked", () => {
+  // Under the AR(1) the paths are drawn from, a path's log-likelihood in normal scores.
+  // On the standard forecast a path's values are its normal scores, give or take the
+  // straight lines between published levels.
+  const logLikelihood = (values: number[], rho: number) =>
+    values
+      .slice(1)
+      .reduce(
+        (sum, value, day, days) =>
+          sum -
+          (day === 0
+            ? value * value
+            : (value - rho * days[day - 1]) ** 2 / (1 - rho * rho)) /
+            2,
+        0
+      )
+
+  it("gives the 20 paths, the most likely first, then each less likely than the one before", () => {
+    const paths = ranked(standard, 0.45)
+    expect(paths).toHaveLength(20)
+    const scores = paths.map((p) => p.logLikelihood)
+    expect(scores).toEqual(scores.toSorted((a, b) => b - a))
+    // Within 15%: a value past q0.01 or q0.99 is held there, and the lines between levels bend.
+    for (const p of paths)
+      expect(
+        Math.abs(logLikelihood(p.values, 0.45) - p.logLikelihood)
+      ).toBeLessThan(0.15 * Math.abs(p.logLikelihood))
+  })
+
+  it("is the same 20 paths, in the same order, every time", () => {
+    const paths = ranked(gpr, 0.45).map((p) => p.values)
+    const drawn = Array.from({ length: 20 }, (_, index) =>
+      path(gpr, 0.45, index)
+    )
+    expect(paths.toSorted()).toEqual(drawn.toSorted())
+    expect(ranked(gpr, 0.45).map((p) => p.values)).toEqual(paths)
+  })
+
+  it("starts every path on the last daily value", () => {
+    for (const p of ranked(gpr, 0)) expect(p.values[0]).toBe(165)
   })
 })

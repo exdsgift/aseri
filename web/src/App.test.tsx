@@ -359,7 +359,7 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     "What happened",
     "8 in 10",
     "5 in 10",
-    "Most likely",
+    "Model path",
     "Forecast made",
   ])
   // Text beside the chart, not the legend, says what the band is and is not.
@@ -367,7 +367,7 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     "The 8 in 10 band: where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call. Daily values can follow the week: compare a day with the same weekday."
   )
   expect(panel.getByRole("img").getAttribute("aria-label")).toBe(
-    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: 8 in 10 between 111 and 251, most likely 168."
+    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: 8 in 10 between 111 and 251, most likely 168. The line ahead is path 1 of 20 drawn from the forecast, the most likely first."
   )
   // Every file but the other series' replays, which wait for their card to be picked.
   expect(fetch.mock.calls.map(([url]) => url).toSorted()).toEqual(

@@ -52,18 +52,51 @@ function quantileAt(
 // `rho`: each day lands in its ranges as often as they say, and moves from the day before
 // as the real days did. Seeded by series, reference date and index.
 export function path(forecast: Forecast, rho: number, index: number) {
+  return draw(forecast, rho, index).values
+}
+
+// The 20 paths the page shows, the most likely first: ranked by their log-likelihood under
+// the AR(1) they are drawn from, in normal scores, so the first is the most typical of them.
+export function ranked(forecast: Forecast, rho: number) {
+  return Array.from({ length: 20 }, (_, index) => draw(forecast, rho, index))
+    .map(({ values, z }) => ({
+      values,
+      logLikelihood: z.reduce(
+        (sum, now, day) =>
+          sum -
+          (day === 0
+            ? now * now
+            : (now - rho * z[day - 1]) ** 2 / (1 - rho * rho)) /
+            2,
+        0
+      ),
+    }))
+    .toSorted((a, b) => b.logLikelihood - a.logLikelihood)
+}
+
+function draw(forecast: Forecast, rho: number, index: number) {
   const uniform = seeded(
     hash(`${forecast.series} ${forecast.dates.at(-1)} ${index}`)
   )
   const levels = Object.keys(forecast.quantiles).sort(
     (a, b) => Number(a) - Number(b)
   )
-  let z = gauss(uniform)
-  return [
-    forecast.values.at(-1)!,
-    ...forecast.targetDates.map((_, day) => {
-      if (day) z = rho * z + Math.sqrt(1 - rho * rho) * gauss(uniform)
-      return quantileAt(forecast.quantiles, levels, day, phi(z))
-    }),
-  ]
+  // A tie of 1 would leave no room to move: the pipeline's correlations stay inside it.
+  rho = Math.max(-0.99, Math.min(0.99, rho))
+  const z: number[] = []
+  for (let day = 0; day < forecast.targetDates.length; day++)
+    z.push(
+      day
+        ? rho * z[day - 1] + Math.sqrt(1 - rho * rho) * gauss(uniform)
+        : gauss(uniform)
+    )
+  return {
+    z,
+    values: [
+      forecast.values.at(-1)!,
+      ...z.map((score, day) =>
+        quantileAt(forecast.quantiles, levels, day, phi(score))
+      ),
+    ],
+  }
 }

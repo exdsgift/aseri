@@ -2,6 +2,7 @@ import { Pictogram, type PictogramName } from "@/components/Pictogram"
 import { MiniForecastChart } from "@/components/PixelForecastChart"
 import { type Series } from "@/lib/api"
 import { formatValue, monthDay, versusBaseline } from "@/lib/format"
+import { ranked } from "@/lib/paths"
 
 // One series at a glance, like the game's title cards: pick it to open it in the forecast panel.
 export function SignalCard({
@@ -55,7 +56,11 @@ export function SignalCard({
         {versusBaseline(today.sevenDayAverage, today.baseline)}{" "}
         {today.baselineLabel}
       </span>{" "}
-      <MiniForecastChart forecast={forecast} />
+      {/* The panel's opening line: the most likely of the model's paths. */}
+      <MiniForecastChart
+        forecast={forecast}
+        path={ranked(forecast, series.rho)[0].values}
+      />
       {/* The forecast is of the daily value: a range for one day, not for the days up to it. */}
       <span className="text-gold-pale">
         In {today.daysAhead} days: {formatValue(today.low)}-
