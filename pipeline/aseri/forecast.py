@@ -48,8 +48,12 @@ def make_context(
     scale or detector belongs here, computed on this slice, never on the whole vintage.
     """
     context = vintage.loc[:reference_date]
-    errors = ANOMALIES.loc[ANOMALIES["series_id"] == series.id, "date"]
-    return context.mask(context.index.isin(errors))
+    return context.mask(context.index.isin(measurement_errors(series)))
+
+
+def measurement_errors(series: Series) -> pd.Series:
+    """The days of `series` in the register of known measurement errors: blank in every context, and never scored."""
+    return ANOMALIES.loc[ANOMALIES["series_id"] == series.id, "date"]
 
 
 def under_review(series: Series, vintage: pd.Series) -> bool:

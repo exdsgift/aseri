@@ -190,18 +190,26 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             )
         )
         levels = archived[-1].forecast.levels
-        rows.append((series.id, status, f"{observed.index[-1]:%Y-%m-%d}", detail))
-        vintages = archive.vintages(archive_dir, series.id)
-        scored = record.scored(series, archived, vintages, today)
-        records.append(
-            record.summary(
+        try:
+            # shortcut: reads every delta file again, once per series; read them once per run if that gets slow.
+            vintages = archive.vintages(archive_dir, series.id)
+            scored = record.scored(series, archived, vintages, today)
+            summary = record.summary(
                 series,
                 scored,
+                # shortcut: a second scoring of every due target; score only the revised ones if runs get slow.
                 record.scored(series, archived, vintages, today, latest=True),
             )
-        )
-        if "red" in record.calibration(series, scored).values():
-            red.append(series.id)
+            zones = record.calibration(series, scored)
+            # Kept only once all of it worked, so a series has its whole record or none.
+            records.append(summary)
+            if "red" in zones.values():
+                red.append(series.id)
+        # Whatever breaks its scores costs the series its scores only: it still publishes, as do the others.
+        except Exception as error:  # noqa: BLE001
+            del entries[-1]["links"]["scores"]
+            detail = f"{detail}; scores failed: {type(error).__name__}: {error}"
+        rows.append((series.id, status, f"{observed.index[-1]:%Y-%m-%d}", detail))
     report(rows)
     if not entries:
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")

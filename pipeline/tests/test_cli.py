@@ -1099,6 +1099,48 @@ def test_the_record_scores_each_series_from_the_archive_and_names_a_red_band_for
     )
 
 
+def test_a_scoring_error_in_one_series_costs_only_its_scores(
+    tmp_path, monkeypatch, stub_model, summary, short_backfill
+):
+    scored = record.scored
+
+    def suez_breaks(series, *args, **kwargs):
+        if series.id == "suez_transits":
+            raise ValueError("a broken vintage")
+        return scored(series, *args, **kwargs)
+
+    monkeypatch.setattr(record, "scored", suez_breaks)
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
+    serve(monkeypatch, sea_lanes())
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+
+    api = tmp_path / "api"
+    entries = {s["series_id"]: s for s in read(api / "series.json")["series"]}
+    # Suez publishes its forecast, with no link to scores it does not have.
+    assert entries.keys() == {"gpr_daily", *PORTS}
+    assert "scores" not in entries["suez_transits"]["links"]
+    assert not (api / "series" / "suez_transits" / "scores.json").exists()
+    assert [s["series_id"] for s in read(api / "scores.json")["series"]] == [
+        "gpr_daily",
+        "hormuz_transits",
+        "bab_el_mandeb_transits",
+        "taiwan_strait_transits",
+    ]
+    assert (api / "series" / "taiwan_strait_transits" / "scores.json").exists()
+    row = [line for line in summary().splitlines() if "suez" in line][-1]
+    assert row.startswith("| suez_transits | ok | 2026-10-25 |")
+    assert "scores failed: ValueError: a broken vintage" in row
+    assert output.read_text(encoding="utf-8").endswith("calibration_red=\n")
+
+
 def test_a_suspect_newest_value_moves_the_origin_back_a_day_and_the_note_says_so_only_while_it_does(
     tmp_path, monkeypatch, stub_model, short_backfill
 ):

@@ -2,7 +2,7 @@ import { useId } from "react"
 
 import { RecordSquares } from "@/components/RecordSquares"
 import { ScoreTable } from "@/components/ScoreTable"
-import { type CatalogEntry, type ScoreRecord } from "@/lib/api"
+import { daysAfter, type CatalogEntry, type ScoreRecord } from "@/lib/api"
 import { monthDay } from "@/lib/format"
 
 // How past forecasts did, per series. The live record shows once it has enough resolved
@@ -72,6 +72,15 @@ function RecordCard({
 }) {
   const backtest = useId()
   const { live, retrospective, min_n_to_display: needed } = record
+  // The replay's oldest forecast: the pipeline keeps 120 days before the newest one.
+  const replayFrom = daysAfter(entry.latest_reference_date, -120)
+  const squares = (scored: ScoreRecord["live"]) => (
+    <RecordSquares
+      weekly={scored.weekly}
+      replayFrom={replayFrom}
+      onOpen={onOpen}
+    />
+  )
   const table = (scored: ScoreRecord["live"], kind: string) => (
     <ScoreTable
       label={`${entry.title}, ${kind}`}
@@ -89,7 +98,7 @@ function RecordCard({
           <p>
             Live record: {live.n} forecasts since {monthDay(live.since!)}
           </p>
-          <RecordSquares weekly={live.weekly} onOpen={onOpen} />
+          {squares(live)}
           {table(live, "live")}
         </>
       ) : (
@@ -98,7 +107,7 @@ function RecordCard({
             Collecting live record:{" "}
             <b className="font-normal text-primary">{record.n}</b> of {needed}
           </p>
-          <RecordSquares weekly={live.weekly} onOpen={onOpen} />
+          {squares(live)}
           <div
             role="group"
             aria-labelledby={backtest}
@@ -107,7 +116,7 @@ function RecordCard({
             <p id={backtest} className="text-key">
               Backtest, not the live record
             </p>
-            <RecordSquares weekly={retrospective.weekly} onOpen={onOpen} />
+            {squares(retrospective)}
             {table(retrospective, "backtest")}
           </div>
         </>

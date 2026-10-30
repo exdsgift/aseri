@@ -146,8 +146,13 @@ def bootstrap(model, baseline=None, *, block: int) -> tuple[float, float, float]
     return float(model.mean() / baseline.mean()), float(low), float(high)
 
 
-def verdict(low: float, high: float) -> str:
-    """What the page says of a model-to-baseline ratio: it beats or loses only when its whole interval does."""
+def verdict(low: float, high: float) -> str | None:
+    """What the page says of a model-to-baseline ratio: it beats or loses only when its whole interval does.
+
+    None when a bound is not finite: a baseline with no error leaves the ratio infinite or undefined.
+    """
+    if not (np.isfinite(low) and np.isfinite(high)):
+        return None
     return "beats" if high < 1 else "loses" if low > 1 else "ties"
 
 

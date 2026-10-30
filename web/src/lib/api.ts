@@ -7,6 +7,8 @@ export type CatalogEntry = {
   baseline_label: string
   horizon_max: number
   interval_steps: number[]
+  // Where the replay ends: it holds this day's forecast and those of the 120 days before.
+  latest_reference_date: string
   // Set when the day's run skipped the series and kept its last good files.
   stale_since?: string | null
   // What a reader must know about the data, such as Taiwan's tracking dropouts.
@@ -93,7 +95,7 @@ const mean = (values: number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length
 
 // API dates are calendar days, so the arithmetic stays in UTC.
-const daysAfter = (isoDate: string, days: number) =>
+export const daysAfter = (isoDate: string, days: number) =>
   new Date(Date.parse(isoDate) + days * 86_400_000).toISOString().slice(0, 10)
 
 // `generated_at` is when the daily run last wrote the site.
@@ -108,7 +110,12 @@ export type Bucket = {
   ae_median?: {
     vs: Record<
       string,
-      { ratio: number | null; ci: (number | null)[]; verdict: string }
+      // All null when the baseline had no error to compare with.
+      {
+        ratio: number | null
+        ci: (number | null)[]
+        verdict: string | null
+      }
     >
   }
 }

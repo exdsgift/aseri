@@ -65,11 +65,18 @@ export function ScoreTable({
                     {percent(held.ci[1])})
                   </td>
                   <td className={cell}>
-                    <span className={verdictColour[versus.verdict]}>
-                      {versus.verdict}
-                    </span>{" "}
-                    {ratio(versus.ratio)} ({ratio(versus.ci[0])}-
-                    {ratio(versus.ci[1])})
+                    {versus.verdict === null ? (
+                      // A baseline with no error leaves no ratio to read.
+                      "-"
+                    ) : (
+                      <>
+                        <span className={verdictColour[versus.verdict]}>
+                          {versus.verdict}
+                        </span>{" "}
+                        {ratio(versus.ratio)} ({ratio(versus.ci[0])}-
+                        {ratio(versus.ci[1])})
+                      </>
+                    )}
                   </td>
                 </>
               ) : (

@@ -238,6 +238,15 @@ def test_the_page_says_beats_or_loses_only_when_the_whole_interval_does(
     assert verdict(low, high) == said
 
 
+@pytest.mark.parametrize(
+    ("low", "high"),
+    [(np.nan, np.nan), (np.inf, np.inf), (0.8, np.inf), (np.nan, 0.9)],
+)
+def test_an_interval_without_finite_bounds_gives_no_verdict(low, high):
+    # A baseline with no error makes the ratio infinite, or undefined when the model has none either.
+    assert verdict(low, high) is None
+
+
 def test_a_flat_history_has_no_mase_rather_than_an_infinite_one():
     # A week-on-week change of zero everywhere: no scale to divide by.
     stub = Forecast(

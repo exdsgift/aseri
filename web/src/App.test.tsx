@@ -568,6 +568,25 @@ it("opens a square of the record in the panel's replay, loading that series' rep
   expect(scrollIntoView).toHaveBeenCalled()
 })
 
+it("reopens a square's forecast on a second tap, after the reader has moved the replay", async () => {
+  serve(published)
+  render(<App />)
+  const record = within(await screen.findByRole("region", { name: "Record" }))
+  const square = () =>
+    within(
+      record.getByRole("heading", { name: "Suez Canal" }).closest("li")!
+    ).getAllByRole("button")[0]
+  const opened = "[F] Suez Canal · backtest from Aug 16"
+  fireEvent.click(square())
+  await screen.findByRole("heading", { level: 2, name: opened })
+
+  fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
+  expect(panelTitle()).toBe("[F] Suez Canal · backtest from Jun 27")
+  fireEvent.click(square())
+
+  expect(panelTitle()).toBe(opened)
+})
+
 it("shows the page without the record when the scores cannot be loaded", async () => {
   vi.stubGlobal("fetch", async (url: string) =>
     url === "api/v1/scores.json"

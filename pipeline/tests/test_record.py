@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import aseri.forecast as forecast_module
 from aseri import archive, record
 from aseri.__main__ import SOURCES
 from aseri.forecast import Forecast
@@ -197,6 +198,46 @@ def test_a_median_on_the_primary_baseline_ties_it_exactly(tmp_path):
     against = summary["retrospective"]["buckets"]["1-7"]["ae_median"]["vs"]
     assert against["mean28"] == {"ratio": 1.0, "ci": [1.0, 1.0], "verdict": "ties"}
     assert set(against) == {"naive", "snaive7", "mean28"}
+
+
+def test_a_ratio_to_a_baseline_with_no_error_has_no_number_and_no_verdict(tmp_path):
+    # 40 ships every day: each baseline is exact, and the model one ship high.
+    flat = pd.Series(40.0, index=pd.date_range(end="2026-11-01", periods=400))
+    forecasts = [around(day, 41.0) for day in pd.date_range("2026-09-01", "2026-09-30")]
+    run(tmp_path, forecasts, flat[:"2026-09-30"], date(2026, 10, 1))
+    run(tmp_path, [], flat, date(2026, 11, 3))
+
+    bucket = record.summary(
+        SUEZ,
+        scored(tmp_path, "2026-11-03"),
+        scored(tmp_path, "2026-11-03", latest=True),
+    )["retrospective"]["buckets"]["1-7"]
+
+    nothing = {"ratio": None, "ci": [None, None], "verdict": None}
+    assert bucket["ae_median"]["vs"] == dict.fromkeys(
+        ("naive", "snaive7", "mean28"), nothing
+    )
+    assert bucket["wis"]["vs_probabilistic_naive"] == nothing
+    assert bucket["mase"] is None
+
+
+def test_a_registered_measurement_error_is_never_scored(first_run, monkeypatch):
+    monkeypatch.setattr(
+        forecast_module,
+        "ANOMALIES",
+        pd.DataFrame(
+            {
+                "series_id": ["suez_transits", "another_series"],
+                "date": pd.to_datetime(["2026-10-05", "2026-10-06"]),
+                "evidence": ["a test entry", "a test entry"],
+            }
+        ),
+    )
+
+    rows = scored(first_run, "2026-11-08")
+
+    # Oct 5, 4 days ahead of Oct 1, is left out; Oct 6 is another series' error.
+    assert rows["horizon"].tolist() == [1, 2, 3, *range(5, 25)]
 
 
 def test_the_record_squares_are_the_last_8_weekly_forecasts_at_7_days_ahead(tmp_path):

@@ -26,8 +26,10 @@ export function App() {
   const [picked, setPicked] = useState(gprId)
   // How past forecasts did, for the record: the page goes on without it.
   const [records, setRecords] = useState<ScoreRecord[]>()
-  // The past forecast a square of the record opened in the panel's replay.
+  // The past forecast a square of the record opened in the panel's replay, and a count of
+  // the taps, so that a second tap on the same square opens it again.
   const [opened, setOpened] = useState<string>()
+  const [taps, setTaps] = useState(0)
   const panelBox = useRef<HTMLDivElement>(null)
   // The series whose replay was asked for: GPR's comes with the page.
   const replayed = useRef(new Set([gprId]))
@@ -89,7 +91,7 @@ export function App() {
                 or on the past forecast a square of the record opened. */}
             <div key={picked} className="motion-safe:animate-dither-in">
               <ForecastPanel
-                key={`${panel.forecasts.length} ${opened}`}
+                key={`${panel.forecasts.length} ${opened} ${taps}`}
                 series={panel}
                 opened={opened}
               />
@@ -107,6 +109,7 @@ export function App() {
               onOpen={(id, date) => {
                 pick(id)
                 setOpened(date)
+                setTaps((count) => count + 1)
               }}
             />
           )}

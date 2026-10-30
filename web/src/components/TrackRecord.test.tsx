@@ -196,6 +196,51 @@ it.each([
   }
 )
 
+it("gives no verdict and no number where the baseline had no error to compare with", () => {
+  const record = {
+    ...suez,
+    retrospective: {
+      ...suez.retrospective,
+      buckets: {
+        "1-7": bucket(105, 0.8, [0.7, 0.9], {
+          mean28: { ratio: null, ci: [null, null], verdict: null },
+        }),
+      },
+    },
+  }
+
+  titled([record])
+
+  expect(cells(card("Suez Canal").getByRole("table"))[1]).toEqual([
+    "1-7",
+    "105",
+    "80% (70-90)",
+    "-",
+  ])
+})
+
+it("draws a square whose forecast has left the replay without a link, and says so", () => {
+  // The replay holds the 120 days to Dec 20: from Aug 22 on.
+  const later = entries.map((entry) =>
+    entry.series_id === "suez_transits"
+      ? { ...entry, latest_reference_date: "2026-12-20" }
+      : entry
+  )
+  render(<TrackRecord records={[suez]} entries={later} onOpen={vi.fn()} />)
+
+  const squares = within(
+    card("Suez Canal").getByRole("list", {
+      name: "Last 8 weekly forecasts, 7 days ahead",
+    })
+  ).getAllByRole("listitem")
+  expect(
+    squares.map((square) => within(square).queryByRole("button") !== null)
+  ).toEqual([false, false, false, true, true, true, true, true])
+  expect(within(squares[2]).getByRole("img").getAttribute("aria-label")).toBe(
+    "Aug 16: outside its 8 in 10 range 7 days ahead, no longer in the replay"
+  )
+})
+
 it("shows the live record once 30 live forecasts have resolved, and no backtest", () => {
   const live = {
     ...suez.retrospective,

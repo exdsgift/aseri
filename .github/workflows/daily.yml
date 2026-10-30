@@ -228,8 +228,15 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           title="Calibration red: $RED"
-          # The record changes once a week per series, so the same set stays red for days: one open issue is enough.
-          if [ "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq length)" -gt 0 ]; then
+          # One open issue for them all: the same set stays red for days, and a new set is news on that issue.
+          open=$(gh issue list --state open --search '"Calibration red" in:title' --json number,title \
+            --jq 'map(select(.title | startswith("Calibration red"))) | first // empty | "\(.number) \(.title)"')
+          if [ -n "$open" ]; then
+            if [ "${open#* }" != "$title" ]; then
+              gh issue comment "${open%% *}" --body "The series in the red zone are now: $RED. Run: $RUN_URL"
+              # Retitled to the new set, so that tomorrow's run, red on the same set, adds nothing.
+              gh issue edit "${open%% *}" --title "$title"
+            fi
             echo "An issue is open already"
             exit 0
           fi

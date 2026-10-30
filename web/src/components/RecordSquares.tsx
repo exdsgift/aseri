@@ -4,12 +4,15 @@ import { type ScoreRecord } from "@/lib/api"
 import { monthDay } from "@/lib/format"
 
 // The last weekly forecasts at 7 days ahead, oldest first: a square each, green when the
-// real value landed inside its 8 in 10 range, red when not. A tap opens it in the replay.
+// real value landed inside its 8 in 10 range, red when not. A tap opens it in the replay,
+// which holds the forecasts from `replayFrom` on: an older square is drawn without a link.
 export function RecordSquares({
   weekly,
+  replayFrom,
   onOpen,
 }: {
   weekly: ScoreRecord["live"]["weekly"]
+  replayFrom: string
   onOpen: (referenceDate: string) => void
 }) {
   const title = useId()
@@ -21,16 +24,28 @@ export function RecordSquares({
         Last {weekly.length} weekly forecasts, 7 days ahead
       </p>
       <ul aria-labelledby={title} className="flex flex-wrap gap-1">
-        {weekly.map(({ reference_date, inside_80 }) => (
-          <li key={reference_date} className="flex">
-            <button
-              type="button"
-              aria-label={`${monthDay(reference_date)}: ${inside_80 ? "inside" : "outside"} its 8 in 10 range 7 days ahead. Open it in the replay`}
-              onClick={() => onOpen(reference_date)}
-              className={`size-6 cursor-pointer ${inside_80 ? "bg-inside" : "bg-destructive"} hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160`}
-            />
-          </li>
-        ))}
+        {weekly.map(({ reference_date, inside_80 }) => {
+          const said = `${monthDay(reference_date)}: ${inside_80 ? "inside" : "outside"} its 8 in 10 range 7 days ahead`
+          const fill = inside_80 ? "bg-inside" : "bg-destructive"
+          return (
+            <li key={reference_date} className="flex">
+              {reference_date < replayFrom ? (
+                <span
+                  role="img"
+                  aria-label={`${said}, no longer in the replay`}
+                  className={`size-6 ${fill}`}
+                />
+              ) : (
+                <button
+                  type="button"
+                  aria-label={`${said}. Open it in the replay`}
+                  onClick={() => onOpen(reference_date)}
+                  className={`size-6 cursor-pointer ${fill} hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160`}
+                />
+              )}
+            </li>
+          )
+        })}
       </ul>
       {/* In words too, so the record never rests on colour alone. */}
       <p>

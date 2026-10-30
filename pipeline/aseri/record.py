@@ -7,7 +7,7 @@ import pandas as pd
 
 from aseri import archive
 from aseri.archive import Archived
-from aseri.forecast import make_context
+from aseri.forecast import make_context, measurement_errors
 from aseri.scoring import (
     BUCKETS,
     REPS,
@@ -42,7 +42,7 @@ METHOD = {
         "seed": SEED,
         "interval": 1 - 2 * TAIL,
     },
-    "verdict": "beats when the whole interval of the ratio is below 1, loses when it is above 1, ties otherwise",
+    "verdict": "beats when the whole interval of the ratio is below 1, loses when it is above 1, ties otherwise; null, like the ratio, when a baseline has no error",
     "mase_scale": "the mean absolute 7-day change over the last 365 days of each forecast's own context",
     "baselines": {
         "naive": "the last value",
@@ -75,6 +75,8 @@ def scored(
     """
     today = pd.Timestamp(today)
     vintages = vintages[vintages["as_of"] <= today]
+    # A registered measurement error is blank in the model's input, and no observation to score against.
+    errors = set(measurement_errors(series))
     observations, contexts, frames = {}, {}, []
     for issued in archived:
         forecast = issued.forecast
@@ -83,7 +85,7 @@ def scored(
             periods=len(forecast.quantiles),
         )
         for target in targets.difference(list(observations)):
-            if scoreable_on(target, series.score_lag) > today:
+            if scoreable_on(target, series.score_lag) > today or target in errors:
                 observations[target] = None
             elif latest:
                 observations[target] = known_on(vintages, target, today)
@@ -120,6 +122,8 @@ def settled(
     """The value `target` is scored against, and its `as_of`: as known on its scoring day, or, if its source had not published it by then, as first seen after.
 
     The launch backfill's targets were all due before the archive began, so they take its first vintage.
+    shortcut: `known_on` scans every vintage row for each target, GPR's 15,000 included; group the rows
+    by target date once if runs get slow.
     """
     found = known_on(vintages, target, scoreable_on(target, lag_days))
     if found is None:
@@ -206,7 +210,8 @@ def _mode(series: Series, rows: pd.DataFrame, mode: str) -> dict:
 def _bucket(rows: pd.DataFrame, bucket: str, last: int) -> dict:
     """The scores of `bucket`, whose last day for this series is `last`."""
     rows = rows[rows["bucket"] == bucket]
-    # Only forecasts with that last day scored, so with every day of the bucket: each weighs the same.
+    # Only forecasts with that last day scored, so with every day of the bucket but a registered
+    # measurement error: each weighs the same.
     rows = rows[rows.groupby("reference_date")["horizon"].transform("max") == last]
     if rows.empty:
         return {"n": 0}
