@@ -40,6 +40,7 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
   expect(hero.getAllByRole("paragraph").map((p) => p.textContent)).toEqual([
     "Geopolitical risk · today",
     "181",
+    "7-day average to Oct 26",
     "81% above its 1985-2019 average",
     "Monday Nov 23, 4 weeks from the last data: most likely 168. 8 in 10 between 111 and 251. (Last Monday: 165)",
   ])

@@ -1,6 +1,12 @@
 import { Wordmark } from "@/components/Wordmark"
 import { type GprToday } from "@/lib/api"
-import { dayLabel, formatValue, versusBaseline, weekday } from "@/lib/format"
+import {
+  dayLabel,
+  formatValue,
+  monthDay,
+  versusBaseline,
+  weekday,
+} from "@/lib/format"
 
 export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
   return (
@@ -13,6 +19,10 @@ export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
             {formatValue(today.sevenDayAverage)}
           </p>
           <div className="flex max-w-[46ch] flex-col gap-[18px] text-balance">
+            {/* The number is an average, and the data lags: say both. */}
+            <p className="-mt-6 text-muted-foreground">
+              7-day average to {monthDay(today.referenceDate)}
+            </p>
             <p>
               {versusBaseline(today.sevenDayAverage, today.baseline)}{" "}
               <span className="whitespace-nowrap">{today.baselineLabel}</span>

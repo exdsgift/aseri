@@ -183,8 +183,9 @@ export function paintChart(
     for (let px = left; px <= right; px += 2) plot(px, y(tick), color.frame)
 
   // The bands, column by column: 5 in 10 at 50% of the dither, 8 in 10 at 25%, with solid edges.
-  for (let px = xo + 1; px <= right; px++) {
-    const daysAhead = ((px - xo) / (right - xo)) * chart.ahead
+  // From the first day ahead: the last value may still be revised, so no width-zero pinch.
+  for (let px = x(origin + 1); px <= right; px++) {
+    const daysAhead = Math.max(1, ((px - xo) / (right - xo)) * chart.ahead)
     const [y90, y75, y25, y10] = ["0.9", "0.75", "0.25", "0.1"].map((level) =>
       y(forecastAt(last, quantiles[level], daysAhead))
     )

@@ -74,6 +74,19 @@ describe("paintChart", () => {
       })
   })
 
+  it("starts the bands on the first day ahead, never pinched to the last value", () => {
+    const band = calls.filter(({ color }) => color === "muted")
+    const firstDay = chart.x(chart.origin + 1)
+    expect(Math.min(...band.map(({ x }) => x))).toBe(firstDay)
+    // The 8-in-10 range of that day, edge to edge.
+    for (const value of [120, 190])
+      expect(band).toContainEqual({
+        x: firstDay,
+        y: chart.y(value),
+        color: "muted",
+      })
+  })
+
   it("keeps the 7-day average as a dimmer line that stops at the origin", () => {
     const average = calls.filter(({ color }) => color === "label")
     expect(average).toContainEqual({
