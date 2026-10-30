@@ -131,7 +131,7 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
       <p className="wrap-anywhere text-muted-foreground">
         Source: {forecast.attribution}
         {forecast.backtest &&
-          ` Backtest: made after the fact, with only the data up to ${made}. The model's training cutoff is not published, so backtests may be optimistic.`}
+          ` Backtest: made after the fact, with only the data up to ${made}, but as published later: it may have been revised since. The model's training cutoff is not published, so backtests may be optimistic.`}
       </p>
     </section>
   )

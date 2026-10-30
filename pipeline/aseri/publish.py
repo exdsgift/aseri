@@ -28,6 +28,11 @@ FORECAST_LICENSE = {
 }
 # The page's 8-in-10 and 5-in-10 ranges and its most likely value.
 REPLAY_LEVELS = (0.1, 0.25, 0.5, 0.75, 0.9)
+# A retrospective forecast read revised data, and the model may have trained on the days it forecasts.
+PSEUDO_REAL_TIME = {
+    "testdata_leakage": "unknown",
+    "pseudo_real_time_note": "Made after the fact, from the data as published on its forecast_date, which may differ from what was known on its reference_date.",
+}
 
 
 def publish(
@@ -106,11 +111,20 @@ def _forecast(series, archived) -> dict:
         },
         # The model that made this forecast: a later model change must not rewrite its credit.
         "attribution": f"{series.license['attribution']} {credit(archived.model_id, archived.provenance['model']['id'])}",
-        "provenance": archived.provenance,
+        "provenance": archived.provenance | _labels(archived),
         "links": {"catalog": "../../../series.json"},
         # The run's, not today's: republishing a forecast never changes its file.
         "generated_at": archived.provenance["generated_at"],
     }
+
+
+def _labels(archived) -> dict:
+    # Computed here, not archived: the manifests of the launch backfill predate the label.
+    return (
+        PSEUDO_REAL_TIME
+        if archived.provenance["forecast_mode"] == "retrospective"
+        else {}
+    )
 
 
 def _index(series, archived, generated_at) -> dict:
@@ -152,6 +166,7 @@ def _replay(series, archived, attribution) -> dict:
                     for level in REPLAY_LEVELS
                 },
             }
+            | _labels(a)
             for a in archived
             if a.forecast.reference_date >= start
         ],

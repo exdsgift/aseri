@@ -33,6 +33,11 @@ PROVENANCE = {
     "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic.",
 }
 
+# What every retrospective forecast says of itself, and a live one never does.
+PSEUDO_REAL_TIME = {
+    "testdata_leakage": "unknown",
+    "pseudo_real_time_note": "Made after the fact, from the data as published on its forecast_date, which may differ from what was known on its reference_date.",
+}
 
 QUANTILES = {
     "0.1": [90.1, 85.4],
@@ -134,12 +139,21 @@ def test_a_forecast_keys_each_quantile_level_without_float_noise(api_dir):
 
 
 def test_a_forecast_carries_the_provenance_of_the_run_that_issued_it(api_dir):
-    forecast = dated(api_dir, "2026-10-25")
+    forecast = dated(api_dir, "2026-10-26")
 
     assert forecast["model_id"] == "aseri-timestral209m"
-    assert forecast["provenance"] == PROVENANCE | {"forecast_mode": "retrospective"}
+    assert forecast["provenance"] == PROVENANCE | {"forecast_mode": "live"}
     # Issued once, so republishing it never changes it.
     assert forecast["generated_at"] == "2026-10-29T07:03:12Z"
+
+
+def test_a_retrospective_forecast_is_labelled_pseudo_real_time(api_dir):
+    forecast = dated(api_dir, "2026-10-25")
+
+    assert (
+        forecast["provenance"]
+        == PROVENANCE | {"forecast_mode": "retrospective"} | PSEUDO_REAL_TIME
+    )
 
 
 def test_a_forecast_credits_the_source_and_the_model(api_dir):
@@ -194,7 +208,8 @@ def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_le
                 "reference_date": "2026-06-28",
                 "forecast_mode": "retrospective",
                 "quantiles": QUANTILES,
-            },
+            }
+            | PSEUDO_REAL_TIME,
             {
                 "reference_date": "2026-10-26",
                 "forecast_mode": "live",

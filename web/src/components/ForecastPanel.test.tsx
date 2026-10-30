@@ -153,7 +153,7 @@ it("says on the source line when the forecast shown is a backtest", () => {
 
   fireEvent.change(slider(), { target: { value: "0" } })
   expect(source()).toBe(
-    `Source: ${latest.attribution} Backtest: made after the fact, with only the data up to Jun 28. The model's training cutoff is not published, so backtests may be optimistic.`
+    `Source: ${latest.attribution} Backtest: made after the fact, with only the data up to Jun 28, but as published later: it may have been revised since. The model's training cutoff is not published, so backtests may be optimistic.`
   )
 })
 

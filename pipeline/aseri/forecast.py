@@ -26,6 +26,15 @@ class Forecast:
     quantiles: np.ndarray
 
 
+def make_context(vintage: pd.Series, reference_date: pd.Timestamp) -> pd.Series:
+    """The model's input for a forecast from `reference_date`: the vintage up to that day.
+
+    The one context builder of the daily run, the backfill and every backtest. Any threshold,
+    scale or detector belongs here, computed on this slice, never on the whole vintage.
+    """
+    return vintage.loc[:reference_date]
+
+
 def forecast(model, observed: pd.Series, horizon: int) -> Forecast:
     """Quantile forecast of the `horizon` days after the last observation, from the whole history."""
     result = model.forecast(observed.to_numpy(), prediction_length=horizon)

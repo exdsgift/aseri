@@ -13,6 +13,8 @@ class Series:
     baseline_label: str
     horizon: int
     interval_steps: tuple[int, ...]
+    # How many days back from its newest an upstream revision may reach; anything older holds the run.
+    revision_window: int
     source: dict
     license: dict
 
@@ -25,6 +27,8 @@ GPR_DAILY = Series(
     baseline_label="its 1985-2019 average",
     horizon=28,
     interval_steps=(7, 14, 28),
+    # GPR rewrites its last month every week; 90 days still catches a rewrite like its 2024 fix back to 2021.
+    revision_window=90,
     source={
         "title": "Caldara and Iacoviello, Geopolitical Risk Index, daily",
         "url": "https://www.matteoiacoviello.com/gpr.htm",

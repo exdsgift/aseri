@@ -1,27 +1,36 @@
 """Caldara and Iacoviello's daily geopolitical risk index (GPRD)."""
 
+import hashlib
 import io
 import time
 import urllib.request
 from datetime import UTC, date, datetime
-from http.client import HTTPException
+from http.client import HTTPException, HTTPMessage
 from urllib.error import HTTPError
 
 import pandas as pd
 
 
-def fetch(url: str) -> tuple[pd.Series, date]:
-    """Today's vintage of the index, and its as_of: the UTC date it was downloaded."""
+def fetch(url: str) -> tuple[pd.Series, date, dict]:
+    """Today's vintage of the index, its as_of (the UTC date it was downloaded), and the file's hash and upstream stamps."""
     as_of = datetime.now(UTC).date()
-    return parse(download(url)), as_of
+    raw, headers = download(url)
+    upstream = {
+        "source_url": url,
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        # The server's own freshness stamps, verbatim, or None when it sends none.
+        "last_modified": headers.get("Last-Modified"),
+        "etag": headers.get("ETag"),
+    }
+    return parse(raw), as_of, upstream
 
 
-def download(url: str) -> bytes:
-    """The file at `url`, retried with exponential backoff (10 s to 80 s) before giving up."""
+def download(url: str) -> tuple[bytes, HTTPMessage]:
+    """The file at `url` and its response headers, retried with exponential backoff (10 s to 80 s) before giving up."""
     for attempt in range(5):
         try:
             with urllib.request.urlopen(url, timeout=60) as response:
-                return response.read()
+                return response.read(), response.headers
         except (OSError, HTTPException) as error:
             # A 4xx will not fix itself; a 5xx, a timeout or a cut connection may.
             if attempt == 4 or (isinstance(error, HTTPError) and error.code < 500):

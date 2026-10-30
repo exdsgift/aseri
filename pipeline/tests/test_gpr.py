@@ -1,3 +1,4 @@
+import hashlib
 import io
 from http.client import IncompleteRead
 from urllib.error import HTTPError
@@ -64,6 +65,43 @@ def test_rejects_an_implausible_value(value):
         gpr.parse(raw)
 
 
+class Response:
+    """What urlopen returns, as far as download reads it."""
+
+    def __init__(self, body, headers):
+        self.body, self.headers = body, headers
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self):
+        return self.body
+
+
+def test_fetch_records_the_hash_of_the_file_and_its_upstream_stamps(monkeypatch):
+    raw = gpr_file([120.5, 98.25], ["2026-10-25", "2026-10-26"])
+    headers = {
+        "Last-Modified": "Mon, 26 Oct 2026 17:55:26 GMT",
+        "ETag": '"6adf940e-185ee0"',
+    }
+    monkeypatch.setattr(
+        gpr.urllib.request, "urlopen", lambda url, timeout: Response(raw, headers)
+    )
+
+    observed, _, upstream = gpr.fetch("https://example.org/gpr.dta")
+
+    assert observed.tolist() == [120.5, 98.25]
+    assert upstream == {
+        "source_url": "https://example.org/gpr.dta",
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "last_modified": "Mon, 26 Oct 2026 17:55:26 GMT",
+        "etag": '"6adf940e-185ee0"',
+    }
+
+
 def test_download_does_not_retry_a_client_error(monkeypatch):
     calls = []
 
@@ -82,20 +120,16 @@ def test_download_does_not_retry_a_client_error(monkeypatch):
 def test_download_retries_a_connection_cut_mid_body(monkeypatch):
     attempts = iter([IncompleteRead(b"partial"), b"whole file"])
 
-    class Response:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *exc):
-            return False
-
+    class CutResponse(Response):
         def read(self):
             outcome = next(attempts)
             if isinstance(outcome, Exception):
                 raise outcome
             return outcome
 
-    monkeypatch.setattr(gpr.urllib.request, "urlopen", lambda url, timeout: Response())
+    monkeypatch.setattr(
+        gpr.urllib.request, "urlopen", lambda url, timeout: CutResponse(None, {})
+    )
     monkeypatch.setattr(gpr.time, "sleep", lambda seconds: None)
 
-    assert gpr.download("https://example.org/gpr.dta") == b"whole file"
+    assert gpr.download("https://example.org/gpr.dta") == (b"whole file", {})

@@ -1,8 +1,11 @@
 """The daily run end to end: fetch, forecast, archive and publish, with a recorded GPR file and a stub model."""
 
+import hashlib
 import io
 import json
 import re
+import runpy
+import sys
 from datetime import UTC, date, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -19,6 +22,11 @@ from aseri.sources import gpr
 
 # The last 60 days of the upstream file as downloaded on 2026-10-29.
 RECORDED_GPR = Path(__file__).parent / "fixtures" / "gpr_daily_recent.dta"
+# The upstream server's stamps on that day's file.
+HEADERS = {
+    "Last-Modified": "Mon, 26 Oct 2026 17:55:26 GMT",
+    "ETag": '"6adf940e-185ee0"',
+}
 LEVELS = (
     0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
     0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99,
@@ -26,9 +34,13 @@ LEVELS = (
 
 
 class StubModel:
-    """Stands in for Timestral: the last value, in a band that widens with each step."""
+    """Stands in for Timestral: the last value, in a band that widens with each step. It keeps every context it reads."""
+
+    def __init__(self):
+        self.contexts = []
 
     def forecast(self, context, prediction_length):
+        self.contexts.append(context)
         steps = np.arange(1, prediction_length + 1)[:, None]
         band = context[-1] + steps * (np.array(LEVELS) - 0.5)
         return SimpleNamespace(
@@ -54,7 +66,7 @@ def run_on(monkeypatch, moment, gpr_file, api_dir, archive_dir):
     clock = SimpleNamespace(now=lambda tz: moment)
     monkeypatch.setattr(cli, "datetime", clock)
     monkeypatch.setattr(gpr, "datetime", clock)
-    monkeypatch.setattr(gpr, "download", lambda url: gpr_file)
+    monkeypatch.setattr(gpr, "download", lambda url: (gpr_file, HEADERS))
     cli.main(api_dir, archive_dir)
 
 
@@ -74,7 +86,9 @@ def stub_model(monkeypatch):
 def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actuals(
     tmp_path, monkeypatch, stub_model
 ):
-    monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
+    monkeypatch.setattr(
+        gpr, "download", lambda url: (RECORDED_GPR.read_bytes(), HEADERS)
+    )
 
     before = datetime.now(UTC).date().isoformat()
     cli.main(tmp_path / "api", tmp_path / "archive")
@@ -111,7 +125,9 @@ def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actua
 def test_a_run_in_github_actions_records_its_commit_and_run(
     tmp_path, monkeypatch, stub_model
 ):
-    monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
+    monkeypatch.setattr(
+        gpr, "download", lambda url: (RECORDED_GPR.read_bytes(), HEADERS)
+    )
     monkeypatch.setenv("GITHUB_SHA", "f" * 40)
     monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
     monkeypatch.setenv("GITHUB_REPOSITORY", "exdsgift/aseri")
@@ -134,10 +150,11 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
     deltas = archive_dir / "target-data" / "deltas"
 
     # Day 1, on an empty archive: the launch backfill, every recorded day, only the newest live.
+    day1_file = recorded_gpr_until("2026-10-19")
     run_on(
         monkeypatch,
         datetime(2026, 10, 20, 7, 2, tzinfo=UTC),
-        recorded_gpr_until("2026-10-19"),
+        day1_file,
         tmp_path / "day1",
         archive_dir,
     )
@@ -153,6 +170,14 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
         53 * 28 * 21
     )
     assert len(pd.read_csv(deltas / "2026-10-20.csv")) == 53
+    assert read(archive_dir / "runs" / "2026-10-20.json")["upstream"] == {
+        "gpr_daily": {
+            "source_url": GPR_DAILY.source["data_url"],
+            "sha256": hashlib.sha256(day1_file).hexdigest(),
+            "last_modified": "Mon, 26 Oct 2026 17:55:26 GMT",
+            "etag": '"6adf940e-185ee0"',
+        }
+    }
     day1 = read(tmp_path / "day1" / "series" / "gpr_daily" / "forecasts.json")
     assert len(day1["forecasts"]) == 53
     assert day1["forecasts"][0]["reference_date"] == "2026-08-28"
@@ -235,6 +260,27 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
         ).read_bytes()
 
 
+def test_every_forecast_of_the_backfill_reads_the_data_up_to_its_own_date_and_no_further(
+    tmp_path, monkeypatch
+):
+    model = StubModel()
+    monkeypatch.setattr(cli, "load_model", lambda: model)
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+
+    observed = gpr.parse(RECORDED_GPR.read_bytes())
+    index = read(tmp_path / "api" / "series" / "gpr_daily" / "forecasts.json")
+    assert len(model.contexts) == len(index["forecasts"]) == 60
+    for context, issued in zip(model.contexts, index["forecasts"]):
+        assert context.tolist() == observed.loc[: issued["reference_date"]].tolist()
+
+
 def test_a_later_run_backfills_the_days_before_an_archived_forecast_and_latest_stays_the_newest(
     tmp_path, monkeypatch, stub_model
 ):
@@ -247,6 +293,7 @@ def test_a_later_run_backfills_the_days_before_an_archived_forecast_and_latest_s
         [cli.forecast(StubModel(), observed, GPR_DAILY.horizon)],
         observed=observed,
         as_of=date(2026, 10, 30),
+        upstream={},
         code_commit="0" * 40,
         run_url=None,
         generated_at=datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
@@ -362,3 +409,40 @@ def test_a_revision_without_a_new_day_is_archived_as_it_is_seen(
     day1 = read(tmp_path / "day1" / "series" / "gpr_daily" / "forecasts.json")
     day2 = read(tmp_path / "day2" / "series" / "gpr_daily" / "forecasts.json")
     assert day2["forecasts"] == day1["forecasts"]
+
+
+def test_a_rewrite_older_than_the_revision_window_stops_the_run_before_it_archives_or_publishes(
+    tmp_path, monkeypatch, capsys
+):
+    archive_dir = tmp_path / "archive"
+    days = pd.date_range("2023-01-01", "2026-10-26", freq="D")
+    history = pd.DataFrame({"date": days, "GPRD": 100.0 + np.arange(len(days)) % 50})
+    archive.write(
+        archive_dir,
+        GPR_DAILY,
+        [],
+        observed=history.set_index("date")["GPRD"],
+        as_of=date(2026, 10, 27),
+        upstream={},
+        code_commit="0" * 40,
+        run_url=None,
+        generated_at=datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+    )
+    archive_before = files(archive_dir)
+    history.loc[history["date"] == "2023-05-01", "GPRD"] = 250.0
+    rewritten = io.BytesIO()
+    history.to_stata(rewritten, write_index=False, convert_dates={"date": "td"})
+    monkeypatch.setattr(gpr, "download", lambda url: (rewritten.getvalue(), HEADERS))
+    # runpy runs __main__ afresh, so the guard goes where it imports load_model from.
+    monkeypatch.setattr("aseri.forecast.load_model", no_model)
+    monkeypatch.delitem(sys.modules, "aseri.__main__")
+    monkeypatch.setattr(sys, "argv", ["aseri", str(tmp_path / "api"), str(archive_dir)])
+
+    # As daily.yml runs it: exit 3 is how the workflow tells a hold from a crash.
+    with pytest.raises(SystemExit) as stopped:
+        runpy.run_module("aseri", run_name="__main__")
+
+    assert stopped.value.code == 3
+    assert "2023-05-01" in capsys.readouterr().err
+    assert files(archive_dir) == archive_before
+    assert not (tmp_path / "api").exists()

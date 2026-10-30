@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from aseri import archive
-from aseri.forecast import forecast, load_model
+from aseri.forecast import forecast, load_model, make_context
 from aseri.publish import publish
 from aseri.series import GPR_DAILY
 from aseri.sources import gpr
@@ -27,7 +27,9 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         else None
     )
     generated_at = datetime.now(UTC)
-    observed, as_of = gpr.fetch(GPR_DAILY.source["data_url"])
+    observed, as_of, upstream = gpr.fetch(GPR_DAILY.source["data_url"])
+    # First, so a deep rewrite stops the run before it archives or publishes anything, actuals included.
+    archive.check_revisions(archive_dir, GPR_DAILY, observed, as_of)
     archived = archive.read(archive_dir, GPR_DAILY.id)
     ran_today = archive.ran_on(archive_dir, generated_at.date())
     new_dates = (
@@ -38,14 +40,17 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         )
     )
     if not ran_today and (
-        new_dates or archive.has_new_observations(archive_dir, GPR_DAILY.id, observed)
+        new_dates
+        or archive.has_new_observations(archive_dir, GPR_DAILY.id, observed, as_of)
     ):
         forecasts = []
         if new_dates:
             model = load_model()
             for day in new_dates:
                 # Each forecast sees only the data up to its own date.
-                forecasts.append(forecast(model, observed.loc[:day], GPR_DAILY.horizon))
+                forecasts.append(
+                    forecast(model, make_context(observed, day), GPR_DAILY.horizon)
+                )
                 # The launch backfill takes minutes, so the log shows it moving.
                 print(
                     f"{GPR_DAILY.id}: forecast {len(forecasts)} of {len(new_dates)}, from {day:%Y-%m-%d}",
@@ -57,6 +62,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             forecasts,
             observed=observed,
             as_of=as_of,
+            upstream=upstream,
             code_commit=code_commit,
             run_url=run_url,
             generated_at=generated_at,
@@ -77,4 +83,9 @@ def main(api_dir: Path, archive_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]), Path(sys.argv[2]))
+    try:
+        main(Path(sys.argv[1]), Path(sys.argv[2]))
+    except archive.RevisionHold as hold:
+        print(hold, file=sys.stderr)
+        # 3, not 1, so daily.yml can tell a hold from a crash and open an issue.
+        sys.exit(3)

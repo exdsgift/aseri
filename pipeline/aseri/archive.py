@@ -14,6 +14,7 @@ from aseri.forecast import (
     WEIGHTS,
     WEIGHTS_REVISION,
     Forecast,
+    make_context,
 )
 from aseri.series import Series
 
@@ -88,11 +89,31 @@ def ran_on(archive_dir: Path, day: date) -> bool:
 
 
 def has_new_observations(
-    archive_dir: Path, series_id: str, observed: pd.Series
+    archive_dir: Path, series_id: str, observed: pd.Series, as_of: date
 ) -> bool:
     return not observation_delta(
-        observed, _latest_vintage(archive_dir, series_id)
+        observed, as_of_view(archive_dir, series_id, as_of)
     ).empty
+
+
+class RevisionHold(Exception):
+    """Upstream changed values older than the series' revision window: a method change or a broken file, for a human to review."""
+
+
+def check_revisions(
+    archive_dir: Path, series: Series, observed: pd.Series, as_of: date
+) -> None:
+    """Raise RevisionHold if `observed` changes an archived value older than `series.revision_window` days before its newest."""
+    known = as_of_view(archive_dir, series.id, as_of)
+    revised = observation_delta(observed, known).index.intersection(known.index)
+    oldest_allowed = observed.index[-1] - pd.Timedelta(days=series.revision_window)
+    deep = revised[revised < oldest_allowed]
+    if len(deep):
+        raise RevisionHold(
+            f"{series.id}: upstream changed {len(deep)} archived values older than its "
+            f"{series.revision_window}-day revision window, the oldest on {deep.min():%Y-%m-%d}. "
+            "Nothing is archived or published until someone has reviewed the rewrite."
+        )
 
 
 def timestamp(moment: datetime) -> str:
@@ -111,6 +132,7 @@ def write(
     *,
     observed: pd.Series,
     as_of: date,
+    upstream: dict,
     code_commit: str,
     run_url: str | None,
     generated_at: datetime,
@@ -128,7 +150,7 @@ def write(
     forecast_date = generated_at.date().isoformat()
     round_file = ROUNDS / f"{forecast_date}-{MODEL_ID}.csv"
     delta_file = DELTAS / f"{forecast_date}.csv"
-    delta = observation_delta(observed, _latest_vintage(archive_dir, series.id))
+    delta = observation_delta(observed, as_of_view(archive_dir, series.id, as_of))
     rounds = [
         {
             "forecast_date": forecast_date,
@@ -176,7 +198,7 @@ def write(
                     "as_of": as_of.isoformat(),
                     # The exact context, as `date,value` lines: rebuilt from the deltas, it must hash the same.
                     "input_sha256": _sha256(
-                        observed.loc[: forecast.reference_date]
+                        make_context(observed, forecast.reference_date)
                         .to_csv(header=False, lineterminator="\n")
                         .encode()
                     ),
@@ -184,6 +206,8 @@ def write(
             }
             for forecast in forecasts
         ],
+        # The raw file this run read, so a later audit can tell a revision from a broken download.
+        "upstream": {series.id: upstream},
         "provenance": {
             "model": {
                 "id": WEIGHTS,
@@ -207,19 +231,29 @@ def write(
         json.dump(manifest, file, indent=2)
 
 
-def _latest_vintage(archive_dir: Path, series_id: str) -> pd.Series:
-    """The observations as the archive last saw them: for each date, the value with the latest as_of."""
+def as_of_view(archive_dir: Path, series_id: str, t: date) -> pd.Series:
+    """`series_id` as the archive knew it on day `t`: every date up to `t`, each with its latest value seen by `t`."""
     deltas = sorted((archive_dir / DELTAS).glob("*.csv"))
     if not deltas:
-        return pd.Series(dtype=float)
-    rows = pd.concat(pd.read_csv(path) for path in deltas)
+        return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+    rows = pd.concat(
+        pd.read_csv(path, parse_dates=["target_end_date", "as_of"]) for path in deltas
+    )
+    t = pd.Timestamp(t)
     rows = (
-        rows[rows["target"] == series_id]
+        rows[
+            (rows["target"] == series_id)
+            & (rows["as_of"] <= t)
+            & (rows["target_end_date"] <= t)
+        ]
         .sort_values("as_of", kind="stable")
         .drop_duplicates("target_end_date", keep="last")
+        .sort_values("target_end_date")
     )
     return pd.Series(
-        rows["observation"].to_numpy(), index=pd.to_datetime(rows["target_end_date"])
+        rows["observation"].to_numpy(),
+        index=pd.DatetimeIndex(rows["target_end_date"]),
+        dtype=float,
     )
 
 
