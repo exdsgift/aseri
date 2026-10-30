@@ -9,6 +9,7 @@ import pandas as pd
 from aseri.archive import REPLAY_DAYS, Archived, timestamp
 from aseri.forecast import MODEL_ID, WEIGHTS, WEIGHTS_REVISION
 from aseri.series import Series
+from aseri.tie import day_to_day_tie
 
 SCHEMA_VERSION = "1.0.0"
 
@@ -26,8 +27,8 @@ FORECAST_LICENSE = {
     "attribution": FORECAST_CREDIT,
     "note": "Upstream terms still apply to the underlying data: see each series' license.",
 }
-# The page's 8-in-10 and 5-in-10 ranges and its most likely value.
-REPLAY_LEVELS = (0.1, 0.25, 0.5, 0.75, 0.9)
+# The page's 8-in-10 and 5-in-10 ranges and its most likely value, and the tails a possible path reaches.
+REPLAY_LEVELS = (0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99)
 # A retrospective forecast read revised data, and the model may have trained on the days it forecasts.
 PSEUDO_REAL_TIME = {
     "testdata_leakage": "unknown",
@@ -41,6 +42,7 @@ def publish(
     archived: list[Archived],
     *,
     observed: pd.Series,
+    first_seen: pd.Series,
     as_of: date,
     generated_at: datetime,
     stale_since: date | None = None,
@@ -48,7 +50,8 @@ def publish(
 ) -> dict:
     """Write every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
 
-    `archived` is oldest reference date first, as `archive.read` returns it. A series the run skipped
+    `archived` is oldest reference date first, as `archive.read` returns it. `first_seen` holds each
+    day as first observed, which the day-to-day tie is scored against. A series the run skipped
     has a `stale_since` date; a `note` says why its latest forecast starts before its last observation.
     """
     links = {
@@ -78,7 +81,8 @@ def publish(
     _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
     _write(api_dir / links["replay"], _replay(series, archived, latest["attribution"]))
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
-    return _entry(series, observed, newest, links, stale_since, note)
+    tie = day_to_day_tie([a.forecast for a in archived], first_seen)
+    return _entry(series, observed, newest, links, stale_since, note, tie)
 
 
 def publish_catalog(
@@ -178,7 +182,7 @@ def _replay(series, archived, attribution) -> dict:
             {
                 "reference_date": f"{a.forecast.reference_date:%Y-%m-%d}",
                 "forecast_mode": a.provenance["forecast_mode"],
-                # One decimal keeps 121 GPR days at 37 KB gzipped, not 68 KB; the dated files keep four.
+                # One decimal keeps 121 GPR days at 70 KB gzipped at nine levels; the dated files keep four.
                 "quantiles": {
                     str(level): [
                         round(float(v), 1)
@@ -212,7 +216,7 @@ def _actuals(series, observed, as_of, generated_at) -> dict:
     }
 
 
-def _entry(series, observed, newest, links, stale_since, note) -> dict:
+def _entry(series, observed, newest, links, stale_since, note, tie) -> dict:
     return {
         "series_id": series.id,
         "title": series.title,
@@ -231,6 +235,8 @@ def _entry(series, observed, newest, links, stale_since, note) -> dict:
         "stale_since": stale_since and stale_since.isoformat(),
         # Why the latest forecast starts before the last observation, then any standing caveat on the data.
         "note": " ".join(n for n in (note, series.note) if n) or None,
+        # Additive to v1: how the real days moved together within a forecast, for the page's possible paths.
+        "day_to_day_tie": tie,
         "source": series.source,
         "license": series.license,
         "links": links,

@@ -39,12 +39,18 @@ PSEUDO_REAL_TIME = {
     "pseudo_real_time_note": "Made after the fact, from the data as published on its forecast_date, which may differ from what was known on its reference_date.",
 }
 
+# The page's levels: its two ranges and most likely value, and the tails a possible path reaches.
+LEVELS = (0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99)
 QUANTILES = {
+    "0.01": [80.4, 70.2],
+    "0.05": [85.6, 78.9],
     "0.1": [90.1, 85.4],
     "0.25": [95.2, 93.5],
     "0.5": [100.2, 101.5],
     "0.75": [105.3, 110.6],
     "0.9": [110.3, 120.6],
+    "0.95": [115.7, 128.3],
+    "0.99": [121.9, 140.8],
 }
 ATTRIBUTION = (
     'Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", '
@@ -64,11 +70,9 @@ def archived(reference_date, forecast_mode, forecast_date="2026-10-29"):
     return Archived(
         forecast=Forecast(
             reference_date=pd.Timestamp(reference_date),
-            levels=(0.1, 0.25, 0.5, 0.75, 0.9),
-            quantiles=np.array(
-                # As the archive reads them back: already rounded, in float64.
-                [[90.1, 95.2, 100.2, 105.3, 110.3], [85.4, 93.5, 101.5, 110.6, 120.6]]
-            ),
+            levels=LEVELS,
+            # As the archive reads them back: already rounded, in float64.
+            quantiles=np.array([QUANTILES[str(level)] for level in LEVELS]).T,
         ),
         model_id="aseri-timestral209m",
         forecast_date=forecast_date,
@@ -85,6 +89,7 @@ def publish_gpr(api_dir, observed, forecasts):
         GPR_DAILY,
         forecasts,
         observed=observed,
+        first_seen=observed,
         as_of=date(2026, 10, 30),
         generated_at=GENERATED_AT,
     )
@@ -206,7 +211,7 @@ def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_le
         "series_id": "gpr_daily",
         "model_id": "aseri-timestral209m",
         "horizon": [1, 2],
-        "quantile_levels": ["0.1", "0.25", "0.5", "0.75", "0.9"],
+        "quantile_levels": [str(level) for level in LEVELS],
         "forecasts": [
             {
                 "reference_date": "2026-06-28",
@@ -292,7 +297,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
         "hf_id": "mistralai/Timestral-209M",
         "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
     }
-    assert catalog["quantile_levels"] == [0.1, 0.25, 0.5, 0.75, 0.9]
+    assert catalog["quantile_levels"] == list(LEVELS)
     assert catalog["series"] == [
         {
             "series_id": "gpr_daily",
@@ -308,6 +313,8 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "latest_forecast_date": "2026-10-29",
             "stale_since": None,
             "note": None,
+            # One pair so far, the two days of 2026-10-25's forecast: far too few for a tie.
+            "day_to_day_tie": {"rho": 0.0, "n": 1},
             "source": GPR_DAILY.source,
             "license": GPR_DAILY.license,
             "links": {
@@ -347,6 +354,7 @@ def test_catalog_lists_every_series_with_its_365_day_mean_where_it_has_no_fixed_
         GPR_DAILY,
         [archived("2026-10-26", "live")],
         observed=days_to("2026-10-27", [120.5, 98.23]),
+        first_seen=days_to("2026-10-27", [120.5, 98.23]),
         as_of=date(2026, 10, 30),
         generated_at=GENERATED_AT,
     )
@@ -355,6 +363,7 @@ def test_catalog_lists_every_series_with_its_365_day_mean_where_it_has_no_fixed_
         TAIWAN_STRAIT_TRANSITS,
         [archived("2026-10-24", "live")],
         observed=TAIWAN_DAYS,
+        first_seen=TAIWAN_DAYS,
         as_of=date(2026, 10, 30),
         generated_at=GENERATED_AT,
         note=note,
