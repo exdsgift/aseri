@@ -10,6 +10,7 @@ from datetime import date
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import pytest
 from huggingface_hub import try_to_load_from_cache
 
@@ -22,8 +23,8 @@ from aseri.forecast import (
     load_model,
     make_context,
 )
-from aseri.series import GPR_DAILY
-from aseri.sources import gpr
+from aseri.series import GPR_DAILY, HORMUZ_TRANSITS
+from aseri.sources import gpr, portwatch
 
 FIXTURES = Path(__file__).parent / "fixtures"
 # The frozen input: 60 real GPR days, also the daily run's recorded download in test_cli.
@@ -57,8 +58,8 @@ def assert_well_formed(result, series):
     """The real outputs keep the stubs' shape: ordered, finite, and never below 0 for a count."""
     assert np.isfinite(result.quantiles).all()
     assert (np.diff(result.quantiles, axis=1) >= 0).all()
-    # GPR is an index, not a count; `kind` comes per series with #138, and until then nothing is a count.
-    if getattr(series, "kind", None) == "count":
+    # GPR is an index; the PortWatch series are counts.
+    if series.kind == "count":
         assert (result.quantiles >= 0).all()
 
 
@@ -124,6 +125,24 @@ def test_a_live_forecast_is_made_again_from_its_archived_vintage(live, model):
         result.quantiles, live.forecast.quantiles, rtol=1e-4, atol=1e-4
     )
     assert_well_formed(result, GPR_DAILY)
+
+
+@pytest.mark.slow
+def test_the_model_keeps_a_count_series_at_0_and_up(model):
+    # Hormuz as recorded for test_portwatch: 55 days of 0 to 8 ships, a band that would reach below 0.
+    pages = [
+        json.loads((FIXTURES / "portwatch" / f"page-{offset}.json").read_bytes())
+        for offset in (0, 25, 50)
+    ]
+    context = portwatch.parse(
+        [feature["attributes"] for page in pages for feature in page["features"]],
+        pd.Timestamp("2026-10-28T07:51:08"),
+    )
+
+    result = forecast(model, context, HORMUZ_TRANSITS.horizon, HORMUZ_TRANSITS.kind)
+
+    assert result.quantiles.shape == (HORMUZ_TRANSITS.horizon, len(LEVELS))
+    assert_well_formed(result, HORMUZ_TRANSITS)
 
 
 @pytest.mark.slow

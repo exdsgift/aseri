@@ -1,5 +1,6 @@
 import hashlib
 import json
+from dataclasses import replace
 from datetime import UTC, date, datetime
 from types import SimpleNamespace
 
@@ -37,14 +38,11 @@ UPSTREAM = {
 }
 
 
-def archive_run(archive_dir, forecasts, observed, run_day):
+def archive_run(archive_dir, forecasts, observed, run_day, *more):
+    """Archive one run of GPR, and of any `more` series given as SeriesRun."""
     archive.write(
         archive_dir,
-        GPR_DAILY,
-        forecasts,
-        observed=observed,
-        as_of=run_day,
-        upstream=UPSTREAM,
+        [archive.SeriesRun(GPR_DAILY, forecasts, observed, run_day, UPSTREAM), *more],
         code_commit="0123abc",
         run_url="https://github.com/exdsgift/aseri/actions/runs/1",
         generated_at=datetime(
@@ -406,6 +404,141 @@ def test_a_run_manifest_records_the_modes_provenance_inputs_upstream_file_and_ch
             delta_file: sha256((tmp_path / delta_file).read_bytes()),
         },
     }
+
+
+# A second series, with its own source: the run archives both in one round, one delta and one manifest.
+SUEZ = replace(
+    GPR_DAILY, id="suez_transits", source={"data_url": "https://example.org/suez"}
+)
+SUEZ_UPSTREAM = {
+    "source_url": "https://example.org/suez",
+    "sha256": "ef" * 32,
+    "data_last_edit_date": "2026-10-28T07:51:08Z",
+}
+
+
+def test_one_run_of_two_series_archives_one_round_one_delta_and_one_manifest(
+    tmp_path,
+):
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-26")],
+        days_to("2026-10-26", [120.5, 98.23]),
+        date(2026, 10, 29),
+        archive.SeriesRun(
+            SUEZ,
+            [
+                two_step_forecast("2026-10-24", shift=-50),
+                two_step_forecast("2026-10-25", shift=-50),
+            ],
+            days_to("2026-10-25", [46.0, 41.0]),
+            date(2026, 10, 29),
+            SUEZ_UPSTREAM,
+        ),
+    )
+
+    round_file = "model-output/aseri-timestral209m/2026-10-29-aseri-timestral209m.csv"
+    delta_file = "target-data/deltas/2026-10-29.csv"
+    assert sorted(
+        p.relative_to(tmp_path).as_posix() for p in tmp_path.rglob("*") if p.is_file()
+    ) == [round_file, "runs/2026-10-29.json", delta_file]
+    rounds = pd.read_csv(tmp_path / round_file)
+    assert rounds[["target", "reference_date"]].drop_duplicates().values.tolist() == [
+        ["gpr_daily", "2026-10-26"],
+        ["suez_transits", "2026-10-24"],
+        ["suez_transits", "2026-10-25"],
+    ]
+    assert (tmp_path / delta_file).read_text(encoding="utf-8").splitlines() == [
+        "target,target_end_date,observation,as_of",
+        "gpr_daily,2026-10-25,120.5,2026-10-29",
+        "gpr_daily,2026-10-26,98.23,2026-10-29",
+        "suez_transits,2026-10-24,46.0,2026-10-29",
+        "suez_transits,2026-10-25,41.0,2026-10-29",
+    ]
+    manifest = json.loads(
+        (tmp_path / "runs" / "2026-10-29.json").read_text(encoding="utf-8")
+    )
+    assert [
+        (f["target"], f["reference_date"], f["forecast_mode"], f["data"]["source_url"])
+        for f in manifest["forecasts"]
+    ] == [
+        ("gpr_daily", "2026-10-26", "live", UPSTREAM["source_url"]),
+        ("suez_transits", "2026-10-24", "retrospective", "https://example.org/suez"),
+        ("suez_transits", "2026-10-25", "live", "https://example.org/suez"),
+    ]
+    assert manifest["upstream"] == {
+        "gpr_daily": UPSTREAM,
+        "suez_transits": SUEZ_UPSTREAM,
+    }
+    assert list(manifest["files"]) == [round_file, delta_file]
+    # Each series reads back only its own forecasts.
+    assert [
+        a.forecast.quantiles[0, 1] for a in archive.read(tmp_path, "gpr_daily")
+    ] == [pytest.approx(100.2)]
+    assert [
+        a.forecast.reference_date for a in archive.read(tmp_path, "suez_transits")
+    ] == [pd.Timestamp("2026-10-24"), pd.Timestamp("2026-10-25")]
+    assert archive.as_of_view(
+        tmp_path, "suez_transits", date(2026, 10, 29)
+    ).to_dict() == (days_to("2026-10-25", [46.0, 41.0]).to_dict())
+
+
+def test_a_manifest_from_before_the_upstream_stamps_still_reads(tmp_path):
+    # As the archive branch's first run wrote runs/2026-10-30.json: one series, no "upstream" key.
+    round_file = "model-output/aseri-timestral209m/2026-10-30-aseri-timestral209m.csv"
+    delta_file = "target-data/deltas/2026-10-30.csv"
+    (tmp_path / round_file).parent.mkdir(parents=True)
+    (tmp_path / round_file).write_text(
+        "forecast_date,target,reference_date,horizon,target_end_date,output_type,output_type_id,value\n"
+        "2026-10-30,gpr_daily,2026-10-26,1,2026-10-27,quantile,0.1,90.1\n"
+        "2026-10-30,gpr_daily,2026-10-26,1,2026-10-27,quantile,0.5,100.2\n"
+        "2026-10-30,gpr_daily,2026-10-26,1,2026-10-27,quantile,0.9,110.3\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    (tmp_path / delta_file).parent.mkdir(parents=True)
+    (tmp_path / delta_file).write_text(
+        "target,target_end_date,observation,as_of\n"
+        "gpr_daily,2026-10-26,165.2528,2026-10-30\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    (tmp_path / "runs").mkdir()
+    (tmp_path / "runs" / "2026-10-30.json").write_text(
+        json.dumps(
+            {
+                "forecast_date": "2026-10-30",
+                "model_id": "aseri-timestral209m",
+                "forecasts": [
+                    {
+                        "target": "gpr_daily",
+                        "reference_date": "2026-10-26",
+                        "forecast_mode": "live",
+                        "data": {
+                            "source_url": UPSTREAM["source_url"],
+                            "as_of": "2026-10-30",
+                            "input_sha256": "db" * 32,
+                        },
+                    }
+                ],
+                "provenance": {
+                    "model": {"id": "mistralai/Timestral-209M"},
+                    "generated_at": "2026-10-30T00:49:14Z",
+                },
+                "files": {round_file: "57" * 32, delta_file: "b1" * 32},
+            }
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    (archived,) = archive.read(tmp_path, "gpr_daily")
+
+    assert archived.forecast.reference_date == pd.Timestamp("2026-10-26")
+    assert archived.forecast.quantiles.tolist() == [[90.1, 100.2, 110.3]]
+    assert archived.provenance["forecast_mode"] == "live"
+    assert archive.read(tmp_path, "suez_transits") == []
+    assert archive.newest_as_of(tmp_path, "gpr_daily") == date(2026, 10, 30)
 
 
 def test_a_forecast_from_the_newest_day_is_retrospective_when_the_archive_holds_a_newer_one(

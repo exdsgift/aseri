@@ -7,8 +7,8 @@ import pytest
 
 from aseri.archive import Archived
 from aseri.forecast import Forecast
-from aseri.publish import publish
-from aseri.series import GPR_DAILY
+from aseri.publish import publish, publish_catalog
+from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 
 PROVENANCE = {
     "model": {
@@ -76,15 +76,19 @@ def archived(reference_date, forecast_mode, forecast_date="2026-10-29"):
     )
 
 
+GENERATED_AT = datetime(2026, 10, 30, 7, 1, 5, tzinfo=UTC)
+
+
 def publish_gpr(api_dir, observed, forecasts):
-    publish(
+    entry = publish(
         api_dir,
         GPR_DAILY,
         forecasts,
         observed=observed,
         as_of=date(2026, 10, 30),
-        generated_at=datetime(2026, 10, 30, 7, 1, 5, tzinfo=UTC),
+        generated_at=GENERATED_AT,
     )
+    publish_catalog(api_dir, [entry], forecasts[-1].forecast.levels, GENERATED_AT)
 
 
 def days_to(last_day, values, dtype=float):
@@ -320,3 +324,60 @@ def test_catalog_states_the_forecast_licence(api_dir):
     catalog = read(api_dir / "series.json")
 
     assert catalog["license"] == FORECAST_LICENSE
+
+
+# 400 days: the 35 oldest at 1000, then 364 at 250 and the newest at 615, so the 365 newest average 251.
+TAIWAN_DAYS = days_to("2026-10-25", [1000.0] * 35 + [250.0] * 364 + [615.0])
+REVIEW_NOTE = "The value of 2026-10-25 is under review."
+
+
+@pytest.mark.parametrize(
+    ("note", "published"),
+    [
+        (None, TAIWAN_STRAIT_TRANSITS.note),
+        (REVIEW_NOTE, f"{REVIEW_NOTE} {TAIWAN_STRAIT_TRANSITS.note}"),
+    ],
+    ids=["nothing under review", "its newest value under review"],
+)
+def test_catalog_lists_every_series_with_its_365_day_mean_where_it_has_no_fixed_baseline(
+    tmp_path, note, published
+):
+    gpr = publish(
+        tmp_path,
+        GPR_DAILY,
+        [archived("2026-10-26", "live")],
+        observed=days_to("2026-10-27", [120.5, 98.23]),
+        as_of=date(2026, 10, 30),
+        generated_at=GENERATED_AT,
+    )
+    taiwan = publish(
+        tmp_path,
+        TAIWAN_STRAIT_TRANSITS,
+        [archived("2026-10-24", "live")],
+        observed=TAIWAN_DAYS,
+        as_of=date(2026, 10, 30),
+        generated_at=GENERATED_AT,
+        note=note,
+    )
+
+    publish_catalog(tmp_path, [gpr, taiwan], (0.1, 0.5, 0.9), GENERATED_AT)
+
+    catalog = read(tmp_path / "series.json")
+    assert catalog["quantile_levels"] == [0.1, 0.5, 0.9]
+    assert [s["series_id"] for s in catalog["series"]] == [
+        "gpr_daily",
+        "taiwan_strait_transits",
+    ]
+    assert catalog["series"][0]["baseline"] == 100
+    entry = catalog["series"][1]
+    assert (entry["baseline"], entry["baseline_label"]) == (251.0, "its 365-day mean")
+    assert entry["unit"] == "ships a day"
+    assert entry["note"] == published
+    assert entry["links"]["actuals"] == "series/taiwan_strait_transits/actuals.json"
+    assert entry["license"]["attribution"] == (
+        "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org)."
+    )
+    # Each series' files sit under its own id.
+    assert read(tmp_path / "series" / "taiwan_strait_transits" / "latest.json")[
+        "attribution"
+    ].startswith("Sources: UN Global Platform; IMF PortWatch")
