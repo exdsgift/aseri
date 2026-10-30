@@ -1,0 +1,648 @@
+<title>aseri hero studies</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Jacquard+24&family=Press+Start+2P&display=swap">
+<!-- PROTOTYPE, throwaway: four hero studies for aseri in the language of engraving meets signal
+     (public-domain engravings, dithered and duotoned, with rays, ticks, scanlines and op-art).
+     Sample data inline, no build step for the page itself. Keys: 1-4 variant, Q W E value. -->
+<style>
+/* Layout: the live hero column (16 px gutters, 46ch copy) over one canvas the size of the hero; each study sets its own two-colour palette. */
+:root {
+  color-scheme: dark;
+  --bg: #050505; --ink: #f2efe8; --ink2: #a5a19a; --sub: #cfcac0; --frame: #34322e;
+  --f-ui: "Press Start 2P", "DotGothic16", ui-monospace, monospace;
+  --f-display: "Jacquard 24", "Times New Roman", serif;
+  --f-word: "DotGothic16", "Press Start 2P", sans-serif;
+}
+:root[data-pal="blue"] { --bg: #1b1bf2; --ink: #ffffff; --ink2: #d0d2ff; --sub: #e4e4ff; --frame: #4545f6; }
+:root[data-pal="gold"] { --bg: #071324; --ink: #ffd23f; --ink2: #9badb7; --sub: #917d3c; --frame: #253a56; }
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font-family: var(--f-ui); font-size: 12px; line-height: 18px; }
+*, *::before, *::after { box-sizing: border-box; }
+p, h1 { margin: 0; font-weight: 400; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* As in Hero.tsx: px-4, a 300 px opening band for the art, gap-9, copy max-w-[46ch]. */
+.hero {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center; gap: 36px;
+  min-height: 100svh;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 300px 200px;
+  text-align: center; text-transform: uppercase; color: var(--ink);
+}
+.art { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.art canvas { display: block; image-rendering: pixelated; }
+/* Scanlines roll slowly over the signal study only. */
+.scan { position: absolute; inset: 0; display: none; background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(10 10 120 / 0.28) 2px 3px); animation: roll 9s linear infinite; }
+:root[data-v="signal"] .scan { display: block; }
+@keyframes roll { to { background-position: 0 30px; } }
+.grain { position: absolute; inset: -40px; opacity: 0.07; animation: grain 0.9s steps(3) infinite; }
+@keyframes grain { 33% { transform: translate(-13px, 7px); } 66% { transform: translate(9px, -11px); } }
+@media (prefers-reduced-motion: reduce) { .scan, .grain { animation: none; } }
+
+.proto {
+  position: absolute; top: 12px; left: max(16px, env(safe-area-inset-left, 0px));
+  padding: 4px 6px; border: 2px solid var(--frame); background: var(--bg);
+  font-size: 8px; line-height: 12px; color: var(--ink2); text-align: left;
+}
+.proto b { font-weight: 400; color: var(--ink); }
+.wordmark { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.wordmark .jp { font-family: var(--f-word); font-size: 64px; line-height: 1; text-transform: none; }
+.wordmark .sub { font-size: 16px; line-height: 24px; color: var(--sub); }
+@media (min-width: 640px) { .wordmark .jp { font-size: 96px; } }
+.num { position: relative; font-family: var(--f-display); font-size: 144px; line-height: 108px; }
+@media (min-width: 768px) { .num { font-size: 192px; line-height: 144px; } }
+.num[data-count] { color: transparent; }
+.num[data-count]::after { content: attr(data-count); position: absolute; top: 0; left: 50%; translate: -50%; white-space: nowrap; color: var(--ink); }
+.copy { display: flex; flex-direction: column; gap: 18px; max-width: 46ch; text-wrap: balance; }
+.copy .first { margin-top: -24px; }
+.muted { color: var(--ink2); }
+.nowrap { white-space: nowrap; }
+
+.credits {
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 190px; max-width: 760px; margin: 0 auto;
+  font-size: 8px; line-height: 14px; color: var(--ink2); text-transform: uppercase;
+}
+.credits p + p { margin-top: 8px; }
+.credits a { color: var(--ink2); overflow-wrap: anywhere; }
+
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: flex; justify-content: center; pointer-events: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.bar-in { pointer-events: auto; width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px; padding: 10px; border: 2px solid var(--frame); background: var(--bg); }
+.cap { min-height: 28px; font-size: 8px; line-height: 14px; color: var(--ink2); text-transform: uppercase; text-align: left; }
+.cap b { font-weight: 400; color: var(--ink); }
+.rows { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; }
+.group { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; }
+.glabel { align-self: center; margin-right: 4px; font-size: 8px; line-height: 12px; color: var(--ink2); text-transform: uppercase; }
+.group button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 5px 7px; border: 0; border-radius: 0; cursor: pointer;
+  font: inherit; font-size: 8px; line-height: 12px; text-transform: uppercase;
+  background: var(--frame); color: var(--ink2); transition: background-color 160ms, color 160ms;
+}
+.group button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+@media (hover: hover) { .group button:hover { background: var(--ink); color: var(--bg); } }
+@media (prefers-reduced-motion: reduce) { .group button { transition: none; } }
+</style>
+
+<section class="hero" id="hero" aria-labelledby="mark">
+  <div class="art" aria-hidden="true"><canvas id="art"></canvas><div class="scan"></div><div class="grain" id="grain"></div></div>
+  <p class="proto"><b>Study</b> · aseri hero · sample data</p>
+  <h1 class="wordmark" id="mark"><span lang="ja" class="jp">焦り</span><span class="sub"><span lang="ja">あせり</span> · aseri</span></h1>
+  <p id="kicker">Geopolitical risk · today</p>
+  <p class="num" id="num">181</p>
+  <div class="copy" id="copy">
+    <p class="muted first" id="avgline">7-day average to Oct 26</p>
+    <p id="vs">81% above <span class="nowrap">its 1985-2019 average</span></p>
+    <p>Monday Nov 23, 4 weeks from the last data: 8 in 10 between 111 and 251, 2 in 10 outside. Most likely 168. (Last Monday: 165)</p>
+    <p class="muted">GPR runs on a weekly cycle: compare Monday with Monday. Data as of Oct 30, preliminary for about 4 weeks.</p>
+  </div>
+</section>
+<footer class="credits">
+  <p>Images, all public domain, cropped, dithered and recoloured for this study:</p>
+  <p>Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592. National Gallery of Art, CC0. <a href="https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg">commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg</a></p>
+  <p>Hendrick Goltzius, The Farnese Hercules, c. 1592, published 1617. The Metropolitan Museum of Art, CC0. <a href="https://commons.wikimedia.org/wiki/File:Farnese_Hercules_MET_DP102198.jpg">commons.wikimedia.org/wiki/File:Farnese_Hercules_MET_DP102198.jpg</a></p>
+  <p>Apollo Belvedere (Apollo Pythius), engraving. Rijksmuseum, CC0. <a href="https://commons.wikimedia.org/wiki/File:Apollo_Belvedere_Apollo_Pythius_(titel_op_object),_RP-P-OB-102.457.jpg">commons.wikimedia.org/wiki/File:Apollo_Belvedere_Apollo_Pythius_(titel_op_object),_RP-P-OB-102.457.jpg</a></p>
+  <p>Albrecht Dürer, Melencolia I, 1514. The Metropolitan Museum of Art, CC0. <a href="https://commons.wikimedia.org/wiki/File:Melencolia_I_MET_DP820348.jpg">commons.wikimedia.org/wiki/File:Melencolia_I_MET_DP820348.jpg</a></p>
+</footer>
+
+<nav class="bar" aria-label="Prototype controls">
+  <div class="bar-in">
+    <p class="cap" aria-live="polite"><b id="capName"></b> <span id="cap"></span></p>
+    <div class="rows">
+      <div class="group" role="group" aria-label="Study" id="variants"></div>
+      <div class="group" role="group" aria-label="7-day average to show" id="values"><span class="glabel">Value</span></div>
+    </div>
+  </div>
+</nav>
+
+<script>
+(() => {
+const IMG = { mercury: '__IMG_mercury__', hercules: '__IMG_hercules__', apollo: '__IMG_apollo__', melencolia: '__IMG_melencolia__' };
+const DATA = { avg: 181, baseline: 100, baselineLabel: 'its 1985-2019 average', referenceDate: 'Oct 26' };
+const VALUES = [100, 181, 300];
+const TAU = Math.PI * 2, DEG = Math.PI / 180;
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const ease = k => 1 - (1 - k) ** 3;
+const mod = (a, n) => ((a % n) + n) % n;
+const rng = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const on = (x, y, d) => (BAYER[((y & 3) << 2) | (x & 3)] + 0.5) / 16 < d;
+// ImageData words are ABGR on little-endian machines, which is every browser in use.
+const u32 = (h, a = 255) => { const n = parseInt(h.slice(1), 16); return ((a << 24) | ((n & 0xff) << 16) | (n & 0xff00) | (n >> 16)) >>> 0; };
+const PAL = {
+  bw: { bg: '#050505', ink: '#f2efe8', mid: '#77736c' },
+  blue: { bg: '#1b1bf2', ink: '#ffffff', mid: '#8d8dff' },
+  gold: { bg: '#071324', ink: '#ffd23f', mid: '#917d3c', frame: '#253a56', label: '#9badb7' },
+};
+let C = {}, P = PAL.bw;
+let still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- the engravings: decoded once into luminance ----------
+const LUM = {};
+const loaded = Promise.all(Object.entries(IMG).map(([k, src]) => new Promise(res => {
+  const im = new Image();
+  im.onload = () => {
+    const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+    const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+    const w = im.width, h = im.height, d = x.getImageData(0, 0, w, h).data, L = new Uint8Array(w * h), SAT = new Uint32Array((w + 1) * (h + 1));
+    for (let i = 0; i < L.length; i++) L[i] = d[i * 4];
+    // A summed-area table, so any crop can be averaged per output pixel instead of aliasing the hatching.
+    for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++)
+      SAT[(y + 1) * (w + 1) + xx + 1] = L[y * w + xx] + SAT[y * (w + 1) + xx + 1] + SAT[(y + 1) * (w + 1) + xx] - SAT[y * (w + 1) + xx];
+    LUM[k] = { w, h, L, SAT }; res();
+  };
+  im.onerror = res; im.src = src;
+})));
+// Draws an engraving crop into ImageData: src [sx, sy, sw, sh] in image px, dst [dx, dy, dw, dh] in canvas px.
+// color(t, x, y) gives a pixel or 0; fade(u, v) above 1 is solid, 0..1 a dithered edge, 0 or less nothing.
+// The mean luminance (0..1) of the source pixels under one output pixel.
+function boxLum(I, ax, ay, bx, by) {
+  let x0 = clamp(Math.floor(ax), 0, I.w - 1), y0 = clamp(Math.floor(ay), 0, I.h - 1);
+  const x1 = clamp(Math.max(x0 + 1, Math.floor(bx)), 1, I.w), y1 = clamp(Math.max(y0 + 1, Math.floor(by)), 1, I.h), w1 = I.w + 1, S = I.SAT;
+  return (S[y1 * w1 + x1] - S[y0 * w1 + x1] - S[y1 * w1 + x0] + S[y0 * w1 + x0]) / ((x1 - x0) * (y1 - y0) * 255);
+}
+function engrave(id, k, src, dst, color, fade) {
+  const I = LUM[k];
+  if (!I) return;
+  const [sx, sy, sw, sh] = src, [dx, dy, dw, dh] = dst, b = new Uint32Array(id.data.buffer), Wd = id.width, Hd = id.height, kx = sw / dw, ky = sh / dh;
+  for (let y = Math.max(0, Math.floor(dy)); y < Math.min(Hd, Math.ceil(dy + dh)); y++) {
+    const v = (y + 0.5 - dy) / dh, ay = sy + (y - dy) * ky;
+    for (let x = Math.max(0, Math.floor(dx)); x < Math.min(Wd, Math.ceil(dx + dw)); x++) {
+      const u = (x + 0.5 - dx) / dw;
+      if (fade) { const f = fade(u, v); if (f <= 0 || (f < 1 && !on(x, y, f))) continue; }
+      const ax = sx + (x - dx) * kx, c = color(boxLum(I, ax, ay, ax + kx, ay + ky), x, y);
+      if (c) b[y * Wd + x] = c;
+    }
+  }
+}
+const rectFade = m => (u, v) => Math.min(u, 1 - u, v, 1 - v) / m;
+const circleFade = m => (u, v) => (0.5 - Math.hypot(u - 0.5, v - 0.5)) / m;
+// Two inks, ordered dither: paper takes the ink, the engraver's lines the ground.
+const duo = (lo = 0, hi = 1) => (t, x, y) => (on(x, y, clamp((t - lo) / (hi - lo))) ? C.ink : C.bg);
+const duoMid = (lo, hi) => (t, x, y) => (t < 0.5 ? (on(x, y, t / 0.5) ? lo[1] : lo[0]) : on(x, y, (t - 0.5) / 0.5) ? hi[1] : hi[0]);
+
+// ---------- canvas, layers, the calm column ----------
+const hero = document.getElementById('hero'), canvas = document.getElementById('art'), ctx = canvas.getContext('2d');
+let W = 0, H = 0, KEEP = { x0: 0, y0: 0, x1: 0, y1: 0 }, LAY = {}, scene = {};
+const mk = () => document.createElement('canvas');
+const back = mk(), front = mk(), veil = mk();
+const textEls = ['mark', 'kicker', 'num', 'copy'].map(id => document.getElementById(id));
+function measure() {
+  const hr = hero.getBoundingClientRect();
+  W = Math.round(hr.width); H = Math.round(hr.height);
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const el of textEls) {
+    const r = el.getBoundingClientRect();
+    x0 = Math.min(x0, r.left - hr.left); y0 = Math.min(y0, r.top - hr.top); x1 = Math.max(x1, r.right - hr.left); y1 = Math.max(y1, r.bottom - hr.top);
+  }
+  KEEP = { x0: Math.floor(x0 - 20), y0: Math.floor(y0 - 14), x1: Math.ceil(x1 + 20), y1: Math.ceil(y1 + 14) };
+  LAY = { cx: W / 2, cy: Math.round(clamp(KEEP.y0 / 2, 90, 170)), wide: KEEP.x0 >= 230 };
+  for (const c of [canvas, back, front, veil]) { c.width = W; c.height = H; }
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+}
+// The text sits on a calm veil of the ground colour: the art shows through faintly, and dissolves at the edge.
+function buildVeil() {
+  const x = veil.getContext('2d'), id = x.createImageData(W, H), b = new Uint32Array(id.data.buffer), full = u32(P.bg, 232), edge = 48;
+  for (let y = 0, i = 0; y < H; y++) for (let xx = 0; xx < W; xx++, i++) {
+    const d = Math.hypot(Math.max(KEEP.x0 - xx, 0, xx - KEEP.x1), Math.max(KEEP.y0 - y, 0, y - KEEP.y1));
+    if (d === 0 || (d < edge && on(xx, y, 1 - d / edge))) b[i] = full;
+  }
+  x.putImageData(id, 0, 0);
+}
+function grainTile() {
+  const c = mk(); c.width = c.height = 160;
+  const x = c.getContext('2d'), id = x.createImageData(160, 160), b = new Uint32Array(id.data.buffer), r = rng(5), ink = u32(P.ink);
+  for (let i = 0; i < b.length; i++) if (r() < 0.22) b[i] = ink;
+  x.putImageData(id, 0, 0);
+  const g = document.getElementById('grain');
+  g.style.backgroundImage = `url(${c.toDataURL()})`;
+}
+const imageData = () => back.getContext('2d').createImageData(W, H);
+function fillBack(id) { new Uint32Array(id.data.buffer).fill(C.bg); }
+
+// ---------- A · Messenger: Mercury holds bundles of rays, in black and white ----------
+// Points in the 560 x 1182 crop: the winged hat, the caduceus, the hand on the staff, the elbow in the cloak, the winged ankle.
+const MERC = { w: 560, h: 1182, arch: [287, 329, 296], walls: [38, 540], chest: [303, 380],
+  bundles: [[285, 55, -75, -92], [525, 225, -25, -38], [474, 664, 14, -6], [100, 420, 196, 188], [322, 1030, 52, 142]] };
+function composeMessenger() {
+  const wide = LAY.wide, fw = wide ? Math.min(KEEP.x0 - 50, 360) : Math.min(140, (KEEP.y0 - 24) * (MERC.w / MERC.h)), fh = (fw * MERC.h) / MERC.w;
+  const fx = wide ? (KEEP.x0 - fw) / 2 : W / 2 - fw / 2, fy = wide ? clamp((H - fh) * 0.3, 30, 400) : 12, s = fw / MERC.w;
+  const bid = imageData(); fillBack(bid); back.getContext('2d').putImageData(bid, 0, 0);
+  const fid = imageData(), [ax, ay, ar] = MERC.arch;
+  // The niche is the dark square behind him; outside its arch there is nothing.
+  engrave(fid, 'mercury', [0, 0, MERC.w, MERC.h], [fx, fy, fw, fh], duo(0.28, 0.82), (u, v) => {
+    const x = u * MERC.w, y = v * MERC.h, inWall = x > MERC.walls[0] && x < MERC.walls[1];
+    const e = y > ay ? (inWall ? Math.min(x - MERC.walls[0], MERC.walls[1] - x) : -1) : ar - Math.hypot(x - ax, y - ay);
+    return Math.min(e / 16, (MERC.h - y) / 60);
+  });
+  front.getContext('2d').putImageData(fid, 0, 0);
+  scene = { s, fh, chest: [fx + MERC.chest[0] * s, fy + MERC.chest[1] * s], bundles: MERC.bundles.map(([x, y, a, m]) => [fx + x * s, fy + y * s, wide ? a : m]) };
+}
+function underMessenger(t) {
+  // A disc of radial ticks behind him, turning very slowly.
+  const [cx, cy] = scene.chest, r1 = scene.fh * 0.4, r2 = scene.fh * 0.5, n = 220, shown = still ? n : Math.floor(n * ease(clamp(t / 1100)));
+  const rot = still ? 0 : t * 0.00001;
+  ctx.strokeStyle = P.ink; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.beginPath();
+  for (let i = 0; i < shown; i++) {
+    const a = -Math.PI / 2 + (i / n) * TAU + rot, c = Math.cos(a), s = Math.sin(a), r0 = i % 5 === 0 ? r1 - 10 : r1;
+    ctx.moveTo(cx + c * r0, cy + s * r0); ctx.lineTo(cx + c * r2, cy + s * r2);
+  }
+  ctx.stroke(); ctx.globalAlpha = 1;
+}
+// Each fist holds a bundle: a fan of possible paths, as wide as the value.
+const spreadOf = v => 0.22 * clamp(v, 0, 400);
+function overMessenger(t, v) {
+  const L = Math.hypot(W, H) * 1.1, grow = still ? 1 : ease(clamp((t - 150) / 1100)), spread = spreadOf(v), base = spreadOf(100);
+  ctx.strokeStyle = P.ink; ctx.lineWidth = 1;
+  scene.bundles.forEach(([x, y, a], j) => {
+    ctx.globalAlpha = 0.85; ctx.beginPath();
+    const n = 15;
+    for (let i = 0; i < n; i++) {
+      const f = i / (n - 1) - 0.5, jit = still ? 0 : 0.3 * Math.sin(t / 2300 + i * 1.7 + j * 5);
+      const ang = (a + f * spread + jit) * DEG, c = Math.cos(ang), s = Math.sin(ang), l1 = L * grow * (0.75 + 0.25 * hash(i * 13 + j * 7)), l0 = 0.16 * L * grow;
+      ctx.moveTo(x - c * l0, y - s * l0); ctx.lineTo(x + c * l1, y + s * l1);
+    }
+    ctx.stroke();
+    // The two dashed rays mark how wide the fan would be at the baseline 100.
+    if (grow > 0.6) {
+      ctx.globalAlpha = 0.8; ctx.setLineDash([3, 5]); ctx.beginPath();
+      for (const sd of [-0.5, 0.5]) { const ang = (a + sd * base) * DEG; ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(ang) * L * grow, y + Math.sin(ang) * L * grow); }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+  });
+  ctx.globalAlpha = 1;
+}
+
+// ---------- B · Signal: the Farnese Hercules on a failing screen, in electric blue ----------
+// In the 760 x 1086 crop: the figure, the spot on his back the frames hold, the two spectators, a cloud.
+const HERC = { fig: [110, 30, 550, 980], torso: [110, 30, 550, 560], back: [292, 300], spect: [550, 950, 210, 136], cloud: [0, 0, 240, 210] };
+// A crop degraded like a CRT: phosphor smear to the right, every third line dark, noise; white and pale blue on the blue ground.
+function crt(k, src, dw, dh, amp, seed, invert = false) {
+  const c = mk(); c.width = Math.max(1, Math.round(dw)); c.height = Math.max(1, Math.round(dh));
+  const x = c.getContext('2d'), id = x.createImageData(c.width, c.height), b = new Uint32Array(id.data.buffer), r = rng(seed), I = LUM[k];
+  if (!I) return c;
+  const [sx, sy, sw, sh] = src, ink = C.ink, mid = C.mid, fade = rectFade(0.06);
+  const kx = sw / c.width, ky = sh / c.height;
+  for (let y = 0; y < c.height; y++) {
+    let acc = 0;
+    const ay = sy + y * ky, scan = y % 3 === 2 ? 0.45 : 1;
+    for (let xx = 0; xx < c.width; xx++) {
+      const u = (xx + 0.5) / c.width, f = fade(u, (y + 0.5) / c.height), ax = sx + xx * kx;
+      let L = boxLum(I, ax, ay, ax + kx, ay + ky);
+      if (invert) L = 1 - L;
+      acc = Math.max(L, acc * 0.78);
+      const val = acc * scan + (r() - 0.5) * amp;
+      if (f <= 0 || (f < 1 && r() > f)) continue;
+      if (val > 0.6 + 0.2 * (r() - 0.5)) b[y * c.width + xx] = ink;
+      else if (val > 0.42 && r() < 0.22) b[y * c.width + xx] = mid;
+    }
+  }
+  x.putImageData(id, 0, 0);
+  return c;
+}
+function composeSignal() {
+  // On a phone only the torso fits above the text, at a size that still reads.
+  const wide = LAY.wide, crop = wide ? HERC.fig : HERC.torso, [, , sw, sh] = crop, asp = sw / sh;
+  const fw = wide ? Math.min(W - KEEP.x1 - 40, 400) : Math.min(W - 40, (KEEP.y0 - 20) * asp), fh = fw / asp;
+  const fx = wide ? KEEP.x1 + (W - KEEP.x1 - fw) / 2 : W / 2 - fw / 2, fy = wide ? clamp((H - fh) * 0.22, 24, 300) : 10;
+  const bid = imageData(); fillBack(bid); back.getContext('2d').putImageData(bid, 0, 0);
+  front.getContext('2d').clearRect(0, 0, W, H);
+  const levels = [0.9, 0.55, 0.3, 0.12, 0.12, 0.12];
+  const item = (src, x, y, w, h, seed) => ({ x, y, w, h, frames: levels.map((a, i) => crt('hercules', src, w, h, a, seed + i * 31)) });
+  const items = [item(crop, fx, fy, fw, fh, 11)];
+  if (wide) {
+    const mw = KEEP.x0 - 40, sp = HERC.spect, cl = HERC.cloud;
+    items.push(item(cl, 20, 40, mw, (mw * cl[3]) / cl[2], 23));
+    items.push(item(sp, 20, H * 0.56, mw, (mw * sp[3]) / sp[2], 37));
+  } else if (H - KEEP.y1 > 120) {
+    const sp = HERC.spect, w = Math.min(W - 32, 320);
+    items.push(item(sp, (W - w) / 2, KEEP.y1 + 10, w, (w * sp[3]) / sp[2], 37));
+  }
+  scene = { items, fig: { x: fx, y: fy, w: fw, h: fh }, backPt: [fx + (HERC.back[0] / sw) * fw, fy + (HERC.back[1] / sh) * fh] };
+}
+function underSignal(t) {
+  // Light leaking in from above, sweeping a little.
+  const ox = W * 0.68, oy = -H * 0.25, sweep = still ? 0 : 1.6 * Math.sin(t / 9000);
+  ctx.strokeStyle = P.ink; ctx.lineWidth = 1; ctx.globalAlpha = 0.22; ctx.beginPath();
+  for (let i = 0; i < 46; i++) {
+    const a = (96 + i * 1.3 + sweep + 0.6 * hash(i)) * DEG, l = H * (0.55 + 0.35 * hash(i * 3));
+    ctx.moveTo(ox, oy); ctx.lineTo(ox + Math.cos(a) * l, oy + Math.sin(a) * l);
+  }
+  ctx.stroke(); ctx.globalAlpha = 1;
+}
+function overSignal(t, v) {
+  const on0 = still ? 1 : clamp((t - 120) / 380);
+  scene.items.forEach((it, j) => {
+    const fi = still ? 3 : t < 300 ? 0 : t < 600 ? 1 : t < 900 ? 2 : 3 + (Math.floor(t / 130 + j) % 3);
+    if (on0 < 1) { // the screen comes on: a line, then the picture opens from the middle
+      const hh = it.h * ease(on0), cy = it.y + it.h / 2;
+      ctx.fillStyle = P.ink; ctx.fillRect(it.x, cy - 1, it.w * clamp(on0 * 3), 2);
+      ctx.save(); ctx.beginPath(); ctx.rect(it.x, cy - hh / 2, it.w, hh); ctx.clip(); ctx.drawImage(it.frames[fi], it.x, it.y); ctx.restore();
+    } else ctx.drawImage(it.frames[fi], it.x, it.y);
+    // Now and then a band of the picture slips sideways.
+    if (!still && t > 1500) {
+      const k = Math.floor(t / 4700) + j * 3, d = t % 4700;
+      if (d < 150 && hash(k) > 0.35) { const by = Math.floor(hash(k * 7) * it.h * 0.8), bh = 8 + Math.floor(hash(k * 11) * 18), off = (hash(k * 13) - 0.5) * 30; ctx.drawImage(it.frames[fi], 0, by, it.w, bh, it.x + off, it.y + by, it.w, bh); }
+    }
+  });
+  // The frames: the small one is the baseline 100, the large one the value.
+  const [bx, by] = scene.backPt, bw = Math.max(36, scene.fig.w * 0.26), vw = (bw * clamp(v, 0, 400)) / 100, show = still || t > 500;
+  if (!show) return;
+  ctx.font = '8px "Press Start 2P", monospace'; ctx.textBaseline = 'top';
+  // Each frame is a blue band under a white dashed line, so it reads over the noise.
+  const frame = (w, dash, off, label, wide2) => {
+    const h = w * 1.3, x = Math.round(bx - w / 2) + 0.5, y = Math.round(by - h / 2) + 0.5;
+    ctx.strokeStyle = P.bg; ctx.lineWidth = wide2 ? 5 : 3; ctx.strokeRect(x, y, Math.round(w), Math.round(h));
+    ctx.strokeStyle = P.ink; ctx.lineWidth = wide2 ? 2 : 1; ctx.setLineDash(dash); ctx.lineDashOffset = off; ctx.strokeRect(x, y, Math.round(w), Math.round(h)); ctx.setLineDash([]);
+    const tw = ctx.measureText(label).width + 8;
+    ctx.fillStyle = P.ink; ctx.fillRect(x - 1, y - 15, tw, 13); ctx.fillStyle = P.bg; ctx.fillText(label, x + 3, y - 12);
+  };
+  frame(vw, [6, 4], still ? 0 : -t / 90, String(Math.round(v)), true);
+  frame(bw, [2, 3], 0, '100', false);
+  ctx.lineWidth = 1;
+}
+
+// ---------- C · Vortex: Apollo at the eye of an op-art vortex, in electric blue ----------
+const APOL = { c: [250, 215], r: 210 };
+const half = mk();
+function composeVortex() {
+  const { cx, cy } = LAY, Rc = Math.min(104, KEEP.y0 * 0.36, W * 0.28), R = Math.min(Rc * 2.2, W * 0.47);
+  const bid = imageData(); fillBack(bid); back.getContext('2d').putImageData(bid, 0, 0);
+  const fid = imageData();
+  const [ax, ay] = APOL.c, k = APOL.r / Rc;
+  engrave(fid, 'apollo', [ax - APOL.r, ay - APOL.r, 2 * APOL.r, 2 * APOL.r], [cx - Rc, cy - Rc, 2 * Rc, 2 * Rc], duo(0.3, 0.85), circleFade(0.03));
+  front.getContext('2d').putImageData(fid, 0, 0);
+  // Half resolution, polar coordinates kept per cell: the twist is the only thing that changes.
+  const w2 = Math.ceil(W / 2), h2 = Math.ceil(H / 2), n = w2 * h2, TH = new Float32Array(n), LR = new Float32Array(n), CK = new Uint8Array(n), NZ = new Uint8Array(n), r = rng(3), lR = Math.log(R / Rc);
+  for (let y = 0, i = 0; y < h2; y++) for (let x = 0; x < w2; x++, i++) {
+    const dx = x * 2 + 1 - cx, dy = y * 2 + 1 - cy, rr = Math.hypot(dx, dy);
+    TH[i] = Math.atan2(dx, -dy);
+    const lr = Math.log(Math.max(rr, 1) / Rc) / lR;
+    LR[i] = rr < Rc - 1 ? -9 : Math.max(0, lr);
+    CK[i] = (Math.floor(x / 18) + Math.floor(y / 18)) & 1;
+    NZ[i] = Math.floor(r() * 255);
+  }
+  half.width = w2; half.height = h2;
+  scene = { Rc, R, w2, h2, TH, LR, CK, NZ, img: half.getContext('2d').createImageData(w2, h2) };
+}
+function underVortex(t, v) {
+  const S2 = scene, b = new Uint32Array(S2.img.data.buffer), T = clamp(v, 0, 400) * DEG, rot = still ? 0 : t * 0.000007, ink = C.ink, bg = C.bg;
+  const dialArms = 12 / TAU, fieldArms = 56 / TAU;
+  // The grain shifts every 180 ms: the half-tone shimmers.
+  const gs = still ? 0 : Math.floor(t / 180) % 3, cut = [232, 238, 244][gs], sp = [30, 22, 38][gs];
+  for (let i = 0, y = 0; y < S2.h2; y++) for (let x = 0; x < S2.w2; x++, i++) {
+    const lr = S2.LR[i];
+    if (lr < -1) { b[i] = 0; continue; }
+    const nz = S2.NZ[i];
+    let white;
+    if (lr <= 1) {
+      // Inside the ring, twelve arms turn the value in degrees from the head to the ring; arm 0 starts at the top.
+      // Stippled, so the solid index arm stands out among them.
+      const s = (S2.TH[i] - T * lr) * dialArms + 0.19;
+      white = s - Math.floor(s) < 0.38 && (nz < 140 || ((x + y) & 1) === 0);
+    } else {
+      // Outside, a field of stripes curving gently; checker squares invert them and stipple them.
+      const s = (S2.TH[i] - T - 0.45 * (lr - 1) - rot) * fieldArms, stripe = s - Math.floor(s) < 0.5;
+      white = S2.CK[i] ? (stripe ? nz < sp : ((x + y) & 1) === 0 || nz < 90) : stripe && nz < cut;
+    }
+    b[i] = white ? ink : bg;
+  }
+  half.getContext('2d').putImageData(S2.img, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(half, 0, 0, S2.w2 * 2, S2.h2 * 2);
+}
+function overVortex(t, v) {
+  const { cx, cy } = LAY, { Rc, R } = scene, T = clamp(v, 0, 400) * DEG, lR = Math.log(R / Rc);
+  // The head sits in a clean white ring.
+  ctx.strokeStyle = P.bg; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(cx, cy, Rc + 1, 0, TAU); ctx.stroke();
+  ctx.strokeStyle = P.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, Rc + 1, 0, TAU); ctx.stroke();
+  // The ring: a tick every 10 points, a long one at the baseline 100.
+  ctx.strokeStyle = P.bg; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+  ctx.strokeStyle = P.ink; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+  ctx.beginPath();
+  for (let d = 0; d < 360; d += 10) { const a = d * DEG - Math.PI / 2, l = d === 100 ? 18 : d % 90 === 0 ? 10 : 6; ctx.moveTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); ctx.lineTo(cx + Math.cos(a) * (R + l), cy + Math.sin(a) * (R + l)); }
+  ctx.stroke();
+  // The bold stripe: it turns one degree per point between the head and the ring.
+  const pts = [];
+  for (let r = Rc; r <= R + 0.1; r += 3) { const a = -Math.PI / 2 + (T * Math.log(r / Rc)) / lR; pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
+  const path = () => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); };
+  ctx.lineCap = 'round';
+  for (const [w, c] of [[11, P.bg], [7, P.ink]]) { ctx.lineWidth = w; ctx.strokeStyle = c; path(); ctx.stroke(); }
+  ctx.lineWidth = 1; ctx.strokeStyle = P.bg; ctx.setLineDash([4, 4]); path(); ctx.stroke(); ctx.setLineDash([]);
+  const [ex, ey] = pts[pts.length - 1];
+  ctx.fillStyle = P.ink; ctx.beginPath(); ctx.arc(ex, ey, 6, 0, TAU); ctx.fill();
+  ctx.lineWidth = 1; ctx.lineCap = 'butt';
+  ctx.font = '8px "Press Start 2P", monospace'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+  const lab = (deg, txt, rr) => { const a = deg * DEG - Math.PI / 2, x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr, w = ctx.measureText(txt).width + 6; ctx.fillStyle = P.ink; ctx.fillRect(x - w / 2, y - 6, w, 12); ctx.fillStyle = P.bg; ctx.fillText(txt, x, y + 1); };
+  lab(100, '100', R + 30);
+  lab(clamp(v, 0, 400), String(Math.round(v)), R - 16);
+  ctx.textAlign = 'start';
+}
+
+// ---------- D · Melancholia: Dürer's angel under a halo of rays, in the site's gold on navy ----------
+// In the 1000 x 1272 crop: the angel's head, and four of her instruments for the margins.
+const MEL = { head: [698, 482, 78], comet: [20, 30, 450, 300], poly: [40, 400, 360, 320], glass: [600, 40, 360, 290], sphere: [20, 760, 330, 390] };
+function composeMelancholia() {
+  const { wide } = LAY, Rm = Math.min(82, KEEP.y0 * 0.29), Rb = Math.min(118, W * 0.29);
+  const bid = imageData(); fillBack(bid);
+  const navy = C.bg, frame = u32(PAL.gold.frame), muted = C.mid;
+  const dim = duoMid([navy, frame], [frame, muted]);
+  const place = (crop, x, y, w) => engrave(bid, 'melencolia', crop, [x, y, w, (w * crop[3]) / crop[2]], dim, rectFade(0.12));
+  if (wide) {
+    const mw = KEEP.x0 - 50, rx = KEEP.x1 + 30;
+    place(MEL.comet, 25, 50, Math.min(mw, 420));
+    place(MEL.poly, 25 + mw * 0.1, H * 0.48, Math.min(mw * 0.85, 360));
+    place(MEL.glass, rx, 50, Math.min(mw, 400));
+    place(MEL.sphere, rx + mw * 0.12, H * 0.5, Math.min(mw * 0.8, 320));
+  } else if (H - KEEP.y1 > 150) {
+    const w = Math.min(W - 32, 300);
+    place(MEL.poly, (W - w) / 2, KEEP.y1 + 10, w);
+  }
+  back.getContext('2d').putImageData(bid, 0, 0);
+  front.getContext('2d').clearRect(0, 0, W, H);
+  // The medallion, dithered three times with the matrix shifted: cycling them makes the gold crawl.
+  // Crisp two-level lines keep the face legible; only the lightest paper turns bright gold.
+  const [hx, hy, hr] = MEL.head, gold2 = (t, x, y) => (on(x, y, clamp((t - 0.16) / 0.6)) ? (t > 0.74 ? C.ink : muted) : navy);
+  const med = [[0, 0], [1, 2], [2, 1]].map(([ox, oy]) => {
+    const c = mk(); c.width = c.height = Math.ceil(2 * Rm);
+    const x = c.getContext('2d'), id = x.createImageData(c.width, c.height);
+    engrave(id, 'melencolia', [hx - hr, hy - hr, 2 * hr, 2 * hr], [0, 0, 2 * Rm, 2 * Rm], (t, px2, py2) => gold2(t, px2 + ox, py2 + oy), circleFade(0.04));
+    x.putImageData(id, 0, 0);
+    return c;
+  });
+  scene = { Rm, Rb, med };
+}
+function underMelancholia(t, v) {
+  const { cx, cy } = LAY, { Rm, Rb } = scene, R = (Rb * clamp(v, 0, 400)) / 100, n = 144, rot = still ? 0 : t * 0.000009;
+  // The baseline ring, faint and dashed.
+  ctx.strokeStyle = PAL.gold.label; ctx.globalAlpha = 0.7; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.arc(cx, cy, Rb, 0, TAU); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  // The halo: rays from the medallion out to the value.
+  ctx.lineWidth = 1;
+  for (const [major, col, a] of [[false, P.mid, 0.9], [true, P.ink, 0.95]]) {
+    ctx.strokeStyle = col; ctx.globalAlpha = a; ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      if ((i % 4 === 0) !== major) continue;
+      const ang = (i / n) * TAU + rot, c = Math.cos(ang), s = Math.sin(ang), wob = still ? 0 : 2 * Math.sin(t / 900 + i * 0.7);
+      const r1 = Rm + 6, r2 = Math.max(r1, R + (major ? 6 : -4) + wob);
+      ctx.moveTo(cx + c * r1, cy + s * r1); ctx.lineTo(cx + c * r2, cy + s * r2);
+    }
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  ctx.font = '8px "Press Start 2P", monospace'; ctx.textBaseline = 'middle'; ctx.fillStyle = PAL.gold.label;
+  ctx.fillText('100', cx + Rb * 0.71 + 6, cy + Rb * 0.71 + 6);
+}
+function overMelancholia(t) {
+  const { cx, cy } = LAY, { Rm, med } = scene, k = still ? 0 : Math.floor(t / 420) % 3;
+  ctx.globalAlpha = still ? 1 : clamp(Math.floor(clamp(t / 500) * 8) / 8);
+  ctx.drawImage(med[k], Math.round(cx - Rm), Math.round(cy - Rm));
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = P.ink; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, Rm + 2.5, 0, TAU); ctx.stroke();
+}
+
+// ---------- the studies ----------
+const VARIANTS = [
+  { id: 'messenger', name: 'Messenger', pal: 'bw', delay: 150, compose: composeMessenger, under: underMessenger, over: overMessenger,
+    idea: 'Mercury, the messenger, holds bundles of rays: each fan is a spread of possible paths.',
+    caption: v => `Every bundle of rays fans as wide as the 7-day average; its two dashed rays mark the baseline 100. Today the fans are ${(v / 100).toFixed(1)} times as wide.` },
+  { id: 'signal', name: 'Signal', pal: 'blue', delay: 450, compose: composeSignal, under: underSignal, over: overSignal,
+    idea: 'The Farnese Hercules on a failing screen: smear, scanlines, noise, selection frames.',
+    caption: v => `The large dotted frame is the 7-day average and the small one the baseline 100: today it is ${(v / 100).toFixed(1)} times as wide.` },
+  { id: 'vortex', name: 'Vortex', pal: 'blue', delay: 300, compose: composeVortex, under: underVortex, over: overVortex,
+    idea: 'Apollo at the eye of an op-art vortex, with a half-tone checkerboard over the stripes.',
+    caption: v => `The bold stripe turns one degree per point between the head and the ring: ${Math.round(v)} degrees today. The long tick marks the baseline 100.` },
+  { id: 'melancholia', name: 'Melancholia', pal: 'gold', delay: 350, compose: composeMelancholia, under: underMelancholia, over: overMelancholia,
+    idea: 'Dürer\'s Melencolia I in the site\'s gold on navy: the angel of worry under a halo, her instruments in the margins.',
+    caption: v => `The halo reaches as far as the 7-day average: the faint ring is the baseline 100, so today the halo is ${(v / 100).toFixed(1)} times as wide.` },
+];
+
+// ---------- state and loop ----------
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+let vi = Math.max(0, VARIANTS.findIndex(x => '#' + x.id === location.hash));
+let value = DATA.avg, t0 = performance.now(), cFrom = 0, cTo = value, cStart = t0 + VARIANTS[vi].delay, ready = false;
+function shown(now) {
+  if (still) return value;
+  const k = Math.floor(clamp((now - cStart) / 640) * 16) / 16;
+  return cFrom + (cTo - cFrom) * ease(k);
+}
+const numEl = document.getElementById('num');
+function applyPalette() {
+  const V = VARIANTS[vi];
+  P = PAL[V.pal];
+  C = { bg: u32(P.bg), ink: u32(P.ink), mid: u32(P.mid) };
+  document.documentElement.dataset.pal = V.pal;
+  document.documentElement.dataset.v = V.id;
+}
+// shortcut: composing a study takes a few hundred ms (the screen frames most); cache per size if this ships.
+function compose() {
+  if (!ready || !W) return;
+  applyPalette();
+  VARIANTS[vi].compose();
+  scene.id = VARIANTS[vi].id;
+  buildVeil(); grainTile();
+}
+function render(now) {
+  if (!ready || !W) return;
+  const V = VARIANTS[vi], t = still ? 1e6 : now - t0, v = shown(now);
+  if (scene.id !== V.id) compose(); // a frame never draws one study with another's scene
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(back, 0, 0);
+  V.under(t, v, now);
+  ctx.drawImage(front, 0, 0);
+  V.over(t, v, now);
+  ctx.drawImage(veil, 0, 0);
+  if (!still && now < cStart + 680) numEl.dataset.count = Math.round(v);
+  else delete numEl.dataset.count;
+}
+let last = 0, visible = true, sized = '';
+(function loop(now) {
+  requestAnimationFrame(loop);
+  if (still || !visible || now - last < 33) return;
+  last = now;
+  render(now);
+})(t0);
+new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(canvas);
+function relayout() { measure(); compose(); render(performance.now()); }
+new ResizeObserver(() => {
+  const r = hero.getBoundingClientRect(), key = Math.round(r.width) + 'x' + Math.round(r.height);
+  if (key === sized) return;
+  sized = key; relayout();
+}).observe(hero);
+Promise.all([loaded, document.fonts?.ready]).then(() => { ready = true; t0 = performance.now(); cStart = t0 + VARIANTS[vi].delay; relayout(); });
+reduced.addEventListener('change', () => { still = reduced.matches; render(performance.now()); });
+
+// ---------- the hero text and the bar ----------
+const mark = document.getElementById('mark');
+const MASKS = Array.from({ length: 8 }, (_, s) => {
+  const dots = BAYER.flatMap((th, i) => (th < 2 * (s + 1) ? [`<rect x="${3 * (i % 4)}" y="${3 * Math.floor(i / 4)}" width="3" height="3"/>`] : [])).join('');
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">${dots}</svg>`)}")`;
+});
+function ditherIn() {
+  if (still) return;
+  let s = 0;
+  const next = () => {
+    if (s >= MASKS.length) { mark.style.maskImage = mark.style.webkitMaskImage = ''; return; }
+    mark.style.maskImage = mark.style.webkitMaskImage = MASKS[s++];
+    setTimeout(next, 30);
+  };
+  next();
+}
+const vBtns = VARIANTS.map((x, i) => {
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.title = x.idea;
+  btn.innerHTML = `<span>[${i + 1}]</span><span>${x.name}</span>`;
+  btn.addEventListener('click', () => setVariant(i));
+  document.getElementById('variants').append(btn);
+  return btn;
+});
+const valBtns = VALUES.map((x, i) => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.innerHTML = `<span>[${'QWE'[i]}]</span><span>${x}</span>`;
+  btn.addEventListener('click', () => setValue(x));
+  document.getElementById('values').append(btn);
+  return btn;
+});
+function updateText() {
+  const V = VARIANTS[vi];
+  document.getElementById('capName').textContent = `${'ABCD'[vi]} · ${V.name}`;
+  document.getElementById('cap').textContent = V.caption(value);
+  vBtns.forEach((b, i) => b.setAttribute('aria-pressed', i === vi));
+  valBtns.forEach((b, i) => b.setAttribute('aria-pressed', VALUES[i] === value));
+  numEl.textContent = value;
+  const p = Math.round((value / DATA.baseline - 1) * 100);
+  document.getElementById('vs').innerHTML = `${Math.abs(p)}% ${p < 0 ? 'below' : 'above'} <span class="nowrap">${DATA.baselineLabel}</span>`;
+  document.getElementById('avgline').textContent = value === DATA.avg ? `7-day average to ${DATA.referenceDate}` : `What-if value: the real 7-day average to ${DATA.referenceDate} is ${DATA.avg}`;
+}
+function setVariant(i) {
+  vi = i; t0 = performance.now(); cFrom = 0; cTo = value; cStart = t0 + VARIANTS[i].delay;
+  try { if (location.hash !== '#' + VARIANTS[i].id) history.replaceState(null, '', '#' + VARIANTS[i].id); } catch { /* a sandbox may refuse: the link just keeps its hash */ }
+  applyPalette(); updateText(); ditherIn(); compose(); render(t0);
+}
+function setValue(x) {
+  const now = performance.now();
+  cFrom = shown(now); cTo = x; value = x; cStart = now;
+  updateText(); render(now);
+}
+addEventListener('hashchange', () => { const i = VARIANTS.findIndex(x => '#' + x.id === location.hash); if (i >= 0 && i !== vi) setVariant(i); });
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.repeat) return;
+  const i = '1234'.indexOf(e.key), j = 'qwe'.indexOf(e.key.toLowerCase());
+  if (i >= 0) setVariant(i);
+  else if (j >= 0) setValue(VALUES[j]);
+});
+
+console.assert(spreadOf(181) / spreadOf(100) > 1.8 && spreadOf(181) / spreadOf(100) < 1.82, 'the fans widen in proportion to the value');
+applyPalette(); updateText(); ditherIn();
+})();
+</script>

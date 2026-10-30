@@ -1,0 +1,990 @@
+<title>aseri eye hero</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Jacquard+24&family=Press+Start+2P&display=swap">
+<!-- PROTOTYPE v2, throwaway: three surreal, Greek-marble manifestos for the aseri hero. The hero column
+     keeps the live site's padding and widths; the pixel art fills the margins and the band around the eye.
+     Sample data inline (the hero test fixture), no build step. Keys: 1-3 variant, Q W E value. -->
+<style>
+/* Layout: the live hero column (16 px gutters, 46ch copy) over one canvas the size of the hero, 3 CSS px per art pixel. Dark only, like the site. */
+:root {
+  color-scheme: dark;
+  --navy: #071324;
+  --abyss: #02070f;
+  --gold: #ffd23f;
+  --gold-pale: #fff0b3;
+  --gold-muted: #917d3c;
+  --frame: #253a56;
+  --label: #9badb7;
+  --text: #cbdbfc;
+  --key: #d9a066;
+  --white: #ffffff;
+  --f-ui: "Press Start 2P", "DotGothic16", ui-monospace, monospace;
+  --f-display: "Jacquard 24", "Times New Roman", serif;
+  --f-word: "DotGothic16", "Press Start 2P", sans-serif;
+}
+html, body { background: var(--navy); color: var(--text); }
+body { margin: 0; font-family: var(--f-ui); font-size: 12px; line-height: 18px; }
+*, *::before, *::after { box-sizing: border-box; }
+p, h1 { margin: 0; font-weight: 400; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* As in Hero.tsx: px-4, pt-56 grown to 300 px for the art, gap-9, copy max-w-[46ch]. */
+.hero {
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center; gap: 36px;
+  min-height: 100svh;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 300px 240px;
+  text-align: center; text-transform: uppercase; color: var(--gold);
+}
+.art { position: absolute; inset: 0; z-index: -1; display: flex; justify-content: center; overflow: hidden; pointer-events: none; }
+.art canvas {
+  flex-shrink: 0; image-rendering: pixelated;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 90px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 90px), transparent 100%);
+}
+
+.proto {
+  position: absolute; top: 12px; left: max(16px, env(safe-area-inset-left, 0px));
+  padding: 4px 6px; border: 2px solid var(--frame); background: var(--navy);
+  font-size: 8px; line-height: 12px; color: var(--label); text-align: left;
+}
+.proto b { font-weight: 400; color: var(--gold); }
+
+.wordmark { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.wordmark .jp { font-family: var(--f-word); font-size: 64px; line-height: 1; text-transform: none; }
+.wordmark .sub { font-size: 16px; line-height: 24px; color: var(--gold-muted); }
+@media (min-width: 640px) { .wordmark .jp { font-size: 96px; } }
+
+.num { position: relative; font-family: var(--f-display); font-size: 144px; line-height: 108px; }
+@media (min-width: 768px) { .num { font-size: 192px; line-height: 144px; } }
+/* As on the site: the count is drawn over the real number, which stays the text. */
+.num[data-count] { color: transparent; }
+.num[data-count]::after { content: attr(data-count); position: absolute; top: 0; left: 50%; translate: -50%; white-space: nowrap; color: var(--gold); }
+
+.copy { display: flex; flex-direction: column; gap: 18px; max-width: 46ch; text-wrap: balance; }
+.copy .first { margin-top: -24px; }
+.muted { color: var(--label); }
+.nowrap { white-space: nowrap; }
+
+/* The prototype bar: floating, framed like the game's sheets. */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: flex; justify-content: center; pointer-events: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.bar-in {
+  pointer-events: auto; width: 100%; max-width: 760px;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 10px; border: 2px solid var(--frame); background: var(--navy);
+}
+.cap { min-height: 28px; font-size: 8px; line-height: 14px; color: var(--label); text-transform: uppercase; text-align: left; }
+.cap b { font-weight: 400; color: var(--gold); }
+.rows { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; }
+.group { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; }
+.glabel { align-self: center; margin-right: 4px; font-size: 8px; line-height: 12px; color: var(--label); text-transform: uppercase; }
+.group button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 5px 7px; border: 0; border-radius: 0; cursor: pointer;
+  font: inherit; font-size: 8px; line-height: 12px; text-transform: uppercase;
+  background: var(--frame); color: var(--label);
+  transition: background-color 160ms, color 160ms;
+}
+.group button .k { color: var(--key); transition: color 160ms; }
+.group button[aria-pressed="true"] { background: var(--gold); color: var(--navy); }
+.group button[aria-pressed="true"] .k { color: var(--navy); }
+@media (hover: hover) {
+  .group button:hover { background: var(--white); color: var(--navy); }
+  .group button:hover .k { color: var(--navy); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .group button, .group button .k { transition: none; }
+}
+</style>
+
+<section class="hero" id="hero" aria-labelledby="mark">
+  <div class="art" aria-hidden="true"><canvas id="art"></canvas></div>
+  <p class="proto"><b>Prototype v2</b> · eye hero · sample data</p>
+  <h1 class="wordmark" id="mark"><span lang="ja" class="jp">焦り</span><span class="sub"><span lang="ja">あせり</span> · aseri</span></h1>
+  <p id="kicker">Geopolitical risk · today</p>
+  <p class="num" id="num">181</p>
+  <div class="copy" id="copy">
+    <p class="muted first" id="avgline">7-day average to Oct 26</p>
+    <p id="vs">81% above <span class="nowrap">its 1985-2019 average</span></p>
+    <p>Monday Nov 23, 4 weeks from the last data: 8 in 10 between 111 and 251, 2 in 10 outside. Most likely 168. (Last Monday: 165)</p>
+    <p class="muted">GPR runs on a weekly cycle: compare Monday with Monday. Data as of Oct 30, preliminary for about 4 weeks.</p>
+  </div>
+</section>
+
+<nav class="bar" aria-label="Prototype controls">
+  <div class="bar-in">
+    <p class="cap" aria-live="polite"><b id="capName">A · Piazza</b> <span id="cap"></span></p>
+    <div class="rows">
+      <div class="group" role="group" aria-label="Manifesto variant" id="variants"></div>
+      <div class="group" role="group" aria-label="7-day average to show" id="values"><span class="glabel">Value</span></div>
+    </div>
+  </div>
+</nav>
+
+<script>
+(() => {
+// ---------- data (the hero test fixture) ----------
+const DATA = { avg: 181, baseline: 100, baselineLabel: 'its 1985-2019 average', referenceDate: 'Oct 26' };
+const VALUES = [100, 181, 300];
+
+// ---------- pixel engine: 3 CSS px an art pixel ----------
+const S = 3, TAU = Math.PI * 2;
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const GLOWS = [0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 0.85, 0.75, 0.65, 0.55];
+// ImageData words are ABGR on little-endian machines, which is every browser in use.
+const hex = h => { const n = parseInt(h.slice(1), 16); return (0xff000000 | ((n & 0xff) << 16) | (n & 0xff00) | (n >> 16)) >>> 0; };
+const COL = {
+  abyss: hex('#02070f'), navy: hex('#071324'), frame: hex('#253a56'), muted: hex('#917d3c'),
+  gold: hex('#ffd23f'), pale: hex('#fff0b3'), label: hex('#9badb7'), white: hex('#ffffff'),
+};
+// Six steps from near-black to pale gold: shadow stays blue, only light turns gold.
+const RAMP = [COL.abyss, COL.navy, COL.frame, COL.muted, COL.gold, COL.pale];
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const ease = k => 1 - (1 - k) ** 3;
+const mod = (a, n) => ((a % n) + n) % n;
+const rng = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const gauss = (d, r) => Math.exp(-(d * d) / (2 * r * r));
+const dome = (u, v, cx, cy, rx, ry) => { const q = 1 - ((u - cx) / rx) ** 2 - ((v - cy) / ry) ** 2; return q > 0 ? Math.sqrt(q) : 0; };
+const bevel = (d, R) => { const q = 1 - Math.min(d, R) / R; return Math.sqrt(1 - q * q); };
+const kf = (t, k) => {
+  if (t <= k[0][0]) return k[0][1];
+  for (let i = 1; i < k.length; i++) if (t <= k[i][0]) {
+    const [t0, v0] = k[i - 1], [t1, v1] = k[i];
+    return v0 + ((v1 - v0) * (t - t0)) / (t1 - t0);
+  }
+  return k[k.length - 1][1];
+};
+// Polygons and polylines are flat [x0, y0, x1, y1, ...] arrays.
+function inPoly(P, x, y) {
+  let r = false;
+  for (let i = 0, j = P.length - 2; i < P.length; j = i, i += 2) {
+    const xi = P[i], yi = P[i + 1], xj = P[j], yj = P[j + 1];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) r = !r;
+  }
+  return r;
+}
+function segDist(x, y, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy, t = l ? clamp(((x - ax) * dx + (y - ay) * dy) / l) : 0;
+  return Math.hypot(x - ax - t * dx, y - ay - t * dy);
+}
+function polyDist(P, x, y) { let d = 1e9; for (let i = 0, j = P.length - 2; i < P.length; j = i, i += 2) d = Math.min(d, segDist(x, y, P[j], P[j + 1], P[i], P[i + 1])); return d; }
+function lineDist(P, x, y) { let d = 1e9; for (let i = 2; i < P.length; i += 2) d = Math.min(d, segDist(x, y, P[i - 2], P[i - 1], P[i], P[i + 1])); return d; }
+
+const hero = document.getElementById('hero');
+const canvas = document.getElementById('art');
+const g = canvas.getContext('2d');
+let W = 0, H = 0, img, buf, mask = 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const on = (x, y, d) => (BAYER[((y & 3) << 2) | (x & 3)] + 0.5) / 16 < d;
+function px(x, y, c) {
+  x = Math.floor(x); y = Math.floor(y);
+  if (x < 0 || y < 0 || x >= W || y >= H) return;
+  if (mask < 1 && !on(x, y, mask)) return;
+  buf[y * W + x] = c;
+}
+function tone(x, y, t) {
+  t = clamp(t) * 5;
+  const i = Math.min(4, Math.floor(t));
+  return on(x, y, t - i) ? RAMP[i + 1] : RAMP[i];
+}
+function curve(xa, xb, f, c, thick = 1, dir = -1) {
+  let prev = null;
+  for (let x = Math.max(0, Math.floor(xa)); x <= Math.min(W - 1, Math.ceil(xb)); x++) {
+    const y = Math.round(f(x));
+    let a = y, b = y;
+    if (prev !== null) { if (prev < y - 1) a = prev + 1; else if (prev > y + 1) b = prev - 1; }
+    for (let yy = a; yy <= b; yy++) for (let k = 0; k < thick; k++) px(x, yy + dir * k, c);
+    prev = y;
+  }
+}
+function dashedCircle(cx, cy, R, c, dashes, L) {
+  const n = Math.max(24, Math.ceil(TAU * R * 1.5));
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * TAU;
+    if (Math.floor((k / n) * dashes * 2) & 1) continue;
+    const x = Math.floor(cx + R * Math.cos(a)), y = Math.floor(cy + R * Math.sin(a));
+    if (L && !(y + 0.5 > L.top(x) && y + 0.5 < L.bot(x))) continue;
+    px(x, y, c);
+  }
+}
+
+// ---------- the scene: lit surfaces composed once, shaded every frame ----------
+// Kinds: lit marble (normal + albedo), a fixed tone (sky, abstract fields), or a void (hollows, arches).
+const K_LIT = 0, K_FIX = 1, K_VOID = 2;
+let SK, SA, SNX, SNY, SNZ, FOG;
+let KEEP = { x0: 0, y0: 0, x1: 0, y1: 0 }, LAY = { cx: 0, ey: 0, narrow: true }, scene = { watchers: [] };
+// The hero text sits on a calm rectangle: no art inside, a dithered edge around it.
+function allowed(x, y) {
+  const d = Math.max(KEEP.x0 - x, x - KEEP.x1, KEEP.y0 - y, y - KEEP.y1);
+  return d >= 6 || (d > 0 && on(x, y, d / 6));
+}
+function put(x, y, k, a, nx = 0, ny = 0, nz = 1) {
+  if (x < 0 || y < 0 || x >= W || y >= H || !allowed(x, y)) return;
+  const i = y * W + x;
+  SK[i] = k; SA[i] = a; SNX[i] = nx; SNY[i] = ny; SNZ[i] = nz;
+}
+// Relief: fn(x, y) at pixel centres gives [height px, albedo, kind?] or null; normals come from the heights.
+// With `flat` set, it writes that fixed tone instead: a cast shadow of the same silhouette.
+function stamp(x0, y0, w, h, fn, flat) {
+  x0 = Math.floor(x0); y0 = Math.floor(y0); w = Math.ceil(w); h = Math.ceil(h);
+  const ww = w + 2, hh = h + 2, n = ww * hh, Hm = new Float32Array(n), Am = new Float32Array(n), Km = new Int8Array(n).fill(-1);
+  for (let j = 0; j < hh; j++) for (let i = 0; i < ww; i++) {
+    const r = fn(x0 + i - 0.5, y0 + j - 0.5);
+    if (!r) continue;
+    const k = j * ww + i;
+    Hm[k] = r[0]; Am[k] = r[1]; Km[k] = r[2] ?? K_LIT;
+  }
+  for (let j = 1; j <= h; j++) for (let i = 1; i <= w; i++) {
+    const k = j * ww + i;
+    if (Km[k] < 0) continue;
+    if (flat !== undefined) { put(x0 + i - 1, y0 + j - 1, K_FIX, flat); continue; }
+    const dx = (Hm[k + 1] - Hm[k - 1]) / 2, dy = (Hm[k + ww] - Hm[k - ww]) / 2, l = Math.sqrt(dx * dx + dy * dy + 1);
+    put(x0 + i - 1, y0 + j - 1, Km[k], Am[k], -dx / l, -dy / l, 1 / l);
+  }
+}
+// Places a shape drawn in local units: scaled by s, turned by ang, mirrored to face left.
+function place(fn, ax, ay, s, ang = 0, mirror = false) {
+  const c = Math.cos(ang), sn = Math.sin(ang);
+  return (x, y) => {
+    const dx = x - ax, dy = y - ay;
+    let u = (c * dx + sn * dy) / s;
+    const v = (-sn * dx + c * dy) / s;
+    if (mirror) u = -u;
+    const r = fn(u, v);
+    return r && [r[0] * s, r[1], r[2]];
+  };
+}
+const toArt = (ax, ay, s, ang, mirror, u, v) => { if (mirror) u = -u; const c = Math.cos(ang), sn = Math.sin(ang); return [ax + s * (c * u - sn * v), ay + s * (sn * u + c * v)]; };
+// Far from the column the night goes to near-black.
+function skyTone(x, y, k = 0.15) {
+  const half = (KEEP.x1 - KEEP.x0) / 2, dxc = Math.abs(x + 0.5 - LAY.cx);
+  const e = clamp((dxc - half) / Math.max(24, W / 2 - half)), top = clamp(1 - y / Math.max(1, KEEP.y0)), bot = clamp((y - KEEP.y1) / Math.max(1, H - KEEP.y1));
+  return 0.2 - k * Math.max(e ** 0.8, top * 0.45, bot * 0.7);
+}
+
+// One light: every lit surface turns toward it, and darkens with distance.
+function shade(L, t) {
+  const lx = L.x, ly = L.y, lz = L.z, r2 = L.r * L.r, lev = L.level, bx = L.bx || 0, by = L.by || 0, bm = L.bm || 0;
+  for (let y = 0, i = 0; y < H; y++) for (let x = 0; x < W; x++, i++) {
+    const k = SK[i];
+    if (k < 0) { buf[i] = 0; continue; }
+    let tt;
+    if (k === K_VOID) tt = 0;
+    else if (k === K_FIX) tt = SA[i];
+    else {
+      const nx = SNX[i], ny = SNY[i], nz = SNZ[i], dx = lx - x, dy = ly - y, dd = dx * dx + dy * dy + lz * lz, dl = Math.sqrt(dd);
+      const ndl = (nx * dx + ny * dy + nz * lz) / dl;
+      let key = ndl > 0 ? (ndl * lev) / (1 + dd / r2) : 0;
+      if (bm) key *= 1 - bm * 0.65 * (0.5 - (0.5 * (-dx * bx - dy * by)) / dl);
+      const moon = 0.12 + 0.17 * Math.max(0, -0.45 * nx - 0.55 * ny + 0.7 * nz);
+      tt = SA[i] * (moon + 1.1 * key) + (ndl > 0.9 ? (ndl - 0.9) * 2.5 * key : 0);
+      if (!still) tt += 0.02 * Math.sin(x * 0.07 + y * 0.045 - t / 1700); // the dither shimmers slowly
+    }
+    // Near the text everything dissolves into the page's navy.
+    buf[i] = tone(x, y, 0.2 + (tt - 0.2) * FOG[i]);
+  }
+}
+function motes(t, L) {
+  const r = rng(77), n = Math.min(40, Math.round((W * H) / 2600));
+  for (let i = 0; i < n; i++) {
+    const x0 = r() * W, y0 = r() * H, sp = 0.0012 + 0.0028 * r(), dr = (r() - 0.5) * 0.002, ph = r() * 10;
+    const x = Math.floor(mod(x0 + dr * t + 3 * Math.sin(t / 3000 + ph), W)), y = Math.floor(mod(y0 - sp * t, H));
+    if (!allowed(x, y)) continue;
+    const d = Math.hypot(x - L.x, y - L.y), tw = still ? 1 : 0.6 + 0.4 * Math.sin(t / 400 + ph * 3);
+    const tt = 0.3 + (0.6 * L.level * tw) / (1 + (d / L.r) ** 2);
+    if (tt > 0.34) px(x, y, tt > 0.72 ? COL.pale : tt > 0.55 ? COL.gold : tt > 0.42 ? COL.muted : COL.frame);
+  }
+}
+
+// ---------- marble: a Greek head in profile (units: 100 wide, 140 tall, facing right) ----------
+const HEAD = [33,86, 27,76, 22,64, 25,58, 20,54, 24,48, 19,43, 21,38, 25,30, 31,22, 39,16, 48,12, 58,10, 67,12, 74,17, 78,24, 80,31, 81,37,
+  83,42, 86,49, 89,56, 91,60, 90,62, 87,63, 85,65, 87,67, 86,69, 84,70, 86,72, 84,74, 81,76, 82,79, 83,83, 80,87, 74,89, 68,91, 66,96,
+  67,103, 71,110, 78,116, 87,121, 93,128, 95,134, 90,138, 82,133, 74,139, 63,134, 52,140, 42,134, 31,139, 21,133, 13,137,
+  12,128, 19,119, 29,110, 34,100, 35,92];
+const HAIR = [58,10, 67,12, 74,17, 77,23, 74,26, 68,25, 62,27, 56,31, 51,37, 47,44, 44,51, 42,58, 41,66, 38,74, 33,86, 27,76, 22,64,
+  25,58, 20,54, 24,48, 19,43, 21,38, 25,30, 31,22, 39,16, 48,12];
+const FILLET = [73,20, 62,22, 50,28, 40,36, 32,46, 26,56];
+const CRACKS = [[60,10, 62,19, 58,27, 64,35, 61,44, 66,52, 63,60], [95,134, 86,126, 89,117, 84,110], [21,40, 30,44, 34,52]];
+function headFn(u, v) {
+  u += 50; v += 70;
+  if (u < 11 || u > 92 || v < 9 || v > 141 || !inPoly(HEAD, u, v)) return null;
+  if (((u - 75) / 4.6) ** 2 + ((v - 46) / 2.1) ** 2 < 1) return [0, 0, K_VOID]; // the hollow eye
+  let h = 4 * bevel(polyDist(HEAD, u, v), 6) + 10 * dome(u, v, 48, 46, 31, 40) + 4 * dome(u, v, 70, 56, 17, 28)
+    + 3 * Math.sqrt(Math.max(0, 1 - (segDist(u, v, 50, 92, 74, 128) / 17) ** 2)) + 3 * dome(u, v, 66, 138, 36, 20);
+  let a = 0.9 + 0.08 * (hash(Math.floor(u * 1.3) * 31 + Math.floor(v * 1.3)) - 0.5);
+  h += 2.2 * gauss(segDist(u, v, 67, 40, 80, 41), 2.4) - 2.6 * gauss(Math.hypot(u - 75, v - 46.5), 4.2);
+  h += 1.8 * gauss(Math.hypot(u - 71, v - 58), 5.5) + 1.5 * gauss(segDist(u, v, 81, 42, 88, 59), 2.2);
+  h += -1.2 * gauss(Math.hypot(u - 85, v - 62), 1.5) - 1.4 * gauss(segDist(u, v, 82, 71, 86, 71), 0.8) + 1.4 * gauss(Math.hypot(u - 80, v - 83), 4);
+  h += 1.1 * gauss(segDist(u, v, 52, 84, 68, 108), 2.6);
+  const e = ((u - 49) / 5.5) ** 2 + ((v - 57) / 8.5) ** 2;
+  if (e < 1) h += 2 * (1 - e) - 1.6 * dome(u, v, 49.5, 57, 2.8, 5.5);
+  else if (inPoly(HAIR, u, v)) {
+    const fd = lineDist(FILLET, u, v);
+    if (fd < 1.7) h += 1.2 * Math.sqrt(1 - (fd / 1.7) ** 2);
+    else {
+      let c = 0;
+      const gi = Math.floor(u / 5), gj = Math.floor(v / 5);
+      for (let ii = gi - 1; ii <= gi + 1; ii++) for (let jj = gj - 1; jj <= gj + 1; jj++)
+        c = Math.max(c, dome(u, v, 5 * (ii + 0.2 + 0.6 * hash(ii * 7.1 + jj * 3.3)), 5 * (jj + 0.2 + 0.6 * hash(ii * 1.7 + jj * 9.1)), 2.9, 2.9));
+      h += 0.8 + 1.5 * c;
+    }
+    if (polyDist(HAIR, u, v) < 0.8) h -= 0.8;
+  }
+  for (const C of CRACKS) if (lineDist(C, u, v) < 0.75) { h -= 1.6; a *= 0.2; }
+  return [h, a];
+}
+const HEAD_EYE = [25, -24]; // the hollow eye, in centred head units
+
+// A standing draped figure on a plinth (units: 40 wide, 130 tall, centred).
+const FIG = [15,15, 25,15, 30,19, 31,30, 30,42, 28,50, 31,64, 34,82, 37,100, 3,100, 6,82, 9,64, 12,50, 10,42, 9,30, 10,19];
+const ARM = [10.5,21, 9.5,35, 16,43, 25,41];
+function figureFn(u, v) {
+  u += 20; v += 65;
+  if (v >= 100) {
+    if (v > 130) return null;
+    if (v < 104.5) { if (Math.abs(u - 20) > 25) return null; return [4 + 1.5 * bevel(Math.min(25 - Math.abs(u - 20), v - 100, 104.5 - v), 1.5), 0.9]; }
+    if (Math.abs(u - 20) > 23) return null;
+    return [3 * bevel(Math.min(23 - Math.abs(u - 20), 130 - v), 2.5), 0.72];
+  }
+  const head = Math.hypot(u - 20, v - 8.5) < 5.5, bun = Math.hypot(u - 22.5, v - 4.5) < 3.2;
+  const neck = Math.abs(u - 20) < 2.2 && v > 12 && v < 16, body = inPoly(FIG, u, v), armD = lineDist(ARM, u, v);
+  if (!head && !bun && !neck && !body && armD > 1.8) return null;
+  if (head || bun) return [4 + 6 * dome(u, v, 20, 8.5, 5.5, 5.5) + 2.5 * dome(u, v, 22.5, 4.5, 3.2, 3.2), 0.92];
+  let h = body ? 3 * bevel(polyDist(FIG, u, v), 4) + 5 * dome(u, v, 20, 55, 18, 56) : 0;
+  if (v >= 48) h += 1.3 * Math.sin(9 * Math.atan2(u - 20, v - 36)) * clamp((v - 48) / 8); // folds fall from the belt
+  else h += 0.7 * Math.sin(u * 0.9 + v * 0.55);
+  if (armD < 1.8) h = Math.max(h, 7 + 2 * Math.sqrt(1 - (armD / 1.8) ** 2));
+  if (neck) h = Math.max(h, 6);
+  return [h, 0.9];
+}
+
+// A fluted Doric column: local x from the axis, y down from the top of the capital (px).
+function columnFn(len, r0, cap = true, broken = 0, seed = 1) {
+  const abH = r0 * 0.5, capH = cap ? r0 * 1.15 : 0;
+  return (lx, ly) => {
+    if (ly < 0 || ly > len) return null;
+    if (broken && ly < broken * (0.5 + 0.5 * hash(Math.floor(lx / 2) + seed)) + (lx > 0 ? 3 : 0)) return null;
+    if (cap && ly < capH) {
+      if (ly < abH) { const w = r0 * 1.55; if (Math.abs(lx) > w) return null; return [r0 * 0.9 + 1.5 * bevel(Math.min(w - Math.abs(lx), ly, abH - ly), 1.5), 0.95]; }
+      const k = (ly - abH) / (capH - abH), w = r0 * (1.45 - 0.42 * k ** 0.6);
+      if (Math.abs(lx) > w) return null;
+      const xr = lx / w;
+      return [w * Math.sqrt(1 - xr * xr) * 0.9, 0.9];
+    }
+    const k = (ly - capH) / Math.max(1, len - capH), r = r0 * (1 - 0.1 * k);
+    if (Math.abs(lx) > r) return null;
+    const xr = lx / r, ph = (Math.asin(xr) / Math.PI + 0.5) * 9, fr = ph - Math.floor(ph), cyl = Math.sqrt(1 - xr * xr);
+    let h = r * cyl - 0.14 * r * Math.sin(Math.PI * fr) * cyl;
+    if (cap && ly < capH + 2) h -= 0.8;
+    return [h, 0.84 + 0.08 * (hash(Math.floor(lx) * 13 + Math.floor(ly / 2)) - 0.5)];
+  };
+}
+// The meander: a raised Greek key on a slab, 10 px a turn.
+const KEY = ['##########', '..........', '.#######..', '.#.....#..', '.#.###.#..', '.#.#...#..', '.#.#...#..', '.#.#####..', '.#........', '##########'];
+function meanderFn(len, broken = false) {
+  return (u, v) => {
+    if (u < -1 || u > len || v < -1 || v > 10) return null;
+    if (broken && u > len - 14 + 10 * hash(Math.floor(v + 1) * 3.7)) return null;
+    const row = Math.floor(v), col = mod(Math.floor(u), 10), lit = row >= 0 && row < 10 && u >= 0 && KEY[row][col] === '#';
+    return [lit ? 1.6 : 0.3, lit ? 0.95 : 0.5];
+  };
+}
+// A laurel garland: leaves in pairs along a sagging cord.
+function laurelFn(x1, x2, y, sag) {
+  const leaves = [], n = Math.max(6, Math.round((x2 - x1) / 4));
+  for (let k = 0; k <= n; k++) {
+    const t = k / n, lx = x1 + (x2 - x1) * t, ly = y + sag * 4 * t * (1 - t), ta = Math.atan2(sag * 4 * (1 - 2 * t), x2 - x1);
+    for (const sd of [-1, 1]) leaves.push([lx, ly, ta + sd * 0.7 + (k & 1 ? 0.15 : -0.15)]);
+  }
+  return (x, y_) => {
+    let best = null;
+    for (const [lx, ly, a] of leaves) {
+      const dx = x - lx, dy = y_ - ly;
+      if (dx * dx + dy * dy > 36) continue;
+      const c = Math.cos(a), s = Math.sin(a), u = c * dx + s * dy - 2.6, v = -s * dx + c * dy, q = 1 - (u / 3.2) ** 2 - (v / 1.25) ** 2;
+      if (q > 0) { const h = 1.6 * Math.sqrt(q) + 0.5; if (!best || h > best[0]) best = [h, 0.82]; }
+    }
+    return best;
+  };
+}
+
+// ---------- the eye ----------
+function lidFns(cx, cy, hw, up, lo, pw = 0.85) {
+  const sh = x => { const u = (x + 0.5 - cx) / hw, s = 1 - u * u; return s > 0 ? s ** pw : 0; };
+  return { sh, top: x => cy - up * sh(x), bot: x => cy + lo * sh(x) };
+}
+const blinkLids = (up, lo, b) => [up * (1 - b) - lo * 0.5 * b, lo * (1 - 0.5 * b)];
+function eye(o) {
+  const L = lidFns(o.cx, o.cy, o.hw, o.up, o.lo, o.pw);
+  for (let x = Math.max(0, Math.floor(o.cx - o.hw)); x <= Math.min(W - 1, Math.ceil(o.cx + o.hw)); x++) {
+    const tY = L.top(x), bY = L.bot(x), s = L.sh(x);
+    for (let y = Math.max(0, Math.floor(tY)); y <= Math.min(H - 1, Math.ceil(bY)); y++) {
+      const yc = y + 0.5;
+      if (yc <= tY || yc >= bY) continue;
+      const dx = x + 0.5 - o.ix, dy = yc - o.iy, rho = Math.hypot(dx, dy);
+      px(x, y, rho < o.Ri ? o.iris(x, y, dx, dy, rho, yc - tY) : o.sclera(x, y, yc - tY, bY - yc, s));
+    }
+  }
+  return L;
+}
+// Iris tissue: radial fibres, a zigzag collarette, crypts, a dark limbus; the fibres bunch as the pupil dilates.
+function makeIris(seed, nf) {
+  const r = rng(seed), fib = Array.from({ length: nf }, r);
+  const crypts = Array.from({ length: 10 }, () => ({ a: r() * TAU - Math.PI, u: 0.42 + r() * 0.42, s: 0.04 + r() * 0.05 }));
+  return (x, y, dx, dy, rho, Ri, Rp, shade, glint) => {
+    if (rho < Rp) return COL.abyss;
+    const u = (rho - Rp) / (Ri - Rp), th = Math.atan2(dy, dx);
+    const f = mod((th / TAU) * nf + u * 1.6, nf), i = Math.floor(f), fr = f - i;
+    const n = fib[i] * (1 - fr) + fib[(i + 1) % nf] * fr;
+    let d;
+    if (u < 0.08) d = 0.4;
+    else if (u < 0.3) d = 0.6 + 0.2 * n;
+    else if (Math.abs(u - (0.34 + 0.035 * Math.sin(th * 13))) < 0.045) d = 0.82;
+    else d = 0.44 + 0.3 * n - 0.22 * clamp((u - 0.8) / 0.2);
+    for (const c of crypts) {
+      const da = Math.abs(mod(th - c.a + Math.PI, TAU) - Math.PI);
+      if (da < c.s * 1.7 && Math.abs(u - c.u) < c.s) { d -= 0.2; break; }
+    }
+    if (glint != null) { const da = Math.abs(mod(th - glint + Math.PI, TAU) - Math.PI); if (da < 0.5 && u > 0.1) d += 0.13 * (1 - da / 0.5); }
+    return tone(x, y, 0.2 + 0.8 * d * shade);
+  };
+}
+function blinkAt(st, t, base, spread) {
+  st.nb ??= t + base * 0.5;
+  if (t > st.nb + 260) st.nb = t + base + hash(st.nb) * spread;
+  return blinkCurve(t - st.nb);
+}
+const blinkCurve = d => (d < 0 ? 0 : d < 80 ? Math.ceil(d / 27) / 3 : d < 120 ? 1 : d < 240 ? 1 - Math.ceil((d - 120) / 40) / 3 : 0);
+
+const fine = matchMedia('(hover: hover) and (pointer: fine)');
+let pointer = null;
+addEventListener('pointermove', e => {
+  if (!fine.matches) return;
+  const r = canvas.getBoundingClientRect();
+  pointer = { x: (e.clientX - r.left) / S, y: (e.clientY - r.top) / S, at: performance.now() };
+}, { passive: true });
+const pointerActive = now => !!pointer && now - pointer.at < 2500;
+function gaze(st, t, rest, now, cx, cy, sx, sy, seq) {
+  st.g ??= { x: 0, y: 0 };
+  const dt = clamp(t - (st.lt ?? t), 0, 100);
+  st.lt = t;
+  let tx = 0, ty = 0, sp = 0.012;
+  if (!rest) {
+    if (pointerActive(now)) { tx = clamp((pointer.x - cx) / sx, -1, 1); ty = clamp((pointer.y - cy) / sy, -1, 1); }
+    else {
+      st.gi ??= 0; st.ga ??= t;
+      if (t >= st.ga) { st.gi++; st.ga = t + 900 + hash(st.gi) * 1500; }
+      [tx, ty, sp] = seq[st.gi % seq.length];
+    }
+  }
+  const ddx = tx - st.g.x, ddy = ty - st.g.y, d = Math.hypot(ddx, ddy), m = sp * dt;
+  if (d <= m) { st.g.x = tx; st.g.y = ty; } else { st.g.x += (ddx / d) * m; st.g.y += (ddy / d) * m; }
+  return still ? { x: 0, y: 0 } : st.g;
+}
+
+// Eyes where they should not be: a pair of points in the dark, or an eye inside a hollow socket.
+function watchers(list, t, now) {
+  const tgt = pointerActive(now) ? pointer : { x: LAY.cx, y: LAY.ey };
+  for (const w of list) {
+    let o;
+    if (still) o = w.still ? 1 : 0;
+    else {
+      const per = 8000 + w.seed * 9000, d = (t + w.seed * 13000) % per;
+      o = d < 200 ? d / 200 : d < 2600 ? 1 : d < 2800 ? 1 - (d - 2600) / 200 : 0;
+      if (d > 1200 && d < 1360) o = 0.15;
+    }
+    if (o <= 0) continue;
+    const gx = clamp((tgt.x - w.x) / 60, -1, 1), gy = clamp((tgt.y - w.y) / 60, -1, 1);
+    if (w.kind === 'pair') {
+      const c = o > 0.6 ? COL.pale : COL.muted, sx = Math.round(gx);
+      for (const s of [-1, 1]) { const x = Math.round(w.x + s * w.sep + sx), y = Math.round(w.y); if (allowed(x, y)) px(x, y, c); }
+      continue;
+    }
+    const ri = Math.max(1, w.hh * 0.95), ix = w.x + gx * Math.max(0, w.hw - ri - 0.5), iy = w.y + gy * w.hh * 0.3;
+    for (let y = Math.floor(w.y - w.hh - 1); y <= w.y + w.hh + 1; y++) for (let x = Math.floor(w.x - w.hw - 1); x <= w.x + w.hw + 1; x++) {
+      const u = (x + 0.5 - w.x) / w.hw;
+      if (Math.abs(u) >= 1 || !allowed(x, y)) continue;
+      const s = (1 - u * u) ** 0.9, dy = y + 0.5 - w.y;
+      if (Math.abs(dy) > w.hh * s * o) continue;
+      const rho = Math.hypot(x + 0.5 - ix, y + 0.5 - iy);
+      px(x, y, rho < ri * 0.4 ? COL.abyss : rho < ri ? COL.gold : tone(x, y, 0.42));
+    }
+  }
+}
+
+// ---------- A · Piazza: a metaphysical square at dusk; the eye is its low sun ----------
+const aperture = r => clamp(0.175 + 0.275 * r, 0.12, 1);
+const SCAN = [[-0.9, 0, 0.012], [0.9, 0, 0.0008], [0.9, 0, 0.012], [0.25, 0.4, 0.012], [-0.5, -0.2, 0.012], [0, 0, 0.012], [-0.9, 0, 0.0008]];
+function composePiazza() {
+  const { cx, ey, narrow } = LAY, yh = ey, f = 100, Zn = 2.5;
+  const yFn = Math.min(H - 10, yh + Math.max(90, (H - yh) * 0.42)), Hc = ((yFn - yh) * Zn) / f, Ht = ((yh + 14) * Zn) / f;
+  const P = 1.5, pw = 0.34, rA = ((1 - pw) * P) / 2, Ys = -Hc + (Hc + Ht) * 0.46, zc = (pw + 1) / 2;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const xc = x + 0.5 - cx, yc = y + 0.5, dxc = Math.abs(xc);
+    const sky = skyTone(x, y) + 0.12 * Math.exp(-((xc / (W * 0.2)) ** 2)) * Math.exp(-(((yc - yh) / 9) ** 2));
+    const Z = (Zn * cx) / Math.max(dxc, 0.5), Y = ((yh - yc) * Z) / f, nx = xc < 0 ? 0.8 : -0.8;
+    if (dxc < 1.5 || Y > Ht) { put(x, y, K_FIX, sky); continue; }
+    if (Y >= -Hc) { // the arcades, receding to the eye
+      const s = mod(Z / P + 0.5, 1), dz = (s - zc) * P;
+      if (s > pw && (Y < Ys || dz * dz + (Y - Ys) ** 2 < rA * rA)) { if (s > 0.94) put(x, y, K_LIT, 0.4); else put(x, y, K_VOID, 0); continue; }
+      if (Math.abs(dz) < 0.22 && s > pw && Y > Ys + rA + 0.6 && Y < Ys + rA + 1.3) { put(x, y, K_VOID, 0); continue; }
+      let a = 0.8 + 0.08 * (hash(Math.floor(Z * 9) * 7 + Math.floor(Y * 4)) - 0.5);
+      if (Y > Ht - 0.28) a = 1; else if (Y > Ht - 0.42) a = 0.3;
+      if (Y < -Hc + 0.22) a = 0.62;
+      put(x, y, K_LIT, a, nx, 0, 0.6);
+    } else { // the floor: paving that converges on the eye, stones missing
+      const Zf = (f * Hc) / (yc - yh), Xw = (xc * Zf) / f, Zf2 = (f * Hc) / (yc + 1 - yh), Xw2 = ((xc + 1) * Zf) / f;
+      const edge = Math.floor(Zf / 1.1) !== Math.floor(Zf2 / 1.1) || Math.floor(Xw / 1.4) !== Math.floor(Xw2 / 1.4);
+      const a = edge && hash(Math.floor(Zf / 1.1) * 17 + Math.floor(Xw / 1.4) * 5) > 0.3 ? 0.3 : 0.55;
+      put(x, y, K_LIT, a, 0, -0.6, 0.8);
+    }
+  }
+  const floorY = x => yh + ((yFn - yh) * Math.abs(x + 0.5 - cx)) / cx;
+  // A long shadow cast away from the eye, across the floor.
+  const castShadow = (bx, by, half, len) => {
+    const dx = bx - cx, dy = by - ey, l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, qx = -uy, qy = ux;
+    const poly = [bx - qx * half, by - qy * half, bx + qx * half, by + qy * half, bx + ux * len + qx * half * 1.6, by + uy * len + qy * half * 1.6, bx + ux * len - qx * half * 1.6, by + uy * len - qy * half * 1.6];
+    for (let y = Math.max(0, Math.floor(by - half * 2)); y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (SK[i] === K_LIT && SNY[i] < -0.5 && inPoly(poly, x + 0.5, y + 0.5)) SA[i] *= 0.16;
+    }
+  };
+  const mL = KEEP.x0, mR = W - KEEP.x1, w = [];
+  if (!narrow) {
+    // The lone statue, left, and its long shadow.
+    const hs = Math.min(H * 0.34, mL * 1.05), s = hs / 130, sx = mL * 0.46, sb = Math.min(H - 10, Math.max(floorY(sx) + hs * 0.5, H * 0.8));
+    castShadow(sx, sb, 20 * s, hs * 1.7);
+    stamp(sx - 27 * s, sb - 131 * s, 54 * s, 133 * s, place(figureFn, sx, sb - 65 * s, s));
+  }
+  // The colossal broken head, right (under the text on a phone), facing the eye.
+  const zoneH = narrow ? H - KEEP.y1 - 6 : H * 0.45, hh = Math.min(zoneH, narrow ? 90 : mR * 1.3), hs2 = hh / 140;
+  if (hh > 30) {
+    const hx = narrow ? W - 36 * hs2 : KEEP.x1 + mR * 0.54, hy = H - 10 - 70 * hs2;
+    castShadow(hx, H - 10, 34 * hs2, hh);
+    stamp(hx - 52 * hs2, hy - 72 * hs2, 104 * hs2, 144 * hs2, place(headFn, hx, hy, hs2, 0, true));
+    const [sx2, sy2] = toArt(hx, hy, hs2, 0, true, HEAD_EYE[0], HEAD_EYE[1]);
+    w.push({ kind: 'socket', x: sx2, y: sy2, hw: 4.6 * hs2, hh: 2.1 * hs2, seed: 0.31, still: true });
+  }
+  // Someone stands deep inside a few arches.
+  for (const [m, side, seed] of [[2, -1, 0.62], [4, 1, 0.17], [6, -1, 0.83]]) {
+    const Z = P * (m + zc - 0.5), Y = -Hc + 1.1, x = cx + (side * Zn * cx) / Z, y = yh - (Y * f) / Z;
+    if (allowed(Math.round(x), Math.round(y))) w.push({ kind: 'pair', x, y, sep: Z < 4 ? 2 : 1, seed });
+  }
+  scene.watchers = w;
+}
+function updatePiazza(t, v, st, now) {
+  const { cx, ey } = LAY, hw = Math.min(54, Math.floor(W * 0.42)), upMax = hw * 0.62, loMax = hw * 0.36, Ri = Math.round(hw * 0.36);
+  const ts = Math.floor(t / 40) * 40, glow = still ? 0.7 : GLOWS[Math.floor(t / 260) % 10];
+  const b = still ? 0 : ts < 720 ? kf(ts, [[0, 1], [380, 1], [500, 0.5], [600, 1], [720, 0]]) : blinkAt(st, t, 3600, 5000);
+  const a = aperture(v / 100), [up, lo] = blinkLids(upMax * a, loMax * (0.6 + 0.4 * a), b);
+  const gz = gaze(st, t, still || t < 1650, now, cx, ey, W * 0.3, 30, SCAN), m = Math.min(1, Math.hypot(gz.x, gz.y));
+  st.E = { cx, cy: ey, hw, upMax, Ri, Rp: Ri * 0.42, up, lo, b, glow, ix: cx + gz.x * hw * 0.46, iy: ey + gz.y * 3 };
+  // The square has no light but the eye: dark while it is shut, brighter the wider it opens, and where it looks.
+  st.light = { x: cx, y: ey, z: 22, r: Math.max(70, W * 0.36), level: (1 - b) * (0.72 + 0.28 * a) * (0.9 + 0.1 * glow), bx: m ? gz.x / m : 0, by: m ? gz.y / m : 0, bm: m };
+}
+function drawPiazza(t, v, st) {
+  const { cx, cy, hw, upMax, Ri, Rp, up, lo, b, glow, ix, iy } = st.E;
+  st.iris ??= makeIris(7, 64);
+  const rx = hw * 1.05, ry = upMax * 1.1, gl = (1 - b) * glow;
+  for (let y = Math.max(0, Math.floor(cy - ry * 1.8)); y < cy; y++)
+    for (let x = Math.max(0, Math.floor(cx - rx * 1.8)); x < Math.min(W, cx + rx * 1.8); x++) {
+      const e = Math.hypot((x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry), dens = gl * 0.4 * clamp((1.75 - e) / 0.85) ** 1.5;
+      if (dens > 0 && on(x, y, dens)) px(x, y, e < 1.25 ? COL.muted : COL.frame);
+    }
+  const L = eye({ cx, cy, hw, up, lo, ix, iy, Ri,
+    sclera: (x, y, dT, dB, s) => tone(x, y, 0.3 + 0.17 * s - 0.2 * clamp(1 - dT / 4)),
+    iris: (x, y, dx, dy, rho, dT) => st.iris(x, y, dx, dy, rho, Ri, Rp, 0.72 + 0.28 * clamp(dT / 4)) });
+  // Sculpted lids: the upper lid's skin runs from the crease to its lit edge.
+  const crease = x => cy - (upMax * 0.98 + 4) * L.sh(x);
+  for (let x = Math.ceil(cx - hw); x <= cx + hw; x++) {
+    const c0 = crease(x), t0_ = L.top(x), b0 = L.bot(x);
+    for (let y = Math.ceil(c0); y < t0_ - 0.5; y++) px(x, y, tone(x, y, 0.24 + (0.36 * (y - c0)) / Math.max(1, t0_ - c0)));
+    for (let y = Math.ceil(b0 + 1); y < b0 + 3.5; y++) px(x, y, tone(x, y, 0.42 - 0.06 * (y - b0)));
+  }
+  if (still || t > 1400) { const a1 = aperture(1); for (let x = Math.ceil(cx - hw * 0.92); x <= cx + hw * 0.92; x++) if (x % 3 === 0) px(x, Math.round(cy - upMax * a1 * L.sh(x)), COL.label); }
+  curve(cx - hw * 0.78, cx + hw * 0.78, crease, COL.muted);
+  curve(cx - hw, cx + hw, L.top, COL.gold, 2, -1);
+  curve(cx - hw, cx + hw, L.bot, COL.muted, 1, 1);
+  const qx = Math.round(ix - Ri * 0.38), qy = Math.round(iy - Ri * 0.4);
+  if (qy > L.top(qx) + 1 && qy + 1 < L.bot(qx)) { px(qx, qy, COL.pale); px(qx + 1, qy, COL.pale); px(qx, qy + 1, COL.pale); px(qx + 1, qy + 1, COL.pale); }
+}
+
+// ---------- B · Colossus: a fragment of a colossal face, floating heads, orbits, a black sun ----------
+function composeColossus() {
+  const { cx, ey, narrow } = LAY, mL = KEEP.x0, mR = W - KEEP.x1;
+  const Ri = Math.min(34, Math.floor(W * 0.27)), hw = Ri * 2, up = Ri * 0.95, lo = Ri * 0.85;
+  scene.shard = { cx, ey, Ri, hw, up, lo, Rp0: Ri * 0.28 };
+  const R0 = hw + 20, dR = narrow ? 11 : 17, gy0 = narrow ? KEEP.y1 : H * 0.55;
+  const ecl = narrow ? null : { x: mL * 0.42, y: Math.min(H * 0.3, ey + 80), r: Math.min(40, mL * 0.36) };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const xc = x + 0.5 - cx, yc = y + 0.5 - ey, rho = Math.hypot(xc, yc);
+    let tt = skyTone(x, y, 0.17);
+    const k = Math.round((rho - R0) / dR);
+    if (k >= 0 && k < 9 && Math.abs(rho - (R0 + k * dR)) < 0.5 && hash(Math.floor((Math.atan2(yc, xc) * rho) / 6) * 13 + k * 101) > 0.35) tt = 0.31;
+    if (y > gy0 && (mod(x, 13) === 0 || mod(y, 13) === 0) && hash(Math.floor(x / 13) * 7 + Math.floor(y / 13) * 31 + (mod(x, 13) === 0 ? 0.5 : 0)) > 0.4 && on(x, y, clamp((y - gy0) / 40))) tt = 0.28;
+    if (ecl) {
+      const ex = x + 0.5 - ecl.x, eyy = y + 0.5 - ecl.y, er = Math.hypot(ex, eyy);
+      if (er < ecl.r) { const c = (ex * (cx - ecl.x) + eyy * (ey - ecl.y)) / (er * Math.hypot(cx - ecl.x, ey - ecl.y) + 1e-6); tt = 0.03 + 0.4 * clamp(c) ** 4 * clamp((er / ecl.r - 0.82) / 0.18); }
+    }
+    put(x, y, K_FIX, tt);
+  }
+  const w = [];
+  // Each floating piece drops a faint shadow on the dark, a little below it.
+  const head = (hx, hy, hh, ang, mirror, seed, stillOpen) => {
+    const s = hh / 140, R = 90 * s;
+    stamp(hx - R + 6, hy - R + 10, 2 * R, 2 * R, place(headFn, hx + 6, hy + 10, s, ang, mirror), 0.05);
+    stamp(hx - R, hy - R, 2 * R, 2 * R, place(headFn, hx, hy, s, ang, mirror));
+    const [sx, sy] = toArt(hx, hy, s, ang, mirror, HEAD_EYE[0], HEAD_EYE[1]);
+    if (Math.abs(Math.sin(ang)) < 0.5) w.push({ kind: 'socket', x: sx, y: sy, hw: 4.6 * s, hh: 2.1 * s, seed, still: stillOpen });
+  };
+  const column = (x, y, len, r, ang, seed) => {
+    const R = len / 2 + r * 2, fn = columnFn(len, r, false, 0, seed);
+    const frag = (u, v) => { v += len / 2; return v < 3 * hash(Math.floor(u) + seed) || v > len - 3 * hash(Math.floor(u) + seed + 9) ? null : fn(u, v); };
+    stamp(x - R + 6, y - R + 10, 2 * R, 2 * R, place(frag, x + 6, y + 10, 1, ang), 0.05);
+    stamp(x - R, y - R, 2 * R, 2 * R, place(frag, x, y, 1, ang));
+  };
+  if (!narrow) {
+    if (ecl) w.push({ kind: 'socket', x: ecl.x, y: ecl.y, hw: ecl.r * 0.42, hh: ecl.r * 0.15, seed: 0.55 });
+    head(mL * 0.55, H * 0.58, Math.min(H * 0.32, mL * 1.15), -0.22, false, 0.12, true);
+    head(mL * 0.38, H * 0.88, Math.min(H * 0.2, mL * 0.75), 2.9, true, 0.77, false);
+    head(KEEP.x1 + mR * 0.5, H * 0.36, Math.min(H * 0.3, mR * 1.1), 0.2, true, 0.42, false);
+    column(KEEP.x1 + mR * 0.48, H * 0.74, Math.min(mR * 0.95, 120), Math.max(5, mR * 0.07), 1.25, 3);
+    const ml = Math.min(mR * 0.85, 90);
+    stamp(KEEP.x1 + mR * 0.06, 2, ml + 24, 44, place(meanderFn(ml, true), KEEP.x1 + mR * 0.1, 24, 1, -0.12));
+  } else {
+    const bz = H - KEEP.y1;
+    if (bz > 40) {
+      head(W * 0.3, KEEP.y1 + bz * 0.5, Math.min(bz * 0.8, 70), -0.25, false, 0.12, true);
+      column(W * 0.74, KEEP.y1 + bz * 0.5, Math.min(W * 0.4, 60), 5, 1.2, 3);
+    }
+  }
+  // The colossal fragment: brow, socket, and a stone eyelid under the live eye.
+  const poly = [], rx = hw + 18, ryT = up + 15, ryB = Math.min(lo + 14, KEEP.y0 - 3 - ey);
+  for (let k = 0; k < 28; k++) {
+    const a = (k / 28) * TAU, rr = 1 - 0.16 * hash(k * 3.1 + 1) - (hash(k * 7.7) > 0.78 ? 0.14 : 0);
+    poly.push(cx + rx * rr * Math.cos(a), ey + 3 + (Math.sin(a) < 0 ? ryT : ryB) * rr * Math.sin(a));
+  }
+  const cracks = [[cx - rx * 0.7, ey - ryT * 0.6, cx - rx * 0.45, ey - ryT * 0.35, cx - rx * 0.5, ey - 4], [cx + rx * 0.85, ey + ryB * 0.5, cx + rx * 0.6, ey + ryB * 0.2, cx + rx * 0.66, ey - 2]];
+  const L = lidFns(cx, ey, hw, up, lo);
+  stamp(cx - rx - 2, ey - ryT - 2, 2 * rx + 4, ryT + ryB + 8, (x, y) => {
+    if (!inPoly(poly, x, y)) return null;
+    let h = 5 * bevel(polyDist(poly, x, y), 6) + 14 * dome(x, y, cx, ey + 3, rx, ryT + ryB), a = 0.9;
+    const s = L.sh(x), tY = L.top(x), bY = L.bot(x);
+    h += 4 * gauss(y - (tY - 9 * s - 4), 3.5) * (0.3 + 0.7 * s);
+    if (y > tY && y < bY) h += -1.5 + 4 * Math.sqrt(Math.max(0, 1 - ((x - cx) / hw) ** 2 - ((y - ey) / up) ** 2));
+    else h -= 2.5 * gauss(Math.min(Math.abs(y - tY), Math.abs(y - bY)), 3) * s;
+    for (const C of cracks) if (lineDist(C, x, y) < 0.7) { h -= 1.5; a = 0.2; }
+    return [h, a];
+  });
+  scene.watchers = w;
+}
+function updateColossus(t, v, st, now) {
+  const G = scene.shard, ts = Math.floor(t / 40) * 40;
+  let rp = G.Rp0 * clamp(v / 100, 0.3, 3);
+  if (!still) {
+    const w = now - cStart - 640;
+    if (w > 0 && w < 1400) rp *= 1 + 0.08 * Math.sin(w / 70) * Math.exp(-w / 260);
+    rp *= 1 + 0.03 * Math.sin(t / 1100) * Math.sin(t / 1700 + 1.3);
+  }
+  const b = still ? 0 : ts < 480 ? kf(ts, [[0, 1], [160, 1], [480, 0]]) : blinkAt(st, t, 10000, 5000);
+  const [up, lo] = blinkLids(G.up, G.lo, b);
+  st.E = { rp: Math.min(rp, G.Ri * 0.88), up, lo, bs: still ? 1 : t < 180 ? 4 : t < 340 ? 2 : 1, glint: still ? -2.3 : (t / 9000) * TAU };
+  // A slow light circles the stones.
+  const phi = still ? 3.6 : 3.2 + t / 8000;
+  st.light = { x: G.cx + W * 0.42 * Math.cos(phi), y: G.ey + 60 + H * 0.22 * Math.sin(phi), z: 45, r: Math.max(90, W * 0.45), level: still ? 1 : clamp(t / 1200) };
+}
+function drawColossus(t, v, st) {
+  const { cx, ey, Ri, hw, Rp0 } = scene.shard, { rp, up, lo, bs, glint } = st.E;
+  st.iris ??= makeIris(3, 132);
+  const L = eye({ cx, cy: ey, hw, up, lo, ix: cx, iy: ey, Ri,
+    sclera: (x, y, dT, dB, s) => tone(x, y, 0.26 + 0.2 * s - 0.17 * clamp(1 - dT / 5)),
+    iris: (x, y, dx, dy, rho, dT) => {
+      if (bs > 1) { dx = Math.floor(x / bs) * bs + bs / 2 - cx; dy = Math.floor(y / bs) * bs + bs / 2 - ey; rho = Math.hypot(dx, dy); if (rho >= Ri) return COL.frame; }
+      return st.iris(x, y, dx, dy, rho, Ri, rp, 0.7 + 0.3 * clamp(dT / 6), glint);
+    } });
+  dashedCircle(cx, ey, Rp0, COL.label, 14, L); // the baseline 100
+  // Marble lids: a thick upper lid lit at its edge, a thinner lower one.
+  for (let x = Math.ceil(cx - hw); x <= cx + hw; x++) {
+    if (L.sh(x) <= 0) continue;
+    const t0_ = Math.round(L.top(x)), b0 = Math.round(L.bot(x));
+    for (let k = 1; k <= 4; k++) px(x, t0_ - k, tone(x, t0_ - k, 0.62 - 0.08 * k));
+    for (let k = 1; k <= 2; k++) px(x, b0 + k, tone(x, b0 + k, 0.46 - 0.08 * k));
+  }
+  curve(cx - hw, cx + hw, L.top, COL.gold, 1, -1);
+  curve(cx - hw, cx + hw, L.bot, COL.muted, 1, 1);
+  const inside = (x, y) => y + 0.5 > L.top(x) + 1 && y + 0.5 < L.bot(x);
+  const wx = Math.round(cx - Ri * 0.42), wy = Math.round(ey - Ri * 0.5);
+  for (let j = 0; j < 5; j++) for (let i = 0; i < 5; i++) if (i !== 2 && j !== 2 && inside(wx + i, wy + j)) px(wx + i, wy + j, COL.pale);
+}
+
+// ---------- C · Argus: a stele of thirty eyes in a curtained colonnade ----------
+function steleGeom() {
+  const { cx, narrow } = LAY, pX = clamp(Math.floor((W - 8) / 10), 11, 22), hw = Math.floor((pX - 4) / 2);
+  const up = Math.max(2, Math.round(hw * 0.62)), lo = Math.max(2, Math.round(hw * 0.48)), pY = up + lo + Math.max(4, Math.round(pX * 0.38));
+  const band = narrow ? 0 : 12, padX = 4, w = 10 * pX + 2 * padX, h = band + 4 + 3 * pY;
+  const x0 = Math.round(cx - w / 2), y0 = Math.max(3, KEEP.y0 - 6 - h);
+  return { pX, pY, hw, up, lo, band, x0, y0, w, h, ex0: x0 + padX + pX / 2, ey0: y0 + band + 2 + pY / 2, cy: y0 + h / 2 };
+}
+function composeArgus() {
+  const { narrow } = LAY, mL = KEEP.x0, mR = W - KEEP.x1, G = steleGeom(), w = [];
+  scene.stele = G;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) put(x, y, K_FIX, skyTone(x, y, 0.17));
+  if (!narrow) for (const side of [-1, 1]) {
+    const mw = side < 0 ? mL : mR, X = f => (side < 0 ? f * mw : W - f * mw);
+    for (const [fx, fr, top, broken] of [[0.2, 0.12, 30, 0], [0.55, 0.095, 30, 0], [0.86, 0.075, 70, 26]]) {
+      const r = Math.max(4, fr * mw), x = X(fx), len = H - top - 4, cf = columnFn(len, r, !broken, broken, fx * 9);
+      stamp(x - r * 1.7, top, r * 3.4, len, (u, v) => cf(u - x, v - top));
+    }
+    // An architrave over the first two columns: triglyphs, and dark metopes.
+    const r0 = Math.max(4, 0.12 * mw), r1 = Math.max(4, 0.095 * mw), xa = Math.min(X(0.2), X(0.55)) - r0 * 1.6, xb = Math.max(X(0.2), X(0.55)) + r1 * 1.6;
+    stamp(xa, 14, xb - xa, 17, (x, y) => {
+      if (x < xa || x > xb || y < 14 || y > 30) return null;
+      const mx = mod(x - xa, 14);
+      if (y < 23) return mx < 5 ? [3 + (mod(mx, 2) < 1 ? 0.6 : 0), 0.9] : [1, 0.28];
+      return [2.5 * bevel(Math.min(x - xa, xb - x, y - 14, 30 - y), 2), 0.82];
+    });
+    if (xa + 23.5 < xb - 6) w.push({ kind: 'pair', x: xa + 23.5, y: 18.5, sep: 2, seed: side < 0 ? 0.41 : 0.73 });
+    // A laurel garland between the capitals.
+    const gx1 = Math.min(X(0.2), X(0.55)) + 4, gx2 = Math.max(X(0.2), X(0.55)) - 4, gy = 30 + 0.12 * mw * 1.2;
+    stamp(gx1 - 6, gy - 6, gx2 - gx1 + 12, mw * 0.18 + 14, laurelFn(gx1, gx2, gy, mw * 0.16));
+    // Eyes in the dark between the columns.
+    w.push({ kind: 'pair', x: X(0.37), y: H * 0.47, sep: 2, seed: side < 0 ? 0.08 : 0.58, still: side < 0 });
+    w.push({ kind: 'pair', x: X(0.71), y: H * 0.68, sep: 1, seed: side < 0 ? 0.91 : 0.26 });
+    // A heavy curtain, drawn back and tied, in front of it all.
+    const Hc = Math.min(H * 0.62, 280), tieY = Hc * 0.42, inTop = mw * 0.62, tieX = mw * 0.15, inBot = mw * 0.36;
+    stamp(side < 0 ? 0 : W - inTop - 2, 0, inTop + 2, Hc + 2, (x, y) => {
+      const u = side < 0 ? x : W - x;
+      if (y < 0 || y > Hc) return null;
+      const xin = y < tieY ? inTop + (tieX - inTop) * (y / tieY) ** 0.75 : tieX + (inBot - tieX) * ((y - tieY) / (Hc - tieY)) ** 1.25;
+      if (u > xin) return null;
+      const f = u / Math.max(1, xin), depth = 2.5 + (3.5 * Math.abs(y - tieY)) / tieY;
+      let h = 7 * Math.sin(Math.PI * Math.min(1, f)) + depth * (0.5 + 0.5 * Math.cos(TAU * f * 6)), a = 0.72;
+      if (Math.abs(y - tieY) < 2.2) { h += 3; a = 1; }
+      if (y > Hc - 2) a = mod(u, 3) < 1.5 ? 0.95 : 0.3;
+      return [h, a];
+    });
+  } else if (G.y0 > 22) {
+    // On a phone a garland hangs above the stele.
+    stamp(4, 2, W - 8, 24, laurelFn(8, W - 8, 6, Math.min(14, G.y0 - 16)));
+  }
+  // The stele: a meander band and thirty carved sockets, each with a stone eyelid.
+  stamp(G.x0, G.y0, G.w, G.h, (x, y) => {
+    if (x < G.x0 || x > G.x0 + G.w || y < G.y0 || y > G.y0 + G.h) return null;
+    let h = 3 * bevel(Math.min(x - G.x0, G.x0 + G.w - x, y - G.y0, G.y0 + G.h - y), 3), a = 0.74 + 0.06 * (hash(Math.floor(x) * 31 + Math.floor(y) * 7) - 0.5);
+    if (G.band && y - G.y0 >= 2 && y - G.y0 < 12 && x - G.x0 >= 3 && G.x0 + G.w - x >= 3) {
+      const row = Math.floor(y - G.y0 - 2), col = mod(Math.floor(x - G.x0 - 3), 10);
+      if (KEY[row][col] === '#') { h += 1.2; a = 0.95; } else { h -= 0.3; a = 0.5; }
+    }
+    const col = clamp(Math.round((x - G.ex0) / G.pX), 0, 9), row = clamp(Math.round((y - G.ey0) / G.pY), 0, 2);
+    const ex = Math.round(G.ex0 + col * G.pX) + 0.5, eyy = Math.round(G.ey0 + row * G.pY) + 0.5, u = (x - ex) / (G.hw + 0.5), s = u * u < 1 ? (1 - u * u) ** 0.9 : 0;
+    if (s > 0 && y > eyy - G.up * s - 1 && y < eyy + G.lo * s + 1) {
+      h += -1.2 + 1.8 * s;
+      if (Math.abs(y - (eyy + 0.5 * G.lo * s)) < 0.6) { h -= 1; a = 0.3; }
+    }
+    return [h, a];
+  });
+  scene.watchers = w;
+}
+const LOOKS = [[0, 0], [-1, 0], [1, -0.3], [0.2, 0.8], [-0.8, 0.5], [0.9, 0.4], [0, -0.8], [-0.4, -0.6]];
+function updateArgus(t, v, st) {
+  const G = scene.stele, n = Math.round(clamp(v, 0, 300) / 10);
+  const fl = still ? 1 : 0.93 + 0.07 * Math.sin(t / 170) * Math.sin(t / 530 + 1);
+  st.n = n;
+  // The more eyes awake, the brighter the hall.
+  st.light = { x: LAY.cx, y: G.cy, z: 30, r: Math.max(80, W * 0.48), level: (0.3 + (0.7 * n) / 30) * fl };
+}
+function drawArgus(t, v, st, now) {
+  const G = scene.stele, n = st.n, live = pointerActive(now) && !still;
+  st.flip ??= new Array(30).fill(-1e9);
+  st.awake ??= new Array(30).fill(false);
+  const sepY = Math.round(G.ey0 + G.pY / 2);
+  for (let x = G.x0 + 4; x <= G.x0 + G.w - 4; x += 3) px(x, sepY, COL.label);
+  for (let i = 0; i < 30; i++) {
+    const row = Math.floor(i / 10), col = i % 10, ex = Math.round(G.ex0 + col * G.pX), ey = Math.round(G.ey0 + row * G.pY), aw = i < n;
+    if (aw !== st.awake[i]) { st.awake[i] = aw; st.flip[i] = t; }
+    let o = still ? +aw : aw ? clamp((t - st.flip[i]) / 120) : 1 - clamp((t - st.flip[i]) / 120);
+    o = Math.round(o * 3) / 3;
+    if (o <= 0) continue; // a sleeping eye is the stone lid itself
+    let b = 1 - o;
+    if (!still && o === 1) { const per = 3800 + hash(i + 1) * 6500; b = blinkCurve((t + hash(i + 7) * per) % per); }
+    let gx = 0, gy = 0;
+    if (!still) {
+      if (live) { const dx = pointer.x - ex, dy = pointer.y - ey, d = Math.hypot(dx, dy) || 1, m = Math.min(1, d / 12); gx = (dx / d) * m; gy = (dy / d) * m; }
+      else { const seg = Math.floor((t - 1400 - ((i * 7) % 10) * 35 - row * 20) / 2600); [gx, gy] = seg < 1 ? [0, 0] : LOOKS[Math.floor(hash(seg) * LOOKS.length)]; }
+    }
+    const [u2, l2] = blinkLids(G.up, G.lo, b), L = lidFns(ex + 0.5, ey + 0.5, G.hw + 0.5, u2, l2, 0.9);
+    const ri = Math.max(1.6, G.up * 0.72), ix = ex + 0.5 + gx * (G.hw - ri), iy = ey + 0.5 + gy * G.up * 0.35;
+    for (let x = ex - G.hw; x <= ex + G.hw; x++) for (let y = Math.floor(L.top(x)); y <= Math.ceil(L.bot(x)); y++) {
+      const yc = y + 0.5;
+      if (yc <= L.top(x) || yc >= L.bot(x)) continue;
+      const rho = Math.hypot(x + 0.5 - ix, yc - iy);
+      px(x, y, rho < ri * 0.45 ? COL.abyss : rho < ri ? COL.gold : yc - L.top(x) < 1.5 ? COL.frame : COL.abyss);
+    }
+    if (b < 0.5 && ri >= 3) px(Math.round(ix - ri * 0.5), Math.round(iy - ri * 0.55), COL.pale);
+    curve(ex - G.hw, ex + G.hw, L.top, COL.gold);
+    curve(ex - G.hw, ex + G.hw, L.bot, COL.muted, 1, 1);
+  }
+}
+
+// ---------- variants ----------
+const VARIANTS = [
+  { id: 'piazza', name: 'Piazza', delay: 700, compose: composePiazza, update: updatePiazza, draw: drawPiazza,
+    idea: 'A de Chirico square at dusk: empty arcades, a lone statue, a fallen head. The eye is the low sun, and the only light.',
+    caption: () => 'The eye is the square\'s only light. Its lids open wider as risk rises: the dotted line is where they rest at the baseline 100, and at 300 the eye is wide open.' },
+  { id: 'colossus', name: 'Colossus', delay: 520, compose: composeColossus, update: updateColossus, draw: drawColossus,
+    idea: 'A fragment of a colossal marble face hangs in the dark among floating heads, orbits and a black sun.',
+    caption: v => `The pupil's width is the 7-day average: the faint ring is the baseline 100, and this pupil is ${(v / 100).toFixed(1)} times as wide.` },
+  { id: 'argus', name: 'Argus', delay: 300, compose: composeArgus, update: updateArgus, draw: drawArgus,
+    idea: 'Argus, the hundred-eyed watchman: a stele of thirty eyes in a curtained colonnade, lit by the eyes that are awake.',
+    caption: v => `Each open eye on the stele is 10 points: ${Math.round(Math.min(v, 300) / 10)} of 30 are awake, and the hall brightens with them. A full first row is the baseline 100.` },
+];
+
+// ---------- state, layout and loop ----------
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+let vi = Math.max(0, VARIANTS.findIndex(x => '#' + x.id === location.hash));
+let value = DATA.avg, st = {}, t0 = performance.now();
+let cFrom = 0, cTo = value, cStart = t0 + VARIANTS[vi].delay;
+// The count-up of the site: 16 steps of 40 ms, slowing into the value.
+function shown(now) {
+  if (still) return value;
+  const k = Math.floor(clamp((now - cStart) / 640) * 16) / 16;
+  return cFrom + (cTo - cFrom) * ease(k);
+}
+const numEl = document.getElementById('num');
+const textEls = ['mark', 'kicker', 'num', 'copy'].map(id => document.getElementById(id));
+// The calm rectangle is measured from the real text, so it follows the live widths.
+function layout() {
+  const hr = hero.getBoundingClientRect();
+  W = Math.ceil(hr.width / S); H = Math.ceil(hr.height / S);
+  const left = (hr.width - W * S) / 2;
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const el of textEls) {
+    const r = el.getBoundingClientRect();
+    x0 = Math.min(x0, r.left - hr.left); y0 = Math.min(y0, r.top - hr.top); x1 = Math.max(x1, r.right - hr.left); y1 = Math.max(y1, r.bottom - hr.top);
+  }
+  KEEP = { x0: Math.floor((x0 - 24 - left) / S), y0: Math.floor((y0 - 16) / S), x1: Math.ceil((x1 + 24 - left) / S), y1: Math.ceil((y1 + 16) / S) };
+  LAY = { cx: W / 2, ey: clamp(KEEP.y0 - 46, 36, 60), narrow: KEEP.x0 < 40 };
+  canvas.width = W; canvas.height = H; canvas.style.width = W * S + 'px'; canvas.style.height = H * S + 'px';
+  img = g.createImageData(W, H); buf = new Uint32Array(img.data.buffer);
+  const n = W * H;
+  SK = new Int8Array(n); SA = new Float32Array(n); SNX = new Float32Array(n); SNY = new Float32Array(n); SNZ = new Float32Array(n); FOG = new Float32Array(n);
+  for (let y = 0, i = 0; y < H; y++) for (let x = 0; x < W; x++, i++)
+    FOG[i] = clamp(Math.hypot(Math.max(KEEP.x0 - x, 0, x - KEEP.x1), Math.max(KEEP.y0 - y, 0, y - KEEP.y1)) / 20) ** 0.8;
+  compose();
+}
+// shortcut: composing the marble takes 90-240 ms, so a resize or a variant switch hitches; cache per size if this ships.
+function compose() {
+  if (!W) return;
+  SK.fill(-1); scene = { watchers: [] };
+  VARIANTS[vi].compose();
+}
+function render(now) {
+  if (!W) return;
+  const V = VARIANTS[vi], t = still ? 1e6 : now - t0, v = shown(now);
+  V.update(t, v, st, now);
+  shade(st.light, t);
+  motes(t, st.light);
+  watchers(scene.watchers, t, now);
+  mask = 1;
+  V.draw(t, v, st, now);
+  g.putImageData(img, 0, 0);
+  if (!still && now < cStart + 680) numEl.dataset.count = Math.round(v);
+  else delete numEl.dataset.count;
+}
+let last = 0, visible = true, sized = '';
+(function loop(now) {
+  requestAnimationFrame(loop);
+  if (still || !visible || now - last < 32) return;
+  last = now;
+  render(now);
+})(t0);
+new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(canvas);
+new ResizeObserver(() => {
+  const r = hero.getBoundingClientRect(), key = Math.round(r.width) + 'x' + Math.round(r.height);
+  if (key === sized) return;
+  sized = key; layout(); render(performance.now());
+}).observe(hero);
+document.fonts?.ready.then(() => { layout(); render(performance.now()); });
+reduced.addEventListener('change', () => { still = reduced.matches; render(performance.now()); });
+
+// ---------- the hero text and the bar ----------
+const mark = document.getElementById('mark');
+// The wordmark dithers in: 8 Bayer steps of 30 ms, 3 px dots, as on the site.
+const MASKS = Array.from({ length: 8 }, (_, s) => {
+  const dots = BAYER.flatMap((th, i) => (th < 2 * (s + 1) ? [`<rect x="${3 * (i % 4)}" y="${3 * Math.floor(i / 4)}" width="3" height="3"/>`] : [])).join('');
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">${dots}</svg>`)}")`;
+});
+function ditherIn() {
+  if (still) return;
+  let s = 0;
+  const next = () => {
+    if (s >= MASKS.length) { mark.style.maskImage = mark.style.webkitMaskImage = ''; return; }
+    mark.style.maskImage = mark.style.webkitMaskImage = MASKS[s++];
+    setTimeout(next, 30);
+  };
+  next();
+}
+const vBtns = VARIANTS.map((x, i) => {
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.title = x.idea;
+  btn.innerHTML = `<span class="k">[${i + 1}]</span><span>${x.name}</span>`;
+  btn.addEventListener('click', () => setVariant(i));
+  document.getElementById('variants').append(btn);
+  return btn;
+});
+const valBtns = VALUES.map((x, i) => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.innerHTML = `<span class="k">[${'QWE'[i]}]</span><span>${x}</span>`;
+  btn.addEventListener('click', () => setValue(x));
+  document.getElementById('values').append(btn);
+  return btn;
+});
+function updateText() {
+  const V = VARIANTS[vi];
+  document.getElementById('capName').textContent = `${'ABC'[vi]} · ${V.name}`;
+  document.getElementById('cap').textContent = V.caption(value);
+  vBtns.forEach((b, i) => b.setAttribute('aria-pressed', i === vi));
+  valBtns.forEach((b, i) => b.setAttribute('aria-pressed', VALUES[i] === value));
+  numEl.textContent = value;
+  const p = Math.round((value / DATA.baseline - 1) * 100);
+  document.getElementById('vs').innerHTML = `${Math.abs(p)}% ${p < 0 ? 'below' : 'above'} <span class="nowrap">${DATA.baselineLabel}</span>`;
+  document.getElementById('avgline').textContent = value === DATA.avg ? `7-day average to ${DATA.referenceDate}` : `What-if value: the real 7-day average to ${DATA.referenceDate} is ${DATA.avg}`;
+}
+function setVariant(i) {
+  vi = i; st = {}; t0 = performance.now();
+  cFrom = 0; cTo = value; cStart = t0 + VARIANTS[i].delay;
+  try { if (location.hash !== '#' + VARIANTS[i].id) history.replaceState(null, '', '#' + VARIANTS[i].id); } catch { /* a sandbox may refuse: the link just keeps its hash */ }
+  updateText(); ditherIn(); compose(); render(t0);
+}
+function setValue(x) {
+  const now = performance.now();
+  cFrom = shown(now); cTo = x; value = x; cStart = now;
+  updateText(); render(now);
+}
+addEventListener('hashchange', () => { const i = VARIANTS.findIndex(x => '#' + x.id === location.hash); if (i >= 0 && i !== vi) setVariant(i); });
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.repeat) return;
+  const i = '123'.indexOf(e.key), j = 'qwe'.indexOf(e.key.toLowerCase());
+  if (i >= 0) setVariant(i);
+  else if (j >= 0) setValue(VALUES[j]);
+});
+
+// Self-check of the encodings.
+console.assert(aperture(1) < aperture(1.81) && aperture(1.81) < aperture(3) && aperture(3) === 1, 'lids open wider with risk, fully at 300');
+console.assert(0.28 * 3 <= 0.88, 'the pupil at 300 still fits the iris');
+console.assert(Math.round(181 / 10) === 18, '181 wakes 18 eyes');
+
+updateText(); ditherIn();
+})();
+</script>
