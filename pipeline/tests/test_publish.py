@@ -5,28 +5,57 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from aseri.archive import Archived
 from aseri.forecast import Forecast
 from aseri.publish import publish
 from aseri.series import GPR_DAILY
 
+PROVENANCE = {
+    "model": {
+        "id": "mistralai/Timestral-209M",
+        "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+        "url": "https://huggingface.co/mistralai/Timestral-209M",
+    },
+    "inference": {
+        "package": "timestral",
+        "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff",
+    },
+    "code": {
+        "commit": "0123abc",
+        "run": "https://github.com/exdsgift/aseri/actions/runs/1",
+    },
+    "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-10-29",
+        "input_sha256": "ab" * 32,
+    },
+    "generated_at": "2026-10-29T07:03:12Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic.",
+}
 
-def publish_gpr(api_dir, observed):
-    forecast = Forecast(
-        reference_date=observed.index[-1],
-        levels=(0.1, 0.5, 0.9),
-        quantiles=np.array(
-            [[90.1, 100.2, 110.3], [85.4, 101.5, 120.6]], dtype=np.float32
+
+def archived(reference_date, forecast_mode, forecast_date="2026-10-29"):
+    return Archived(
+        forecast=Forecast(
+            reference_date=pd.Timestamp(reference_date),
+            levels=(0.1, 0.5, 0.9),
+            quantiles=np.array(
+                [[90.1, 100.2, 110.3], [85.4, 101.5, 120.6]], dtype=np.float32
+            ),
         ),
+        forecast_date=forecast_date,
+        provenance=PROVENANCE | {"forecast_mode": forecast_mode},
     )
+
+
+def publish_gpr(api_dir, observed, forecasts):
     publish(
         api_dir,
         GPR_DAILY,
-        forecast,
+        forecasts,
         observed=observed,
-        as_of=date(2026, 10, 29),
-        code_commit="0123abc",
-        run_url="https://github.com/exdsgift/aseri/actions/runs/1",
-        generated_at=datetime(2026, 10, 29, 7, 3, 12, tzinfo=UTC),
+        as_of=date(2026, 10, 30),
+        generated_at=datetime(2026, 10, 30, 7, 1, 5, tzinfo=UTC),
     )
 
 
@@ -37,7 +66,11 @@ def days_to(last_day, values, dtype=float):
 
 @pytest.fixture
 def api_dir(tmp_path):
-    publish_gpr(tmp_path, days_to("2026-10-26", [120.5, 98.23, 101.3], "float32"))
+    publish_gpr(
+        tmp_path,
+        days_to("2026-10-27", [120.5, 98.23, 101.3, 99.0]),
+        [archived("2026-10-25", "retrospective"), archived("2026-10-26", "live")],
+    )
     return tmp_path
 
 
@@ -45,60 +78,55 @@ def read(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_latest_forecast_counts_its_horizon_from_the_reference_date(api_dir):
-    latest = read(api_dir / "series" / "gpr_daily" / "latest.json")
-
-    assert latest["series_id"] == "gpr_daily"
-    assert latest["reference_date"] == "2026-10-26"
-    assert latest["forecast_date"] == "2026-10-29"
-    assert latest["horizon"] == [1, 2]
-    assert latest["target_end_date"] == ["2026-10-27", "2026-10-28"]
+def dated(api_dir, reference_date):
+    return read(
+        api_dir / "series" / "gpr_daily" / "forecasts" / f"{reference_date}.json"
+    )
 
 
-def test_latest_forecast_keys_each_quantile_level_without_float_noise(api_dir):
-    latest = read(api_dir / "series" / "gpr_daily" / "latest.json")
+def test_every_archived_forecast_has_its_own_file_by_reference_date(api_dir):
+    retrospective = dated(api_dir, "2026-10-25")
+    live = dated(api_dir, "2026-10-26")
 
-    assert latest["output_type"] == "quantile"
-    assert latest["quantiles"] == {
+    assert retrospective["reference_date"] == "2026-10-25"
+    assert retrospective["forecast_mode"] == "retrospective"
+    assert live["reference_date"] == "2026-10-26"
+    assert live["forecast_mode"] == "live"
+
+
+def test_a_forecast_counts_its_horizon_from_the_reference_date(api_dir):
+    forecast = dated(api_dir, "2026-10-26")
+
+    assert forecast["series_id"] == "gpr_daily"
+    assert forecast["forecast_date"] == "2026-10-29"
+    assert forecast["horizon"] == [1, 2]
+    assert forecast["target_end_date"] == ["2026-10-27", "2026-10-28"]
+
+
+def test_a_forecast_keys_each_quantile_level_without_float_noise(api_dir):
+    forecast = dated(api_dir, "2026-10-26")
+
+    assert forecast["output_type"] == "quantile"
+    assert forecast["quantiles"] == {
         "0.1": [90.1, 85.4],
         "0.5": [100.2, 101.5],
         "0.9": [110.3, 120.6],
     }
 
 
-def test_latest_forecast_carries_its_provenance(api_dir):
-    latest = read(api_dir / "series" / "gpr_daily" / "latest.json")
+def test_a_forecast_carries_the_provenance_of_the_run_that_issued_it(api_dir):
+    forecast = dated(api_dir, "2026-10-25")
 
-    assert latest["model_id"] == "aseri-timestral209m"
-    assert latest["forecast_mode"] == "live"
-    assert latest["provenance"] == {
-        "model": {
-            "id": "mistralai/Timestral-209M",
-            "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
-            "url": "https://huggingface.co/mistralai/Timestral-209M",
-        },
-        "inference": {
-            "package": "timestral",
-            "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff",
-        },
-        "code": {
-            "commit": "0123abc",
-            "run": "https://github.com/exdsgift/aseri/actions/runs/1",
-        },
-        "data": {
-            "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
-            "as_of": "2026-10-29",
-        },
-        "generated_at": "2026-10-29T07:03:12Z",
-        "forecast_mode": "live",
-        "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic.",
-    }
+    assert forecast["model_id"] == "aseri-timestral209m"
+    assert forecast["provenance"] == PROVENANCE | {"forecast_mode": "retrospective"}
+    # Issued once, so republishing it never changes it.
+    assert forecast["generated_at"] == "2026-10-29T07:03:12Z"
 
 
-def test_latest_forecast_credits_the_source_and_the_model(api_dir):
-    latest = read(api_dir / "series" / "gpr_daily" / "latest.json")
+def test_a_forecast_credits_the_source_and_the_model(api_dir):
+    forecast = dated(api_dir, "2026-10-26")
 
-    assert latest["attribution"] == (
+    assert forecast["attribution"] == (
         'Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", '
         "American Economic Review 112(4), 1194-1225. "
         "Data: https://www.matteoiacoviello.com/gpr.htm "
@@ -106,23 +134,75 @@ def test_latest_forecast_credits_the_source_and_the_model(api_dir):
     )
 
 
-def test_actuals_list_the_observed_values_by_date_without_float_noise(api_dir):
-    actuals = read(api_dir / "series" / "gpr_daily" / "actuals.json")
+def test_a_forecast_is_self_describing(api_dir):
+    forecast = dated(api_dir, "2026-10-26")
+
+    assert forecast["schema_version"] == "1.0.0"
+    assert forecast["unit"] == "index (1985-2019 average = 100)"
+    assert forecast["horizon_unit"] == "day"
+    assert forecast["links"] == {"catalog": "../../../series.json"}
+
+
+def test_latest_is_the_newest_forecast_linking_to_its_dated_file(api_dir):
+    latest = read(api_dir / "series" / "gpr_daily" / "latest.json")
+    newest = dated(api_dir, "2026-10-26")
+
+    assert latest["links"] == {
+        "catalog": "../../series.json",
+        "canonical": "forecasts/2026-10-26.json",
+    }
+    assert latest | {"links": None} == newest | {"links": None}
+
+
+def test_the_index_lists_every_forecast_oldest_first(api_dir):
+    index = read(api_dir / "series" / "gpr_daily" / "forecasts.json")
+
+    assert index == {
+        "schema_version": "1.0.0",
+        "series_id": "gpr_daily",
+        "forecasts": [
+            {
+                "reference_date": "2026-10-25",
+                "forecast_date": "2026-10-29",
+                "forecast_mode": "retrospective",
+                "url": "forecasts/2026-10-25.json",
+            },
+            {
+                "reference_date": "2026-10-26",
+                "forecast_date": "2026-10-29",
+                "forecast_mode": "live",
+                "url": "forecasts/2026-10-26.json",
+            },
+        ],
+        "generated_at": "2026-10-30T07:01:05Z",
+    }
+
+
+def test_actuals_list_the_observed_values_by_date_without_float_noise(tmp_path):
+    publish_gpr(
+        tmp_path,
+        days_to("2026-10-26", [120.5, 98.23, 101.3], "float32"),
+        [archived("2026-10-26", "live")],
+    )
+
+    actuals = read(tmp_path / "series" / "gpr_daily" / "actuals.json")
 
     assert actuals == {
         "schema_version": "1.0.0",
         "series_id": "gpr_daily",
         "unit": "index (1985-2019 average = 100)",
-        "as_of": "2026-10-29",
+        "as_of": "2026-10-30",
         "date": ["2026-10-24", "2026-10-25", "2026-10-26"],
         "observation": [120.5, 98.23, 101.3],
         "attribution": GPR_DAILY.license["attribution"],
-        "generated_at": "2026-10-29T07:03:12Z",
+        "generated_at": "2026-10-30T07:01:05Z",
     }
 
 
 def test_actuals_keep_the_last_400_days(tmp_path):
-    publish_gpr(tmp_path, days_to("2026-10-26", range(500)))
+    publish_gpr(
+        tmp_path, days_to("2026-10-26", range(500)), [archived("2026-10-26", "live")]
+    )
 
     actuals = read(tmp_path / "series" / "gpr_daily" / "actuals.json")
 
@@ -135,7 +215,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
     catalog = read(api_dir / "series.json")
 
     assert catalog["schema_version"] == "1.0.0"
-    assert catalog["generated_at"] == "2026-10-29T07:03:12Z"
+    assert catalog["generated_at"] == "2026-10-30T07:01:05Z"
     assert catalog["model"] == {
         "model_id": "aseri-timestral209m",
         "hf_id": "mistralai/Timestral-209M",
@@ -152,13 +232,14 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "horizon_unit": "day",
             "horizon_max": 28,
             "interval_steps": [7, 14, 28],
-            "last_observation_date": "2026-10-26",
+            "last_observation_date": "2026-10-27",
             "latest_reference_date": "2026-10-26",
             "latest_forecast_date": "2026-10-29",
             "source": GPR_DAILY.source,
             "license": GPR_DAILY.license,
             "links": {
                 "latest": "series/gpr_daily/latest.json",
+                "forecasts": "series/gpr_daily/forecasts.json",
                 "actuals": "series/gpr_daily/actuals.json",
             },
         }
@@ -174,13 +255,3 @@ def test_catalog_states_the_forecast_licence(api_dir):
         "attribution": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI).",
         "note": "Upstream terms still apply to the underlying data: see each series' license.",
     }
-
-
-def test_latest_forecast_is_self_describing(api_dir):
-    latest = read(api_dir / "series" / "gpr_daily" / "latest.json")
-
-    assert latest["schema_version"] == "1.0.0"
-    assert latest["unit"] == "index (1985-2019 average = 100)"
-    assert latest["horizon_unit"] == "day"
-    assert latest["generated_at"] == "2026-10-29T07:03:12Z"
-    assert latest["links"] == {"catalog": "../../series.json"}

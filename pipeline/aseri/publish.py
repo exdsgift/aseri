@@ -6,13 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from aseri.forecast import (
-    MODEL_ID,
-    PACKAGE_COMMIT,
-    WEIGHTS,
-    WEIGHTS_REVISION,
-    Forecast,
-)
+from aseri.archive import Archived
+from aseri.forecast import MODEL_ID, WEIGHTS, WEIGHTS_REVISION
 from aseri.series import Series
 
 SCHEMA_VERSION = "1.0.0"
@@ -24,31 +19,44 @@ FORECAST_CREDIT = (
 def publish(
     api_dir: Path,
     series: Series,
-    forecast: Forecast,
+    archived: list[Archived],
     *,
     observed: pd.Series,
     as_of: date,
-    code_commit: str,
-    run_url: str | None,
     generated_at: datetime,
 ) -> None:
-    """Write the catalog, and the latest forecast and the observed values of `series`, under `api_dir`."""
+    """Write the catalog, and every archived forecast of `series`, their index, the latest one and the observed values, under `api_dir`."""
     links = {
         "latest": f"series/{series.id}/latest.json",
+        "forecasts": f"series/{series.id}/forecasts.json",
         "actuals": f"series/{series.id}/actuals.json",
     }
+    for forecast in archived:
+        _write(
+            api_dir / "series" / series.id / _dated(forecast),
+            _forecast(series, forecast),
+        )
+    newest = archived[-1]
     _write(
         api_dir / links["latest"],
-        _latest(series, forecast, as_of, code_commit, run_url, generated_at),
+        _forecast(series, newest)
+        | {"links": {"catalog": "../../series.json", "canonical": _dated(newest)}},
     )
+    _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
     _write(
         api_dir / "series.json",
-        _catalog(series, forecast, links, generated_at),
+        _catalog(series, observed, newest, links, generated_at),
     )
 
 
-def _latest(series, forecast, as_of, code_commit, run_url, generated_at) -> dict:
+def _dated(archived: Archived) -> str:
+    """Where a forecast's own, never-changing file lives, relative to its series."""
+    return f"forecasts/{archived.forecast.reference_date:%Y-%m-%d}.json"
+
+
+def _forecast(series, archived) -> dict:
+    forecast = archived.forecast
     steps = len(forecast.quantiles)
     target_end_dates = pd.date_range(
         forecast.reference_date + pd.Timedelta(days=1), periods=steps, freq="D"
@@ -57,9 +65,9 @@ def _latest(series, forecast, as_of, code_commit, run_url, generated_at) -> dict
         "schema_version": SCHEMA_VERSION,
         "series_id": series.id,
         "model_id": MODEL_ID,
-        "forecast_date": generated_at.date().isoformat(),
+        "forecast_date": archived.forecast_date,
         "reference_date": forecast.reference_date.date().isoformat(),
-        "forecast_mode": "live",
+        "forecast_mode": archived.provenance["forecast_mode"],
         "unit": series.unit,
         "horizon_unit": "day",
         "horizon": list(range(1, steps + 1)),
@@ -71,23 +79,26 @@ def _latest(series, forecast, as_of, code_commit, run_url, generated_at) -> dict
             for i, level in enumerate(forecast.levels)
         },
         "attribution": f"{series.license['attribution']} {FORECAST_CREDIT}",
-        "provenance": {
-            "model": {
-                "id": WEIGHTS,
-                "revision": WEIGHTS_REVISION,
-                "url": f"https://huggingface.co/{WEIGHTS}",
-            },
-            "inference": {"package": "timestral", "package_commit": PACKAGE_COMMIT},
-            "code": {"commit": code_commit, "run": run_url},
-            "data": {
-                "source_url": series.source["data_url"],
-                "as_of": as_of.isoformat(),
-            },
-            "generated_at": _timestamp(generated_at),
-            "forecast_mode": "live",
-            "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic.",
-        },
-        "links": {"catalog": "../../series.json"},
+        "provenance": archived.provenance,
+        "links": {"catalog": "../../../series.json"},
+        # The run's, not today's: republishing a forecast never changes its file.
+        "generated_at": archived.provenance["generated_at"],
+    }
+
+
+def _index(series, archived, generated_at) -> dict:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "series_id": series.id,
+        "forecasts": [
+            {
+                "reference_date": forecast.forecast.reference_date.date().isoformat(),
+                "forecast_date": forecast.forecast_date,
+                "forecast_mode": forecast.provenance["forecast_mode"],
+                "url": _dated(forecast),
+            }
+            for forecast in archived
+        ],
         "generated_at": _timestamp(generated_at),
     }
 
@@ -108,7 +119,7 @@ def _actuals(series, observed, as_of, generated_at) -> dict:
     }
 
 
-def _catalog(series, forecast, links, generated_at) -> dict:
+def _catalog(series, observed, newest, links, generated_at) -> dict:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _timestamp(generated_at),
@@ -117,7 +128,7 @@ def _catalog(series, forecast, links, generated_at) -> dict:
             "hf_id": WEIGHTS,
             "revision": WEIGHTS_REVISION,
         },
-        "quantile_levels": list(forecast.levels),
+        "quantile_levels": list(newest.forecast.levels),
         "license": {
             "name": "CC BY-NC 4.0",
             "url": "https://creativecommons.org/licenses/by-nc/4.0/",
@@ -134,9 +145,9 @@ def _catalog(series, forecast, links, generated_at) -> dict:
                 "horizon_unit": "day",
                 "horizon_max": series.horizon,
                 "interval_steps": list(series.interval_steps),
-                "last_observation_date": forecast.reference_date.date().isoformat(),
-                "latest_reference_date": forecast.reference_date.date().isoformat(),
-                "latest_forecast_date": generated_at.date().isoformat(),
+                "last_observation_date": observed.index[-1].date().isoformat(),
+                "latest_reference_date": newest.forecast.reference_date.date().isoformat(),
+                "latest_forecast_date": newest.forecast_date,
                 "source": series.source,
                 "license": series.license,
                 "links": links,

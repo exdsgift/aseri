@@ -1,5 +1,6 @@
-"""The daily run end to end: fetch, forecast and publish, with a recorded GPR file and a stub model."""
+"""The daily run end to end: fetch, forecast, archive and publish, with a recorded GPR file and a stub model."""
 
+import io
 import json
 import re
 from datetime import UTC, datetime
@@ -7,6 +8,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+import pandas as pd
+import pytest
 import torch
 
 import aseri.__main__ as cli
@@ -31,23 +34,54 @@ class StubModel:
         )
 
 
-def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actuals(
-    tmp_path, monkeypatch
-):
-    monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
+def no_model():
+    raise AssertionError("the data has not moved, so no model should load")
+
+
+def recorded_gpr_until(last_day):
+    """The recorded upstream file as it stood when `last_day` was its newest day."""
+    frame = pd.read_stata(RECORDED_GPR)
+    raw = io.BytesIO()
+    frame[frame["date"] <= last_day].to_stata(
+        raw, write_index=False, convert_dates={"date": "td"}
+    )
+    return raw.getvalue()
+
+
+def run_on(monkeypatch, moment, gpr_file, api_dir, archive_dir):
+    clock = SimpleNamespace(now=lambda tz: moment)
+    monkeypatch.setattr(cli, "datetime", clock)
+    monkeypatch.setattr(gpr, "datetime", clock)
+    monkeypatch.setattr(gpr, "download", lambda url: gpr_file)
+    cli.main(api_dir, archive_dir)
+
+
+def read(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def files(directory):
+    return {p: p.read_bytes() for p in directory.rglob("*") if p.is_file()}
+
+
+@pytest.fixture
+def stub_model(monkeypatch):
     monkeypatch.setattr(cli, "load_model", StubModel)
 
+
+def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actuals(
+    tmp_path, monkeypatch, stub_model
+):
+    monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
+
     before = datetime.now(UTC).date().isoformat()
-    cli.main(tmp_path)
+    cli.main(tmp_path / "api", tmp_path / "archive")
     run_days = {before, datetime.now(UTC).date().isoformat()}
 
-    catalog = json.loads((tmp_path / "series.json").read_text(encoding="utf-8"))
-    latest = json.loads(
-        (tmp_path / "series" / "gpr_daily" / "latest.json").read_text(encoding="utf-8")
-    )
-    actuals = json.loads(
-        (tmp_path / "series" / "gpr_daily" / "actuals.json").read_text(encoding="utf-8")
-    )
+    api = tmp_path / "api"
+    catalog = read(api / "series.json")
+    latest = read(api / "series" / "gpr_daily" / "latest.json")
+    actuals = read(api / "series" / "gpr_daily" / "actuals.json")
     assert catalog["series"][0]["links"]["actuals"] == "series/gpr_daily/actuals.json"
     assert len(actuals["date"]) == len(actuals["observation"]) == 60
     assert actuals["date"][-1] == latest["reference_date"]
@@ -66,25 +100,129 @@ def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actua
     provenance = latest["provenance"]
     assert re.fullmatch(r"[0-9a-f]{40}", provenance["code"]["commit"])
     assert provenance["data"]["as_of"] in run_days
+    assert re.fullmatch(r"[0-9a-f]{64}", provenance["data"]["input_sha256"])
     assert provenance["inference"]["package_commit"]
     assert provenance["model"]["revision"]
     assert provenance["generated_at"].startswith(latest["forecast_date"])
 
 
-def test_a_run_in_github_actions_records_its_commit_and_run(tmp_path, monkeypatch):
+def test_a_run_in_github_actions_records_its_commit_and_run(
+    tmp_path, monkeypatch, stub_model
+):
     monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
-    monkeypatch.setattr(cli, "load_model", StubModel)
     monkeypatch.setenv("GITHUB_SHA", "f" * 40)
     monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
     monkeypatch.setenv("GITHUB_REPOSITORY", "exdsgift/aseri")
     monkeypatch.setenv("GITHUB_RUN_ID", "42")
 
-    cli.main(tmp_path)
+    cli.main(tmp_path / "api", tmp_path / "archive")
 
-    latest = json.loads(
-        (tmp_path / "series" / "gpr_daily" / "latest.json").read_text(encoding="utf-8")
-    )
+    latest = read(tmp_path / "api" / "series" / "gpr_daily" / "latest.json")
     assert latest["provenance"]["code"] == {
         "commit": "f" * 40,
         "run": "https://github.com/exdsgift/aseri/actions/runs/42",
     }
+
+
+def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_nothing(
+    tmp_path, monkeypatch, stub_model
+):
+    archive_dir = tmp_path / "archive"
+    rounds = archive_dir / "model-output" / "aseri-timestral209m"
+    deltas = archive_dir / "target-data" / "deltas"
+
+    # Day 1, on an empty archive: one live forecast from the newest day.
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 20, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-19"),
+        tmp_path / "day1",
+        archive_dir,
+    )
+
+    assert sorted(
+        p.relative_to(archive_dir).as_posix() for p in files(archive_dir)
+    ) == [
+        "model-output/aseri-timestral209m/2026-10-20-aseri-timestral209m.csv",
+        "runs/2026-10-20.json",
+        "target-data/deltas/2026-10-20.csv",
+    ]
+    assert len(pd.read_csv(rounds / "2026-10-20-aseri-timestral209m.csv")) == 28 * 21
+    assert len(pd.read_csv(deltas / "2026-10-20.csv")) == 53
+    day1 = read(tmp_path / "day1" / "series" / "gpr_daily" / "forecasts.json")
+    assert [(f["reference_date"], f["forecast_mode"]) for f in day1["forecasts"]] == [
+        ("2026-10-19", "live")
+    ]
+
+    # Day 2, after GPR's weekly update: one forecast per new day, only the newest live.
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 4, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    series = tmp_path / "day2" / "series" / "gpr_daily"
+    index = read(series / "forecasts.json")
+    assert [
+        (f["reference_date"], f["forecast_date"], f["forecast_mode"])
+        for f in index["forecasts"]
+    ] == [
+        ("2026-10-19", "2026-10-20", "live"),
+        ("2026-10-20", "2026-10-27", "retrospective"),
+        ("2026-10-21", "2026-10-27", "retrospective"),
+        ("2026-10-22", "2026-10-27", "retrospective"),
+        ("2026-10-23", "2026-10-27", "retrospective"),
+        ("2026-10-24", "2026-10-27", "retrospective"),
+        ("2026-10-25", "2026-10-27", "retrospective"),
+        ("2026-10-26", "2026-10-27", "live"),
+    ]
+    assert pd.read_csv(deltas / "2026-10-27.csv")["target_end_date"].tolist() == [
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+    ]
+    # Each forecast saw only the data up to its own date: the stub centres on that day's value.
+    actuals = read(series / "actuals.json")
+    for forecast in index["forecasts"]:
+        dated = read(series / forecast["url"])
+        day = actuals["date"].index(dated["reference_date"])
+        assert dated["quantiles"]["0.5"][0] == actuals["observation"][day]
+    # The published forecasts are the archived ones.
+    archived = pd.read_csv(rounds / "2026-10-27-aseri-timestral209m.csv")
+    for reference_date, rows in archived.groupby("reference_date"):
+        dated = read(series / "forecasts" / f"{reference_date}.json")
+        assert dated["quantiles"] == {
+            str(level): by_level.sort_values("horizon")["value"].tolist()
+            for level, by_level in rows.groupby("output_type_id")
+        }
+    latest = read(series / "latest.json")
+    assert latest["links"]["canonical"] == "forecasts/2026-10-26.json"
+    assert (
+        latest["quantiles"]
+        == read(series / "forecasts" / "2026-10-26.json")["quantiles"]
+    )
+
+    # A rerun the same day: no new data, so no model, no new archive file, the same forecasts.
+    archive_before = files(archive_dir)
+    monkeypatch.setattr(cli, "load_model", no_model)
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 9, 30, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "rerun",
+        archive_dir,
+    )
+
+    assert files(archive_dir) == archive_before
+    rerun = tmp_path / "rerun" / "series" / "gpr_daily"
+    assert read(rerun / "forecasts.json")["forecasts"] == index["forecasts"]
+    for forecast in index["forecasts"]:
+        assert (rerun / forecast["url"]).read_bytes() == (
+            series / forecast["url"]
+        ).read_bytes()

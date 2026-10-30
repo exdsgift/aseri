@@ -39,4 +39,5 @@ def parse(raw: bytes) -> pd.Series:
     # 0 occurs on real days; the record is 1046 (after 9/11), so 5000 means a broken file.
     if not observed.between(0, 5000).all():
         raise ValueError("GPR has implausible values outside 0 to 5000")
-    return observed
+    # Four decimals drop the float32 noise, so the model reads exactly the values the archive keeps.
+    return observed.round(4)

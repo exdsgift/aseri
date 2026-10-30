@@ -35,6 +35,12 @@ def test_reads_the_daily_index_by_date():
     assert observed.tolist() == [120.5, 98.25, 0.0]
 
 
+def test_reads_four_decimals_without_the_float32_noise_of_the_file():
+    raw = gpr_file([164.2596, 81.5903], ["2026-10-25", "2026-10-26"])
+
+    assert gpr.parse(raw).tolist() == [164.2596, 81.5903]
+
+
 @pytest.mark.parametrize(
     ("values", "dates"),
     [

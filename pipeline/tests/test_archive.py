@@ -1,0 +1,284 @@
+import hashlib
+import json
+from datetime import UTC, date, datetime
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from aseri import archive
+from aseri.forecast import Forecast
+from aseri.series import GPR_DAILY
+
+
+def days_to(last_day, values):
+    dates = pd.date_range(end=last_day, periods=len(values), freq="D")
+    return pd.Series(values, index=dates, dtype=float)
+
+
+def two_step_forecast(reference_date, shift=0.0):
+    return Forecast(
+        reference_date=pd.Timestamp(reference_date),
+        levels=(0.1, 0.5, 0.9),
+        quantiles=np.array(
+            [[90.1, 100.2, 110.3], [85.4, 101.5, 120.6]], dtype=np.float32
+        )
+        + shift,
+    )
+
+
+def archive_run(archive_dir, forecasts, observed, run_day):
+    archive.write(
+        archive_dir,
+        GPR_DAILY,
+        forecasts,
+        observed=observed,
+        as_of=run_day,
+        code_commit="0123abc",
+        run_url="https://github.com/exdsgift/aseri/actions/runs/1",
+        generated_at=datetime(
+            run_day.year, run_day.month, run_day.day, 7, 3, 12, tzinfo=UTC
+        ),
+    )
+
+
+def test_a_round_holds_every_level_of_every_forecast_in_the_long_hubverse_shape(
+    tmp_path,
+):
+    observed = days_to("2026-10-26", [120.5, 98.23, 101.3])
+
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-25"), two_step_forecast("2026-10-26", shift=1)],
+        observed,
+        date(2026, 10, 29),
+    )
+
+    round_file = (
+        tmp_path
+        / "model-output"
+        / "aseri-timestral209m"
+        / "2026-10-29-aseri-timestral209m.csv"
+    )
+    assert round_file.read_text(encoding="utf-8").splitlines() == [
+        "forecast_date,target,reference_date,horizon,target_end_date,output_type,output_type_id,value",
+        "2026-10-29,gpr_daily,2026-10-25,1,2026-10-26,quantile,0.1,90.1",
+        "2026-10-29,gpr_daily,2026-10-25,1,2026-10-26,quantile,0.5,100.2",
+        "2026-10-29,gpr_daily,2026-10-25,1,2026-10-26,quantile,0.9,110.3",
+        "2026-10-29,gpr_daily,2026-10-25,2,2026-10-27,quantile,0.1,85.4",
+        "2026-10-29,gpr_daily,2026-10-25,2,2026-10-27,quantile,0.5,101.5",
+        "2026-10-29,gpr_daily,2026-10-25,2,2026-10-27,quantile,0.9,120.6",
+        "2026-10-29,gpr_daily,2026-10-26,1,2026-10-27,quantile,0.1,91.1",
+        "2026-10-29,gpr_daily,2026-10-26,1,2026-10-27,quantile,0.5,101.2",
+        "2026-10-29,gpr_daily,2026-10-26,1,2026-10-27,quantile,0.9,111.3",
+        "2026-10-29,gpr_daily,2026-10-26,2,2026-10-28,quantile,0.1,86.4",
+        "2026-10-29,gpr_daily,2026-10-26,2,2026-10-28,quantile,0.5,102.5",
+        "2026-10-29,gpr_daily,2026-10-26,2,2026-10-28,quantile,0.9,121.6",
+    ]
+
+
+def test_an_empty_archive_forecasts_from_the_newest_date_alone():
+    observed = days_to("2026-10-26", [120.5, 98.23, 101.3])
+
+    assert archive.new_reference_dates(observed, None) == [pd.Timestamp("2026-10-26")]
+
+
+def test_a_jump_of_several_days_forecasts_from_every_new_date_in_order():
+    observed = days_to("2026-10-26", range(10))
+
+    assert archive.new_reference_dates(observed, pd.Timestamp("2026-10-23")) == [
+        pd.Timestamp("2026-10-24"),
+        pd.Timestamp("2026-10-25"),
+        pd.Timestamp("2026-10-26"),
+    ]
+
+
+def test_data_that_has_not_moved_forecasts_nothing():
+    observed = days_to("2026-10-26", range(10))
+
+    assert archive.new_reference_dates(observed, pd.Timestamp("2026-10-26")) == []
+
+
+def test_the_first_delta_holds_the_whole_series():
+    observed = days_to("2026-10-26", [120.5, 98.23, 101.3])
+
+    delta = archive.observation_delta(observed, pd.Series(dtype=float))
+
+    assert delta.equals(observed)
+
+
+def test_a_delta_holds_only_the_days_that_are_new_or_revised():
+    vintage = days_to("2026-10-25", [120.5, 98.23, 101.3])
+    observed = days_to("2026-10-27", [120.5, 98.23, 99.8, 140.0, 0.0])
+
+    delta = archive.observation_delta(observed, vintage)
+
+    assert delta.to_dict() == {
+        pd.Timestamp("2026-10-25"): 99.8,
+        pd.Timestamp("2026-10-26"): 140.0,
+        pd.Timestamp("2026-10-27"): 0.0,
+    }
+
+
+def test_the_first_run_records_every_observation_and_later_runs_only_the_new_or_revised(
+    tmp_path,
+):
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-26")],
+        days_to("2026-10-26", [120.5, 98.23, 101.3]),
+        date(2026, 10, 29),
+    )
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-11-01")],
+        days_to(
+            "2026-11-01", [120.5, 98.23, 99.8, 140.0, 0.0, 87.5, 90.25, 110.0, 110.0]
+        ),
+        date(2026, 11, 2),
+    )
+
+    deltas = tmp_path / "target-data" / "deltas"
+    assert (deltas / "2026-10-29.csv").read_text(encoding="utf-8").splitlines() == [
+        "target,target_end_date,observation,as_of",
+        "gpr_daily,2026-10-24,120.5,2026-10-29",
+        "gpr_daily,2026-10-25,98.23,2026-10-29",
+        "gpr_daily,2026-10-26,101.3,2026-10-29",
+    ]
+    assert (deltas / "2026-11-02.csv").read_text(encoding="utf-8").splitlines() == [
+        "target,target_end_date,observation,as_of",
+        "gpr_daily,2026-10-26,99.8,2026-11-02",
+        "gpr_daily,2026-10-27,140.0,2026-11-02",
+        "gpr_daily,2026-10-28,0.0,2026-11-02",
+        "gpr_daily,2026-10-29,87.5,2026-11-02",
+        "gpr_daily,2026-10-30,90.25,2026-11-02",
+        "gpr_daily,2026-10-31,110.0,2026-11-02",
+        "gpr_daily,2026-11-01,110.0,2026-11-02",
+    ]
+
+
+def test_a_second_run_on_the_same_day_never_rewrites_the_archive(tmp_path):
+    observed = days_to("2026-10-26", [120.5, 98.23, 101.3])
+    archive_run(
+        tmp_path, [two_step_forecast("2026-10-26")], observed, date(2026, 10, 29)
+    )
+    before = {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+
+    with pytest.raises(FileExistsError):
+        archive_run(
+            tmp_path,
+            [two_step_forecast("2026-10-26", shift=1)],
+            observed,
+            date(2026, 10, 29),
+        )
+
+    assert {p: p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()} == before
+
+
+def sha256(content: bytes) -> str:
+    return hashlib.sha256(content).hexdigest()
+
+
+def test_a_run_manifest_records_the_modes_provenance_inputs_and_checksums(tmp_path):
+    observed = days_to("2026-10-26", [120.5, 98.23, 101.3])
+
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-25"), two_step_forecast("2026-10-26")],
+        observed,
+        date(2026, 10, 29),
+    )
+
+    manifest = json.loads(
+        (tmp_path / "runs" / "2026-10-29.json").read_text(encoding="utf-8")
+    )
+    data = {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-10-29",
+    }
+    round_file = "model-output/aseri-timestral209m/2026-10-29-aseri-timestral209m.csv"
+    delta_file = "target-data/deltas/2026-10-29.csv"
+    assert manifest == {
+        "forecast_date": "2026-10-29",
+        "forecasts": [
+            {
+                "target": "gpr_daily",
+                "reference_date": "2026-10-25",
+                "forecast_mode": "retrospective",
+                "data": data
+                | {"input_sha256": sha256(b"2026-10-24,120.5\n2026-10-25,98.23\n")},
+            },
+            {
+                "target": "gpr_daily",
+                "reference_date": "2026-10-26",
+                "forecast_mode": "live",
+                "data": data
+                | {
+                    "input_sha256": sha256(
+                        b"2026-10-24,120.5\n2026-10-25,98.23\n2026-10-26,101.3\n"
+                    )
+                },
+            },
+        ],
+        "provenance": {
+            "model": {
+                "id": "mistralai/Timestral-209M",
+                "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+                "url": "https://huggingface.co/mistralai/Timestral-209M",
+            },
+            "inference": {
+                "package": "timestral",
+                "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff",
+            },
+            "code": {
+                "commit": "0123abc",
+                "run": "https://github.com/exdsgift/aseri/actions/runs/1",
+            },
+            "generated_at": "2026-10-29T07:03:12Z",
+            "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic.",
+        },
+        "files": {
+            round_file: sha256((tmp_path / round_file).read_bytes()),
+            delta_file: sha256((tmp_path / delta_file).read_bytes()),
+        },
+    }
+
+
+def test_archived_forecasts_read_back_oldest_first_with_the_run_that_issued_them(
+    tmp_path,
+):
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-25"), two_step_forecast("2026-10-26")],
+        days_to("2026-10-26", [120.5, 98.23, 101.3]),
+        date(2026, 10, 29),
+    )
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-27", shift=1)],
+        days_to("2026-10-27", [120.5, 98.23, 101.3, 99.0]),
+        date(2026, 10, 30),
+    )
+
+    archived = archive.read(tmp_path, "gpr_daily")
+
+    assert [
+        (a.forecast.reference_date, a.forecast_date, a.provenance["forecast_mode"])
+        for a in archived
+    ] == [
+        (pd.Timestamp("2026-10-25"), "2026-10-29", "retrospective"),
+        (pd.Timestamp("2026-10-26"), "2026-10-29", "live"),
+        (pd.Timestamp("2026-10-27"), "2026-10-30", "live"),
+    ]
+    newest = archived[-1]
+    assert newest.forecast.levels == (0.1, 0.5, 0.9)
+    assert newest.forecast.quantiles.tolist() == [
+        [91.1, 101.2, 111.3],
+        [86.4, 102.5, 121.6],
+    ]
+    assert newest.provenance["generated_at"] == "2026-10-30T07:03:12Z"
+    assert newest.provenance["data"]["as_of"] == "2026-10-30"
+
+
+def test_an_empty_archive_has_no_forecasts(tmp_path):
+    assert archive.read(tmp_path, "gpr_daily") == []
