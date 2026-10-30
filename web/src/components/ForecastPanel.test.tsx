@@ -300,9 +300,24 @@ it("opens on the most likely value of each day, and turns no path until asked", 
 
   wait(6000)
   expect(screen.queryByText(/^Possible path/)).toBeNull()
-  expect(screen.queryByText(/^The line ahead/)).toBeNull()
+  expect(screen.getByText(/^The line ahead/).textContent).toBe(
+    "The line ahead is the most likely value of each day: the real days go up and down around it, 8 in 10 inside the band."
+  )
   expect(legendNames()).toEqual(["Most likely"])
   expect(button("Show possible paths")).toBeTruthy()
+})
+
+it("keeps the keyboard focus on the one button that switches the two views", () => {
+  render(<ForecastPanel series={gpr} />)
+  const toggle = button("Show possible paths")
+  toggle.focus()
+
+  fireEvent.click(toggle)
+  expect(document.activeElement).toBe(toggle)
+  expect(toggle.textContent).toBe("Most likely")
+  fireEvent.click(toggle)
+  expect(document.activeElement).toBe(toggle)
+  expect(toggle.textContent).toBe("Show possible paths")
 })
 
 it("shows the possible paths in order, one every 1.2 s, until paused or back on the most likely", () => {

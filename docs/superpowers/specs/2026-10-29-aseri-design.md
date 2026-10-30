@@ -327,7 +327,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 
   The sun and the paths stop while the tab is hidden or they are off screen.
 - **UI transitions** take 160 ms. Panel changes use the 8-step Bayer dither (30 ms per step).
-- **`prefers-reduced-motion`** turns all of it off: a static sun, no count-up, no scan, no dither transitions, one path that turns only on "Another path".
+- **`prefers-reduced-motion`** turns all of it off: a static sun, no count-up, no scan, no dither transitions, and the possible paths step only on "Next path".
 - **Data loading (my call):** first load fetches `series.json`, every `latest.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data.
 - **Accessibility:**
   - every control is a real button or input, with a visible focus (2 px gold outline);
@@ -357,7 +357,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - Draw at 2 CSS px per art pixel with `image-rendering: pixelated`, and Bresenham lines.
   - Daily values: a gold line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
   - The 7-day average: a label-grey line that stops at the origin.
-  - The forecast side: the most likely value of each day, a pale gold line from the last daily value with its end labelled, on the panel and on the cards' mini charts alike. Once asked, the panel draws a possible path in its place, with no label at its end; the bands keep theirs.
+  - The forecast side: the most likely value of each day, a pale gold line from the last daily value. On the panel its end is labelled, on the cards' mini charts it ends in a 3x3 square. Once asked, the panel draws a possible path in its place, with no label at its end; the bands keep theirs.
   - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in muted gold with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted blue line.

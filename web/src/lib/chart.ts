@@ -211,7 +211,7 @@ function square(plot: Plot, x: number, y: number, size: number, color: string) {
 }
 
 // `path`, the last daily value then one value a day ahead, takes the most likely value's place:
-// the panel draws one possible path, since a flat median beside a jagged past reads as a promise.
+// the panel opens on the most likely value and, asked, draws possible paths, which read like the past.
 export function paintChart(
   plot: Plot,
   chart: Layout,
