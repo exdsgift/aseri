@@ -7,7 +7,7 @@ import pytest
 
 from aseri.archive import Archived
 from aseri.forecast import Forecast
-from aseri.publish import publish, publish_catalog
+from aseri.publish import publish, publish_catalog, shown
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 
 PROVENANCE = {
@@ -206,28 +206,43 @@ def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_le
     )
 
     replay = read(tmp_path / "series" / "gpr_daily" / "replay.json")
+    # The page's levels and the 5% and 95% a path reaches before the chart's frame, as the page writes them.
+    shown = {
+        level: [round(value) for value in QUANTILES[level]]
+        for level in ("0.05", "0.1", "0.25", "0.5", "0.75", "0.9", "0.95")
+    }
 
     assert replay == {
         "series_id": "gpr_daily",
         "model_id": "aseri-timestral209m",
         "horizon": [1, 2],
-        "quantile_levels": [str(level) for level in LEVELS],
+        "quantile_levels": list(shown),
         "forecasts": [
             {
                 "reference_date": "2026-06-28",
                 "forecast_mode": "retrospective",
-                "quantiles": QUANTILES,
+                "quantiles": shown,
             }
             | PSEUDO_REAL_TIME,
             {
                 "reference_date": "2026-10-26",
                 "forecast_mode": "live",
-                "quantiles": QUANTILES,
+                "quantiles": shown,
             },
         ],
         "license": FORECAST_LICENSE,
         "attribution": ATTRIBUTION,
     }
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [(251.4, 251), (-12.6, -13), (10.0, 10), (9.96, 10.0), (2.74, 2.7), (0.0, 0.0)],
+)
+def test_the_replay_rounds_as_the_page_writes_values_whole_from_10_and_to_one_decimal_below(
+    value, expected
+):
+    assert shown(value) == expected
 
 
 def test_the_index_lists_every_forecast_oldest_first(api_dir):

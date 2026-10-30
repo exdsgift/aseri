@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { Intervals } from "@/components/Intervals"
 import { PixelForecastChart } from "@/components/PixelForecastChart"
@@ -50,6 +50,11 @@ export function ForecastPanel({ series }: { series: Series }) {
   // Which possible path the chart draws, the next one every 1.2 s: none turns under reduced
   // motion, nor while nobody can see the panel.
   const [drawn, setDrawn] = useState(0)
+  // The same array until the path changes, so other renders do not repaint the chart.
+  const drawnPath = useMemo(
+    () => path(forecast, rho, drawn),
+    [forecast, rho, drawn]
+  )
   const [paused, setPaused] = useState(false)
   const reduced = useReducedMotion()
   const panel = useRef<HTMLElement>(null)
@@ -145,7 +150,7 @@ export function ForecastPanel({ series }: { series: Series }) {
       </div>
       <PixelForecastChart
         forecast={forecast}
-        path={path(forecast, rho, drawn)}
+        path={drawnPath}
         summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}.${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
       />
       <div className="flex flex-wrap items-center gap-2 text-muted-foreground">

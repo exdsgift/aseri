@@ -27,8 +27,9 @@ FORECAST_LICENSE = {
     "attribution": FORECAST_CREDIT,
     "note": "Upstream terms still apply to the underlying data: see each series' license.",
 }
-# The page's 8-in-10 and 5-in-10 ranges and its most likely value, and the tails a possible path reaches.
-REPLAY_LEVELS = (0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99)
+# The page's 8-in-10 and 5-in-10 ranges and its most likely value, and the 5% and 95% a possible
+# path reaches before the chart's frame: beyond them a path runs along the frame anyway.
+REPLAY_LEVELS = (0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
 # A retrospective forecast read revised data, and the model may have trained on the days it forecasts.
 PSEUDO_REAL_TIME = {
     "testdata_leakage": "unknown",
@@ -169,6 +170,12 @@ def _index(series, archived, generated_at) -> dict:
     }
 
 
+def shown(value) -> float:
+    """A value as the page writes it: whole from 10 up, to one decimal below."""
+    value = float(value)
+    return round(value) if abs(value) >= 9.95 else round(value, 1)
+
+
 def _replay(series, archived, attribution) -> dict:
     """The forecasts of the replay window, at the page's levels only, in one file for the slider."""
     newest = archived[-1].forecast
@@ -182,10 +189,11 @@ def _replay(series, archived, attribution) -> dict:
             {
                 "reference_date": f"{a.forecast.reference_date:%Y-%m-%d}",
                 "forecast_mode": a.provenance["forecast_mode"],
-                # One decimal keeps 121 GPR days at 70 KB gzipped at nine levels; the dated files keep four.
+                # As the page writes them, so GPR's replay, loaded with the page, stays small;
+                # the dated files keep four decimals.
                 "quantiles": {
                     str(level): [
-                        round(float(v), 1)
+                        shown(v)
                         for v in a.forecast.quantiles[:, a.forecast.levels.index(level)]
                     ]
                     for level in REPLAY_LEVELS

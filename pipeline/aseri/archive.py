@@ -268,9 +268,10 @@ def as_of_view(archive_dir: Path, series_id: str, t: date) -> pd.Series:
 
 def first_seen(archive_dir: Path, series_id: str) -> pd.Series:
     """Every date of `series_id` with its value in the first vintage that held it: the one that resolved its forecasts."""
-    return _by_date(
-        _seen(archive_dir, series_id).drop_duplicates("target_end_date", keep="first")
-    )
+    rows = _seen(archive_dir, series_id)
+    # As in as_of_view: a vintage dated before a day is no vintage of it.
+    rows = rows[rows["target_end_date"] <= rows["as_of"]]
+    return _by_date(rows.drop_duplicates("target_end_date", keep="first"))
 
 
 def _seen(archive_dir: Path, series_id: str) -> pd.DataFrame:

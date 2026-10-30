@@ -232,7 +232,7 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `series/{series_id}/latest.json` | Latest forecast. A copy of the newest dated file, with `links.canonical` pointing to that file | Daily |
 | `series/{series_id}/forecasts.json` | Index of every issued forecast: `reference_date`, `forecast_date`, mode, URL. Needed because static hosts cannot list directories | Daily, grows about 100 bytes per forecast |
 | `series/{series_id}/forecasts/{reference_date}.json` | One forecast | **Never** |
-| `series/{series_id}/replay.json` | The forecasts of the 120 days to the latest, for the page's replay slider, to one decimal and at nine levels: 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95 and 0.99, the page's ranges and most likely value and the tails a possible path reaches. About 70 KB gzipped for GPR | Daily |
+| `series/{series_id}/replay.json` | The forecasts of the 120 days to the latest, for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
 | `series/{series_id}/actuals.json` | Latest vintage of the observed series (`date[]`, `observation[]`, flags) with `as_of` | Daily |
 | `series/{series_id}/scores.json` | Track record for one series: summary by horizon bucket and by horizon, for the model and baselines | Daily |
 | `scores.json` | Cross-series summary for the site's scoreboard | Daily |
@@ -489,7 +489,7 @@ https://<owner>.github.io/aseri/
 │       │   ├── latest.json
 │       │   ├── forecasts.json          index of issued forecasts
 │       │   ├── forecasts/{reference_date}.json   immutable
-│       │   ├── replay.json             the last 120 days at nine levels
+│       │   ├── replay.json             the last 120 days at seven levels
 │       │   ├── actuals.json
 │       │   └── scores.json
 │       └── bulk/

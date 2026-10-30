@@ -246,7 +246,7 @@ Follow `docs/research/public-api.md`. The essentials:
   - `series/{id}/latest.json`;
   - `series/{id}/forecasts.json`: the index;
   - `series/{id}/forecasts/{reference_date}.json`: immutable;
-  - `series/{id}/replay.json`: the forecasts of the last 120 days, for the replay slider, at nine levels: the page's five and the tails a possible path reaches (0.01, 0.05, 0.95, 0.99);
+  - `series/{id}/replay.json`: the forecasts of the last 120 days, for the replay slider, at seven levels: the page's five and the 5% and 95% a possible path reaches before the chart's frame, written as the page writes values;
   - `series/{id}/actuals.json`;
   - `series/{id}/scores.json`;
   - `scores.json`;
