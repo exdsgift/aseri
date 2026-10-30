@@ -451,6 +451,21 @@ it("leaves out the card of a series whose files are broken, and keeps the page",
   ).toBeNull()
 })
 
+it("shows GPR as soon as it loads, while another series' files are still on their way", async () => {
+  vi.stubGlobal("fetch", (url: string) =>
+    url.includes("taiwan_strait_transits")
+      ? new Promise(() => {})
+      : Promise.resolve(Response.json(published[url]))
+  )
+
+  render(<App />)
+
+  await screen.findByText("181", { selector: "p" })
+  const signals = within(await screen.findByRole("region", { name: "Signals" }))
+  expect(signals.getAllByRole("button")).toHaveLength(4)
+  expect(signals.queryByRole("button", { name: /^Taiwan Strait/ })).toBeNull()
+})
+
 it("draws no group without a series in the catalog", async () => {
   serve({
     ...published,
@@ -478,7 +493,7 @@ it("opens a picked card's series in the panel and brings it into view, then load
 
   fireEvent.click(card(/^Suez Canal/))
 
-  expect(panelTitle()).toBe("[F] Suez Canal · forecast made Oct 29")
+  expect(panelTitle()).toBe("[F] Suez Canal · forecast made today")
   expect(card(/^Suez Canal/).getAttribute("aria-pressed")).toBe("true")
   expect(card(/^Geopolitical risk/).getAttribute("aria-pressed")).toBe("false")
   const panel = screen.getByRole("region", { name: /^\[F\] Suez Canal/ })
@@ -489,6 +504,30 @@ it("opens a picked card's series in the panel and brings it into view, then load
   expect(screen.getByText("181", { selector: "p" })).toBeTruthy()
 })
 
+it("asks for a series' replay once, however often its card is picked, even when the replay is missing", async () => {
+  const replayUrl = "api/v1/series/hormuz_transits/replay.json"
+  const fetch = vi.fn(async (url: string) =>
+    url === replayUrl
+      ? new Response("", { status: 404 })
+      : Response.json(published[url])
+  )
+  vi.stubGlobal("fetch", fetch)
+  vi.spyOn(console, "error").mockImplementation(() => {})
+  render(<App />)
+  await screen.findByRole("button", { name: /^Strait of Hormuz/ })
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+  fireEvent.click(card(/^Strait of Hormuz/))
+  fireEvent.click(card(/^Strait of Hormuz/))
+  await settle()
+  fireEvent.click(card(/^Geopolitical risk/))
+  fireEvent.click(card(/^Strait of Hormuz/))
+  await settle()
+
+  expect(fetch.mock.calls.filter(([url]) => url === replayUrl)).toHaveLength(1)
+  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
+})
+
 it("opens a series with its card's key, unless a field has the focus", async () => {
   serve(published)
   render(<App />)
@@ -497,14 +536,14 @@ it("opens a series with its card's key, unless a field has the focus", async () 
     fireEvent.keyDown(target, { key })
 
   press("3")
-  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made Oct 29")
+  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
   expect(scrollIntoView).toHaveBeenCalled()
 
   // The slider takes its own keys.
   const slider = await screen.findByRole("slider")
   slider.focus()
   press("1", slider)
-  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made Oct 29")
+  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
 
   // No sixth card, and no shortcut with a modifier.
   press("6")

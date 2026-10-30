@@ -45,8 +45,8 @@ def publish(
     generated_at: datetime,
     stale_since: date | None = None,
     note: str | None = None,
-) -> None:
-    """Write the catalog, and every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`.
+) -> dict:
+    """Write every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
 
     `archived` is oldest reference date first, as `archive.read` returns it. A series the run skipped
     has a `stale_since` date; a `note` says why its latest forecast starts before its last observation.
@@ -78,9 +78,27 @@ def publish(
     _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
     _write(api_dir / links["replay"], _replay(series, archived, latest["attribution"]))
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
+    return _entry(series, observed, newest, links, stale_since, note)
+
+
+def publish_catalog(
+    api_dir: Path, entries: list[dict], levels: tuple, generated_at: datetime
+) -> None:
+    """Write the catalog, `series.json`: the model, its quantile `levels`, and the entry `publish` returned for each series."""
     _write(
         api_dir / "series.json",
-        _catalog(series, observed, newest, links, generated_at, stale_since, note),
+        {
+            "schema_version": SCHEMA_VERSION,
+            "generated_at": timestamp(generated_at),
+            "model": {
+                "model_id": MODEL_ID,
+                "hf_id": WEIGHTS,
+                "revision": WEIGHTS_REVISION,
+            },
+            "quantile_levels": list(levels),
+            "license": FORECAST_LICENSE,
+            "series": entries,
+        },
     )
 
 
@@ -194,38 +212,28 @@ def _actuals(series, observed, as_of, generated_at) -> dict:
     }
 
 
-def _catalog(series, observed, newest, links, generated_at, stale_since, note) -> dict:
+def _entry(series, observed, newest, links, stale_since, note) -> dict:
     return {
-        "schema_version": SCHEMA_VERSION,
-        "generated_at": timestamp(generated_at),
-        "model": {
-            "model_id": MODEL_ID,
-            "hf_id": WEIGHTS,
-            "revision": WEIGHTS_REVISION,
-        },
-        "quantile_levels": list(newest.forecast.levels),
-        "license": FORECAST_LICENSE,
-        "series": [
-            {
-                "series_id": series.id,
-                "title": series.title,
-                "unit": series.unit,
-                "baseline": series.baseline,
-                "baseline_label": series.baseline_label,
-                "horizon_unit": "day",
-                "horizon_max": series.horizon,
-                "interval_steps": list(series.interval_steps),
-                "last_observation_date": observed.index[-1].date().isoformat(),
-                "latest_reference_date": newest.forecast.reference_date.date().isoformat(),
-                "latest_forecast_date": newest.forecast_date,
-                # Additive to v1: null while the series is fresh and its forecast starts from its last observation.
-                "stale_since": stale_since and stale_since.isoformat(),
-                "note": note,
-                "source": series.source,
-                "license": series.license,
-                "links": links,
-            }
-        ],
+        "series_id": series.id,
+        "title": series.title,
+        "unit": series.unit,
+        "baseline": series.baseline
+        if series.baseline is not None
+        else round(float(observed.iloc[-365:].mean()), 4),
+        "baseline_label": series.baseline_label,
+        "horizon_unit": "day",
+        "horizon_max": series.horizon,
+        "interval_steps": list(series.interval_steps),
+        "last_observation_date": observed.index[-1].date().isoformat(),
+        "latest_reference_date": newest.forecast.reference_date.date().isoformat(),
+        "latest_forecast_date": newest.forecast_date,
+        # Additive to v1: null while the series is fresh and its forecast starts from its last observation.
+        "stale_since": stale_since and stale_since.isoformat(),
+        # Why the latest forecast starts before the last observation, then any standing caveat on the data.
+        "note": " ".join(n for n in (note, series.note) if n) or None,
+        "source": series.source,
+        "license": series.license,
+        "links": links,
     }
 
 

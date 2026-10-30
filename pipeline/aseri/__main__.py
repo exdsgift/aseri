@@ -9,12 +9,24 @@ from pathlib import Path
 
 from aseri import archive
 from aseri.forecast import forecast, load_model, make_context, under_review
-from aseri.publish import publish
-from aseri.series import GPR_DAILY
-from aseri.sources import gpr
+from aseri.publish import publish, publish_catalog
+from aseri.series import (
+    BAB_EL_MANDEB_TRANSITS,
+    GPR_DAILY,
+    HORMUZ_TRANSITS,
+    SUEZ_TRANSITS,
+    TAIWAN_STRAIT_TRANSITS,
+)
+from aseri.sources import gpr, portwatch
 
-# Each series with the adapter that fetches it and checks its contract.
-SOURCES = ((GPR_DAILY, gpr),)
+# Each series with the adapter that fetches it and checks its contract, in the catalog's order.
+SOURCES = (
+    (GPR_DAILY, gpr),
+    (SUEZ_TRANSITS, portwatch),
+    (HORMUZ_TRANSITS, portwatch),
+    (BAB_EL_MANDEB_TRANSITS, portwatch),
+    (TAIWAN_STRAIT_TRANSITS, portwatch),
+)
 # Days past its expected lag at which a series' data warns, and at which the series is skipped as stale.
 LATE_DAYS, STALE_DAYS = 2, 7
 
@@ -38,62 +50,58 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         else None
     )
     generated_at = datetime.now(UTC)
-    model = None
-    rows = []
-    # shortcut: archive.write and publish take one series each (one manifest per run day, one catalog
-    # entry), so the second series (#132) needs both to take every series at once.
+    today = generated_at.date()
+    # Each series' download, and the series the run publishes from the archive instead, with why.
+    fetched, skipped = {}, {}
     for series, source in SOURCES:
         try:
-            observed, as_of, upstream = source.fetch(series.source["data_url"])
+            fetched[series.id] = (series, *source.fetch(series.source["data_url"]))
         # Whatever breaks a download, a file or a contract fails its own series, never the run.
         except Exception as error:  # noqa: BLE001
-            problem = f"{type(error).__name__}: {error}"
-            rows.append(
-                publish_stale(
-                    api_dir, archive_dir, series, generated_at, "failed", problem
-                )
-            )
-            continue
-        # First, so a deep rewrite stops the run before it archives or publishes anything, actuals included.
-        # A manual run with accept_revisions ticked, after a human has reviewed the rewrite, records it instead.
+            skipped[series.id] = ("failed", f"{type(error).__name__}: {error}")
+    # First, so a deep rewrite holds its series before any of its data is archived: it keeps its last good files,
+    # and daily.yml opens an issue. A manual run with accept_revisions ticked, after a human review, records it.
+    for series, observed, as_of, _ in list(fetched.values()):
         if os.environ.get("ASERI_ACCEPT_REVISIONS") == "true":
             print(
                 f"{series.id}: revisions accepted for this run, unchecked", flush=True
             )
-        else:
+            continue
+        try:
             archive.check_revisions(archive_dir, series, observed, as_of)
+        except archive.RevisionHold as hold:
+            del fetched[series.id]
+            skipped[series.id] = ("held", str(hold))
+    ran_today = archive.ran_on(archive_dir, today)
+    model, runs, issued = None, [], {}
+    for series, observed, as_of, upstream in fetched.values():
         lag = (as_of - observed.index[-1].date()).days
-        age = f"days old: {lag}, expected up to {series.expected_lag}"
         if lag >= series.expected_lag + STALE_DAYS:
-            rows.append(
-                publish_stale(api_dir, archive_dir, series, generated_at, "stale", age)
+            skipped[series.id] = (
+                "stale",
+                f"days old: {lag}, expected up to {series.expected_lag}",
             )
             continue
         # A suspect newest value waits a day: archived and published as an actual, never forecast from.
-        note, usable = None, observed
-        if under_review(series, observed):
-            usable = observed.iloc[:-1]
-            note = (
-                f"The value of {observed.index[-1]:%Y-%m-%d} is under review, far outside its "
-                "previous 28 days, so the latest forecast starts from the day before."
-            )
-        archived = archive.read(archive_dir, series.id)
-        ran_today = archive.ran_on(archive_dir, generated_at.date())
+        # shortcut: only the newest day is checked, so a dropout inside a PortWatch weekly batch is still a
+        # retrospective origin; check every new day if the replay ever shows one.
+        usable = observed.iloc[:-1] if under_review(series, observed) else observed
         new_dates = (
             []
             if ran_today
             else archive.new_reference_dates(
-                usable, [a.forecast.reference_date for a in archived]
+                usable,
+                [
+                    a.forecast.reference_date
+                    for a in archive.read(archive_dir, series.id)
+                ],
             )
         )
-        if not ran_today and (
-            new_dates
-            or archive.has_new_observations(archive_dir, series.id, observed, as_of)
-        ):
-            forecasts = []
-            if new_dates and model is None:
-                model = load_model()
+        forecasts = []
+        try:
             for day in new_dates:
+                if model is None:
+                    model = load_model()
                 # Each forecast sees only the data up to its own date.
                 forecasts.append(
                     forecast(
@@ -108,73 +116,91 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                     f"{series.id}: forecast {len(forecasts)} of {len(new_dates)}, from {day:%Y-%m-%d}",
                     flush=True,
                 )
-            archive.write(
-                archive_dir,
+        # A model or post-processing error fails its own series; its new observations are still archived below,
+        # since PortWatch keeps no vintages, and the next run forecasts the days this one missed.
+        except Exception as error:  # noqa: BLE001
+            skipped[series.id] = (
+                "failed",
+                f"forecast: {type(error).__name__}: {error}",
+            )
+            forecasts = []
+        issued[series.id] = len(forecasts)
+        if not ran_today and (
+            forecasts
+            or archive.has_new_observations(archive_dir, series.id, observed, as_of)
+        ):
+            runs.append(archive.SeriesRun(series, forecasts, observed, as_of, upstream))
+    # One manifest, one round and one delta for the whole run.
+    if runs:
+        archive.write(
+            archive_dir,
+            runs,
+            code_commit=code_commit,
+            run_url=run_url,
+            generated_at=generated_at,
+        )
+    entries, rows, levels = [], [], None
+    for series, _ in SOURCES:
+        archived = archive.read(archive_dir, series.id)
+        # A fresh series with no archive waits for tomorrow: today's run was archived before it had data.
+        status, detail = skipped.get(series.id, ("waiting", "today's run is archived"))
+        if not archived:
+            rows.append(
+                (series.id, status, None, f"{detail}; nothing archived to publish")
+            )
+            continue
+        note = None
+        if series.id in skipped:
+            observed = archive.as_of_view(archive_dir, series.id, today)
+            # The vintage it republishes, not the day it failed to fetch a newer one.
+            as_of = archive.newest_as_of(archive_dir, series.id)
+            detail = f"{detail}; last good files kept"
+        else:
+            _, observed, as_of, _ = fetched[series.id]
+            # Said only while the latest forecast does start from the day before the suspect value.
+            if (
+                under_review(series, observed)
+                and archived[-1].forecast.reference_date == observed.index[-2]
+            ):
+                note = (
+                    f"The value of {observed.index[-1]:%Y-%m-%d} is under review, far outside its "
+                    "previous 28 days, so the latest forecast starts from the day before."
+                )
+            lag = (as_of - observed.index[-1].date()).days
+            status = "late" if lag >= series.expected_lag + LATE_DAYS else "ok"
+            detail = (
+                f"days old: {lag}, expected up to {series.expected_lag}; "
+                f"{issued[series.id]} new forecasts, the latest from "
+                f"{archived[-1].forecast.reference_date:%Y-%m-%d}"
+                + (f". {note}" if note else "")
+            )
+        since = late_since(series, observed.index[-1].date())
+        entries.append(
+            publish(
+                api_dir,
                 series,
-                forecasts,
+                archived,
                 observed=observed,
                 as_of=as_of,
-                upstream=upstream,
-                code_commit=code_commit,
-                run_url=run_url,
                 generated_at=generated_at,
-            )
-            archived = archive.read(archive_dir, series.id)
-        since = late_since(series, observed.index[-1].date())
-        publish(
-            api_dir,
-            series,
-            archived,
-            observed=observed,
-            as_of=as_of,
-            generated_at=generated_at,
-            note=note,
-            stale_since=since if as_of >= since else None,
-        )
-        status = "late" if lag >= series.expected_lag + LATE_DAYS else "ok"
-        rows.append(
-            (
-                series.id,
-                status,
-                f"{observed.index[-1]:%Y-%m-%d}",
-                f"{age}; {len(new_dates)} new forecasts, the latest from "
-                f"{archived[-1].forecast.reference_date:%Y-%m-%d}"
-                + (f". {note}" if note else ""),
+                note=note,
+                # A failure before the data is late leaves the page as current as on any day: the summary says it failed.
+                stale_since=since if today >= since else None,
             )
         )
+        levels = archived[-1].forecast.levels
+        rows.append((series.id, status, f"{observed.index[-1]:%Y-%m-%d}", detail))
     report(rows)
-    # A row without a "data to" date published nothing.
-    if not any(data_to for _, _, data_to, _ in rows):
+    if not entries:
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")
-    # The series the page now shows as late, read from what it reads, for daily.yml to open an issue on.
+    publish_catalog(api_dir, entries, levels, generated_at)
+    # The series the page now shows as late, read from what it reads, and the held ones, for daily.yml's issues.
     if "GITHUB_OUTPUT" in os.environ:
         catalog = json.loads((api_dir / "series.json").read_text(encoding="utf-8"))
         late = [s["series_id"] for s in catalog["series"] if s["stale_since"]]
+        held = [id for id, (status, _) in skipped.items() if status == "held"]
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as file:
-            file.write(f"stale={','.join(late)}\n")
-
-
-def publish_stale(api_dir, archive_dir, series, generated_at, status, problem):
-    """Publish a skipped series' last good forecast and data, from the archive, labelled stale; the summary row."""
-    archived = archive.read(archive_dir, series.id)
-    if not archived:
-        return series.id, status, None, f"{problem}; nothing archived to publish"
-    today = generated_at.date()
-    observed = archive.as_of_view(archive_dir, series.id, today)
-    last_day = observed.index[-1].date()
-    since = late_since(series, last_day)
-    publish(
-        api_dir,
-        series,
-        archived,
-        observed=observed,
-        # The vintage it republishes, not the day it failed to fetch a newer one.
-        as_of=archive.newest_as_of(archive_dir, series.id),
-        generated_at=generated_at,
-        # A failure before the data is late leaves the page as current as on any day: the summary says it failed.
-        stale_since=since if today >= since else None,
-    )
-    return series.id, status, f"{last_day:%Y-%m-%d}", f"{problem}; last good files kept"
+            file.write(f"stale={','.join(late)}\nrevision_hold={','.join(held)}\n")
 
 
 def report(rows) -> None:
@@ -190,9 +216,4 @@ def report(rows) -> None:
 
 
 if __name__ == "__main__":
-    try:
-        main(Path(sys.argv[1]), Path(sys.argv[2]))
-    except archive.RevisionHold as hold:
-        print(hold, file=sys.stderr)
-        # 3, not 1, so daily.yml can tell a hold from a crash and open an issue.
-        sys.exit(3)
+    main(Path(sys.argv[1]), Path(sys.argv[2]))
