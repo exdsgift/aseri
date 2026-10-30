@@ -231,7 +231,7 @@ it("fits a real value far outside the 1-year range on the lanes, instead of pinn
   const { container } = render(<ForecastPanel series={gpr} />)
   fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
 
-  const reals = [...container.querySelectorAll<HTMLElement>("i.plus")]
+  const reals = [...container.querySelectorAll<HTMLElement>("i.bg-white")]
   expect(reals.length).toBeGreaterThan(0)
   for (const mark of reals)
     expect(parseFloat(mark.style.left)).toBeLessThan(100)
@@ -248,6 +248,10 @@ it("shows a sea lane with its own horizon, steps and baseline", async () => {
   // Only GPR's source revises its last month.
   expect(screen.getByText(/^Data as of/).textContent).toBe(
     `Data as of ${monthDay(hormuzActuals.as_of)}.`
+  )
+  // No weekday note: the sea lanes have no weekly cycle, only GPR does.
+  expect(screen.getByText(/^The 8 in 10 band/).textContent).toBe(
+    "The 8 in 10 band: where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call."
   )
   expect(readout()[0]).toBe("Nov 08 · 8 in 10: 0-6 · most likely 3")
   expect(intervals()).toEqual([

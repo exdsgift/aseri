@@ -90,7 +90,7 @@ export function Intervals({
               {monthDay(row.date)}
             </p>
             {/* The ranges first: a median alone reads as a promise. */}
-            <p className="flex flex-wrap gap-x-4 gap-y-1">
+            <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
               <span>
                 5 in 10: {formatValue(row.fiveInTen[0])}-
                 {formatValue(row.fiveInTen[1])}
@@ -101,7 +101,7 @@ export function Intervals({
               </span>{" "}
               <span>
                 most likely{" "}
-                <b className="font-normal text-gold-pale">
+                <b className="text-[12px] font-normal text-gold-pale">
                   {formatValue(row.mostLikely)}
                 </b>
               </span>
@@ -131,10 +131,9 @@ export function Intervals({
                   className={`${mark} bg-gold-pale`}
                   style={{ left: at(row.mostLikely) }}
                 />
-                {/* A plus, as on the chart: the median's tick is a near-white too. */}
                 {row.real !== undefined && (
                   <i
-                    className="absolute top-[5px] -ml-[3px] size-1.5 plus"
+                    className={`${mark} bg-white`}
                     style={{ left: at(row.real) }}
                   />
                 )}

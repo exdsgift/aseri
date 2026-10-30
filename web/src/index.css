@@ -56,13 +56,6 @@
     0 0 / 4px 4px;
 }
 
-/* What happened, marked as on the chart: a plus 3 art pixels wide, set at size-1.5. */
-@utility plus {
-  background:
-    linear-gradient(var(--white) 0 0) center / 2px 100% no-repeat,
-    linear-gradient(var(--white) 0 0) center / 100% 2px no-repeat;
-}
-
 /* The hero's art fades into the page at its edges, as in the prototype. */
 @utility vignette {
   background: radial-gradient(

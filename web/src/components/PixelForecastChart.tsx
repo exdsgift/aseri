@@ -188,11 +188,10 @@ function ChartLabels({
   const xo = x(origin)
   const end = (level: string) => forecast.quantiles[level][ahead - 1]
   const real = forecast.actuals[ahead - 1]
-  // Top to bottom, so that each label clears the one above. The median no larger than
-  // its range's ends: alone and bigger, it reads as a promise.
+  // Top to bottom, so that each label clears the one above.
   const ends = [
     { value: end("0.9"), className: "" },
-    { value: end("0.5"), className: "text-gold-pale" },
+    { value: end("0.5"), className: "text-[12px] text-gold-pale" },
     { value: end("0.1"), className: "" },
     ...(real === undefined
       ? []

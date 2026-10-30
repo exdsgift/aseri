@@ -7,14 +7,14 @@ import { type Series } from "@/lib/api"
 import { formatValue, monthDay } from "@/lib/format"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 
-// The chart's marks, each in its shape: a solid, a dotted and a dashed line, and a plus.
+// The ranges before the most likely value, as in the readout.
 const legend = [
   ["Daily value", "h-0.5 w-4 bg-primary"],
-  ["7-day average", "w-4 border-t-2 border-dotted border-muted-foreground"],
-  ["What happened", "size-1.5 plus"],
+  ["7-day average", "h-0.5 w-4 bg-muted-foreground"],
+  ["What happened", "size-1 bg-white"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
-  ["Most likely", "w-4 border-t-2 border-dashed border-gold-pale"],
+  ["Most likely", "h-0.5 w-4 bg-gold-pale"],
   ["Forecast made", "h-3 border-l-2 border-dotted border-focus"],
 ]
 
@@ -134,12 +134,14 @@ export function ForecastPanel({ series }: { series: Series }) {
       </ul>
       {/* Text, not the legend, prevents the known misreadings of a band: a high and a low,
           a swing, a weekly dip taken for a fall. The same whatever the day, so that the
-          slider under it never moves during a replay. */}
+          slider under it never moves during a replay. Only GPR has a weekly cycle (lag-7
+          autocorrelation 0.62); the sea lanes have none. */}
       <p className="text-muted-foreground">
         The 8 in 10 band: where the daily value should land 8 days in 10,
         outside it about 2 in 10. Not a high and a low, nor volatility: it
-        widens because later days are harder to call. Daily values can follow
-        the week: compare a day with the same weekday.
+        widens because later days are harder to call.
+        {id === "gpr_daily" &&
+          " Daily values can follow the week: compare a day with the same weekday."}
       </p>
       {last > 0 && (
         <ReplaySlider forecasts={forecasts} shown={shown} setShown={setShown} />

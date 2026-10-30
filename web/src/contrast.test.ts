@@ -100,13 +100,5 @@ describe("marks", () => {
     expect(contrast(mark, surface)).toBeGreaterThanOrEqual(3)
   })
 
-  // Marks that meet and differ by colour alone: the median and what happened, over the
-  // bands. The pairs told apart by shape, a dashed median, a dotted 7-day average and a
-  // plus for what happened, are drawn in chart.test.ts.
-  it.each([
-    [chartTokens.pale, chartTokens.muted],
-    [chartTokens.real, chartTokens.muted],
-  ])("%s over %s stands out at 3:1", (mark, under) => {
-    expect(contrast(mark, under)).toBeGreaterThanOrEqual(3)
-  })
+  // No check between paired marks, at 3:1 or by shape: the owner chose no shape cues (#143).
 })

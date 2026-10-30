@@ -97,57 +97,6 @@ describe("paintChart", () => {
     })
     expect(Math.max(...average.map(({ x }) => x))).toBe(now.x)
   })
-
-  it("draws the daily values solid, the median dashed and the 7-day average dotted, so no two read as one line", () => {
-    // The columns from `from` to `to` that a colour leaves empty.
-    const gaps = (color: string, from: number, to: number) => {
-      const drawn = new Set(
-        calls.filter((call) => call.color === color).map(({ x }) => x)
-      )
-      return Array.from({ length: to - from + 1 }, (_, i) => from + i).filter(
-        (x) => !drawn.has(x)
-      )
-    }
-    expect(gaps("gold", chart.x(chart.first), now.x)).toEqual([])
-    // Up to the 3x3 mark at its end.
-    expect(gaps("pale", now.x, chart.right - 2)).not.toEqual([])
-    expect(gaps("label", chart.x(chart.first), now.x)).not.toEqual([])
-  })
-
-  it("marks each day of what happened with a plus, a shape the daily line never makes", () => {
-    const replayed = {
-      ...forecast,
-      actuals: Array.from({ length: 28 }, (_, k) => 130 + k),
-    }
-    const layout = chartLayout(replayed, 692)
-    const real = new Set<string>()
-    paintChart(
-      (x, y, color) => color === "real" && real.add(`${x},${y}`),
-      layout,
-      replayed,
-      colors
-    )
-
-    replayed.actuals.forEach((value, k) => {
-      const x = layout.x(layout.origin + 1 + k)
-      const y = layout.y(value)
-      for (const [dx, dy] of [
-        [0, 0],
-        [-1, 0],
-        [1, 0],
-        [0, -1],
-        [0, 1],
-      ])
-        expect(real).toContain(`${x + dx},${y + dy}`)
-      for (const [dx, dy] of [
-        [-1, -1],
-        [1, -1],
-        [-1, 1],
-        [1, 1],
-      ])
-        expect(real).not.toContain(`${x + dx},${y + dy}`)
-    })
-  })
 })
 
 describe("chartLayout", () => {

@@ -336,7 +336,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 - **Contrast,** checked by `web/src/contrast.test.ts` from the tokens in `index.css`:
   - text at 4.5:1 on every surface it sits on: the page, an interval row, a picked card;
   - chart and lane marks at 3:1 on the page, a picked card and a row. The frame's hatch and grid lines are exempt: the forecast zone's name and the value ticks say the same in text;
-  - marks that meet differ at 3:1 or by shape, never by colour alone: the median is dashed, the 7-day average dotted, the daily values solid, and what happened is a plus.
+  - no check between marks that meet: they differ by colour, with no shape cues (owner's choice, 2026-10-30).
 - **Fonts, all OFL and self-hosted:**
   - DotGothic16 for the wordmark;
   - Jacquard 24 for the giant numbers and section titles;
@@ -345,16 +345,16 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   Use ASCII "-" for negative numbers, because Press Start 2P has no U+2212. The original dos-age fonts have no licence and must not be used.
 - **Charts are custom canvas components,** not Recharts.
   - Draw at 2 CSS px per art pixel with `image-rendering: pixelated`, and Bresenham lines.
-  - Daily values: a solid gold line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
-  - The 7-day average: a dotted label-grey line that stops at the origin. The median: a dashed pale gold line.
-  - What happened after a replayed forecast was made: white plus marks, or single pixels when the days are under 3 art pixels apart.
+  - Daily values: a gold line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
+  - The 7-day average: a label-grey line that stops at the origin. The median: a pale gold line.
+  - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in muted gold with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted blue line.
   - Labels are real text over the canvas.
   - The scale ignores the 2% most extreme daily values, which sit on the edge.
 - **Copy** that prevents the known misreadings (a range read as a high and a low, a median read as a promise), checked by a text lint in `web/src/App.test.tsx`:
   - a range always comes before "most likely", with a fixed denominator of 10: "8 in 10 between {lo} and {hi}, 2 in 10 outside". No median stands alone anywhere, a social preview included;
-  - beside the chart, what the band is and is not: "where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call", and that daily values can follow the week, so a day compares with the same weekday ("compare Monday with Monday" in the hero);
+  - beside the chart, what the band is and is not: "where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call"; for GPR alone, that daily values can follow the week, so a day compares with the same weekday ("compare Monday with Monday" in the hero). The sea lanes have no weekly cycle;
   - "data as of {date}", from each `actuals.json`'s `as_of`; for GPR, "preliminary for about 4 weeks";
   - never "will" and never "% confidence";
   - when the catalog's `generated_at` is more than 2 days old, the hero says "Site last updated {date}: the daily update may have stopped", computed in the browser.
