@@ -1,0 +1,51 @@
+name: model-check
+
+# The real model, weekly and on any change that could move its numbers: the goldens, and an archived live forecast made again.
+on:
+  schedule:
+    # Monday, after the daily run has archived its forecast.
+    - cron: "0 9 * * 1"
+  push:
+    branches: [master]
+    paths:
+      - pipeline/pyproject.toml
+      - pipeline/uv.lock
+      - pipeline/aseri/forecast.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          working-directory: pipeline
+      - run: uv sync --locked
+      - name: Read the pinned weights revision from the code
+        id: weights
+        run: echo "revision=$(grep -oP 'WEIGHTS_REVISION = "\K[0-9a-f]+' aseri/forecast.py)" >> "$GITHUB_OUTPUT"
+      # Restore only: daily.yml saves this cache, and this workflow writes nothing.
+      - name: Restore the Timestral weights (837 MB) cached by their pinned revision
+        id: cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cache/huggingface/hub
+          key: timestral-209m-${{ steps.weights.outputs.revision }}
+      - name: Download the weights on a cache miss, so the model tests never skip for lack of them
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: uv run python -c "from aseri.forecast import load_model; load_model()"
+      - name: Check out the archive, shallow
+        uses: actions/checkout@v7
+        with:
+          ref: archive
+          path: archive
+      - name: Golden quantiles, and the newest live forecast made again from its archived vintage
+        # -rs prints why a test skipped, such as no live forecast yet after a new MODEL_ID.
+        run: uv run pytest -m slow -rs

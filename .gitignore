@@ -20,3 +20,6 @@ node_modules/
 
 # Generated site and API: published as a Pages artifact, never committed
 /site/
+
+# The archive branch, checked out here for the slow tests
+/archive/
