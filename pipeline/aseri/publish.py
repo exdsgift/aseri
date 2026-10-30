@@ -60,10 +60,10 @@ def publish(
     for forecast in archived:
         _write(
             api_dir / "series" / series.id / _dated(forecast),
-            _forecast(series, forecast),
+            _forecast(series, forecast, observed),
         )
     newest = archived[-1]
-    latest = _forecast(series, newest)
+    latest = _forecast(series, newest, observed)
     _write(
         api_dir / links["latest"],
         latest
@@ -107,11 +107,12 @@ def _dated(archived: Archived) -> str:
     return f"forecasts/{archived.forecast.reference_date:%Y-%m-%d}.json"
 
 
-def _forecast(series, archived) -> dict:
+def _forecast(series, archived, observed) -> dict:
     forecast = archived.forecast
     steps = len(forecast.quantiles)
-    target_end_dates = pd.date_range(
-        forecast.reference_date + pd.Timedelta(days=1), periods=steps, freq="D"
+    # As the archive dated them: from the days up to the reference date, which a revision never drops.
+    target_end_dates = series.target_dates(
+        observed.loc[: forecast.reference_date].index, steps
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -121,7 +122,7 @@ def _forecast(series, archived) -> dict:
         "reference_date": forecast.reference_date.date().isoformat(),
         "forecast_mode": archived.provenance["forecast_mode"],
         "unit": series.unit,
-        "horizon_unit": "day",
+        "horizon_unit": series.horizon_unit,
         "horizon": list(range(1, steps + 1)),
         "target_end_date": target_end_dates.strftime("%Y-%m-%d").tolist(),
         "output_type": "quantile",
@@ -217,11 +218,14 @@ def _entry(series, observed, newest, links, stale_since, note) -> dict:
         "series_id": series.id,
         "title": series.title,
         "unit": series.unit,
+        # 365 days, not values: Brent has about 253 a year.
         "baseline": series.baseline
         if series.baseline is not None
-        else round(float(observed.iloc[-365:].mean()), 4),
+        else round(
+            float(observed.loc[observed.index[-1] - pd.Timedelta(days=364) :].mean()), 4
+        ),
         "baseline_label": series.baseline_label,
-        "horizon_unit": "day",
+        "horizon_unit": series.horizon_unit,
         "horizon_max": series.horizon,
         "interval_steps": list(series.interval_steps),
         "last_observation_date": observed.index[-1].date().isoformat(),
@@ -231,6 +235,8 @@ def _entry(series, observed, newest, links, stale_since, note) -> dict:
         "stale_since": stale_since and stale_since.isoformat(),
         # Why the latest forecast starts before the last observation, then any standing caveat on the data.
         "note": " ".join(n for n in (note, series.note) if n) or None,
+        # Additive to v1: whether the values follow the week, so a day compares with the same weekday.
+        "weekly": series.weekly,
         "source": series.source,
         "license": series.license,
         "links": links,

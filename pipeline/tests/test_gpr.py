@@ -8,6 +8,7 @@ from urllib.error import HTTPError
 import pandas as pd
 import pytest
 
+from aseri import sources
 from aseri.sources import gpr
 
 
@@ -91,7 +92,7 @@ def test_fetch_records_the_hash_of_the_file_and_its_upstream_stamps(monkeypatch)
     }
     requests = []
     monkeypatch.setattr(
-        gpr.urllib.request,
+        sources.urllib.request,
         "urlopen",
         lambda request, timeout: requests.append(request) or Response(raw, headers),
     )
@@ -113,7 +114,7 @@ def test_fetch_records_the_hash_of_the_file_and_its_upstream_stamps(monkeypatch)
 def test_fetch_rejects_a_day_after_the_day_it_downloads_the_file(monkeypatch):
     raw = gpr_file([120.5, 98.25], ["2026-10-25", "2026-10-26"])
     monkeypatch.setattr(
-        gpr.urllib.request, "urlopen", lambda url, timeout: Response(raw, {})
+        sources.urllib.request, "urlopen", lambda url, timeout: Response(raw, {})
     )
     monkeypatch.setattr(
         gpr, "datetime", SimpleNamespace(now=lambda tz: datetime(2026, 10, 25, 7, 2))
@@ -130,11 +131,11 @@ def test_download_does_not_retry_a_client_error(monkeypatch):
         calls.append(url)
         raise HTTPError(url, 404, "Not Found", None, None)
 
-    monkeypatch.setattr(gpr.urllib.request, "urlopen", refuse)
-    monkeypatch.setattr(gpr.time, "sleep", lambda seconds: None)
+    monkeypatch.setattr(sources.urllib.request, "urlopen", refuse)
+    monkeypatch.setattr(sources.time, "sleep", lambda seconds: None)
 
     with pytest.raises(HTTPError):
-        gpr.download("https://example.org/gpr.dta")
+        sources.download("https://example.org/gpr.dta")
     assert len(calls) == 1
 
 
@@ -149,8 +150,8 @@ def test_download_retries_a_connection_cut_mid_body(monkeypatch):
             return outcome
 
     monkeypatch.setattr(
-        gpr.urllib.request, "urlopen", lambda url, timeout: CutResponse(None, {})
+        sources.urllib.request, "urlopen", lambda url, timeout: CutResponse(None, {})
     )
-    monkeypatch.setattr(gpr.time, "sleep", lambda seconds: None)
+    monkeypatch.setattr(sources.time, "sleep", lambda seconds: None)
 
-    assert gpr.download("https://example.org/gpr.dta") == (b"whole file", {})
+    assert sources.download("https://example.org/gpr.dta") == (b"whole file", {})

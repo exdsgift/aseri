@@ -20,7 +20,7 @@ import aseri.__main__ as cli
 import aseri.forecast as forecast_module
 from aseri import archive
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
-from aseri.sources import gpr, portwatch
+from aseri.sources import fred, gpr, losses, portwatch
 
 # The last 60 days of the upstream file as downloaded on 2026-10-29.
 RECORDED_GPR = Path(__file__).parent / "fixtures" / "gpr_daily_recent.dta"
@@ -81,6 +81,7 @@ def unreachable(request, timeout):
 @pytest.fixture(autouse=True)
 def portwatch_down(monkeypatch):
     # Every test runs every series; the GPR tests see PortWatch down, so its four series publish nothing.
+    # The other sources share urlopen and time.sleep, so Brent, Wikipedia, the alerts and the drones fail too.
     monkeypatch.setattr(portwatch.urllib.request, "urlopen", unreachable)
     monkeypatch.setattr(portwatch.time, "sleep", lambda seconds: None)
 
@@ -1162,3 +1163,72 @@ def test_an_archive_of_single_series_manifests_reads_and_stays_byte_identical_un
     assert len(index) == 15
     catalog = read(tmp_path / "api" / "series.json")
     assert [s["series_id"] for s in catalog["series"]] == ["gpr_daily", *PORTS]
+
+
+# Brent and the drones through a whole run, with hand-made files and PortWatch down.
+
+
+def test_brent_and_the_drones_run_end_to_end_on_trading_days_and_with_a_fall_flagged(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    prints = pd.bdate_range("2025-09-01", "2026-10-27")
+    brent = "observation_date,DCOILBRENTEU\n" + "".join(
+        f"{d:%Y-%m-%d},{100 + i % 5:.2f}\n" for i, d in enumerate(prints)
+    )
+    # 1500 drones a day to 2026-10-30, but the total falls by 50 on the 29th: a correction.
+    days = pd.date_range("2025-09-01", "2026-10-30")
+    totals = [1500 * i for i in range(len(days))]
+    totals[-2] = totals[-3] - 50
+    totals[-1] = totals[-2] + 1500
+    reports = [
+        {"date": f"{d:%Y-%m-%d}", "day": i + 2, "drone": t}
+        for i, (d, t) in enumerate(zip(days, totals))
+    ]
+    clock = SimpleNamespace(now=lambda tz: datetime(2026, 10, 30, 7, 2, tzinfo=UTC))
+    monkeypatch.setattr(fred, "datetime", clock)
+    monkeypatch.setattr(losses, "datetime", clock)
+    monkeypatch.setattr(fred, "download", lambda url: (brent.encode(), {}))
+    monkeypatch.setattr(
+        losses, "download", lambda url: (json.dumps(reports).encode(), {})
+    )
+    archive_dir = tmp_path / "archive"
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        archive_dir,
+    )
+
+    rounds = pd.read_csv(
+        archive_dir
+        / "model-output"
+        / "aseri-timestral209m"
+        / "2026-10-30-aseri-timestral209m.csv"
+    )
+    brent_dates = pd.DatetimeIndex(
+        rounds.loc[rounds["target"] == "brent_spot", "target_end_date"]
+    )
+    assert not (brent_dates.day_of_week >= 5).any()
+    api = tmp_path / "api"
+    latest = read(api / "series" / "brent_spot" / "latest.json")
+    assert latest["reference_date"] == "2026-10-27"
+    assert latest["horizon_unit"] == "trading_day"
+    assert latest["target_end_date"][:4] == [
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-11-02",
+    ]
+    manifest = read(archive_dir / "runs" / "2026-10-30.json")
+    assert manifest["upstream"]["ua_drones_downed_claimed"]["revisions"] == [
+        "2026-10-29"
+    ]
+    actuals = read(api / "series" / "ua_drones_downed_claimed" / "actuals.json")
+    assert actuals["observation"][-2:] == [-50.0, 1500.0]
+    entries = {s["series_id"]: s for s in read(api / "series.json")["series"]}
+    assert list(entries) == ["gpr_daily", "brent_spot", "ua_drones_downed_claimed"]
+    assert entries["ua_drones_downed_claimed"]["unit"].endswith(
+        "claimed by Ukraine's General Staff, one side's figures"
+    )

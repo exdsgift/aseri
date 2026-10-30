@@ -8,7 +8,7 @@ import pytest
 from aseri.archive import Archived
 from aseri.forecast import Forecast
 from aseri.publish import publish, publish_catalog
-from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
+from aseri.series import BRENT_SPOT, GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 
 PROVENANCE = {
     "model": {
@@ -308,6 +308,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "latest_forecast_date": "2026-10-29",
             "stale_since": None,
             "note": None,
+            "weekly": True,
             "source": GPR_DAILY.source,
             "license": GPR_DAILY.license,
             "links": {
@@ -381,3 +382,28 @@ def test_catalog_lists_every_series_with_its_365_day_mean_where_it_has_no_fixed_
     assert read(tmp_path / "series" / "taiwan_strait_transits" / "latest.json")[
         "attribution"
     ].startswith("Sources: UN Global Platform; IMF PortWatch")
+
+
+def test_brent_counts_trading_days_and_averages_365_days_not_365_prints(tmp_path):
+    # Two years of weekday prints to Friday 2026-10-23: 100 until a year ago, then 120.
+    prints = pd.bdate_range(end="2026-10-23", periods=522)
+    observed = pd.Series(
+        np.where(prints > pd.Timestamp("2025-10-23"), 120.0, 100.0), index=prints
+    )
+
+    entry = publish(
+        tmp_path,
+        BRENT_SPOT,
+        [archived("2026-10-23", "live")],
+        observed=observed,
+        as_of=date(2026, 10, 30),
+        generated_at=GENERATED_AT,
+    )
+
+    latest = read(tmp_path / "series" / "brent_spot" / "latest.json")
+    assert latest["horizon_unit"] == "trading_day"
+    # Its 2 steps after a Friday: Monday and Tuesday, never the weekend.
+    assert latest["target_end_date"] == ["2026-10-26", "2026-10-27"]
+    assert (entry["horizon_unit"], entry["weekly"]) == ("trading_day", False)
+    assert entry["baseline"] == 120.0
+    assert entry["note"] == BRENT_SPOT.note

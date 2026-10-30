@@ -11,7 +11,7 @@ import torch
 
 from aseri import archive
 from aseri.forecast import Forecast, forecast, make_context
-from aseri.series import GPR_DAILY
+from aseri.series import BRENT_SPOT, GPR_DAILY
 
 
 def days_to(last_day, values):
@@ -83,6 +83,41 @@ def test_a_round_holds_every_level_of_every_forecast_in_the_long_hubverse_shape(
         "2026-10-29,gpr_daily,2026-10-26,2,2026-10-28,quantile,0.1,86.4",
         "2026-10-29,gpr_daily,2026-10-26,2,2026-10-28,quantile,0.5,102.5",
         "2026-10-29,gpr_daily,2026-10-26,2,2026-10-28,quantile,0.9,121.6",
+    ]
+
+
+def test_brent_s_steps_are_dated_by_trading_days_from_its_prints(tmp_path):
+    # Prints on weekdays to Friday 2026-10-23: its two steps are Monday and Tuesday.
+    prints = pd.bdate_range(end="2026-10-23", periods=3)
+    observed = pd.Series([118.8, 115.2, 117.4], index=prints)
+
+    archive.write(
+        tmp_path,
+        [
+            archive.SeriesRun(
+                BRENT_SPOT,
+                [two_step_forecast("2026-10-22"), two_step_forecast("2026-10-23")],
+                observed,
+                date(2026, 10, 29),
+                UPSTREAM,
+            )
+        ],
+        code_commit="0123abc",
+        run_url=None,
+        generated_at=datetime(2026, 10, 29, 7, 3, 12, tzinfo=UTC),
+    )
+
+    rounds = pd.read_csv(
+        tmp_path
+        / "model-output"
+        / "aseri-timestral209m"
+        / "2026-10-29-aseri-timestral209m.csv"
+    ).drop_duplicates(["reference_date", "horizon"])
+    assert rounds[["reference_date", "horizon", "target_end_date"]].values.tolist() == [
+        ["2026-10-22", 1, "2026-10-23"],
+        ["2026-10-22", 2, "2026-10-26"],
+        ["2026-10-23", 1, "2026-10-26"],
+        ["2026-10-23", 2, "2026-10-27"],
     ]
 
 

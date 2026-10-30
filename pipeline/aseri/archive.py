@@ -170,22 +170,28 @@ def write(
         )
         newest = max((f.reference_date for f in forecasts), default=None)
         delta = observation_delta(observed, as_of_view(archive_dir, series.id, as_of))
-        rounds += [
-            {
-                "forecast_date": forecast_date,
-                "target": series.id,
-                "reference_date": f"{forecast.reference_date:%Y-%m-%d}",
-                "horizon": step,
-                "target_end_date": f"{forecast.reference_date + pd.Timedelta(days=step):%Y-%m-%d}",
-                "output_type": "quantile",
-                "output_type_id": level,
-                # Four decimals, as in the API, drop the float32 noise and keep enough digits for scoring.
-                "value": round(float(value), 4),
-            }
-            for forecast in forecasts
-            for step, values in enumerate(forecast.quantiles, start=1)
-            for level, value in zip(forecast.levels, values)
-        ]
+        for forecast in forecasts:
+            # Each step's date, from the days up to its reference date only: Brent's are trading days.
+            days = series.target_dates(
+                observed.loc[: forecast.reference_date].index, len(forecast.quantiles)
+            )
+            rounds += [
+                {
+                    "forecast_date": forecast_date,
+                    "target": series.id,
+                    "reference_date": f"{forecast.reference_date:%Y-%m-%d}",
+                    "horizon": step,
+                    "target_end_date": f"{day:%Y-%m-%d}",
+                    "output_type": "quantile",
+                    "output_type_id": level,
+                    # Four decimals, as in the API, drop the float32 noise and keep enough digits for scoring.
+                    "value": round(float(value), 4),
+                }
+                for step, (day, values) in enumerate(
+                    zip(days, forecast.quantiles), start=1
+                )
+                for level, value in zip(forecast.levels, values)
+            ]
         deltas.append(
             pd.DataFrame(
                 {

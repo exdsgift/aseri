@@ -12,12 +12,16 @@ from aseri.forecast import forecast, load_model, make_context, under_review
 from aseri.publish import publish, publish_catalog
 from aseri.series import (
     BAB_EL_MANDEB_TRANSITS,
+    BRENT_SPOT,
     GPR_DAILY,
     HORMUZ_TRANSITS,
     SUEZ_TRANSITS,
     TAIWAN_STRAIT_TRANSITS,
+    UA_AIR_RAID_HOURS,
+    UA_DRONES_DOWNED_CLAIMED,
+    WIKI_WW3_VIEWS,
 )
-from aseri.sources import gpr, portwatch
+from aseri.sources import fred, gpr, losses, portwatch, sirens, wikimedia
 
 # Each series with the adapter that fetches it and checks its contract, in the catalog's order.
 SOURCES = (
@@ -26,6 +30,10 @@ SOURCES = (
     (HORMUZ_TRANSITS, portwatch),
     (BAB_EL_MANDEB_TRANSITS, portwatch),
     (TAIWAN_STRAIT_TRANSITS, portwatch),
+    (WIKI_WW3_VIEWS, wikimedia),
+    (BRENT_SPOT, fred),
+    (UA_AIR_RAID_HOURS, sirens),
+    (UA_DRONES_DOWNED_CLAIMED, losses),
 )
 # Days past its expected lag at which a series' data warns, and at which the series is skipped as stale.
 LATE_DAYS, STALE_DAYS = 2, 7
