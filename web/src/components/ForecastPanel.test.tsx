@@ -45,7 +45,7 @@ const lines = (element: HTMLElement) =>
   within(element)
     .getAllByRole("paragraph")
     .map((p) => p.textContent)
-const readout = () => lines(screen.getByRole("status"))
+const readout = () => lines(screen.getByTestId("readout"))
 const intervals = () =>
   within(screen.getByRole("list", { name: /Intervals/ }))
     .getAllByRole("listitem")
@@ -166,4 +166,22 @@ it("calls a past live forecast a forecast, not a backtest", () => {
   expect(title()).toBe("[F] Geopolitical risk · forecast made Oct 25")
   expect(slider().getAttribute("aria-valuetext")).toBe("Oct 25")
   expect(source()).toBe(`Source: ${latest.attribution}`)
+})
+
+it("announces nothing as a live region, so slider steps never pile up", () => {
+  render(<ForecastPanel gpr={gpr} />)
+  expect(screen.queryByRole("status")).toBeNull()
+  expect(screen.queryByRole("log")).toBeNull()
+})
+
+it("fits a real value far outside the 1-year range on the lanes, instead of pinning it to the edge", () => {
+  const spike = gpr.forecasts[0]
+  spike.actuals = spike.actuals.map((value, k) => (k === 6 ? 5000 : value))
+  const { container } = render(<ForecastPanel gpr={gpr} />)
+  fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
+
+  const reals = [...container.querySelectorAll<HTMLElement>("i.bg-white")]
+  expect(reals.length).toBeGreaterThan(0)
+  for (const mark of reals)
+    expect(parseFloat(mark.style.left)).toBeLessThan(100)
 })

@@ -56,7 +56,9 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
       </div>
       {/* The same lines whatever the day, each short enough not to wrap on a 360 px phone,
           so that the chart and the slider never move under a finger dragging the replay. */}
-      <div role="status" className="flex flex-col gap-1.5">
+      {/* Not a live region: re-read on every slider step, it would pile up announcements;
+          the slider itself announces the day. */}
+      <div data-testid="readout" className="flex flex-col gap-1.5">
         <p>
           {target}: most likely{" "}
           <b className="font-normal text-gold-pale">{at("0.5")}</b>

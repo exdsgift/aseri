@@ -25,10 +25,15 @@ export function Intervals({
   const title = useId()
   const rows = stepRows(forecast, steps)
   const thatDay = forecast.values.at(-1)!
+  // Real values too: one pinned to the edge would hide how far outside the range it fell.
   const scale = intervalScale([
     ...year,
     baseline,
-    ...rows.flatMap((row) => row.eightInTen),
+    thatDay,
+    ...rows.flatMap((row) => [
+      ...row.eightInTen,
+      ...(row.real === undefined ? [] : [row.real]),
+    ]),
   ])
   const at = (value: number) => `${scale.at(value)}%`
   const span = ([low, high]: number[]) => ({

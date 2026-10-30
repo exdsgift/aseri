@@ -123,23 +123,65 @@ it.each([
     "a past forecast made before the actuals start",
     {
       ...replay,
-      forecasts: [
-        { ...replay.forecasts[0], reference_date: "2025-01-06" },
-        ...replay.forecasts,
-      ],
+      forecasts: replay.forecasts.map((f, i) =>
+        i === 0 ? { ...f, reference_date: "2025-01-06" } : f
+      ),
     },
   ],
-])("refuses a replay file with %s", async (_, broken) => {
-  vi.stubGlobal("fetch", async (url: string) =>
-    Response.json(
-      { ...published, "api/v1/series/gpr_daily/replay.json": broken }[url]
+])(
+  "drops %s from the replay, and keeps today's forecast",
+  async (_, broken) => {
+    vi.stubGlobal("fetch", async (url: string) =>
+      Response.json(
+        { ...published, "api/v1/series/gpr_daily/replay.json": broken }[url]
+      )
     )
+
+    render(<App />)
+
+    await screen.findByText("181")
+    // 120 past forecasts and today's, less the broken one.
+    expect(screen.getByRole("slider").getAttribute("max")).toBe("119")
+  }
+)
+
+it("shows today's forecast without the replay when the replay file is missing", async () => {
+  vi.stubGlobal("fetch", async (url: string) =>
+    url.endsWith("replay.json")
+      ? new Response("", { status: 404 })
+      : Response.json(published[url])
   )
   vi.spyOn(console, "error").mockImplementation(() => {})
 
   render(<App />)
 
-  expect(await screen.findByRole("alert")).toBeTruthy()
+  await screen.findByText("181")
+  expect(
+    screen.getByRole("region", { name: /forecast made today/ })
+  ).toBeTruthy()
+  expect(screen.queryByRole("slider")).toBeNull()
+})
+
+it("never scores today's forecast, even when the actuals run ahead of it", async () => {
+  const aheadByTwoDays = {
+    ...actuals,
+    date: [...actuals.date, "2026-10-27", "2026-10-28"],
+    observation: [...actuals.observation, 150, 160],
+  }
+  vi.stubGlobal("fetch", async (url: string) =>
+    Response.json(
+      { ...published, "api/v1/series/gpr_daily/actuals.json": aheadByTwoDays }[
+        url
+      ]
+    )
+  )
+
+  render(<App />)
+
+  expect(
+    await screen.findByText(/^Real value on Nov 23: not known yet/)
+  ).toBeTruthy()
+  expect(screen.queryByText(/^So far/)).toBeNull()
 })
 
 it("shows today's GPR forecast in the panel, from one load of each file", async () => {

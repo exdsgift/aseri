@@ -83,15 +83,15 @@ export async function loadGpr(): Promise<Gpr> {
     read<Catalog>("series.json"),
     read<Latest>("series/gpr_daily/latest.json"),
     read<Actuals>("series/gpr_daily/actuals.json"),
-    read<Replay>("series/gpr_daily/replay.json"),
+    // The replay is extra: without it the page still shows today's forecast.
+    read<Replay>("series/gpr_daily/replay.json").catch((error) => {
+      console.error(error)
+      return { horizon: [], forecasts: [] }
+    }),
   ])
   const gpr = catalog.series.find((s) => s.series_id === "gpr_daily")
   const days = gpr?.horizon_max
   const reference = actuals.date.indexOf(latest.reference_date)
-  // The files are cached separately, so the replay may end a day before or after latest.json.
-  const past = replay.forecasts
-    .filter((f) => f.reference_date < latest.reference_date)
-    .map((f) => ({ ...f, origin: actuals.date.indexOf(f.reference_date) }))
   // The chart draws every day ahead up to the hero's, at the five levels it reads.
   const everyDay = (horizon: number[], quantiles: Record<string, number[]>) =>
     horizon.length === days &&
@@ -99,13 +99,16 @@ export async function loadGpr(): Promise<Gpr> {
     ["0.1", "0.25", "0.5", "0.75", "0.9"].every(
       (level) => quantiles[level]?.length === days
     )
+  // The files are cached separately, so the replay may end a day before or after latest.json;
+  // a past forecast the page cannot draw in full is left out rather than failing the page.
+  const past = replay.forecasts
+    .filter((f) => f.reference_date < latest.reference_date)
+    .map((f) => ({ ...f, origin: actuals.date.indexOf(f.reference_date) }))
+    .filter((f) => f.origin >= 6 && everyDay(replay.horizon, f.quantiles))
   if (
     !gpr ||
     !everyDay(latest.horizon, latest.quantiles) ||
     reference < 6 ||
-    !past.every(
-      (f) => everyDay(replay.horizon, f.quantiles) && f.origin >= 6
-    ) ||
     !gpr.interval_steps.every((step) => step >= 1 && step <= gpr.horizon_max)
   ) {
     throw new Error("The published GPR files are incomplete")
@@ -161,12 +164,16 @@ export async function loadGpr(): Promise<Gpr> {
           f.forecast_mode
         )
       ),
-      madeOn(
-        reference,
-        latest.target_end_date,
-        latest.quantiles,
-        latest.forecast_mode
-      ),
+      {
+        ...madeOn(
+          reference,
+          latest.target_end_date,
+          latest.quantiles,
+          latest.forecast_mode
+        ),
+        // Actuals that run ahead of latest.json belong to a forecast not published yet.
+        actuals: [],
+      },
     ],
     steps: gpr.interval_steps,
   }
