@@ -7,13 +7,14 @@ import { type Series } from "@/lib/api"
 import { formatValue, monthDay } from "@/lib/format"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 
+// The chart's marks, each in its shape: a solid, a dotted and a dashed line, and a plus.
 const legend = [
   ["Daily value", "h-0.5 w-4 bg-primary"],
-  ["7-day average", "h-0.5 w-4 bg-muted-foreground"],
-  ["What happened", "size-1 bg-white"],
-  ["Most likely", "h-0.5 w-4 bg-gold-pale"],
-  ["5 in 10", "h-2.5 w-4 dither-50"],
+  ["7-day average", "w-4 border-t-2 border-dotted border-muted-foreground"],
+  ["What happened", "size-1.5 plus"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
+  ["5 in 10", "h-2.5 w-4 dither-50"],
+  ["Most likely", "w-4 border-t-2 border-dashed border-gold-pale"],
   ["Forecast made", "h-3 border-l-2 border-dotted border-focus"],
 ]
 
@@ -21,7 +22,7 @@ const legend = [
 // its intervals and where the data comes from.
 export function ForecastPanel({ series }: { series: Series }) {
   const title = useId()
-  const { forecasts, steps, today, staleSince, madeOn, note } = series
+  const { id, forecasts, steps, today, staleSince, madeOn, note } = series
   // UTC, like every date the pipeline writes.
   const madeToday = madeOn === new Date().toISOString().slice(0, 10)
   const last = forecasts.length - 1
@@ -61,6 +62,11 @@ export function ForecastPanel({ series }: { series: Series }) {
           </span>
         </p>
       </div>
+      {/* The real values of a replay are as read that day; GPR's source revises its last month. */}
+      <p className="text-muted-foreground">
+        Data as of {monthDay(today.asOf)}
+        {id === "gpr_daily" && ", preliminary for about 4 weeks"}.
+      </p>
       {/* Such as Taiwan's tracking dropouts, or a newest value under review. */}
       {note && <p className="text-key">Note: {note}</p>}
       {/* The same lines whatever the day, each short enough not to wrap on a 360 px phone,
@@ -68,15 +74,16 @@ export function ForecastPanel({ series }: { series: Series }) {
       {/* Not a live region: re-read on every slider step, it would pile up announcements;
           the slider itself announces the day. */}
       <div data-testid="readout" className="flex flex-col gap-1.5">
+        {/* The range first: a median alone reads as a promise. */}
         <p>
-          {target}: most likely{" "}
-          <b className="font-normal text-gold-pale">{at("0.5")}</b>
+          {target} · 8 in 10:{" "}
+          <b className="font-normal text-gold-pale">
+            {at("0.1")}-{at("0.9")}
+          </b>
           <span className="max-[480px]:hidden"> ·</span>{" "}
           <span className="max-[480px]:block">
-            8 in 10:{" "}
-            <b className="font-normal text-gold-pale">
-              {at("0.1")}-{at("0.9")}
-            </b>
+            most likely{" "}
+            <b className="font-normal text-gold-pale">{at("0.5")}</b>
           </span>
         </p>
         <p>
@@ -115,7 +122,7 @@ export function ForecastPanel({ series }: { series: Series }) {
       </div>
       <PixelForecastChart
         forecast={forecast}
-        summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: most likely ${at("0.5")}, 8 in 10 between ${at("0.1")} and ${at("0.9")}.${sofar.of ? ` In white, what happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
+        summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}.${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
       />
       <ul className="flex flex-wrap gap-x-4 gap-y-2 text-muted-foreground">
         {legend.map(([name, swatch]) => (
@@ -125,6 +132,15 @@ export function ForecastPanel({ series }: { series: Series }) {
           </li>
         ))}
       </ul>
+      {/* Text, not the legend, prevents the known misreadings of a band: a high and a low,
+          a swing, a weekly dip taken for a fall. The same whatever the day, so that the
+          slider under it never moves during a replay. */}
+      <p className="text-muted-foreground">
+        The 8 in 10 band: where the daily value should land 8 days in 10,
+        outside it about 2 in 10. Not a high and a low, nor volatility: it
+        widens because later days are harder to call. Daily values can follow
+        the week: compare a day with the same weekday.
+      </p>
       {last > 0 && (
         <ReplaySlider forecasts={forecasts} shown={shown} setShown={setShown} />
       )}

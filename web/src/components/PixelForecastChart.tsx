@@ -11,6 +11,7 @@ import {
 import { type Forecast } from "@/lib/api"
 import {
   chartLayout,
+  chartTokens,
   dateTicks,
   miniChartLayout,
   nudgeApart,
@@ -19,6 +20,7 @@ import {
   textWidth,
   valueTicks,
   type ChartLayout,
+  type Colors,
   type Layout,
 } from "@/lib/chart"
 import { formatValue, monthDay } from "@/lib/format"
@@ -50,7 +52,6 @@ function usePixelChart<L extends Layout>(
     if (!chart) return
     const context = canvas.current!.getContext("2d")!
     const css = getComputedStyle(canvas.current!)
-    const token = (name: string) => css.getPropertyValue(name)
     context.clearRect(0, 0, chart.art.width, chart.art.height)
     paintChart(
       (x, y, color) => {
@@ -59,15 +60,12 @@ function usePixelChart<L extends Layout>(
       },
       chart,
       forecast,
-      {
-        gold: token("--primary"),
-        pale: token("--gold-pale"),
-        muted: token("--secondary"),
-        frame: token("--border"),
-        focus: token("--focus"),
-        label: token("--muted-foreground"),
-        real: token("--white"),
-      }
+      Object.fromEntries(
+        Object.entries(chartTokens).map(([mark, name]) => [
+          mark,
+          css.getPropertyValue(name),
+        ])
+      ) as Colors
     )
   }, [chart, forecast])
 
@@ -137,10 +135,19 @@ export function PixelForecastChart({
         }
       />
       {chart && <ChartLabels chart={chart} forecast={forecast} />}
-      {/* A narrower chart starts later, past the day a tap may have left up. */}
-      {chart && hovered !== undefined && hovered >= chart.first && (
-        <DayTip chart={chart} forecast={forecast} day={hovered} width={width} />
-      )}
+      {/* A narrower chart starts later, and an older forecast of the replay ends earlier,
+          than the day a tap may have left up. */}
+      {chart &&
+        hovered !== undefined &&
+        hovered >= chart.first &&
+        hovered <= chart.origin + chart.ahead && (
+          <DayTip
+            chart={chart}
+            forecast={forecast}
+            day={hovered}
+            width={width}
+          />
+        )}
     </div>
   )
 }
@@ -181,10 +188,11 @@ function ChartLabels({
   const xo = x(origin)
   const end = (level: string) => forecast.quantiles[level][ahead - 1]
   const real = forecast.actuals[ahead - 1]
-  // Top to bottom, so that each label clears the one above.
+  // Top to bottom, so that each label clears the one above. The median no larger than
+  // its range's ends: alone and bigger, it reads as a promise.
   const ends = [
     { value: end("0.9"), className: "" },
-    { value: end("0.5"), className: "text-[12px] text-gold-pale" },
+    { value: end("0.5"), className: "text-gold-pale" },
     { value: end("0.1"), className: "" },
     ...(real === undefined
       ? []
@@ -302,10 +310,10 @@ function DayTip({
           <span className="block text-key">
             {monthDay(forecast.targetDates[step])}
           </span>
-          <span className="block">Most likely {at("0.5")}</span>
           <span className="block">
             8 in 10: {at("0.1")}-{at("0.9")}
           </span>
+          <span className="block">Most likely {at("0.5")}</span>
           {forecast.actuals[step] !== undefined && (
             <span className="block text-white">
               What happened {formatValue(forecast.actuals[step])}

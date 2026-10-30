@@ -85,18 +85,11 @@ export function Intervals({
             key={row.step}
             className="flex flex-col gap-1.5 bg-muted px-2 py-1.5"
           >
-            <p className="flex items-baseline justify-between gap-2 text-muted-foreground">
-              <span>
-                In {row.step} {row.step === 1 ? "day" : "days"} ·{" "}
-                {monthDay(row.date)}
-              </span>{" "}
-              <span>
-                most likely{" "}
-                <b className="text-[12px] font-normal text-gold-pale">
-                  {formatValue(row.mostLikely)}
-                </b>
-              </span>
+            <p className="text-muted-foreground">
+              In {row.step} {row.step === 1 ? "day" : "days"} ·{" "}
+              {monthDay(row.date)}
             </p>
+            {/* The ranges first: a median alone reads as a promise. */}
             <p className="flex flex-wrap gap-x-4 gap-y-1">
               <span>
                 5 in 10: {formatValue(row.fiveInTen[0])}-
@@ -105,6 +98,12 @@ export function Intervals({
               <span>
                 8 in 10: {formatValue(row.eightInTen[0])}-
                 {formatValue(row.eightInTen[1])}
+              </span>{" "}
+              <span>
+                most likely{" "}
+                <b className="font-normal text-gold-pale">
+                  {formatValue(row.mostLikely)}
+                </b>
               </span>
               {row.real !== undefined && (
                 <>
@@ -132,9 +131,10 @@ export function Intervals({
                   className={`${mark} bg-gold-pale`}
                   style={{ left: at(row.mostLikely) }}
                 />
+                {/* A plus, as on the chart: the median's tick is a near-white too. */}
                 {row.real !== undefined && (
                   <i
-                    className={`${mark} bg-white`}
+                    className="absolute top-[5px] -ml-[3px] size-1.5 plus"
                     style={{ left: at(row.real) }}
                   />
                 )}

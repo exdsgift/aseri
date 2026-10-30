@@ -12,6 +12,7 @@ const today: Today = {
   daysAhead: 28,
   referenceDate: "2026-10-26",
   referenceValue: 165,
+  asOf: "2026-10-30",
   targetDate: "2026-11-23",
   mostLikely: 168,
   low: 111,

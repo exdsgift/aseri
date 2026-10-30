@@ -13,13 +13,31 @@ import {
 import { countUp, useSteps } from "@/lib/motion"
 import { sunRadius } from "@/lib/sun"
 
-export function Hero({ today, failed }: { today?: Today; failed: boolean }) {
+// `updated` is when the daily run last wrote the site.
+export function Hero({
+  today,
+  updated,
+  failed,
+}: {
+  today?: Today
+  updated?: string
+  failed: boolean
+}) {
   return (
     // From 224 px down, as in the prototype: the wordmark sits under the sun.
     <section className="relative isolate flex min-h-svh flex-col items-center gap-9 px-4 pt-56 pb-14 text-center text-primary uppercase">
       <Sun radius={today && sunRadius(today.sevenDayAverage, today.baseline)} />
       <Wordmark />
       <p>Geopolitical risk · today</p>
+      {/* GitHub pauses the schedule of an idle repository, and a run that never starts
+          writes nothing: only the page can say its data is old. */}
+      {updated &&
+        Date.parse(updated) < new Date().getTime() - 2 * 86_400_000 && (
+          <p className="text-destructive">
+            Site last updated {monthDay(updated.slice(0, 10))}: the daily update
+            may have stopped.
+          </p>
+        )}
       {today && (
         <>
           <CountUp value={today.sevenDayAverage} />
@@ -32,12 +50,20 @@ export function Hero({ today, failed }: { today?: Today; failed: boolean }) {
               {versusBaseline(today.sevenDayAverage, today.baseline)}{" "}
               <span className="whitespace-nowrap">{today.baselineLabel}</span>
             </p>
+            {/* The range first, with its complement: a median alone reads as a promise. */}
             <p>
               {dayLabel(today.targetDate)}, {today.daysAhead / 7} weeks from the
-              last data: most likely {formatValue(today.mostLikely)}. 8 in 10
-              between {formatValue(today.low)} and {formatValue(today.high)}.
-              (Last {weekday(today.referenceDate)}:{" "}
+              last data: 8 in 10 between {formatValue(today.low)} and{" "}
+              {formatValue(today.high)}, 2 in 10 outside. Most likely{" "}
+              {formatValue(today.mostLikely)}. (Last{" "}
+              {weekday(today.referenceDate)}:{" "}
               {formatValue(today.referenceValue)})
+            </p>
+            {/* Its source revises GPR for about a month. */}
+            <p className="text-muted-foreground">
+              GPR runs on a weekly cycle: compare {weekday(today.referenceDate)}{" "}
+              with {weekday(today.referenceDate)}. Data as of{" "}
+              {monthDay(today.asOf)}, preliminary for about 4 weeks.
             </p>
           </div>
         </>

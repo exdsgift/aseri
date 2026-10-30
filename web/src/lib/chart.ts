@@ -156,25 +156,42 @@ export type ChartLayout = ReturnType<typeof chartLayout>
 export type Layout = ReturnType<typeof layout>
 type Plot = (x: number, y: number, color: string) => void
 type Point = [number, number]
-type Colors = Record<
-  "gold" | "pale" | "muted" | "frame" | "focus" | "label" | "real",
-  string
->
+
+// The page's token behind each colour of the chart.
+export const chartTokens = {
+  gold: "--primary",
+  pale: "--gold-pale",
+  muted: "--secondary",
+  frame: "--border",
+  focus: "--focus",
+  label: "--muted-foreground",
+  real: "--white",
+}
+export type Colors = Record<keyof typeof chartTokens, string>
 
 // The thresholds of a 4x4 Bayer matrix, the dither of the bands.
 export const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
 
 // Bresenham through each point in turn: lines stay one art pixel thick, with no smoothing.
-function polyline(plot: Plot, points: Point[], color: string) {
+// A broken line draws `on` pixels in every `on + off` along its length, and its last point.
+function polyline(
+  plot: Plot,
+  points: Point[],
+  color: string,
+  [on, off] = [1, 0]
+) {
+  let n = 0
+  const dot = (x: number, y: number) => {
+    if (n++ % (on + off) < on) plot(x, y, color)
+  }
+  dot(...points[0])
   for (let i = 1; i < points.length; i++) {
     let [x0, y0] = points[i - 1]
     const [x1, y1] = points[i]
     const dx = Math.abs(x1 - x0)
     const dy = -Math.abs(y1 - y0)
     let error = dx + dy
-    for (;;) {
-      plot(x0, y0, color)
-      if (x0 === x1 && y0 === y1) break
+    while (x0 !== x1 || y0 !== y1) {
       const twice = 2 * error
       if (twice >= dy) {
         error += dy
@@ -184,13 +201,27 @@ function polyline(plot: Plot, points: Point[], color: string) {
         error += dx
         y0 += y0 < y1 ? 1 : -1
       }
+      dot(x0, y0)
     }
   }
+  plot(...points.at(-1)!, color)
 }
 
 function square(plot: Plot, x: number, y: number, size: number, color: string) {
   for (let dx = 0; dx < size; dx++)
     for (let dy = 0; dy < size; dy++) plot(x + dx, y + dy, color)
+}
+
+// What happened: a plus centred on its value, a shape no line of the chart makes.
+function plus(plot: Plot, x: number, y: number, color: string) {
+  for (const [dx, dy] of [
+    [0, 0],
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1],
+  ])
+    plot(x + dx, y + dy, color)
 }
 
 export function paintChart(
@@ -228,6 +259,7 @@ export function paintChart(
         plot(px, py, color.muted)
     }
   }
+  // The median, dashed: a solid line from the last value would read as the data carrying on.
   polyline(
     plot,
     [
@@ -237,16 +269,18 @@ export function paintChart(
         y(value),
       ]),
     ],
-    color.pale
+    color.pale,
+    [3, 2]
   )
 
-  // The 7-day average, dimmer: context only, since the forecast is of the daily value.
+  // The 7-day average, dimmer and dotted: context only, since the forecast is of the daily value.
   polyline(
     plot,
     averages
       .slice(first)
       .map((average, i): Point => [x(first + i), y(average)]),
-    color.label
+    color.label,
+    [1, 1]
   )
   // The daily values, the quantity forecast, so the forecast carries on from where they end.
   polyline(
@@ -254,11 +288,13 @@ export function paintChart(
     values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
     color.gold
   )
-  // What happened after the forecast was made, in white over the bands,
-  // as dots 2 art pixels wide when the days are far enough apart.
-  const dot = (right - left) / chart.span >= 3 ? 2 : 1
+  // What happened after the forecast was made, in white over the bands: a plus a day
+  // when the days are far enough apart for the pluses not to touch, else a pixel.
+  const room = (right - left) / chart.span >= 3
   actuals.forEach((value, k) =>
-    square(plot, x(origin + 1 + k), y(value), dot, color.real)
+    room
+      ? plus(plot, x(origin + 1 + k), y(value), color.real)
+      : plot(x(origin + 1 + k), y(value), color.real)
   )
 
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.focus)
@@ -272,5 +308,5 @@ export function paintChart(
     color.pale
   )
   if (actuals.length === chart.ahead)
-    square(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, 3, color.real)
+    plus(plot, right, y(actuals[chart.ahead - 1]), color.real)
 }

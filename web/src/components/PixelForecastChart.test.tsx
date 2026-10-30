@@ -93,6 +93,19 @@ it("drops the readout of a day the chart no longer shows", () => {
   expect(screen.queryByText(/^Daily value \d/)).toBeNull()
 })
 
+it("drops a tap's readout past the end of an older forecast the replay moves to", () => {
+  const { rerender } = render(
+    <PixelForecastChart forecast={forecast} summary="" />
+  )
+  resize(692)
+
+  // Today's last day ahead, months after the oldest forecast's.
+  fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
+  expect(screen.queryByText(/^Most likely \d/)).not.toBeNull()
+  rerender(<PixelForecastChart forecast={backtest} summary="" />)
+  expect(screen.queryByText(/^Most likely \d/)).toBeNull()
+})
+
 it("drops the readout when a mouse or a pen leaves, but keeps a tap's", () => {
   render(<PixelForecastChart forecast={forecast} summary="" />)
   resize(692)

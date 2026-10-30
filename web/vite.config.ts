@@ -32,6 +32,8 @@ export default defineConfig({
     setupFiles: ["src/test-setup.ts"],
     unstubGlobals: true,
     restoreMocks: true,
+    // Vitest empties CSS imports, but the contrast test reads the tokens as text.
+    css: { include: [/index\.css\?raw$/] },
     // West of UTC, so a date read in local time lands on the wrong day and fails a test.
     env: { TZ: "America/New_York" },
   },

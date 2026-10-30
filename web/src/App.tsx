@@ -17,6 +17,8 @@ export function App() {
   const [signals, setSignals] =
     useState<{ entry: CatalogEntry; series: Series }[]>()
   const [failed, setFailed] = useState(false)
+  // When the daily run last wrote the site.
+  const [updated, setUpdated] = useState<string>()
   // The series in the panel. The hero stays on GPR.
   const [picked, setPicked] = useState(gprId)
   const panelBox = useRef<HTMLDivElement>(null)
@@ -27,7 +29,8 @@ export function App() {
   // The cards need every series' forecast and daily values; only GPR's replay, the panel's first.
   useEffect(() => {
     loadCatalog()
-      .then(async (catalog) => {
+      .then(async ({ generated_at, series: catalog }) => {
+        setUpdated(generated_at)
         if (!catalog.some((entry) => entry.series_id === gprId))
           throw new Error("The catalog has no gpr_daily")
         const loaded = await Promise.all(
@@ -69,7 +72,7 @@ export function App() {
 
   return (
     <main>
-      <Hero today={gpr?.today} failed={failed} />
+      <Hero today={gpr?.today} updated={updated} failed={failed} />
       {signals && panel && (
         <>
           <div ref={panelBox} className="scroll-mt-4 px-4 pb-14">

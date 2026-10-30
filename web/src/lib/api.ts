@@ -22,7 +22,7 @@ type Latest = {
   quantiles: Record<string, number[]>
   attribution: string
 }
-type Actuals = { date: string[]; observation: number[] }
+type Actuals = { as_of: string; date: string[]; observation: number[] }
 // Today's forecast and the 120 before it, oldest first.
 type Replay = {
   horizon: number[]
@@ -42,6 +42,8 @@ export type Today = {
   referenceDate: string
   // The daily value on the reference date, the same weekday as the target date.
   referenceValue: number
+  // The day the data was read from its source, which may revise it later.
+  asOf: string
   targetDate: string
   mostLikely: number
   low: number
@@ -94,9 +96,9 @@ const mean = (values: number[]) =>
 const daysAfter = (isoDate: string, days: number) =>
   new Date(Date.parse(isoDate) + days * 86_400_000).toISOString().slice(0, 10)
 
-export async function loadCatalog() {
-  return (await read<{ series: CatalogEntry[] }>("series.json")).series
-}
+// `generated_at` is when the daily run last wrote the site.
+export const loadCatalog = () =>
+  read<{ generated_at: string; series: CatalogEntry[] }>("series.json")
 
 // A series' forecast and daily values, and the replay's past forecasts when asked for:
 // a card needs only today's.
@@ -173,6 +175,7 @@ export async function loadSeries(
       daysAhead: days,
       referenceDate: latest.reference_date,
       referenceValue: actuals.observation[reference],
+      asOf: actuals.as_of,
       targetDate: latest.target_end_date[step],
       mostLikely: latest.quantiles["0.5"][step],
       low: latest.quantiles["0.1"][step],

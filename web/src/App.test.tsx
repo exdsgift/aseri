@@ -11,7 +11,9 @@ import catalog from "@/fixtures/series.json"
 import actuals from "@/fixtures/series/gpr_daily/actuals.json"
 import latest from "@/fixtures/series/gpr_daily/latest.json"
 import replay from "@/fixtures/series/gpr_daily/replay.json"
+import { monthDay } from "@/lib/format"
 
+import page from "../index.html?raw"
 import { App } from "./App"
 
 // What the daily runs published, at the URLs the page reads: GPR's of 2026-10-30,
@@ -61,8 +63,127 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
     "181",
     "7-day average to Oct 26",
     "81% above its 1985-2019 average",
-    "Monday Nov 23, 4 weeks from the last data: most likely 168. 8 in 10 between 111 and 251. (Last Monday: 165)",
+    "Monday Nov 23, 4 weeks from the last data: 8 in 10 between 111 and 251, 2 in 10 outside. Most likely 168. (Last Monday: 165)",
+    `GPR runs on a weekly cycle: compare Monday with Monday. Data as of ${monthDay(actuals.as_of)}, preliminary for about 4 weeks.`,
   ])
+})
+
+// GitHub pauses an idle repository's schedule, and nothing else would say the files stopped.
+it("cautions when the site was last updated more than 2 days ago", async () => {
+  serve(published)
+  const day = 86_400_000
+  const updated = Date.parse(catalog.generated_at)
+  const caution = () => screen.queryByText(/^Site last updated/)
+
+  vi.setSystemTime(updated + 2 * day)
+  render(<App />)
+  await screen.findByText("181", { selector: "p" })
+  expect(caution()).toBeNull()
+  cleanup()
+
+  vi.setSystemTime(updated + 3 * day)
+  render(<App />)
+  await screen.findByText("181", { selector: "p" })
+  expect(caution()!.textContent).toBe(
+    `Site last updated ${monthDay(catalog.generated_at.slice(0, 10))}: the daily update may have stopped.`
+  )
+  expect(caution()!.className).toContain("text-destructive")
+})
+
+// The words beside the numbers prevent the known misreadings: a median read as a promise,
+// a range read as false precision. Each "most likely" value comes after its range.
+it("keeps the copy honest, today and in replay, and in index.html's tags", async () => {
+  // A chart with a width draws its labels, and a tap on it opens a day's readout.
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      callback: ResizeObserverCallback
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback
+      }
+      observe() {
+        this.callback(
+          [{ contentRect: { width: 692 } } as ResizeObserverEntry],
+          this as never
+        )
+      }
+      disconnect() {}
+    }
+  )
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      observe() {}
+      disconnect() {}
+    }
+  )
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    clearRect() {},
+    fillRect() {},
+  } as never)
+  serve(published)
+  render(<App />)
+  const chart = await screen.findByRole("img")
+  // The text nodes, and the text alternatives a screen reader gets instead.
+  const copy = () => {
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT
+    )
+    const nodes: Text[] = []
+    while (walker.nextNode()) nodes.push(walker.currentNode as Text)
+    const alternatives = [
+      ...document.querySelectorAll("[aria-label], [aria-valuetext]"),
+    ].flatMap((element) =>
+      ["aria-label", "aria-valuetext"].flatMap(
+        (name) => element.getAttribute(name) ?? []
+      )
+    )
+    return {
+      text: [...nodes.map((node) => node.data), ...alternatives].join(" "),
+      // Where the page says "most likely": the block around the words, or the alternative.
+      medians: [
+        ...nodes
+          .filter((node) => /most likely/i.test(node.data))
+          .map(
+            (node) => node.parentElement!.closest("p, li, div")!.textContent!
+          ),
+        ...alternatives.filter((text) => /most likely/i.test(text)),
+      ],
+    }
+  }
+  const seen = [copy()]
+  fireEvent.pointerDown(chart, { clientX: 692 })
+  seen.push(copy())
+  fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
+  fireEvent.pointerDown(chart, { clientX: 692 })
+  seen.push(copy())
+  const text = [...seen.map((s) => s.text), page].join(" ")
+  const medians = [...seen.flatMap((s) => s.medians), page]
+
+  expect(text).not.toMatch(/\bwill\b/i)
+  expect(text).not.toMatch(/%\s*confidence/i)
+  // The replay's tap readout is up, so every place a median shows was read.
+  expect(text).toMatch(/What happened \d/)
+  expect(medians.filter((block) => bareMedians(block).length)).toEqual([])
+})
+
+// The text before each "most likely" value, back to the one before it, that gives no
+// "n in 10" range.
+const bareMedians = (block: string) =>
+  block
+    .split(/most likely:? (?=\d)/i)
+    .slice(0, -1)
+    .filter((before) => !/\d+ in 10\b.*?\d+(?:-| and )\d/i.test(before))
+
+it("finds a most likely value given without its range first", () => {
+  expect(bareMedians("Nov 23: most likely 168 · 8 in 10: 111-251")).toEqual([
+    "Nov 23: ",
+  ])
+  expect(bareMedians("8 in 10 between 111 and 251. Most likely 168")).toEqual(
+    []
+  )
+  expect(bareMedians("Most likely")).toEqual([])
 })
 
 it("says so in one plain line when the data cannot be loaded", async () => {
@@ -215,9 +336,10 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     })
   )
   const paragraphs = panel.getAllByRole("paragraph").map((p) => p.textContent)
-  expect(paragraphs.slice(0, 2)).toEqual([
+  expect(paragraphs.slice(0, 3)).toEqual([
     "index (1985-2019 average = 100) · data to Oct 26",
-    "Nov 23: most likely 168 · 8 in 10: 111-251",
+    `Data as of ${monthDay(actuals.as_of)}, preliminary for about 4 weeks.`,
+    "Nov 23 · 8 in 10: 111-251 · most likely 168",
   ])
   expect(paragraphs.at(-1)).toBe(`Source: ${latest.attribution}`)
   const legend = within(panel.getAllByRole("list")[0])
@@ -225,13 +347,17 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     "Daily value",
     "7-day average",
     "What happened",
-    "Most likely",
-    "5 in 10",
     "8 in 10",
+    "5 in 10",
+    "Most likely",
     "Forecast made",
   ])
+  // Text beside the chart, not the legend, says what the band is and is not.
+  expect(panel.getByText(/^The 8 in 10 band/).textContent).toBe(
+    "The 8 in 10 band: where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call. Daily values can follow the week: compare a day with the same weekday."
+  )
   expect(panel.getByRole("img").getAttribute("aria-label")).toBe(
-    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: most likely 168, 8 in 10 between 111 and 251."
+    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: 8 in 10 between 111 and 251, most likely 168."
   )
   // Every file but the other series' replays, which wait for their card to be picked.
   expect(fetch.mock.calls.map(([url]) => url).toSorted()).toEqual(

@@ -56,6 +56,13 @@
     0 0 / 4px 4px;
 }
 
+/* What happened, marked as on the chart: a plus 3 art pixels wide, set at size-1.5. */
+@utility plus {
+  background:
+    linear-gradient(var(--white) 0 0) center / 2px 100% no-repeat,
+    linear-gradient(var(--white) 0 0) center / 100% 2px no-repeat;
+}
+
 /* The hero's art fades into the page at its edges, as in the prototype. */
 @utility vignette {
   background: radial-gradient(
@@ -217,14 +224,14 @@
   --muted-foreground: #9badb7; /* label */
   --accent: #3d3524; /* picked */
   --accent-foreground: #fff0b3;
-  --destructive: #d95763; /* outside */
+  --destructive: #e3858d; /* outside: #d95763 lightened, 4.5:1 on a row and a picked card */
   --border: #253a56; /* frame */
   --input: #253a56;
   --ring: #ffd23f;
   --chart-1: #ffd23f;
   --chart-2: #fff0b3;
   --chart-3: #917d3c;
-  --chart-4: #5b6ee1;
+  --chart-4: #7181e5;
   --chart-5: #78c283;
   --sidebar: #071324;
   --sidebar-foreground: #9badb7;
@@ -237,7 +244,7 @@
   /* The tokens shadcn has no variable for. */
   --gold-pale: #fff0b3;
   --key: #d9a066; /* key-hint gold */
-  --focus: #5b6ee1;
+  --focus: #7181e5; /* #5b6ee1 lightened, 4.5:1 as the origin date */
   --inside: #78c283;
   --white: #ffffff; /* what happened */
 }

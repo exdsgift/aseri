@@ -286,7 +286,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
    - the wordmark 焦り, with "あせり · aseri" under it;
    - the kicker "Geopolitical risk · today";
    - the GPR 7-day average as a giant number;
-   - the pitch: "{x}% above its 1985-2019 average", then the 4-week forecast for the same weekday as the last data, compared with that weekday (owner's choice): "{Weekday Mon DD}, 4 weeks from the last data: most likely {m}. 8 in 10 between {lo} and {hi}. (Last {weekday}: {v})". GPR has a strong weekday cycle, so a single day must never be compared with a day on a different weekday or with the 7-day average.
+   - the pitch: "{x}% above its 1985-2019 average", then the 4-week forecast for the same weekday as the last data, compared with that weekday (owner's choice): "{Weekday Mon DD}, 4 weeks from the last data: 8 in 10 between {lo} and {hi}, 2 in 10 outside. Most likely {m}. (Last {weekday}: {v})", the range first (6.9, copy). GPR has a strong weekday cycle, so a single day must never be compared with a day on a different weekday or with the 7-day average.
 
    The sun's size encodes today's GPR against the baseline.
 2. **The forecast panel,** a game-sheet frame with the title row `[F] {series} · forecast made today | {unit} · data to {date}`:
@@ -294,7 +294,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
    - the pixel chart (6.9);
    - a legend;
    - the replay slider: 120 days, weekly ticks, ←/→ for one day, T for today, "Back to today";
-   - the intervals block: a row for "today, that day", then one row per interval step with the most likely value, the 5-in-10 and 8-in-10 ranges and, in replay, the real value with inside or outside, all on one value scale with the 1-year range and the GPR baseline;
+   - the intervals block: a row for "today, that day", then one row per interval step with the 5-in-10 and 8-in-10 ranges, then the most likely value and, in replay, the real value with inside or outside, all on one value scale with the 1-year range and the GPR baseline;
    - the source line, with attribution and the backtest/live note.
 3. **Signals:** nine cards in three groups: "Risk, attention and oil", "Sea lanes", "War in Ukraine". Each card shows:
    - an icon, a name and a key hint `[n]`;
@@ -330,9 +330,13 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - background `#071324`, frame `#253a56`, row `#222034`, picked `#3d3524`;
   - text `#cbdbfc`, label `#9badb7`;
   - gold `#ffd23f`, pale gold `#fff0b3`, muted gold `#917d3c`, key-hint gold `#d9a066`;
-  - focus `#5b6ee1`, inside `#78c283`, outside `#d95763`.
+  - focus `#7181e5`, inside `#78c283`, outside `#e3858d`.
 
-  Map them to shadcn variables (`--background`, `--primary`, and so on) with `--radius: 0`.
+  Map them to shadcn variables (`--background`, `--primary`, and so on) with `--radius: 0`. Focus and outside are the prototype's `#5b6ee1` and `#d95763` lightened at the same hue and saturation, so that they read as text (#143).
+- **Contrast,** checked by `web/src/contrast.test.ts` from the tokens in `index.css`:
+  - text at 4.5:1 on every surface it sits on: the page, an interval row, a picked card;
+  - chart and lane marks at 3:1 on the page, a picked card and a row. The frame's hatch and grid lines are exempt: the forecast zone's name and the value ticks say the same in text;
+  - marks that meet differ at 3:1 or by shape, never by colour alone: the median is dashed, the 7-day average dotted, the daily values solid, and what happened is a plus.
 - **Fonts, all OFL and self-hosted:**
   - DotGothic16 for the wordmark;
   - Jacquard 24 for the giant numbers and section titles;
@@ -341,12 +345,19 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   Use ASCII "-" for negative numbers, because Press Start 2P has no U+2212. The original dos-age fonts have no licence and must not be used.
 - **Charts are custom canvas components,** not Recharts.
   - Draw at 2 CSS px per art pixel with `image-rendering: pixelated`, and Bresenham lines.
-  - Daily values: pixel dots, grey before the origin, white after it.
-  - The 7-day average: gold line. The median: pale gold line.
+  - Daily values: a solid gold line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
+  - The 7-day average: a dotted label-grey line that stops at the origin. The median: a dashed pale gold line.
+  - What happened after a replayed forecast was made: white plus marks, or single pixels when the days are under 3 art pixels apart.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in muted gold with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted blue line.
   - Labels are real text over the canvas.
   - The scale ignores the 2% most extreme daily values, which sit on the edge.
+- **Copy** that prevents the known misreadings (a range read as a high and a low, a median read as a promise), checked by a text lint in `web/src/App.test.tsx`:
+  - a range always comes before "most likely", with a fixed denominator of 10: "8 in 10 between {lo} and {hi}, 2 in 10 outside". No median stands alone anywhere, a social preview included;
+  - beside the chart, what the band is and is not: "where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call", and that daily values can follow the week, so a day compares with the same weekday ("compare Monday with Monday" in the hero);
+  - "data as of {date}", from each `actuals.json`'s `as_of`; for GPR, "preliminary for about 4 weeks";
+  - never "will" and never "% confidence";
+  - when the catalog's `generated_at` is more than 2 days old, the hero says "Site last updated {date}: the daily update may have stopped", computed in the browser.
 - **Other primitives:**
   - the sun is a canvas (Bayer glow, dashed ring);
   - the icons are 8x12 pictograms knocked out of a solid block;
