@@ -26,17 +26,17 @@ export function ditherMask(step: number) {
   return `url("data:image/svg+xml,${encodeURIComponent(tile)}")`
 }
 
-const reduce = "(prefers-reduced-motion: reduce)"
+// Made once: every render reads it.
+const reduce = matchMedia("(prefers-reduced-motion: reduce)")
 
 function onReduceChange(changed: () => void) {
-  const query = matchMedia(reduce)
-  query.addEventListener("change", changed)
-  return () => query.removeEventListener("change", changed)
+  reduce.addEventListener("change", changed)
+  return () => reduce.removeEventListener("change", changed)
 }
 
 // True while the reader asks for less motion: then nothing on the page moves.
 export const useReducedMotion = () =>
-  useSyncExternalStore(onReduceChange, () => matchMedia(reduce).matches)
+  useSyncExternalStore(onReduceChange, () => reduce.matches)
 
 // Steps 0 to count - 1, `ms` apart, then undefined: the resting state, and the only
 // one under reduced motion. Animation frames wait while the tab is hidden, and so

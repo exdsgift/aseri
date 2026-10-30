@@ -5,6 +5,9 @@
 @import "@fontsource/jacquard-24/latin.css";
 @import "@fontsource/press-start-2p/latin.css";
 
+/* Tests hold no classes for the page, and their words would become utilities. */
+@source not "./**/*.test.*";
+
 /* Only the two chunks of DotGothic16 that hold 焦, り, あ and せ: the full set adds
    31 KB of gzipped CSS. Chunk numbers belong to the pinned 5.3.1 release. */
 @font-face {
@@ -53,13 +56,13 @@
     0 0 / 4px 4px;
 }
 
-/* The hero's art fades into the page at its edges. */
+/* The hero's art fades into the page at its edges, as in the prototype. */
 @utility vignette {
   background: radial-gradient(
-    55% 75% at 50% 50%,
-    transparent,
+    55% 75% at 50% 38%,
+    transparent 0,
     color-mix(in srgb, var(--background) 55%, transparent) 70%,
-    var(--background)
+    var(--background) 100%
   );
 }
 
@@ -113,6 +116,12 @@
   @keyframes breathe {
     from {
       opacity: 0.35;
+    }
+  }
+  --animate-sun-pulse: sun-pulse 3.2s ease-in-out infinite alternate;
+  @keyframes sun-pulse {
+    to {
+      transform: scale(1.04);
     }
   }
   --color-gold-pale: var(--gold-pale);
@@ -215,15 +224,28 @@
     @apply font-sans;
   }
   /* A count-up is drawn over the number, whose own text stays the real value for screen
-     readers and copying: the empty alternative after the slash keeps the count unspoken. */
+     readers and copying: the empty alternative after the slash keeps the count unspoken.
+     Browsers without that syntax keep the first content line, and still draw the count. */
   [data-count] {
     position: relative;
     color: transparent;
     &::after {
+      content: attr(data-count);
       content: attr(data-count) / "";
       position: absolute;
-      inset: 0;
+      top: 0;
+      left: 50%;
+      /* Centred on the number even when wider: the digits are not all one width. */
+      translate: -50%;
+      white-space: nowrap;
       color: var(--primary);
+    }
+    /* High contrast paints all text in one colour: show only the real number. */
+    @media (forced-colors: active) {
+      color: inherit;
+      &::after {
+        display: none;
+      }
     }
   }
 }

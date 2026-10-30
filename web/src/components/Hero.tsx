@@ -1,3 +1,5 @@
+import { useMemo } from "react"
+
 import { Sun } from "@/components/Sun"
 import { Wordmark } from "@/components/Wordmark"
 import { type GprToday } from "@/lib/api"
@@ -13,7 +15,8 @@ import { sunRadius } from "@/lib/sun"
 
 export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
   return (
-    <section className="flex min-h-svh flex-col items-center justify-center gap-9 px-4 py-14 text-center text-primary uppercase">
+    // From 224 px down, as in the prototype: the wordmark sits under the sun.
+    <section className="relative isolate flex min-h-svh flex-col items-center gap-9 px-4 pt-56 pb-14 text-center text-primary uppercase">
       <Sun radius={today && sunRadius(today.sevenDayAverage, today.baseline)} />
       <Wordmark />
       <p>Geopolitical risk · today</p>
@@ -51,7 +54,7 @@ export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
 // The giant number counts up on arrival, 40 ms a step. The count is drawn over the
 // number's own text (see index.css), so screen readers and copying get the real value.
 function CountUp({ value }: { value: number }) {
-  const shown = countUp(value)
+  const shown = useMemo(() => countUp(value), [value])
   const step = useSteps(shown.length, 40)
   return (
     <p

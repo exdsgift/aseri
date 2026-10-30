@@ -1,9 +1,11 @@
-// jsdom has no matchMedia: answer as a browser with no preference set. A test that
-// needs one stubs its own.
-window.matchMedia = (media: string) =>
-  ({
-    media,
-    matches: false,
-    addEventListener() {},
-    removeEventListener() {},
-  }) as unknown as MediaQueryList
+// jsdom has no matchMedia: each query gets one list, which answers as a browser with
+// no preference set. A test sets `matches` on it, and dispatches "change" if it must.
+const lists = new Map<string, MediaQueryList>()
+window.matchMedia = (media: string) => {
+  if (!lists.has(media))
+    lists.set(
+      media,
+      Object.assign(new EventTarget(), { media, matches: false }) as never
+    )
+  return lists.get(media)!
+}

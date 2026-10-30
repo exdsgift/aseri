@@ -18,12 +18,11 @@ const today: GprToday = {
   high: 251,
 }
 
+// The page reads the one list jsdom's stand-in gives for the query (see test-setup.ts).
 const prefers = (reduce: boolean) =>
-  vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: reduce && query === "(prefers-reduced-motion: reduce)",
-    addEventListener() {},
-    removeEventListener() {},
-  }))
+  Object.assign(matchMedia("(prefers-reduced-motion: reduce)"), {
+    matches: reduce,
+  })
 
 // The animation frames the page asks for, run by hand, 16 ms apart.
 let frames: Map<number, FrameRequestCallback>
@@ -57,7 +56,7 @@ beforeEach(() => {
       }
       observe() {
         this.callback(
-          [{ contentRect: { width: 800, height: 224 } } as ResizeObserverEntry],
+          [{ contentRect: { width: 800 } } as ResizeObserverEntry],
           this as never
         )
       }
@@ -66,15 +65,21 @@ beforeEach(() => {
   )
   fillRect = vi.fn()
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    setTransform() {},
     clearRect() {},
     fillRect,
   } as never)
+  // The sun ticks on an interval.
+  vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] })
 })
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+  prefers(false)
+  // Back to jsdom's own visible document.
+  delete (document as { hidden?: boolean }).hidden
+})
 
 it("counts the number up over its real value, which is the text all along", () => {
-  prefers(false)
   const { container } = render(<Hero today={today} failed={false} />)
 
   const number = screen.getByText("181")
@@ -85,15 +90,36 @@ it("counts the number up over its real value, which is the text all along", () =
   advance(1000)
   expect(number.dataset.count).toBeUndefined()
   expect(number.textContent).toBe("181")
+  expect(frames.size).toBe(0)
   // The art keeps moving, out of the screen reader's way.
-  expect(frames.size).toBe(1)
+  const drawn = fillRect.mock.calls.length
+  vi.advanceTimersByTime(260)
+  expect(fillRect.mock.calls.length).toBeGreaterThan(drawn)
   expect(
     container.querySelector("canvas")!.closest("[aria-hidden]")
   ).not.toBeNull()
 })
 
+it("stops the sun while the tab is hidden, and starts it again on return", () => {
+  render(<Hero today={today} failed={false} />)
+  const hide = (hidden: boolean) => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: hidden,
+    })
+    document.dispatchEvent(new Event("visibilitychange"))
+  }
+
+  hide(true)
+  const drawn = fillRect.mock.calls.length
+  vi.advanceTimersByTime(2600)
+  expect(fillRect.mock.calls.length).toBe(drawn)
+  hide(false)
+  vi.advanceTimersByTime(260)
+  expect(fillRect.mock.calls.length).toBeGreaterThan(drawn)
+})
+
 it("dithers the wordmark in, then leaves it whole", () => {
-  prefers(false)
   render(<Hero failed={false} />)
 
   const wordmark = screen.getByRole("heading", { level: 1 })
@@ -110,5 +136,6 @@ it("keeps everything still when motion is reduced, with the sun drawn once", () 
   expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
   expect(container.querySelector("[class*=animate-]")).toBeNull()
   expect(frames.size).toBe(0)
+  expect(vi.getTimerCount()).toBe(0)
   expect(fillRect).toHaveBeenCalled()
 })

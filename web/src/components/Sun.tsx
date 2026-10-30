@@ -1,39 +1,40 @@
 import { useEffect, useRef, useState } from "react"
 
 import { useReducedMotion } from "@/lib/motion"
-import { paintSun, stillSun, sunFrame, tick } from "@/lib/sun"
+import {
+  artHeight,
+  paintSun,
+  stillSun,
+  sunFrame,
+  tick,
+  type SunFrame,
+} from "@/lib/sun"
 
-// CSS pixels per art pixel: chunkier than the chart, like the game's title art.
+// CSS pixels per art pixel, as in the prototype: chunkier than the chart.
 const art = 4
 
-// The hero's art, with its box reserved so nothing moves when it draws. Decorative:
-// the number and the sentence under it say in text what the sun's size shows.
+// The hero's art: a 360 px layer behind the wordmark and the text, so it moves nothing.
+// Decorative: the number and the sentence under it say in text what the sun shows.
 export function Sun({ radius }: { radius?: number }) {
   const canvas = useRef<HTMLCanvasElement>(null)
-  const [box, setBox] = useState<{ width: number; height: number }>()
+  // In art pixels: the canvas is drawn small and scaled up without smoothing.
+  const [width, setWidth] = useState(0)
   const reduced = useReducedMotion()
 
   useEffect(() => {
     const observer = new ResizeObserver(([entry]) =>
-      setBox({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
-      })
+      setWidth(Math.ceil(entry.contentRect.width / art))
     )
-    observer.observe(canvas.current!)
+    observer.observe(canvas.current!.parentElement!)
     return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
-    if (!box) return
+    if (!width) return
     const element = canvas.current!
-    // shortcut: read on resize only, so a window moved to a screen of another density
-    // keeps the old one until the next resize. Upgrade with a resolution media query.
-    const ratio = devicePixelRatio
-    element.width = Math.round(box.width * ratio)
-    element.height = Math.round(box.height * ratio)
-    // Whole device pixels per art pixel, so every art pixel is the same size at any zoom.
-    const scale = Math.max(1, Math.round(art * ratio))
+    // Sizing clears the canvas, so the frame is drawn at once: never a blank one.
+    element.width = width
+    element.height = artHeight
     const context = element.getContext("2d")!
     const css = getComputedStyle(element)
     const colors = {
@@ -42,42 +43,50 @@ export function Sun({ radius }: { radius?: number }) {
       star: css.getPropertyValue("--muted-foreground"),
       faint: css.getPropertyValue("--border"),
     }
-    const size = {
-      width: Math.ceil(element.width / scale),
-      height: Math.ceil(element.height / scale),
-    }
-    const draw = (frame = stillSun) => {
-      context.setTransform(1, 0, 0, 1, 0, 0)
-      context.clearRect(0, 0, element.width, element.height)
-      context.setTransform(scale, 0, 0, scale, 0, 0)
+    const draw = (frame: SunFrame) => {
+      context.clearRect(0, 0, width, artHeight)
       paintSun(
         (x, y, color) => {
           context.fillStyle = color
           context.fillRect(x, y, 1, 1)
         },
-        size,
+        width,
         radius,
         frame,
         colors
       )
     }
-    if (reduced) return draw()
+    if (reduced) return draw(stillSun)
 
-    // Redrawn once a tick. Animation frames stop while the tab is hidden.
-    let shown: number | undefined
-    let frame = requestAnimationFrame(function next(now) {
-      const step = Math.floor(now / tick)
-      if (step !== shown) draw(sunFrame((shown = step)))
-      frame = requestAnimationFrame(next)
-    })
-    return () => cancelAnimationFrame(frame)
-  }, [box, radius, reduced])
+    // One tick every 260 ms, and none while the tab is hidden.
+    let step = 0
+    draw(sunFrame(step))
+    const run = () =>
+      document.hidden
+        ? undefined
+        : setInterval(() => draw(sunFrame(++step)), tick)
+    let timer = run()
+    const onVisibility = () => {
+      clearInterval(timer)
+      timer = run()
+    }
+    document.addEventListener("visibilitychange", onVisibility)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener("visibilitychange", onVisibility)
+    }
+  }, [width, radius, reduced])
 
   return (
-    <div aria-hidden className="relative -mx-4 h-56 self-stretch">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-x-0 top-0 -z-10 flex h-[360px] justify-center overflow-hidden"
+    >
+      {/* Exactly 4 CSS px an art pixel: a few px wider than the layer, centred and clipped. */}
       <canvas
         ref={canvas}
-        className="absolute inset-0 size-full [image-rendering:pixelated]"
+        className={`h-full shrink-0 origin-[50%_136px] [mask-image:linear-gradient(to_bottom,#000_40%,transparent_100%)] [image-rendering:pixelated] ${reduced ? "" : "animate-sun-pulse"}`}
+        style={{ width: width * art }}
       />
       <div
         className={`absolute inset-0 vignette ${reduced ? "opacity-70" : "animate-breathe"}`}
