@@ -14,6 +14,7 @@ import {
   nudgeApart,
   paintChart,
   pixel,
+  textWidth,
   valueTicks,
   type ChartLayout,
 } from "@/lib/chart"
@@ -95,11 +96,12 @@ export function PixelForecastChart({
         onPointerDown={point}
         // A tap's tooltip stays up: touch fires pointerleave as the finger lifts.
         onPointerLeave={(event) =>
-          event.pointerType === "mouse" && setHovered(undefined)
+          event.pointerType !== "touch" && setHovered(undefined)
         }
       />
       {chart && <ChartLabels chart={chart} forecast={forecast} />}
-      {chart && hovered !== undefined && (
+      {/* A narrower chart starts later, past the day a tap may have left up. */}
+      {chart && hovered !== undefined && hovered >= chart.first && (
         <DayTip chart={chart} forecast={forecast} day={hovered} width={width} />
       )}
     </div>
@@ -155,6 +157,12 @@ function ChartLabels({
     { date: forecast.dates[origin], x: xo * pixel },
     { date: forecast.targetDates[ahead - 1], x: (right + 1) * pixel }
   )
+  const past = chart.narrow ? "Daily · 7d avg" : "Daily values · 7-day avg"
+  const future = `Next ${ahead} days`
+  // The forecast zone's name, right-aligned, past the origin and clear of the label on the left.
+  const futureFits =
+    (right + 1) * pixel - textWidth(future) >=
+    Math.max(xo * pixel, left * pixel + textWidth(past) + 8)
   return (
     <div
       aria-hidden
@@ -182,16 +190,16 @@ function ChartLabels({
         </Label>
       ))}
       <Label x={left * pixel} top={0}>
-        {chart.narrow ? "Daily · 7d avg" : "Daily values · 7-day avg"}
+        {past}
       </Label>
-      {right - xo > 44 && (
+      {futureFits && (
         <Label
           x={(right + 1) * pixel}
           top={0}
           align="right"
           className="text-primary"
         >
-          Next {ahead} days
+          {future}
         </Label>
       )}
       {ends.map(({ value, className }, i) => (

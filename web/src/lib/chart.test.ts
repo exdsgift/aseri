@@ -1,12 +1,54 @@
 import { describe, expect, it } from "vitest"
 
+import { type Forecast } from "./api"
 import {
+  chartLayout,
   dateTicks,
   forecastAt,
   nudgeApart,
   valueScale,
   valueTicks,
 } from "./chart"
+
+describe("chartLayout", () => {
+  // `days` daily values, then 28 days ahead.
+  const forecast = (days: number): Forecast => ({
+    series: "",
+    unit: "",
+    attribution: "",
+    dates: Array(days).fill(""),
+    values: Array(days).fill(100),
+    averages: Array(days).fill(100),
+    targetDates: Array(28).fill(""),
+    quantiles: { "0.1": Array(28).fill(80), "0.9": Array(28).fill(120) },
+  })
+
+  it("shows 8 weeks when wide, the last 4 of them ahead, from end to end", () => {
+    const chart = chartLayout(forecast(400), 692)
+    expect([chart.narrow, chart.origin, chart.first]).toEqual([false, 399, 344])
+    expect(chart.x(chart.first)).toBe(chart.left)
+    expect(chart.x(chart.origin + 28)).toBe(chart.right)
+  })
+
+  it("shows 4 weeks of past when narrow", () => {
+    const chart = chartLayout(forecast(400), 440)
+    expect([chart.narrow, chart.first]).toEqual([true, 372])
+  })
+
+  it("starts from the first day when the history is shorter", () => {
+    expect(chartLayout(forecast(10), 692).first).toBe(0)
+  })
+
+  it("finds each day under its own x, and the nearest end beyond the chart", () => {
+    for (const width of [280, 440, 692]) {
+      const chart = chartLayout(forecast(400), width)
+      for (let day = chart.first; day <= chart.origin + 28; day++)
+        expect(chart.dayAt(chart.x(day))).toBe(day)
+      expect(chart.dayAt(0)).toBe(chart.first)
+      expect(chart.dayAt(chart.art.width)).toBe(chart.origin + 28)
+    }
+  })
+})
 
 describe("valueScale", () => {
   // Fifty quiet days and one spike.

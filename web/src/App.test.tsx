@@ -55,6 +55,57 @@ it("says so in one plain line when the data cannot be loaded", async () => {
   expect(screen.queryByRole("region")).toBeNull()
 })
 
+// The chart draws one forecast per day up to the hero's step, at five levels.
+const pick = (rows: number[], at: number[]) => at.map((i) => rows[i])
+it.each([
+  [
+    "only the 7, 14 and 28-day steps",
+    {
+      ...latest,
+      horizon: [7, 14, 28],
+      target_end_date: pick(latest.target_end_date as never, [6, 13, 27]),
+      quantiles: Object.fromEntries(
+        Object.entries(latest.quantiles).map(([level, rows]) => [
+          level,
+          pick(rows, [6, 13, 27]),
+        ])
+      ),
+    },
+  ],
+  [
+    "days past the catalog's horizon",
+    {
+      ...latest,
+      horizon: [...latest.horizon, 29],
+      target_end_date: [...latest.target_end_date, "2026-11-24"],
+      quantiles: Object.fromEntries(
+        Object.entries(latest.quantiles).map(([level, rows]) => [
+          level,
+          [...rows, rows.at(-1)],
+        ])
+      ),
+    },
+  ],
+  [
+    "no 5-in-10 range",
+    {
+      ...latest,
+      quantiles: { ...latest.quantiles, "0.25": undefined },
+    },
+  ],
+])("refuses a forecast file with %s", async (_, broken) => {
+  vi.stubGlobal("fetch", async (url: string) =>
+    Response.json(
+      { ...published, "api/v1/series/gpr_daily/latest.json": broken }[url]
+    )
+  )
+  vi.spyOn(console, "error").mockImplementation(() => {})
+
+  render(<App />)
+
+  expect(await screen.findByRole("alert")).toBeTruthy()
+})
+
 it("shows today's GPR forecast in the panel, from one load of each file", async () => {
   const fetch = vi.fn(async (url: string) => Response.json(published[url]))
   vi.stubGlobal("fetch", fetch)

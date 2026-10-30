@@ -64,12 +64,19 @@ export async function loadGpr(): Promise<Gpr> {
     read<Actuals>("series/gpr_daily/actuals.json"),
   ])
   const gpr = catalog.series.find((s) => s.series_id === "gpr_daily")
-  // horizon_max is a whole number of weeks, so the target date falls on the weekday of the last data.
-  const step = gpr ? latest.horizon.indexOf(gpr.horizon_max) : -1
   const reference = actuals.date.indexOf(latest.reference_date)
-  if (!gpr || step < 0 || reference < 6) {
+  // The chart draws every day ahead up to the hero's, at the five levels it reads.
+  const everyDay =
+    latest.horizon.length === gpr?.horizon_max &&
+    latest.horizon.every((h, i) => h === i + 1) &&
+    ["0.1", "0.25", "0.5", "0.75", "0.9"].every(
+      (level) => latest.quantiles[level]?.length === gpr.horizon_max
+    )
+  if (!gpr || !everyDay || reference < 6) {
     throw new Error("The published GPR files are incomplete")
   }
+  // horizon_max is a whole number of weeks, so the target date falls on the weekday of the last data.
+  const step = gpr.horizon_max - 1
   // Up to the reference date: the files are cached separately, so actuals may run ahead.
   // From the 7th day, so that every day has a full week for its average.
   const dates = actuals.date.slice(6, reference + 1)

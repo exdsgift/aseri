@@ -52,7 +52,10 @@ export function ForecastPanel({ forecast }: { forecast: Forecast }) {
           </li>
         ))}
       </ul>
-      <p className="text-muted-foreground">Source: {forecast.attribution}</p>
+      {/* The URLs in it are longer than a phone is wide. */}
+      <p className="wrap-anywhere text-muted-foreground">
+        Source: {forecast.attribution}
+      </p>
     </section>
   )
 }

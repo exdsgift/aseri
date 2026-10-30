@@ -47,8 +47,10 @@ export function nudgeApart(tops: number[], gap: number) {
 
 type Day = { date: string; x: number }
 
-// A date label, "Mmm DD", is 6 characters of 8 px in Press Start 2P.
-const dateWidth = 48
+// Press Start 2P draws every character 8 px wide at the labels' 8 px size.
+export const textWidth = (text: string) => text.length * 8
+
+const dateWidth = textWidth("Mmm DD")
 
 // The dates under the chart, in CSS pixels: the origin centred on its day, and the
 // first and last days flush with the ends when their labels clear the origin's.
