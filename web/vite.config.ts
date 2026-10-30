@@ -29,6 +29,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    setupFiles: ["src/test-setup.ts"],
     unstubGlobals: true,
     restoreMocks: true,
     // West of UTC, so a date read in local time lands on the wrong day and fails a test.
