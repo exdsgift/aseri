@@ -83,6 +83,8 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             )
             continue
         # A suspect newest value waits a day: archived and published as an actual, never forecast from.
+        # shortcut: only the newest day is checked, so a dropout inside a PortWatch weekly batch is still a
+        # retrospective origin; check every new day if the replay ever shows one.
         usable = observed.iloc[:-1] if under_review(series, observed) else observed
         new_dates = (
             []
