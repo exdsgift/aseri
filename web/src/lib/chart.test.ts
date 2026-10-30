@@ -161,17 +161,29 @@ describe("chartLayout", () => {
     expect(chart.hi).toBeGreaterThanOrEqual(900)
   })
 
-  it("fits the outer published levels, the reach of a possible path, which a card's chart leaves out", () => {
+  it("fits the published levels nearest 5% and 95%, so a skewed tail cannot squash the past", () => {
+    // Like Hormuz: 0 to 8 ships, and a 1-in-100 chance of a reopening near 37.
     const tails = forecast(400)
     tails.quantiles = {
       ...tails.quantiles,
-      "0.01": Array(28).fill(10),
+      "0.01": Array(28).fill(60),
+      "0.05": Array(28).fill(70),
+      "0.95": Array(28).fill(130),
       "0.99": Array(28).fill(500),
     }
     const chart = chartLayout(tails, 692)
-    expect(chart.lo).toBeLessThanOrEqual(10)
-    expect(chart.hi).toBeGreaterThanOrEqual(500)
-    expect(miniChartLayout(tails, 300).hi).toBeLessThan(200)
+    expect(chart.lo).toBeLessThanOrEqual(70)
+    expect(chart.hi).toBeGreaterThanOrEqual(130)
+    expect(chart.hi).toBeLessThan(200)
+    // A path beyond them runs along the frame.
+    expect(chart.y(500)).toBe(chart.top)
+    expect(miniChartLayout(tails, 300).hi).toBeLessThan(130)
+  })
+
+  it("falls back to the outermost levels a forecast has, as an older replay has only 0.1 to 0.9", () => {
+    const chart = chartLayout(forecast(400), 692)
+    expect(chart.hi).toBeGreaterThanOrEqual(120)
+    expect(Number.isFinite(chart.hi)).toBe(true)
   })
 
   it("starts from the first day when the history is shorter", () => {

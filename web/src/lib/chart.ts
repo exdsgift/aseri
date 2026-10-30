@@ -75,9 +75,11 @@ export function valueTicks(lo: number, hi: number, parts = 3) {
 export function chartLayout(forecast: Forecast, width: number) {
   const narrow = width < 480
   const ahead = forecast.targetDates.length
-  const levels = Object.keys(forecast.quantiles).sort(
-    (a, b) => Number(a) - Number(b)
-  )
+  const levels = Object.keys(forecast.quantiles).map(Number)
+  const nearest = (to: number) =>
+    String(
+      levels.reduce((a, b) => (Math.abs(b - to) < Math.abs(a - to) ? b : a))
+    )
   return {
     narrow,
     // Room for the value ticks on the left, the end values on the right and the dates below.
@@ -86,8 +88,9 @@ export function chartLayout(forecast: Forecast, width: number) {
       { width: Math.floor(width / pixel), height: narrow ? 130 : 160 },
       narrow ? Math.max(21, ahead) : Math.max(28, 2 * ahead),
       { left: 20, right: 27, top: 10, bottom: 13 },
-      // The outer published levels: a possible path never goes past them.
-      [levels[0], levels.at(-1)!]
+      // The published levels nearest 5% and 95%. A path past them, about a day in ten, runs
+      // along the frame: fitting q0.01 to q0.99 squashed Hormuz's 0 to 8 ships into a fifth.
+      [nearest(0.05), nearest(0.95)]
     ),
   }
 }

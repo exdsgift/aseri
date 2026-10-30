@@ -362,7 +362,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in muted gold with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted blue line.
   - Labels are real text over the canvas.
-  - The scale ignores the 2% most extreme daily values, which sit on the edge. The panel's also fits the outer published levels, the reach of a possible path, so no path is clipped and the scale holds still as the paths turn.
+  - The scale fits every daily value shown, so the main line is never clipped. The panel's also fits the published levels nearest 5% and 95%, and holds still as the paths turn. A path past them, about a day in ten, runs along the frame: fitting q0.01 to q0.99 squashed Hormuz's 0 to 8 ships into a fifth of the chart.
 - **Copy** that prevents the known misreadings (a range read as a high and a low, a median read as a promise), checked by a text lint in `web/src/App.test.tsx`:
   - a range always comes before "most likely", with a fixed denominator of 10: "8 in 10 between {lo} and {hi}, 2 in 10 outside". No median stands alone anywhere, a social preview included;
   - beside the chart, what the line ahead is: "The line ahead is one possible path, not the forecast: no one knows which days turn out high". #147 asked for "which days will be high"; "turn out" keeps the rule below;
