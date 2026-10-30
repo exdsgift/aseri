@@ -1,0 +1,37 @@
+{
+  "forecast_date": "2026-10-30",
+  "model_id": "aseri-timestral209m",
+  "forecasts": [
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-10-26",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-10-30",
+        "input_sha256": "db31fc0c0d78f84899d594f42f79716c2125ef63629318f3b0c1d9c4d6a77304"
+      }
+    }
+  ],
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "47ec0b1e54a10447a9a5d4fffdb68c4d79ea1bf6",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/40982004738"
+    },
+    "generated_at": "2026-10-30T00:49:14Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m/2026-10-30-aseri-timestral209m.csv": "57d5ca627ff67321b5b38d3bd540b423adf90852a46231a4241282672790e33b",
+    "target-data/deltas/2026-10-30.csv": "b13a784200ca0696a620077e546f7c426375cce8fa3a531f32f5fc6b641ba2bd"
+  }
+}
