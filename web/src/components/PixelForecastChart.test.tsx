@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
 import actuals from "@/fixtures/actuals.json"
 import latest from "@/fixtures/latest.json"
+import replay from "@/fixtures/replay.json"
 import catalog from "@/fixtures/series.json"
 import { loadGpr, type Forecast } from "@/lib/api"
 
@@ -10,6 +11,8 @@ import { PixelForecastChart } from "./PixelForecastChart"
 
 let resize: (width: number) => void
 let forecast: Forecast
+// The oldest of the replay, made on Jun 28: every day of it is known.
+let backtest: Forecast
 
 // jsdom lays nothing out and has no canvas: the test sets the width and drops the drawing.
 beforeEach(async () => {
@@ -37,11 +40,37 @@ beforeEach(async () => {
     "api/v1/series.json": catalog,
     "api/v1/series/gpr_daily/latest.json": latest,
     "api/v1/series/gpr_daily/actuals.json": actuals,
+    "api/v1/series/gpr_daily/replay.json": replay,
   }
   vi.stubGlobal("fetch", async (url: string) => Response.json(published[url]))
-  forecast = (await loadGpr()).forecast
+  const { forecasts } = await loadGpr()
+  forecast = forecasts.at(-1)!
+  backtest = forecasts[0]
 })
 afterEach(cleanup)
+
+it("labels what happened on the last day, and on any day of a replay", () => {
+  render(<PixelForecastChart forecast={backtest} summary="" />)
+  resize(692)
+
+  // The end values, top to bottom: what happened, 8 in 10's top, most likely, 8 in 10's bottom.
+  const tops = ["168", "167", "104", "59"].map((value) =>
+    parseFloat(screen.getByText(value).style.top)
+  )
+  expect(tops).toEqual(tops.toSorted((a, b) => a - b))
+  expect(screen.queryByText("28 days after")).not.toBeNull()
+  // The last day ahead, at the right end.
+  fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
+  expect(screen.queryByText("What happened 168")).not.toBeNull()
+})
+
+it("has nothing to say about what happened ahead of today", () => {
+  render(<PixelForecastChart forecast={forecast} summary="" />)
+  resize(692)
+
+  fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
+  expect(screen.queryByText(/^What happened/)).toBeNull()
+})
 
 it("names the forecast zone only where the name clears the label on the left", () => {
   render(<PixelForecastChart forecast={forecast} summary="" />)

@@ -21,6 +21,8 @@ describe("chartLayout", () => {
     averages: Array(days).fill(100),
     targetDates: Array(28).fill(""),
     quantiles: { "0.1": Array(28).fill(80), "0.9": Array(28).fill(120) },
+    actuals: [],
+    backtest: false,
   })
 
   it("shows 8 weeks when wide, the last 4 of them ahead, from end to end", () => {
@@ -76,6 +78,11 @@ describe("valueTicks", () => {
   it("steps by the smallest 1, 2 or 5 times a power of ten that splits the scale in 3 at most", () => {
     expect(valueTicks(92, 208)).toEqual([100, 150, 200])
     expect(valueTicks(0, 34)).toEqual([0, 20])
+  })
+
+  it("splits the scale in more parts when asked", () => {
+    expect(valueTicks(63, 374)).toEqual([200])
+    expect(valueTicks(63, 374, 4)).toEqual([100, 200, 300])
   })
 })
 

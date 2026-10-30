@@ -20,7 +20,7 @@ export function App() {
       <Hero today={gpr?.today} failed={failed} />
       {gpr && (
         <div className="px-4 pb-14">
-          <ForecastPanel forecast={gpr.forecast} />
+          <ForecastPanel gpr={gpr} />
         </div>
       )}
     </main>

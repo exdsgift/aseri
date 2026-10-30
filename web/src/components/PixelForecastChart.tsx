@@ -64,6 +64,7 @@ export function PixelForecastChart({
         frame: token("--border"),
         focus: token("--focus"),
         label: token("--muted-foreground"),
+        real: token("--white"),
       }
     )
   }, [chart, forecast])
@@ -143,11 +144,16 @@ function ChartLabels({
   const { left, right, bottom, x, y, first, origin, ahead } = chart
   const xo = x(origin)
   const end = (level: string) => forecast.quantiles[level][ahead - 1]
+  const real = forecast.actuals[ahead - 1]
+  // Top to bottom, so that each label clears the one above.
   const ends = [
     { value: end("0.9"), className: "" },
     { value: end("0.5"), className: "text-[12px] text-gold-pale" },
     { value: end("0.1"), className: "" },
-  ]
+    ...(real === undefined
+      ? []
+      : [{ value: real, className: "text-[12px] text-white" }]),
+  ].toSorted((a, b) => b.value - a.value)
   const tops = nudgeApart(
     ends.map(({ value }) => y(value) * pixel - 6),
     14
@@ -158,7 +164,10 @@ function ChartLabels({
     { date: forecast.targetDates[ahead - 1], x: (right + 1) * pixel }
   )
   const past = chart.narrow ? "Daily · 7d avg" : "Daily values · 7-day avg"
-  const future = `Next ${ahead} days`
+  // A forecast with days already known is a past one.
+  const future = forecast.actuals.length
+    ? `${ahead} days after`
+    : `Next ${ahead} days`
   // The forecast zone's name, right-aligned, past the origin and clear of the label on the left.
   const futureFits =
     (right + 1) * pixel - textWidth(future) >=
@@ -261,6 +270,11 @@ function DayTip({
           <span className="block">
             8 in 10: {at("0.1")}-{at("0.9")}
           </span>
+          {forecast.actuals[step] !== undefined && (
+            <span className="block text-white">
+              What happened {formatValue(forecast.actuals[step])}
+            </span>
+          )}
         </>
       )}
     </div>

@@ -53,6 +53,46 @@
     0 0 / 4px 4px;
 }
 
+/* The replay slider: a pixel ruler with a gold block thumb, white on hover and press.
+   No transition, so the thumb stays under the pointer. */
+@utility pixel-range {
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  &::-webkit-slider-runnable-track {
+    height: 4px;
+    background: var(--border);
+  }
+  &::-moz-range-track {
+    height: 4px;
+    background: var(--border);
+  }
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 20px;
+    margin-top: -8px;
+    border: 0;
+    border-radius: 0;
+    background: var(--primary);
+  }
+  &::-moz-range-thumb {
+    width: 12px;
+    height: 20px;
+    border: 0;
+    border-radius: 0;
+    background: var(--primary);
+  }
+  &:hover::-webkit-slider-thumb,
+  &:active::-webkit-slider-thumb {
+    background: var(--white);
+  }
+  &:hover::-moz-range-thumb,
+  &:active::-moz-range-thumb {
+    background: var(--white);
+  }
+}
+
 @theme inline {
   /* Pixel fonts stay sharp only at whole-pixel sizes. */
   --font-heading: var(--font-sans);
@@ -143,6 +183,7 @@
   --key: #d9a066; /* key-hint gold */
   --focus: #5b6ee1;
   --inside: #78c283;
+  --white: #ffffff; /* what happened */
 }
 
 @layer base {

@@ -67,10 +67,10 @@ export function dateTicks(first: Day, origin: Day, last: Day) {
   ]
 }
 
-// Round values for the y axis: the smallest step of 1, 2 or 5 times a power of ten
-// that splits the scale in 3 at most.
-export function valueTicks(lo: number, hi: number) {
-  const raw = (hi - lo) / 3
+// Round values for an axis: the smallest step of 1, 2 or 5 times a power of ten
+// that splits the scale in `parts` at most.
+export function valueTicks(lo: number, hi: number, parts = 3) {
+  const raw = (hi - lo) / parts
   const power = 10 ** Math.floor(Math.log10(raw))
   const step = [1, 2, 5, 10].find((m) => m * power >= raw)! * power
   const ticks = []
@@ -109,7 +109,7 @@ export function chartLayout(forecast: Forecast, width: number) {
       ...forecast.quantiles["0.1"],
       ...forecast.quantiles["0.9"],
     ],
-    forecast.values.slice(first),
+    [...forecast.values.slice(first), ...forecast.actuals],
     top,
     bottom
   )
@@ -134,7 +134,7 @@ export type ChartLayout = ReturnType<typeof chartLayout>
 type Plot = (x: number, y: number, color: string) => void
 type Point = [number, number]
 type Colors = Record<
-  "gold" | "pale" | "muted" | "frame" | "focus" | "label",
+  "gold" | "pale" | "muted" | "frame" | "focus" | "label" | "real",
   string
 >
 
@@ -177,7 +177,7 @@ export function paintChart(
   color: Colors
 ) {
   const { left, right, top, bottom, x, y, first, origin } = chart
-  const { values, averages, quantiles } = forecast
+  const { values, averages, quantiles, actuals } = forecast
   const xo = x(origin)
   const last = values[origin]
 
@@ -220,6 +220,10 @@ export function paintChart(
   const dot = (right - left) / chart.span >= 3 ? 2 : 1
   for (let day = first; day <= origin; day++)
     square(plot, x(day), y(values[day]), dot, color.label)
+  // What happened after the forecast was made, in white over the bands.
+  actuals.forEach((value, k) =>
+    square(plot, x(origin + 1 + k), y(value), dot, color.real)
+  )
   polyline(
     plot,
     averages
@@ -238,4 +242,6 @@ export function paintChart(
     3,
     color.pale
   )
+  if (actuals.length === chart.ahead)
+    square(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, 3, color.real)
 }
