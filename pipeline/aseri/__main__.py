@@ -29,7 +29,11 @@ def main(api_dir: Path, archive_dir: Path) -> None:
     generated_at = datetime.now(UTC)
     observed, as_of, upstream = gpr.fetch(GPR_DAILY.source["data_url"])
     # First, so a deep rewrite stops the run before it archives or publishes anything, actuals included.
-    archive.check_revisions(archive_dir, GPR_DAILY, observed, as_of)
+    # A manual run with accept_revisions ticked, after a human has reviewed the rewrite, records it instead.
+    if os.environ.get("ASERI_ACCEPT_REVISIONS") == "true":
+        print(f"{GPR_DAILY.id}: revisions accepted for this run, unchecked", flush=True)
+    else:
+        archive.check_revisions(archive_dir, GPR_DAILY, observed, as_of)
     archived = archive.read(archive_dir, GPR_DAILY.id)
     ran_today = archive.ran_on(archive_dir, generated_at.date())
     new_dates = (

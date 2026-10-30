@@ -105,6 +105,14 @@ def check_revisions(
 ) -> None:
     """Raise RevisionHold if `observed` changes an archived value older than `series.revision_window` days before its newest."""
     known = as_of_view(archive_dir, series.id, as_of)
+    # A broken file can be continuous and unchanged where it has data, yet shorter.
+    dropped = known.index.difference(observed.index)
+    if len(dropped):
+        raise RevisionHold(
+            f"{series.id}: upstream dropped {len(dropped)} archived days, from "
+            f"{dropped.min():%Y-%m-%d} to {dropped.max():%Y-%m-%d}. "
+            "Nothing is archived or published until someone has reviewed the file."
+        )
     revised = observation_delta(observed, known).index.intersection(known.index)
     oldest_allowed = observed.index[-1] - pd.Timedelta(days=series.revision_window)
     deep = revised[revised < oldest_allowed]

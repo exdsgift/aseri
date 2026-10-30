@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 7 * * *"
   workflow_dispatch:
+    inputs:
+      accept_revisions:
+        description: "Accept an upstream rewrite older than the revision window, after reviewing it (this run only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -68,6 +73,9 @@ jobs:
           path: archive
       - name: Fetch, forecast, archive and publish
         id: run
+        env:
+          # Empty on the cron, "true" only on a manual run with the box ticked.
+          ASERI_ACCEPT_REVISIONS: ${{ inputs.accept_revisions }}
         run: |
           # Exit 3 is a revision hold (aseri/__main__.py): flagged here, by a step that succeeds, and failed in the next.
           status=0
@@ -153,7 +161,8 @@ jobs:
   # Opens an issue on a revision hold. It runs only gh, no third-party code, so it alone gets issues: write.
   revision-alert:
     needs: build
-    if: failure() && needs.build.outputs.revision_hold == 'true'
+    # Like archive and deploy, only master's runs count: a test run on a branch opens no issue.
+    if: failure() && github.ref == 'refs/heads/master' && needs.build.outputs.revision_hold == 'true'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -174,7 +183,7 @@ jobs:
 
           Run: $RUN_URL
 
-          The step \"Fetch, forecast, archive and publish\" names the series and the oldest changed day. A genuine rewrite needs a reviewed change to the pipeline before the daily run can go on."
+          The step \"Fetch, forecast, archive and publish\" names the series and the oldest changed day. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite, and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
 
   deploy:
     needs: [build, archive]

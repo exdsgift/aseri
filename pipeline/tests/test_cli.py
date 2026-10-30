@@ -446,3 +446,41 @@ def test_a_rewrite_older_than_the_revision_window_stops_the_run_before_it_archiv
     assert "2023-05-01" in capsys.readouterr().err
     assert files(archive_dir) == archive_before
     assert not (tmp_path / "api").exists()
+
+
+def test_a_reviewed_rewrite_goes_through_once_it_is_accepted(
+    tmp_path, monkeypatch, stub_model
+):
+    archive_dir = tmp_path / "archive"
+    days = pd.date_range("2023-01-01", "2026-10-26", freq="D")
+    history = pd.DataFrame({"date": days, "GPRD": 100.0 + np.arange(len(days)) % 50})
+    archive.write(
+        archive_dir,
+        GPR_DAILY,
+        [],
+        observed=history.set_index("date")["GPRD"],
+        as_of=date(2026, 10, 27),
+        upstream={},
+        code_commit="0" * 40,
+        run_url=None,
+        generated_at=datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+    )
+    history.loc[history["date"] == "2023-05-01", "GPRD"] = 250.0
+    rewritten = io.BytesIO()
+    history.to_stata(rewritten, write_index=False, convert_dates={"date": "td"})
+    # As a manual run of daily.yml with accept_revisions ticked sets it.
+    monkeypatch.setenv("ASERI_ACCEPT_REVISIONS", "true")
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 28, 7, 2, tzinfo=UTC),
+        rewritten.getvalue(),
+        tmp_path / "api",
+        archive_dir,
+    )
+
+    assert (
+        archive.as_of_view(archive_dir, "gpr_daily", date(2026, 10, 28))["2023-05-01"]
+        == 250.0
+    )
+    assert (tmp_path / "api" / "series" / "gpr_daily" / "latest.json").exists()

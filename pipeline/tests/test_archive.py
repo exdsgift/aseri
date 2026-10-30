@@ -249,6 +249,19 @@ def test_revisions_within_the_window_and_new_days_pass(tmp_path):
     archive.check_revisions(tmp_path, GPR_DAILY, revised, date(2026, 11, 3))
 
 
+@pytest.mark.parametrize(
+    "truncated",
+    [since_2023()[:"2026-06-01"], since_2023()["2023-03-01":]],
+    ids=["its newest months", "its first months"],
+)
+def test_a_file_that_drops_archived_days_holds_the_run(tmp_path, truncated):
+    # A broken download: still continuous, every value it keeps unchanged, but shorter.
+    archive_run(tmp_path, [], since_2023(), date(2026, 10, 27))
+
+    with pytest.raises(archive.RevisionHold, match="dropped"):
+        archive.check_revisions(tmp_path, GPR_DAILY, truncated, date(2026, 10, 28))
+
+
 class RecordingStub:
     """Stands in for Timestral and keeps every context it reads; its band scales with the whole context, so any leak moves it."""
 
