@@ -73,17 +73,6 @@ it("labels what happened on the last day, and on any day of a replay", () => {
   expect(screen.queryByText("What happened 168")).not.toBeNull()
 })
 
-it("labels the most likely value's end when it draws no path, as the panel opens", () => {
-  render(<PixelForecastChart forecast={backtest} summary="" />)
-  resize(692)
-
-  // The end values, top to bottom: what happened, 8 in 10's top, most likely, 8 in 10's bottom.
-  const tops = ["168", "167", "104", "59"].map((value) =>
-    parseFloat(screen.getByText(value).style.top)
-  )
-  expect(tops).toEqual(tops.toSorted((a, b) => a - b))
-})
-
 it("has nothing to say about what happened ahead of today", () => {
   render(drawn(forecast))
   resize(692)

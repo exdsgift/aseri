@@ -26,11 +26,11 @@ import {
 import { formatValue, monthDay } from "@/lib/format"
 
 // Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens,
-// with a possible `path` in the most likely value's place.
+// with `path`, one of the model's paths, on the forecast side.
 function usePixelChart<L extends Layout>(
   forecast: Forecast,
   layout: (forecast: Forecast, width: number) => L,
-  path?: number[]
+  path: number[]
 ) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
@@ -112,8 +112,7 @@ export function PixelForecastChart({
   summary,
 }: {
   forecast: Forecast
-  // A possible path in the most likely value's place; none draws the most likely value.
-  path?: number[]
+  path: number[]
   summary: string
 }) {
   const { box, canvas, width, chart, size } = usePixelChart(
@@ -149,9 +148,7 @@ export function PixelForecastChart({
           event.pointerType !== "touch" && setHovered(undefined)
         }
       />
-      {chart && (
-        <ChartLabels chart={chart} forecast={forecast} likely={!path} />
-      )}
+      {chart && <ChartLabels chart={chart} forecast={forecast} />}
       {/* A narrower chart starts later than the day a tap may have left up. */}
       {chart &&
         hovered?.forecast === forecast &&
@@ -195,23 +192,18 @@ function Label({
 function ChartLabels({
   chart,
   forecast,
-  likely,
 }: {
   chart: ChartLayout
   forecast: Forecast
-  likely: boolean
 }) {
   const { left, right, bottom, x, y, first, origin, ahead } = chart
   const xo = x(origin)
   const end = (level: string) => forecast.quantiles[level][ahead - 1]
   const real = forecast.actuals[ahead - 1]
-  // Top to bottom, so that each label clears the one above. The most likely value's end only
-  // while the chart draws it: a possible path's end, labelled, would read as the forecast.
+  // Top to bottom, so that each label clears the one above. No label on the path's end:
+  // it would read as the forecast.
   const ends = [
     { value: end("0.9"), className: "" },
-    ...(likely
-      ? [{ value: end("0.5"), className: "text-[12px] text-gold-pale" }]
-      : []),
     { value: end("0.1"), className: "" },
     ...(real === undefined
       ? []

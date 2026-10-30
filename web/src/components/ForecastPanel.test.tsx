@@ -303,7 +303,7 @@ it("opens on the most likely of the model's 20 paths, and turns none until asked
   wait(6000)
   expect(pathShown()).toBe("Path 1 of 20, the most likely")
   expect(screen.getByText(/^The line ahead/).textContent).toBe(
-    "The line ahead is one of 20 paths drawn from the model's forecast, the most likely first: each day of it falls in the band as often as the forecast says."
+    "The line ahead is one of 20 paths drawn from the model's forecast, the most likely first. Together they fall in the band as often as the forecast says."
   )
   expect(legendLine()).toEqual(["Model path"])
   expect(screen.queryByRole("button", { name: "Most likely" })).toBeNull()

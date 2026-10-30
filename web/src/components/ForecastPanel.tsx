@@ -6,7 +6,7 @@ import { ReplaySlider } from "@/components/ReplaySlider"
 import { type Series } from "@/lib/api"
 import { formatValue, monthDay } from "@/lib/format"
 import { tickWhileShown, useReducedMotion } from "@/lib/motion"
-import { ranked } from "@/lib/paths"
+import { PATHS, ranked } from "@/lib/paths"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 
 // `line` names the line ahead: the most likely value, or a possible path.
@@ -21,7 +21,6 @@ const legend = (line: string) => [
 ]
 
 // The chart draws one of these at a time, never several: overlapping paths read as nothing.
-const paths = 20
 
 // Flat blocks that turn white on hover, like Back to today.
 const control =
@@ -54,7 +53,13 @@ export function ForecastPanel({ series }: { series: Series }) {
   const ordered = useMemo(() => ranked(forecast, rho), [forecast, rho])
   const [drawn, setDrawn] = useState(0)
   const [playing, setPlaying] = useState(false)
-  const next = () => setDrawn((k) => (k + 1) % paths)
+  const next = () => setDrawn((k) => (k + 1) % PATHS)
+  // Another forecast opens on its own most likely path, still.
+  const show: typeof setShown = (action) => {
+    setShown(action)
+    setDrawn(0)
+    setPlaying(false)
+  }
   const reduced = useReducedMotion()
   const panel = useRef<HTMLElement>(null)
   useEffect(() => {
@@ -148,7 +153,7 @@ export function ForecastPanel({ series }: { series: Series }) {
       <PixelForecastChart
         forecast={forecast}
         path={ordered[drawn].values}
-        summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}. The line ahead is path ${drawn + 1} of ${paths} drawn from the forecast, the most likely first.${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
+        summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}. The line ahead is path ${drawn + 1} of ${PATHS} drawn from the forecast, the most likely first.${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
       />
       <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
         {!reduced && (
@@ -164,13 +169,13 @@ export function ForecastPanel({ series }: { series: Series }) {
         <button type="button" onClick={next} className={control}>
           Next path
         </button>
-        <span>{`Path ${drawn + 1} of ${paths}${drawn ? "" : ", the most likely"}`}</span>
+        <span>{`Path ${drawn + 1} of ${PATHS}${drawn ? "" : ", the most likely"}`}</span>
       </div>
       {/* Drawn from the forecast, a path reads like data: the words say what it is. */}
       <p className="text-muted-foreground">
-        The line ahead is one of {paths} paths drawn from the model&apos;s
-        forecast, the most likely first: each day of it falls in the band as
-        often as the forecast says.
+        The line ahead is one of {PATHS} paths drawn from the model&apos;s
+        forecast, the most likely first. Together they fall in the band as often
+        as the forecast says.
       </p>
       <ul className="flex flex-wrap gap-x-4 gap-y-2 text-muted-foreground">
         {legend("Model path").map(([name, swatch]) => (
@@ -192,7 +197,7 @@ export function ForecastPanel({ series }: { series: Series }) {
           " Daily values can follow the week: compare a day with the same weekday."}
       </p>
       {last > 0 && (
-        <ReplaySlider forecasts={forecasts} shown={shown} setShown={setShown} />
+        <ReplaySlider forecasts={forecasts} shown={shown} setShown={show} />
       )}
       <Intervals
         forecast={forecast}

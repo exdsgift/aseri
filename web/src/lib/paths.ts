@@ -55,10 +55,17 @@ export function path(forecast: Forecast, rho: number, index: number) {
   return draw(forecast, rho, index).values
 }
 
-// The 20 paths the page shows, the most likely first: ranked by their log-likelihood under
+// How many paths the page draws from each forecast.
+export const PATHS = 20
+
+// A tie of 1 would leave no room to move: the pipeline's correlations stay inside it.
+const tied = (rho: number) => Math.max(-0.99, Math.min(0.99, rho))
+
+// The paths the page shows, the most likely first: ranked by their log-likelihood under
 // the AR(1) they are drawn from, in normal scores, so the first is the most typical of them.
 export function ranked(forecast: Forecast, rho: number) {
-  return Array.from({ length: 20 }, (_, index) => draw(forecast, rho, index))
+  rho = tied(rho)
+  return Array.from({ length: PATHS }, (_, index) => draw(forecast, rho, index))
     .map(({ values, z }) => ({
       values,
       logLikelihood: z.reduce(
@@ -81,8 +88,7 @@ function draw(forecast: Forecast, rho: number, index: number) {
   const levels = Object.keys(forecast.quantiles).sort(
     (a, b) => Number(a) - Number(b)
   )
-  // A tie of 1 would leave no room to move: the pipeline's correlations stay inside it.
-  rho = Math.max(-0.99, Math.min(0.99, rho))
+  rho = tied(rho)
   const z: number[] = []
   for (let day = 0; day < forecast.targetDates.length; day++)
     z.push(
