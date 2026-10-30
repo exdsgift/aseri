@@ -1,0 +1,236 @@
+<meta charset="utf-8">
+<title>aseri forecast points</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Jacquard+24&display=swap">
+<style>
+/* Layout: one chart panel as on aseri; a Timestral-style dot slider above the chart picks the forecast. */
+:root {
+  color-scheme: dark;
+  --bg: #071324;
+  --text: #cbdbfc;
+  --label: #9badb7;
+  --gold: #ffd23f;
+  --gold-pale: #fff0b3;
+  --gold-dim: #917d3c;
+  --frame: #253a56;
+  --picked: #3d3524;
+  --focus: #7181e5;
+  --font: "Press Start 2P", "DotGothic16", monospace;
+  --display: "Jacquard 24", serif;
+}
+body { background: var(--bg); color: var(--text); font: 8px/14px var(--font); text-transform: uppercase; }
+main { max-width: 980px; margin: 0 auto; padding-block: 32px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 20px; }
+h1 { font: 40px/1 var(--display); color: var(--gold-dim); text-transform: none; letter-spacing: 0.04em; margin: 0; text-align: center; }
+.lede { color: var(--label); text-align: center; max-width: 64ch; margin: 0 auto; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+button { font: inherit; text-transform: inherit; color: var(--text); background: transparent; border: 2px solid var(--frame); padding: 6px 8px; cursor: pointer; }
+button[aria-pressed="true"] { background: var(--picked); border-color: var(--gold); color: var(--gold-pale); }
+button:focus-visible, .slider:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.panel { border: 2px solid var(--frame); padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--gold); }
+.head span:last-child { color: var(--label); }
+.readout { color: var(--gold-pale); line-height: 16px; min-height: 16px; }
+
+/* The slider: a dotted track, one dot a week, a square handle with a bar, its label beside it. */
+.slider { position: relative; height: 28px; margin: 0 8px; cursor: pointer; touch-action: none; outline: none; }
+.slider .dot { position: absolute; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; background: var(--frame); }
+.slider .dot.done { background: var(--label); }
+.slider .handle { position: absolute; top: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; background: var(--text); display: grid; place-items: center; }
+.slider .handle::after { content: ""; width: 2px; height: 10px; background: var(--bg); }
+.slider .tag { position: absolute; top: 50%; transform: translateY(-50%); white-space: nowrap; color: var(--gold); padding-left: 16px; }
+.slider .tag.left { padding: 0 16px 0 0; transform: translate(-100%, -50%); }
+
+.chart { position: relative; }
+canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+.ticks { position: absolute; inset: 0; pointer-events: none; }
+.ticks span { position: absolute; left: 0; transform: translateY(-50%); color: var(--label); }
+.dates { position: relative; height: 14px; color: var(--label); }
+.dates span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.dates span.o { color: var(--focus); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.legend i { display: inline-block; width: 12px; height: 6px; vertical-align: middle; margin-right: 6px; }
+.legend i.l { height: 2px; }
+.note { color: var(--label); max-width: 72ch; }
+.pathctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pathctl span { color: var(--label); }
+</style>
+<main>
+  <h1>Forecast as a line</h1>
+  <p class="lede">Prototype. Real aseri data from the run of 2026-10-30. The line ahead is one possible path drawn from the forecast, a new one each second; the halo is where 5 and 8 paths in 10 fall.</p>
+  <div class="row" id="series"></div>
+  <section class="panel">
+    <div class="head"><span id="title"></span><span id="unit"></span></div>
+    <div class="slider" id="slider" role="slider" tabindex="0" aria-label="Pick a forecast"></div>
+    <p class="readout" id="readout"></p>
+    <div class="chart" id="chartbox">
+      <canvas id="chart" aria-label="Forecast chart"></canvas>
+      <div class="ticks" id="ticks"></div>
+    </div>
+    <div class="dates" id="dates"></div>
+    <div class="pathctl">
+      <button id="play"></button>
+      <button id="another">Another path</button>
+      <span id="pathlabel"></span>
+    </div>
+    <div class="legend" id="legend"></div>
+    <p class="note" id="note"></p>
+  </section>
+</main>
+<script>
+const DATA = __DATA__
+const C = { bg: "#071324", gold: "#ffd23f", pale: "#fff0b3", band8: "#2a2718", band5: "#4a4122", frame: "#253a56", hatch: "#0e1b31", truth: "#9badb7", focus: "#7181e5" }
+const PATHS = 20
+const SERIES = { gpr_daily: "GPR", suez_transits: "Suez", taiwan_strait_transits: "Taiwan", hormuz_transits: "Hormuz" }
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches
+const state = { series: "suez_transits", pick: null, path: 0, playing: !reduce }
+
+const md = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { month: "short", day: "2-digit", timeZone: "UTC" })
+const fmt = (v) => (Math.abs(v) >= 10 ? Math.round(v) : Math.round(v * 10) / 10).toString()
+
+function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296 } }
+const hash = (s) => [...s].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) | 0, 7)
+const gauss = (r) => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r())
+function phi(z) { const t = 1 / (1 + 0.3275911 * Math.abs(z) / Math.SQRT2), e = Math.exp(-z * z / 2); const p = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * e; return z >= 0 ? (1 + p) / 2 : (1 - p) / 2 }
+// The day's quantile function, read off its 21 levels by straight lines, held at q0.01 and q0.99 beyond them.
+function quantileAt(f, h, u) {
+  const levels = Object.keys(f.q).map(Number).sort((a, b) => a - b)
+  if (u <= levels[0]) return f.q[String(levels[0])][h]
+  for (let i = 1; i < levels.length; i++)
+    if (u <= levels[i]) { const a = levels[i - 1], b = levels[i], qa = f.q[String(a)][h], qb = f.q[String(b)][h]; return qa + ((qb - qa) * (u - a)) / (b - a) }
+  return f.q[String(levels.at(-1))][h]
+}
+// A possible path: each day from its own forecast, tied to the day before by a Gaussian AR(1) copula
+// whose rho is the lag-1 correlation of the normal scores of where the real days fell in the backtest.
+function path(s, f, k) {
+  const r = rng(hash(`${state.series}${f.ref}${k}`)), rho = s.rho
+  let z = gauss(r)
+  return f.targets.map((_, h) => { if (h) z = rho * z + Math.sqrt(1 - rho * rho) * gauss(r); return quantileAt(f, h, phi(z)) })
+}
+
+const seriesRow = document.getElementById("series")
+for (const [id, label] of Object.entries(SERIES)) {
+  const b = document.createElement("button")
+  b.id = `series-${id}`
+  b.textContent = label
+  b.onclick = () => { state.series = id; state.pick = null; render() }
+  seriesRow.append(b)
+}
+document.getElementById("play").onclick = () => { state.playing = !state.playing; render() }
+document.getElementById("another").onclick = () => { state.path++; render() }
+
+function px(ctx, x, y, w, h, color) { ctx.fillStyle = color; ctx.fillRect(Math.round(x), Math.round(y), w, h) }
+function line(ctx, x0, y0, x1, y1, color) {
+  x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1)
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1
+  let err = dx + dy
+  ctx.fillStyle = color
+  for (;;) { ctx.fillRect(x0, y0, 1, 1); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx } if (e2 <= dx) { err += dx; y0 += sy } }
+}
+
+function slider(s) {
+  const el = document.getElementById("slider"), n = s.forecasts.length, i = state.pick
+  const at = (k) => `${(k / (n - 1)) * 100}%`
+  const today = i === n - 1
+  const tag = today ? "Forecast" : `${md(s.forecasts[i].ref)} · what happened`
+  el.innerHTML = s.forecasts.map((_, k) => `<span class="dot${k < i ? " done" : ""}" style="left:${at(k)}"></span>`).join("") +
+    `<span class="handle" style="left:${at(i)}"></span><span class="tag${i > n / 2 ? " left" : ""}" style="left:${at(i)}">${tag}</span>`
+  el.setAttribute("aria-valuemin", 0); el.setAttribute("aria-valuemax", n - 1); el.setAttribute("aria-valuenow", i)
+  el.setAttribute("aria-valuetext", today ? "Today's forecast" : `Forecast made ${md(s.forecasts[i].ref)}`)
+  const pickAt = (e) => { const r = el.getBoundingClientRect(); const k = Math.round(((e.clientX - r.left) / r.width) * (n - 1)); const c = Math.max(0, Math.min(n - 1, k)); if (c !== state.pick) { state.pick = c; render() } }
+  el.onpointerdown = (e) => { el.setPointerCapture(e.pointerId); pickAt(e); el.onpointermove = pickAt }
+  el.onpointerup = () => { el.onpointermove = null }
+  el.onkeydown = (e) => { const d = { ArrowLeft: -1, ArrowRight: 1 }[e.key]; if (d) { e.preventDefault(); state.pick = Math.max(0, Math.min(n - 1, state.pick + d)); render() } }
+}
+
+function render() {
+  for (const id of Object.keys(SERIES)) document.getElementById(`series-${id}`).setAttribute("aria-pressed", state.series === id)
+  const s = DATA[state.series]
+  if (state.pick == null) state.pick = s.forecasts.length - 1
+  const f = s.forecasts[state.pick], H = f.targets.length
+  slider(s)
+  document.getElementById("title").textContent = `${s.title} · forecast made ${md(f.ref)}`
+  document.getElementById("unit").textContent = s.unit
+
+  const box = document.getElementById("chartbox")
+  const cw = box.clientWidth, scale = cw >= 600 ? 3 : 2
+  const W = Math.floor(cw / scale), Hh = Math.round(Math.min(150, Math.max(90, W * 0.42)))
+  const canvas = document.getElementById("chart")
+  canvas.width = W; canvas.height = Hh
+  canvas.style.width = `${W * scale}px`; canvas.style.height = `${Hh * scale}px`
+  const ctx = canvas.getContext("2d")
+  px(ctx, 0, 0, W, Hh, C.bg)
+
+  const end = s.dates.indexOf(f.ref)
+  const histDays = W >= 250 ? 56 : 28
+  const dates = s.dates.slice(end - histDays + 1, end + 1), values = s.values.slice(end - histDays + 1, end + 1)
+  const truth = f.targets.map((t) => { const i = s.dates.indexOf(t); return i < 0 ? null : s.values[i] })
+  const n = dates.length + H
+  const left = 4, right = W - 4, top = 4, bottom = Hh - 4
+  const x = (i) => left + ((right - left) * (i + 0.5)) / n
+  const q = (k) => f.q[k]
+  const paths = Array.from({ length: PATHS }, (_, k) => path(s, f, k))
+  const shown = [...values, ...q("0.1"), ...q("0.9"), ...paths.flat(), ...truth.filter((t) => t != null)]
+  let lo = Math.min(...shown), hi = Math.max(...shown)
+  const pad = (hi - lo) * 0.06; lo -= pad; hi += pad
+  const y = (val) => bottom - ((bottom - top) * (val - lo)) / (hi - lo)
+  const o = dates.length - 1
+
+  for (let xx = Math.round(x(o + 0.5)); xx <= right; xx++) px(ctx, xx, top, 1, bottom - top + 1, C.hatch)
+  const step = Math.pow(10, Math.floor(Math.log10((hi - lo) / 2)))
+  const ticks = []
+  for (let t = Math.ceil(lo / step) * step; t <= hi; t += step) ticks.push(t)
+  const keep = ticks.length > 4 ? ticks.filter((_, i) => i % 2 === 0) : ticks
+  for (const t of keep) for (let xx = left; xx <= right; xx += 3) px(ctx, xx, y(t), 1, 1, C.frame)
+  document.getElementById("ticks").innerHTML = keep.map((t) => `<span style="top:${(y(t) / Hh) * 100}%">${fmt(t)}</span>`).join("")
+
+  // The halo: the 8 in 10 and 5 in 10 ranges as two solid fills, joined day to day like an area.
+  const area = (a, b, color) => {
+    for (let h = 0; h < H; h++) {
+      const x0 = h === 0 ? x(o) : x(o + h), x1 = x(o + 1 + h)
+      const lo0 = h === 0 ? values[o] : q(a)[h - 1], hi0 = h === 0 ? values[o] : q(b)[h - 1]
+      for (let xx = Math.round(x0); xx <= Math.round(x1); xx++) {
+        const t = x1 === x0 ? 1 : (xx - x0) / (x1 - x0)
+        const yTop = y(hi0 + (q(b)[h] - hi0) * t), yBot = y(lo0 + (q(a)[h] - lo0) * t)
+        px(ctx, xx, yTop, 1, Math.max(1, Math.round(yBot - yTop) + 1), color)
+      }
+    }
+  }
+  area("0.1", "0.9", C.band8)
+  area("0.25", "0.75", C.band5)
+
+  for (let i = 1; i < values.length; i++) line(ctx, x(i - 1), y(values[i - 1]), x(i), y(values[i]), C.gold)
+  for (let yy = top; yy <= bottom; yy += 2) px(ctx, x(o + 0.5), yy, 1, 1, C.focus)
+
+  // What happened after a past forecast, as a grey line, like Timestral's ground truth.
+  let prevT = [x(o), y(values[o])]
+  truth.forEach((t, h) => { if (t == null) return; const p = [x(o + 1 + h), y(t)]; line(ctx, prevT[0], prevT[1], p[0], p[1], C.truth); prevT = p })
+
+  const p = paths[state.path % PATHS]
+  let prev = [x(o), y(values[o])]
+  p.forEach((val, h) => { const pt = [x(o + 1 + h), y(val)]; line(ctx, prev[0], prev[1], pt[0], pt[1], C.pale); prev = pt })
+
+  const pct = (i) => `${((x(i) / W) * 100).toFixed(2)}%`
+  document.getElementById("dates").innerHTML =
+    `<span style="left:${pct(0)};transform:none">${md(dates[0])}</span>` +
+    `<span class="o" style="left:${pct(o)}">${md(dates[o])}</span>` +
+    `<span style="left:${pct(n - 1)};transform:translateX(-100%)">${md(f.targets[H - 1])}</span>`
+
+  const d = H - 1, known = truth.filter((t) => t != null)
+  const inside = truth.filter((t, h) => t != null && t >= q("0.1")[h] && t <= q("0.9")[h]).length
+  document.getElementById("readout").textContent =
+    `${md(f.targets[d])}, in ${H} days · 8 in 10: ${fmt(q("0.1")[d])}-${fmt(q("0.9")[d])}, 2 in 10 outside` +
+    (known.length ? ` · ${inside} of ${known.length} real days inside the 8 in 10 range` : "")
+  document.getElementById("play").textContent = state.playing ? "Pause" : "Play"
+  document.getElementById("play").setAttribute("aria-pressed", state.playing)
+  document.getElementById("pathlabel").textContent = `possible path ${(state.path % PATHS) + 1} of ${PATHS}`
+  const legend = [[C.gold, "what happened before", "l"], [C.pale, "one possible path", "l"], [C.band5, "5 in 10"], [C.band8, "8 in 10"]]
+  if (known.length) legend.push([C.truth, "what happened after", "l"])
+  document.getElementById("legend").innerHTML = legend.map(([c, l, k]) => `<span><i class="${k ?? ""}" style="background:${c}"></i>${l}</span>`).join("")
+  document.getElementById("note").textContent =
+    `The line ahead is one of many possible paths: each of its days falls in that day's range as often as the forecast says, and it moves from day to day as ${s.title} did in the backtest (day-to-day tie ${s.rho}). It is not what will happen: no one knows which days will be high.`
+}
+setInterval(() => { if (state.playing && !document.hidden) { state.path++; render() } }, 1200)
+addEventListener("resize", render)
+document.fonts.ready.then(render)
+render()
+</script>
