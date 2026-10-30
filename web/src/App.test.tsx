@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
 import actuals from "@/fixtures/actuals.json"
 import latest from "@/fixtures/latest.json"
+import replay from "@/fixtures/replay.json"
 import catalog from "@/fixtures/series.json"
 
 import { App } from "./App"
@@ -12,6 +13,7 @@ const published: Record<string, unknown> = {
   "api/v1/series.json": catalog,
   "api/v1/series/gpr_daily/latest.json": latest,
   "api/v1/series/gpr_daily/actuals.json": actuals,
+  "api/v1/series/gpr_daily/replay.json": replay,
 }
 
 // jsdom lays nothing out, so the chart never learns its width and draws nothing.
@@ -106,6 +108,39 @@ it.each([
   expect(await screen.findByRole("alert")).toBeTruthy()
 })
 
+it.each([
+  [
+    "a past forecast without its 5-in-10 range",
+    {
+      ...replay,
+      forecasts: replay.forecasts.map((f, i) =>
+        i === 3 ? { ...f, quantiles: { ...f.quantiles, "0.25": undefined } } : f
+      ),
+    },
+  ],
+  [
+    "a past forecast made before the actuals start",
+    {
+      ...replay,
+      forecasts: [
+        { ...replay.forecasts[0], reference_date: "2025-01-06" },
+        ...replay.forecasts,
+      ],
+    },
+  ],
+])("refuses a replay file with %s", async (_, broken) => {
+  vi.stubGlobal("fetch", async (url: string) =>
+    Response.json(
+      { ...published, "api/v1/series/gpr_daily/replay.json": broken }[url]
+    )
+  )
+  vi.spyOn(console, "error").mockImplementation(() => {})
+
+  render(<App />)
+
+  expect(await screen.findByRole("alert")).toBeTruthy()
+})
+
 it("shows today's GPR forecast in the panel, from one load of each file", async () => {
   const fetch = vi.fn(async (url: string) => Response.json(published[url]))
   vi.stubGlobal("fetch", fetch)
@@ -117,14 +152,17 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
       name: "[F] Geopolitical risk · forecast made today",
     })
   )
-  expect(panel.getAllByRole("paragraph").map((p) => p.textContent)).toEqual([
+  const paragraphs = panel.getAllByRole("paragraph").map((p) => p.textContent)
+  expect(paragraphs.slice(0, 2)).toEqual([
     "index (1985-2019 average = 100) · data to Oct 26",
     "Nov 23: most likely 168 · 8 in 10: 111-251",
-    `Source: ${latest.attribution}`,
   ])
-  expect(panel.getAllByRole("listitem").map((li) => li.textContent)).toEqual([
+  expect(paragraphs.at(-1)).toBe(`Source: ${latest.attribution}`)
+  const legend = within(panel.getAllByRole("list")[0])
+  expect(legend.getAllByRole("listitem").map((li) => li.textContent)).toEqual([
     "Daily value",
     "7-day average",
+    "What happened",
     "Most likely",
     "5 in 10",
     "8 in 10",
