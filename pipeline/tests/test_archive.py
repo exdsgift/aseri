@@ -247,6 +247,42 @@ def test_the_as_of_view_holds_each_value_as_it_was_known_on_that_day(tmp_path):
     )
 
 
+def test_each_day_resolves_to_its_value_in_the_first_vintage_that_held_it(tmp_path):
+    archive_run(
+        tmp_path, [], days_to("2026-10-26", [120.5, 98.23, 101.3]), date(2026, 10, 29)
+    )
+    # A later vintage revises 2026-10-26 and adds a day.
+    archive_run(
+        tmp_path,
+        [],
+        days_to("2026-10-27", [120.5, 98.23, 99.8, 140.0]),
+        date(2026, 11, 2),
+    )
+
+    assert (
+        archive.first_seen(tmp_path, "gpr_daily").to_dict()
+        == days_to("2026-10-27", [120.5, 98.23, 101.3, 140.0]).to_dict()
+    )
+
+
+def test_a_day_dated_ahead_of_its_download_resolves_only_from_a_vintage_on_or_after_it(
+    tmp_path,
+):
+    # An upstream file dated ahead of its download: its 2026-10-31 is no vintage of that day.
+    archive_run(
+        tmp_path, [], days_to("2026-10-31", [120.5, 98.23, 101.3]), date(2026, 10, 30)
+    )
+    archive_run(
+        tmp_path, [], days_to("2026-10-31", [120.5, 98.23, 77.0]), date(2026, 11, 1)
+    )
+
+    assert archive.first_seen(tmp_path, "gpr_daily").to_dict() == {
+        pd.Timestamp("2026-10-29"): 120.5,
+        pd.Timestamp("2026-10-30"): 98.23,
+        pd.Timestamp("2026-10-31"): 77.0,
+    }
+
+
 def test_the_as_of_view_never_returns_a_day_after_its_date(tmp_path):
     # An upstream file dated ahead of its download, which the view must not pass on.
     archive_run(

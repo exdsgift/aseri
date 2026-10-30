@@ -1,28 +1,37 @@
-import { useId, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { Intervals } from "@/components/Intervals"
 import { PixelForecastChart } from "@/components/PixelForecastChart"
 import { ReplaySlider } from "@/components/ReplaySlider"
 import { type Series } from "@/lib/api"
 import { formatValue, monthDay } from "@/lib/format"
+import { tickWhileShown, useReducedMotion } from "@/lib/motion"
+import { path } from "@/lib/paths"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 
-// The ranges before the most likely value, as in the readout.
-const legend = [
+// `line` names the line ahead: the most likely value, or a possible path.
+const legend = (line: string) => [
   ["Daily value", "h-0.5 w-4 bg-primary"],
   ["7-day average", "h-0.5 w-4 bg-muted-foreground"],
   ["What happened", "size-1 bg-white"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
-  ["Most likely", "h-0.5 w-4 bg-gold-pale"],
+  [line, "h-0.5 w-4 bg-gold-pale"],
   ["Forecast made", "h-3 border-l-2 border-dotted border-focus"],
 ]
+
+// The chart draws one of these at a time, never several: overlapping paths read as nothing.
+const paths = 20
+
+// Flat blocks that turn white on hover, like Back to today.
+const control =
+  "cursor-pointer bg-secondary px-2 py-1.5 text-background uppercase hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160"
 
 // A game sheet: today's forecast or a past one from the replay, its pixel chart,
 // its intervals and where the data comes from.
 export function ForecastPanel({ series }: { series: Series }) {
   const title = useId()
-  const { id, forecasts, steps, today, staleSince, madeOn, note, weekly } =
+  const { id, forecasts, steps, today, staleSince, madeOn, note, weekly, rho } =
     series
   // UTC, like every date the pipeline writes.
   const madeToday = madeOn === new Date().toISOString().slice(0, 10)
@@ -40,9 +49,28 @@ export function ForecastPanel({ series }: { series: Series }) {
   // The target day is the hero's step, the last one.
   const [targetDay] = stepRows(forecast, [end + 1])
   const sofar = insideSoFar(forecast)
+  // The chart opens on the most likely value of each day, the most useful view. Asked, it
+  // draws the possible paths in order instead, the next every 1.2 s: none turns under reduced
+  // motion, nor while nobody can see the panel.
+  const [drawn, setDrawn] = useState<number>()
+  // The same array until the path changes, so other renders do not repaint the chart.
+  const drawnPath = useMemo(
+    () => (drawn === undefined ? undefined : path(forecast, rho, drawn)),
+    [forecast, rho, drawn]
+  )
+  const [playing, setPlaying] = useState(false)
+  // Only ever called with a path drawn.
+  const next = () => setDrawn((k) => (k! + 1) % paths)
+  const reduced = useReducedMotion()
+  const panel = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (reduced || !playing) return
+    return tickWhileShown(panel.current!, 1200, () => next())
+  }, [reduced, playing])
 
   return (
     <section
+      ref={panel}
       aria-labelledby={title}
       className="mx-auto flex max-w-[720px] flex-col gap-3 border-2 border-border px-3 pt-2 pb-3 text-[8px]/[12px] uppercase chip"
     >
@@ -125,15 +153,56 @@ export function ForecastPanel({ series }: { series: Series }) {
       </div>
       <PixelForecastChart
         forecast={forecast}
-        summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}.${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
+        path={drawnPath}
+        summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}.${drawn === undefined ? "" : ` The line ahead shows possible path ${drawn + 1} of ${paths}, not the forecast.`}${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
       />
+      <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+        {/* One button for both views, so the keyboard focus stays on it. */}
+        <button
+          type="button"
+          onClick={() => {
+            setDrawn(drawn === undefined ? 0 : undefined)
+            // Motion only when asked, and never under reduced motion.
+            setPlaying(drawn === undefined && !reduced)
+          }}
+          className={control}
+        >
+          {drawn === undefined ? "Show possible paths" : "Most likely"}
+        </button>
+        {drawn !== undefined && (
+          <>
+            {!reduced && (
+              <button
+                type="button"
+                onClick={() => setPlaying(!playing)}
+                // As wide as either word, so the controls after it never move.
+                className={`min-w-14 ${control}`}
+              >
+                {playing ? "Pause" : "Play"}
+              </button>
+            )}
+            <button type="button" onClick={next} className={control}>
+              Next path
+            </button>
+            <span>{`Possible path ${drawn + 1} of ${paths}`}</span>
+          </>
+        )}
+      </div>
+      {/* The words keep either line from reading as a promise, and their line holds its place. */}
+      <p className="text-muted-foreground">
+        {drawn === undefined
+          ? "The line ahead is the most likely value of each day: the real days go up and down around it, 8 in 10 inside the band."
+          : "The line ahead is one possible path, not the forecast: no one knows which days turn out high."}
+      </p>
       <ul className="flex flex-wrap gap-x-4 gap-y-2 text-muted-foreground">
-        {legend.map(([name, swatch]) => (
-          <li key={name} className="flex items-center gap-2">
-            <span aria-hidden className={swatch} />
-            {name}
-          </li>
-        ))}
+        {legend(drawn === undefined ? "Most likely" : "One possible path").map(
+          ([name, swatch]) => (
+            <li key={name} className="flex items-center gap-2">
+              <span aria-hidden className={swatch} />
+              {name}
+            </li>
+          )
+        )}
       </ul>
       {/* Text, not the legend, prevents the known misreadings of a band: a high and a low,
           a swing, a weekly dip taken for a fall. The same whatever the day, so that the

@@ -75,6 +75,11 @@ export function valueTicks(lo: number, hi: number, parts = 3) {
 export function chartLayout(forecast: Forecast, width: number) {
   const narrow = width < 480
   const ahead = forecast.targetDates.length
+  const levels = Object.keys(forecast.quantiles).map(Number)
+  const nearest = (to: number) =>
+    String(
+      levels.reduce((a, b) => (Math.abs(b - to) < Math.abs(a - to) ? b : a))
+    )
   return {
     narrow,
     // Room for the value ticks on the left, the end values on the right and the dates below.
@@ -82,7 +87,10 @@ export function chartLayout(forecast: Forecast, width: number) {
       forecast,
       { width: Math.floor(width / pixel), height: narrow ? 130 : 160 },
       narrow ? Math.max(21, ahead) : Math.max(28, 2 * ahead),
-      { left: 20, right: 27, top: 10, bottom: 13 }
+      { left: 20, right: 27, top: 10, bottom: 13 },
+      // The published levels nearest 5% and 95%. A path past them, about a day in ten, runs
+      // along the frame: fitting q0.01 to q0.99 squashed Hormuz's 0 to 8 ships into a fifth.
+      [nearest(0.05), nearest(0.95)]
     ),
   }
 }
@@ -94,18 +102,20 @@ export function miniChartLayout(forecast: Forecast, width: number) {
     { width: Math.floor(width / pixel), height: 32 },
     Math.max(28, 2 * forecast.targetDates.length),
     // Just enough for the 3x3 marks at the ends and the base line.
-    { left: 1, right: 2, top: 1, bottom: 2 }
+    { left: 1, right: 2, top: 1, bottom: 2 },
+    ["0.1", "0.9"]
   )
 }
 
 // Days count from the first of the daily values: the origin is the last one, and the
 // forecast days follow it. `shown` days of history, then the days ahead, fill the art
-// less its margins.
+// less its margins. The scale fits the forecast between the `fitted` levels.
 function layout(
   forecast: Forecast,
   art: { width: number; height: number },
   shown: number,
-  margin: { left: number; right: number; top: number; bottom: number }
+  margin: { left: number; right: number; top: number; bottom: number },
+  fitted: [string, string]
 ) {
   const ahead = forecast.targetDates.length
   const origin = forecast.values.length - 1
@@ -129,8 +139,7 @@ function layout(
     [
       ...forecast.values.slice(first),
       ...forecast.averages.slice(first),
-      ...forecast.quantiles["0.1"],
-      ...forecast.quantiles["0.9"],
+      ...fitted.flatMap((level) => forecast.quantiles[level]),
       ...forecast.actuals,
     ],
     top,
@@ -201,11 +210,14 @@ function square(plot: Plot, x: number, y: number, size: number, color: string) {
     for (let dy = 0; dy < size; dy++) plot(x + dx, y + dy, color)
 }
 
+// `path`, the last daily value then one value a day ahead, takes the most likely value's place:
+// the panel opens on the most likely value and, asked, draws possible paths, which read like the past.
 export function paintChart(
   plot: Plot,
   chart: Layout,
   forecast: Forecast,
-  color: Colors
+  color: Colors,
+  path?: number[]
 ) {
   const { left, right, top, bottom, x, y, first, origin } = chart
   const { values, averages, quantiles, actuals } = forecast
@@ -238,13 +250,10 @@ export function paintChart(
   }
   polyline(
     plot,
-    [
-      [xo, y(last)],
-      ...quantiles["0.5"].map((value, k): Point => [
-        x(origin + 1 + k),
-        y(value),
-      ]),
-    ],
+    (path ?? [last, ...quantiles["0.5"]]).map((value, k): Point => [
+      x(origin + k),
+      y(value),
+    ]),
     color.pale
   )
 
@@ -272,13 +281,14 @@ export function paintChart(
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.focus)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
   square(plot, xo - 1, y(last) - 1, 3, color.gold)
-  square(
-    plot,
-    right - 1,
-    y(quantiles["0.5"][chart.ahead - 1]) - 1,
-    3,
-    color.pale
-  )
+  if (!path)
+    square(
+      plot,
+      right - 1,
+      y(quantiles["0.5"][chart.ahead - 1]) - 1,
+      3,
+      color.pale
+    )
   if (actuals.length === chart.ahead)
     square(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, 3, color.real)
 }

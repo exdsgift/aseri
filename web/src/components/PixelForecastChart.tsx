@@ -23,12 +23,14 @@ import {
   type Colors,
   type Layout,
 } from "@/lib/chart"
-import { formatValue, monthDay } from "@/lib/format"
+import { daysAhead, formatValue, monthDay } from "@/lib/format"
 
-// Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens.
+// Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens,
+// with a possible `path` in the most likely value's place.
 function usePixelChart<L extends Layout>(
   forecast: Forecast,
-  layout: (forecast: Forecast, width: number) => L
+  layout: (forecast: Forecast, width: number) => L,
+  path?: number[]
 ) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
@@ -65,9 +67,10 @@ function usePixelChart<L extends Layout>(
           mark,
           css.getPropertyValue(name),
         ])
-      ) as Colors
+      ) as Colors,
+      path
     )
-  }, [chart, forecast])
+  }, [chart, forecast, path])
 
   // Nothing until the box is measured: the canvas's default 300 px would widen it.
   const size = {
@@ -99,14 +102,18 @@ export function MiniForecastChart({ forecast }: { forecast: Forecast }) {
 
 export function PixelForecastChart({
   forecast,
+  path,
   summary,
 }: {
   forecast: Forecast
+  // A possible path in the most likely value's place; none draws the most likely value.
+  path?: number[]
   summary: string
 }) {
   const { box, canvas, width, chart, size } = usePixelChart(
     forecast,
-    chartLayout
+    chartLayout,
+    path
   )
   // A day is an index into the forecast's days, so it holds only for the forecast it was picked on.
   const [hovered, setHovered] = useState<{ forecast: Forecast; day: number }>()
@@ -136,7 +143,9 @@ export function PixelForecastChart({
           event.pointerType !== "touch" && setHovered(undefined)
         }
       />
-      {chart && <ChartLabels chart={chart} forecast={forecast} />}
+      {chart && (
+        <ChartLabels chart={chart} forecast={forecast} likely={!path} />
+      )}
       {/* A narrower chart starts later than the day a tap may have left up. */}
       {chart &&
         hovered?.forecast === forecast &&
@@ -180,18 +189,23 @@ function Label({
 function ChartLabels({
   chart,
   forecast,
+  likely,
 }: {
   chart: ChartLayout
   forecast: Forecast
+  likely: boolean
 }) {
   const { left, right, bottom, x, y, first, origin, ahead } = chart
   const xo = x(origin)
   const end = (level: string) => forecast.quantiles[level][ahead - 1]
   const real = forecast.actuals[ahead - 1]
-  // Top to bottom, so that each label clears the one above.
+  // Top to bottom, so that each label clears the one above. The most likely value's end only
+  // while the chart draws it: a possible path's end, labelled, would read as the forecast.
   const ends = [
     { value: end("0.9"), className: "" },
-    { value: end("0.5"), className: "text-[12px] text-gold-pale" },
+    ...(likely
+      ? [{ value: end("0.5"), className: "text-[12px] text-gold-pale" }]
+      : []),
     { value: end("0.1"), className: "" },
     ...(real === undefined
       ? []
@@ -208,9 +222,8 @@ function ChartLabels({
   )
   const past = chart.narrow ? "Daily · 7d avg" : "Daily values · 7-day avg"
   // A forecast with days already known is a past one.
-  const future = forecast.actuals.length
-    ? `${ahead} days after`
-    : `Next ${ahead} days`
+  const days = daysAhead(ahead, forecast.horizonUnit ?? "day")
+  const future = forecast.actuals.length ? `${days} after` : `Next ${days}`
   // The forecast zone's name, right-aligned, past the origin and clear of the label on the left.
   const futureFits =
     (right + 1) * pixel - textWidth(future) >=

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 
-import { useReducedMotion } from "@/lib/motion"
+import { tickWhileShown, useReducedMotion } from "@/lib/motion"
 import {
   artHeight,
   paintSun,
@@ -67,28 +67,8 @@ export function Sun({ radius }: { radius?: number }) {
 
     // One tick every 260 ms, and none while the tab is hidden or the hero is off screen.
     let step = 0
-    let onScreen = true
-    let timer: ReturnType<typeof setInterval> | undefined
-    const update = () => {
-      clearInterval(timer)
-      timer =
-        onScreen && !document.hidden
-          ? setInterval(() => draw(sunFrame(++step)), tick)
-          : undefined
-    }
-    const observer = new IntersectionObserver(([entry]) => {
-      onScreen = entry.isIntersecting
-      update()
-    })
     draw(sunFrame(step))
-    update()
-    observer.observe(element)
-    document.addEventListener("visibilitychange", update)
-    return () => {
-      clearInterval(timer)
-      observer.disconnect()
-      document.removeEventListener("visibilitychange", update)
-    }
+    return tickWhileShown(element, tick, () => draw(sunFrame(++step)))
   }, [width, radius, reduced])
 
   return (

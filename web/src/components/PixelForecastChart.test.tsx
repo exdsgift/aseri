@@ -6,8 +6,13 @@ import actuals from "@/fixtures/series/gpr_daily/actuals.json"
 import latest from "@/fixtures/series/gpr_daily/latest.json"
 import replay from "@/fixtures/series/gpr_daily/replay.json"
 import { loadSeries, type Forecast } from "@/lib/api"
+import { path } from "@/lib/paths"
 
 import { PixelForecastChart } from "./PixelForecastChart"
+
+const drawn = (shown: Forecast) => (
+  <PixelForecastChart forecast={shown} path={path(shown, 0, 0)} summary="" />
+)
 
 let resize: (width: number) => void
 let forecast: Forecast
@@ -52,6 +57,23 @@ beforeEach(async () => {
 afterEach(cleanup)
 
 it("labels what happened on the last day, and on any day of a replay", () => {
+  render(drawn(backtest))
+  resize(692)
+
+  // The end values, top to bottom: what happened, 8 in 10's top, 8 in 10's bottom.
+  const tops = ["168", "167", "59"].map((value) =>
+    parseFloat(screen.getByText(value).style.top)
+  )
+  expect(tops).toEqual(tops.toSorted((a, b) => a - b))
+  // Not the most likely value: the chart draws a possible path in its place.
+  expect(screen.queryByText("104")).toBeNull()
+  expect(screen.queryByText("28 days after")).not.toBeNull()
+  // The last day ahead, at the right end.
+  fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
+  expect(screen.queryByText("What happened 168")).not.toBeNull()
+})
+
+it("labels the most likely value's end when it draws no path, as the panel opens", () => {
   render(<PixelForecastChart forecast={backtest} summary="" />)
   resize(692)
 
@@ -60,14 +82,10 @@ it("labels what happened on the last day, and on any day of a replay", () => {
     parseFloat(screen.getByText(value).style.top)
   )
   expect(tops).toEqual(tops.toSorted((a, b) => a - b))
-  expect(screen.queryByText("28 days after")).not.toBeNull()
-  // The last day ahead, at the right end.
-  fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
-  expect(screen.queryByText("What happened 168")).not.toBeNull()
 })
 
 it("has nothing to say about what happened ahead of today", () => {
-  render(<PixelForecastChart forecast={forecast} summary="" />)
+  render(drawn(forecast))
   resize(692)
 
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
@@ -75,7 +93,7 @@ it("has nothing to say about what happened ahead of today", () => {
 })
 
 it("names the forecast zone only where the name clears the label on the left", () => {
-  render(<PixelForecastChart forecast={forecast} summary="" />)
+  render(drawn(forecast))
 
   resize(440)
   expect(screen.queryByText("Next 28 days")).not.toBeNull()
@@ -84,8 +102,15 @@ it("names the forecast zone only where the name clears the label on the left", (
   expect(screen.queryByText("Next 28 days")).toBeNull()
 })
 
+it("counts Brent's zone in trading days", () => {
+  render(drawn({ ...forecast, horizonUnit: "trading_day" }))
+
+  resize(692)
+  expect(screen.queryByText("Next 28 trading days")).not.toBeNull()
+})
+
 it("drops the readout of a day the chart no longer shows", () => {
-  render(<PixelForecastChart forecast={forecast} summary="" />)
+  render(drawn(forecast))
   resize(692)
 
   // The left end of the chart, the first day it shows.
@@ -97,33 +122,29 @@ it("drops the readout of a day the chart no longer shows", () => {
 })
 
 it("drops a tap's readout past the end of an older forecast the replay moves to", () => {
-  const { rerender } = render(
-    <PixelForecastChart forecast={forecast} summary="" />
-  )
+  const { rerender } = render(drawn(forecast))
   resize(692)
 
   // Today's last day ahead, months after the oldest forecast's.
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
   expect(screen.queryByText(/^Most likely \d/)).not.toBeNull()
-  rerender(<PixelForecastChart forecast={backtest} summary="" />)
+  rerender(drawn(backtest))
   expect(screen.queryByText(/^Most likely \d/)).toBeNull()
 })
 
 it("drops a tap's readout once the replay moves to another forecast, even on a day both show", () => {
-  const { rerender } = render(
-    <PixelForecastChart forecast={forecast} summary="" />
-  )
+  const { rerender } = render(drawn(forecast))
   resize(692)
 
   // A day of history in the middle of today's chart.
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 300 })
   expect(screen.queryByText(/^Daily value \d/)).not.toBeNull()
-  rerender(<PixelForecastChart forecast={older} summary="" />)
+  rerender(drawn(older))
   expect(screen.queryByText(/^Daily value \d/)).toBeNull()
 })
 
 it("drops the readout when a mouse or a pen leaves, but keeps a tap's", () => {
-  render(<PixelForecastChart forecast={forecast} summary="" />)
+  render(drawn(forecast))
   resize(692)
   const chart = screen.getByRole("img")
 

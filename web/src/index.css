@@ -94,43 +94,46 @@
   }
 }
 
-/* The replay slider: a pixel ruler with a gold block thumb, white on hover and press.
-   No transition, so the thumb stays under the pointer. */
+/* The replay slider, as on Timestral's page: its track is the dots drawn under it, and its
+   thumb a square handle with a vertical bar, white on hover and press. No transition, so the
+   handle stays under the pointer. */
 @utility pixel-range {
   appearance: none;
   background: transparent;
   cursor: pointer;
   &::-webkit-slider-runnable-track {
     height: 4px;
-    background: var(--border);
+    background: transparent;
   }
   &::-moz-range-track {
     height: 4px;
-    background: var(--border);
+    background: transparent;
   }
   &::-webkit-slider-thumb {
     appearance: none;
-    width: 12px;
+    width: 20px;
     height: 20px;
     margin-top: -8px;
     border: 0;
     border-radius: 0;
-    background: var(--primary);
+    background: linear-gradient(var(--background), var(--background)) center /
+      2px 10px no-repeat var(--foreground);
   }
   &::-moz-range-thumb {
-    width: 12px;
+    width: 20px;
     height: 20px;
     border: 0;
     border-radius: 0;
-    background: var(--primary);
+    background: linear-gradient(var(--background), var(--background)) center /
+      2px 10px no-repeat var(--foreground);
   }
   &:hover::-webkit-slider-thumb,
   &:active::-webkit-slider-thumb {
-    background: var(--white);
+    background-color: var(--white);
   }
   &:hover::-moz-range-thumb,
   &:active::-moz-range-thumb {
-    background: var(--white);
+    background-color: var(--white);
   }
 }
 

@@ -40,6 +40,29 @@ function onReduceChange(changed: () => void) {
 export const useReducedMotion = () =>
   useSyncExternalStore(onReduceChange, () => reduceQuery().matches)
 
+// Calls `tick` every `ms`, never while the tab is hidden or `element` is off screen.
+// Returns what stops it for good.
+export function tickWhileShown(element: Element, ms: number, tick: () => void) {
+  let onScreen = true
+  let timer: ReturnType<typeof setInterval> | undefined
+  const update = () => {
+    clearInterval(timer)
+    timer = onScreen && !document.hidden ? setInterval(tick, ms) : undefined
+  }
+  const observer = new IntersectionObserver(([entry]) => {
+    onScreen = entry.isIntersecting
+    update()
+  })
+  update()
+  observer.observe(element)
+  document.addEventListener("visibilitychange", update)
+  return () => {
+    clearInterval(timer)
+    observer.disconnect()
+    document.removeEventListener("visibilitychange", update)
+  }
+}
+
 // Steps 0 to count - 1, `ms` apart, then undefined: the resting state. Already there
 // under reduced motion at load, so turning it off later never replays the sequence.
 // Timed from the first animation frame: a tab hidden midway gets no frames, and on

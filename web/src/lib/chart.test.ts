@@ -50,22 +50,29 @@ describe("paintChart", () => {
     real: "real",
   }
   const chart = chartLayout(forecast, 692)
-  const calls: { x: number; y: number; color: string }[] = []
-  paintChart(
-    (x, y, color) => calls.push({ x, y, color }),
-    chart,
-    forecast,
-    colors
-  )
+  // One possible path, well above the most likely value (155), from the last daily value.
+  const path = [values[chart.origin], ...Array(28).fill(185)]
+  const paint = (drawn?: number[]) => {
+    const calls: { x: number; y: number; color: string }[] = []
+    paintChart(
+      (x, y, color) => calls.push({ x, y, color }),
+      chart,
+      forecast,
+      colors,
+      drawn
+    )
+    return calls
+  }
+  const calls = paint(path)
   // What the reader sees: the last colour painted on each pixel.
   const seen = new Map(calls.map(({ x, y, color }) => [`${x},${y}`, color]))
   const now = { x: chart.x(chart.origin), y: chart.y(values[chart.origin]) }
 
-  it("starts the forecast on the point it marks as now: the last daily value, the quantity forecast", () => {
+  it("starts the possible path on the point it marks as now: the last daily value, the quantity forecast", () => {
     expect(forecast.averages[chart.origin]).toBeGreaterThan(145)
     expect(seen.get(`${now.x},${now.y}`)).toBe("gold")
-    const median = calls.find(({ color }) => color === "pale")
-    expect(median).toMatchObject(now)
+    const start = calls.find(({ color }) => color === "pale")
+    expect(start).toMatchObject(now)
     // The history's main line runs through every daily value it shows.
     for (let day = chart.first; day <= chart.origin; day++)
       expect(calls).toContainEqual({
@@ -73,6 +80,26 @@ describe("paintChart", () => {
         y: chart.y(values[day]),
         color: "gold",
       })
+  })
+
+  it("draws the possible path through every day ahead, in the most likely value's place and colour", () => {
+    for (let day = 1; day <= 28; day++)
+      expect(calls).toContainEqual({
+        x: chart.x(chart.origin + day),
+        y: chart.y(185),
+        color: "pale",
+      })
+    // No most likely line and no mark at its end: past the first day, only the path is pale.
+    const ahead = calls.filter(
+      ({ x, color }) => color === "pale" && x > chart.x(chart.origin + 1)
+    )
+    expect(new Set(ahead.map(({ y }) => y))).toEqual(new Set([chart.y(185)]))
+  })
+
+  it("draws the bands as it does without a path", () => {
+    const bands = (drawn: typeof calls) =>
+      drawn.filter(({ color }) => color === "muted")
+    expect(bands(calls)).toEqual(bands(paint()))
   })
 
   it("starts the bands on the first day ahead, never pinched to the last value", () => {
@@ -132,6 +159,31 @@ describe("chartLayout", () => {
     const chart = chartLayout(spiky, 692)
     expect(chart.y(900)).toBeGreaterThan(chart.top)
     expect(chart.hi).toBeGreaterThanOrEqual(900)
+  })
+
+  it("fits the published levels nearest 5% and 95%, so a skewed tail cannot squash the past", () => {
+    // Like Hormuz: 0 to 8 ships, and a 1-in-100 chance of a reopening near 37.
+    const tails = forecast(400)
+    tails.quantiles = {
+      ...tails.quantiles,
+      "0.01": Array(28).fill(60),
+      "0.05": Array(28).fill(70),
+      "0.95": Array(28).fill(130),
+      "0.99": Array(28).fill(500),
+    }
+    const chart = chartLayout(tails, 692)
+    expect(chart.lo).toBeLessThanOrEqual(70)
+    expect(chart.hi).toBeGreaterThanOrEqual(130)
+    expect(chart.hi).toBeLessThan(200)
+    // A path beyond them runs along the frame.
+    expect(chart.y(500)).toBe(chart.top)
+    expect(miniChartLayout(tails, 300).hi).toBeLessThan(130)
+  })
+
+  it("falls back to the outermost levels a forecast has, as an older replay has only 0.1 to 0.9", () => {
+    const chart = chartLayout(forecast(400), 692)
+    expect(chart.hi).toBeGreaterThanOrEqual(120)
+    expect(Number.isFinite(chart.hi)).toBe(true)
   })
 
   it("starts from the first day when the history is shorter", () => {
@@ -206,6 +258,18 @@ describe("miniChartLayout", () => {
     // Like the panel's chart, the forecast starts on the last daily value, its main mark.
     const now = { x: chart.x(chart.origin), y: chart.y(shown.values[399]) }
     expect(calls.find(({ color }) => color === "pale")).toMatchObject(now)
+    // Unlike it, a card draws the most likely value, to a mark at its end.
+    for (let day = 1; day <= 28; day++)
+      expect(calls).toContainEqual({
+        x: chart.x(chart.origin + day),
+        y: chart.y(38),
+        color: "pale",
+      })
+    expect(calls).toContainEqual({
+      x: chart.right + 1,
+      y: chart.y(38) + 1,
+      color: "pale",
+    })
   })
 
   it("shows the days of the panel's wide chart", () => {

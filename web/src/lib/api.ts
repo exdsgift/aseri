@@ -15,6 +15,8 @@ export type CatalogEntry = {
   note?: string | null
   // Whether its values follow the week: GPR's and Wikipedia's do.
   weekly?: boolean
+  // How the real days moved together within a forecast: the possible paths follow it.
+  day_to_day_tie?: { rho: number; n: number }
   links: { latest: string; actuals: string; replay: string }
 }
 type Latest = {
@@ -70,6 +72,8 @@ export type Forecast = {
   actuals: number[]
   // Made after the fact, with only the data up to its day.
   backtest: boolean
+  // "trading_day" for Brent, whose days ahead skip weekends and holidays; "day" when absent.
+  horizonUnit?: string
 }
 
 // `forecasts` holds the replay's 120 days, oldest first, then today's forecast:
@@ -78,6 +82,7 @@ export type Forecast = {
 // `staleSince` is the day the data fell behind, while the pipeline cannot refresh it.
 // `madeOn` is the day today's forecast was made: GPR moves weekly, so often not today.
 // `weekly` says its values follow the week.
+// `rho` ties each day of a possible path to the day before.
 export type Series = {
   id: string
   today: Today
@@ -87,6 +92,7 @@ export type Series = {
   madeOn: string
   note: string | null
   weekly: boolean
+  rho: number
 }
 
 // Relative to the page, which Pages serves under /aseri/.
@@ -188,6 +194,7 @@ export async function loadSeries(
     quantiles,
     actuals: actuals.observation.slice(origin + 1, origin + 1 + days),
     backtest: mode === "retrospective",
+    horizonUnit: entry.horizon_unit,
   })
   return {
     id: entry.series_id,
@@ -230,5 +237,7 @@ export async function loadSeries(
     madeOn: latest.forecast_date,
     note: entry.note ?? null,
     weekly: entry.weekly ?? false,
+    // A catalog cached from before the tie was published draws independent days.
+    rho: entry.day_to_day_tie?.rho ?? 0,
   }
 }
