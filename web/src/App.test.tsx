@@ -169,7 +169,7 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     "Forecast made",
   ])
   expect(panel.getByRole("img").getAttribute("aria-label")).toBe(
-    "Geopolitical risk: daily values and their 7-day average, 181 on Oct 26, then the forecast to Nov 23: most likely 168, 8 in 10 between 111 and 251."
+    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: most likely 168, 8 in 10 between 111 and 251."
   )
   expect(fetch.mock.calls.map(([url]) => url).toSorted()).toEqual(
     Object.keys(published).toSorted()

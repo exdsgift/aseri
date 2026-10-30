@@ -14,9 +14,10 @@ export function insideSoFar({ actuals, quantiles }: Forecast) {
   }
 }
 
-// The 7-day average's range over the last year, the backdrop of every interval row.
-export function yearRange(averages: number[]) {
-  const year = averages.slice(-365)
+// The daily value's range over the last year, the backdrop of every interval row:
+// the rows forecast daily values, so the range is of the same quantity.
+export function yearRange(values: number[]) {
+  const year = values.slice(-365)
   return [Math.min(...year), Math.max(...year)]
 }
 

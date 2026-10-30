@@ -6,9 +6,84 @@ import {
   dateTicks,
   forecastAt,
   nudgeApart,
+  paintChart,
   valueScale,
   valueTicks,
 } from "./chart"
+
+describe("paintChart", () => {
+  // A weekly cycle, so the last day (110) sits well below its 7-day average (about 150).
+  const values = Array.from({ length: 60 }, (_, day) =>
+    day % 7 === 3 ? 110 : 160
+  )
+  const forecast: Forecast = {
+    series: "",
+    unit: "",
+    attribution: "",
+    dates: Array(60).fill(""),
+    values,
+    averages: values.map((_, day) => {
+      const week = values.slice(Math.max(0, day - 6), day + 1)
+      return week.reduce((sum, value) => sum + value, 0) / week.length
+    }),
+    targetDates: Array(28).fill(""),
+    quantiles: Object.fromEntries(
+      [
+        ["0.1", 120],
+        ["0.25", 140],
+        ["0.5", 155],
+        ["0.75", 170],
+        ["0.9", 190],
+      ].map(([level, value]) => [level, Array(28).fill(value)])
+    ),
+    actuals: [],
+    backtest: false,
+  }
+  const colors = {
+    gold: "gold",
+    pale: "pale",
+    muted: "muted",
+    frame: "frame",
+    focus: "focus",
+    label: "label",
+    real: "real",
+  }
+  const chart = chartLayout(forecast, 692)
+  const calls: { x: number; y: number; color: string }[] = []
+  paintChart(
+    (x, y, color) => calls.push({ x, y, color }),
+    chart,
+    forecast,
+    colors
+  )
+  // What the reader sees: the last colour painted on each pixel.
+  const seen = new Map(calls.map(({ x, y, color }) => [`${x},${y}`, color]))
+  const now = { x: chart.x(chart.origin), y: chart.y(values[chart.origin]) }
+
+  it("starts the forecast on the point it marks as now: the last daily value, the quantity forecast", () => {
+    expect(forecast.averages[chart.origin]).toBeGreaterThan(145)
+    expect(seen.get(`${now.x},${now.y}`)).toBe("gold")
+    const median = calls.find(({ color }) => color === "pale")
+    expect(median).toMatchObject(now)
+    // The history's main line runs through every daily value it shows.
+    for (let day = chart.first; day <= chart.origin; day++)
+      expect(calls).toContainEqual({
+        x: chart.x(day),
+        y: chart.y(values[day]),
+        color: "gold",
+      })
+  })
+
+  it("keeps the 7-day average as a dimmer line that stops at the origin", () => {
+    const average = calls.filter(({ color }) => color === "label")
+    expect(average).toContainEqual({
+      x: now.x,
+      y: chart.y(forecast.averages[chart.origin]),
+      color: "label",
+    })
+    expect(Math.max(...average.map(({ x }) => x))).toBe(now.x)
+  })
+})
 
 describe("chartLayout", () => {
   // `days` daily values, then 28 days ahead.
@@ -37,6 +112,14 @@ describe("chartLayout", () => {
     expect([chart.narrow, chart.first]).toEqual([true, 372])
   })
 
+  it("fits every daily value it shows, so the main line is never clipped", () => {
+    const spiky = forecast(400)
+    spiky.values = spiky.values.map((value, day) => (day === 390 ? 900 : value))
+    const chart = chartLayout(spiky, 692)
+    expect(chart.y(900)).toBeGreaterThan(chart.top)
+    expect(chart.hi).toBeGreaterThanOrEqual(900)
+  })
+
   it("starts from the first day when the history is shorter", () => {
     expect(chartLayout(forecast(10), 692).first).toBe(0)
   })
@@ -53,24 +136,21 @@ describe("chartLayout", () => {
 })
 
 describe("valueScale", () => {
-  // Fifty quiet days and one spike.
-  const daily = [...Array(50).fill(150), 1000]
-
-  it("fits the 7-day line and the bands, with an 8% margin", () => {
-    const scale = valueScale([100, 200], daily, 0, 100)
+  it("fits every value it must show, with an 8% margin", () => {
+    const scale = valueScale([100, 150, 200], 0, 100)
     expect(scale.lo).toBeCloseTo(92)
     expect(scale.hi).toBeCloseTo(208)
+    expect(scale.y(150)).toBe(50)
   })
 
-  it("leaves out the 2% most extreme daily values, which sit on the edge", () => {
-    const scale = valueScale([100, 200], daily, 0, 100)
-    expect(scale.y(150)).toBe(50)
+  it("keeps anything beyond it on the edge", () => {
+    const scale = valueScale([100, 200], 0, 100)
     expect(scale.y(1000)).toBe(0)
     expect(scale.y(-1000)).toBe(100)
   })
 
   it("never goes below zero", () => {
-    expect(valueScale([2, 100], [50], 0, 100).lo).toBe(0)
+    expect(valueScale([2, 100], 0, 100).lo).toBe(0)
   })
 })
 

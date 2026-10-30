@@ -8,8 +8,8 @@ import { formatValue, monthDay } from "@/lib/format"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 
 const legend = [
-  ["Daily value", "size-1 bg-muted-foreground"],
-  ["7-day average", "h-0.5 w-4 bg-primary"],
+  ["Daily value", "h-0.5 w-4 bg-primary"],
+  ["7-day average", "h-0.5 w-4 bg-muted-foreground"],
   ["What happened", "size-1 bg-white"],
   ["Most likely", "h-0.5 w-4 bg-gold-pale"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
@@ -31,6 +31,7 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
   const target = monthDay(forecast.targetDates[end])
   const made = monthDay(forecast.dates.at(-1)!)
   const dataTo = monthDay(forecasts[last].dates.at(-1)!)
+  const lastValue = formatValue(forecast.values.at(-1)!)
   const average = formatValue(forecast.averages.at(-1)!)
   // The target day is the hero's step, the last one.
   const [targetDay] = stepRows(forecast, [end + 1])
@@ -103,7 +104,7 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
       </div>
       <PixelForecastChart
         forecast={forecast}
-        summary={`${forecast.series}: daily values and their 7-day average, ${average} on ${made}, then the ${forecast.backtest ? "backtest" : "forecast"} to ${target}: most likely ${at("0.5")}, 8 in 10 between ${at("0.1")} and ${at("0.9")}.${sofar.of ? ` In white, what happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
+        summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: most likely ${at("0.5")}, 8 in 10 between ${at("0.1")} and ${at("0.9")}.${sofar.of ? ` In white, what happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
       />
       <ul className="flex flex-wrap gap-x-4 gap-y-2 text-muted-foreground">
         {legend.map(([name, swatch]) => (
@@ -120,7 +121,7 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
         forecast={forecast}
         today={live}
         steps={steps}
-        year={yearRange(forecasts[last].averages)}
+        year={yearRange(forecasts[last].values)}
         baseline={today.baseline}
         baselineLabel={today.baselineLabel}
       />

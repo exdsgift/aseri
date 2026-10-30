@@ -135,7 +135,7 @@ it("lists that day's value, then each step's ranges as text and, once known, its
     "In 28 days · Nov 23 most likely 168 5 in 10: 136-207 8 in 10: 111-251",
   ])
   expect(screen.getByText(/^Thin line/).textContent).toBe(
-    "Thin line: the 1-year range of the 7-day average, 77 to 362. Dotted: the day the forecast was made."
+    "Thin line: the 1-year range of the daily value, 22 to 501. Dotted: the day the forecast was made."
   )
 
   fireEvent.change(slider(), { target: { value: "0" } })

@@ -158,7 +158,7 @@ export function Intervals({
         </span>
       </div>
       <p className="text-muted-foreground">
-        Thin line: the 1-year range of the 7-day average, {formatValue(year[0])}{" "}
+        Thin line: the 1-year range of the daily value, {formatValue(year[0])}{" "}
         to {formatValue(year[1])}. Dotted: the day the forecast was made.
       </p>
     </div>

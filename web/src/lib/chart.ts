@@ -3,18 +3,11 @@ import { type Forecast } from "@/lib/api"
 // CSS pixels per art pixel: the chart is drawn small and scaled up without smoothing.
 export const pixel = 2
 
-// The scale fits the 7-day line and the bands, and the daily values without their
-// 2% most extreme days, which sit on the edge. y runs from top to bottom, in art pixels.
-export function valueScale(
-  fitted: number[],
-  daily: number[],
-  top: number,
-  bottom: number
-) {
-  const sorted = daily.toSorted((a, b) => a - b)
-  const percentile = (p: number) => sorted[Math.round(p * (sorted.length - 1))]
-  const low = Math.min(...fitted, percentile(0.02))
-  const high = Math.max(...fitted, percentile(0.98))
+// The scale fits every value the chart shows, so no line is clipped into looking like
+// the chart's edge. y runs from top to bottom, in art pixels.
+export function valueScale(fitted: number[], top: number, bottom: number) {
+  const low = Math.min(...fitted)
+  const high = Math.max(...fitted)
   const margin = (high - low || 1) * 0.08
   const lo = Math.max(0, low - margin)
   const hi = high + margin
@@ -105,11 +98,12 @@ export function chartLayout(forecast: Forecast, width: number) {
     )
   const scale = valueScale(
     [
+      ...forecast.values.slice(first),
       ...forecast.averages.slice(first),
       ...forecast.quantiles["0.1"],
       ...forecast.quantiles["0.9"],
+      ...forecast.actuals,
     ],
-    [...forecast.values.slice(first), ...forecast.actuals],
     top,
     bottom
   )
@@ -216,25 +210,30 @@ export function paintChart(
     color.pale
   )
 
-  // Daily values as dots, 2 art pixels wide when the days are far enough apart.
-  const dot = (right - left) / chart.span >= 3 ? 2 : 1
-  for (let day = first; day <= origin; day++)
-    square(plot, x(day), y(values[day]), dot, color.label)
-  // What happened after the forecast was made, in white over the bands.
-  actuals.forEach((value, k) =>
-    square(plot, x(origin + 1 + k), y(value), dot, color.real)
-  )
+  // The 7-day average, dimmer: context only, since the forecast is of the daily value.
   polyline(
     plot,
     averages
       .slice(first)
       .map((average, i): Point => [x(first + i), y(average)]),
+    color.label
+  )
+  // The daily values, the quantity forecast, so the forecast carries on from where they end.
+  polyline(
+    plot,
+    values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
     color.gold
+  )
+  // What happened after the forecast was made, in white over the bands,
+  // as dots 2 art pixels wide when the days are far enough apart.
+  const dot = (right - left) / chart.span >= 3 ? 2 : 1
+  actuals.forEach((value, k) =>
+    square(plot, x(origin + 1 + k), y(value), dot, color.real)
   )
 
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.focus)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
-  square(plot, xo - 1, y(averages[origin]) - 1, 3, color.gold)
+  square(plot, xo - 1, y(last) - 1, 3, color.gold)
   square(
     plot,
     right - 1,

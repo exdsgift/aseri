@@ -65,8 +65,8 @@ describe("stepRows", () => {
 describe("yearRange", () => {
   it("is the lowest and the highest of the last 365 days", () => {
     // 366 days: the first one is more than a year old.
-    const averages = [5, ...Array(362).fill(100), 50, 300, 120]
-    expect(yearRange(averages)).toEqual([50, 300])
+    const values = [5, ...Array(362).fill(100), 50, 300, 120]
+    expect(yearRange(values)).toEqual([50, 300])
   })
 })
 
