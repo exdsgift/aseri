@@ -59,15 +59,19 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         # Whatever breaks a download, a file or a contract fails its own series, never the run.
         except Exception as error:  # noqa: BLE001
             skipped[series.id] = ("failed", f"{type(error).__name__}: {error}")
-    # First, so a deep rewrite of any series stops the run before it archives or publishes anything, actuals included.
-    # A manual run with accept_revisions ticked, after a human has reviewed the rewrite, records it instead.
-    for series, observed, as_of, _ in fetched.values():
+    # First, so a deep rewrite holds its series before any of its data is archived: it keeps its last good files,
+    # and daily.yml opens an issue. A manual run with accept_revisions ticked, after a human review, records it.
+    for series, observed, as_of, _ in list(fetched.values()):
         if os.environ.get("ASERI_ACCEPT_REVISIONS") == "true":
             print(
                 f"{series.id}: revisions accepted for this run, unchecked", flush=True
             )
-        else:
+            continue
+        try:
             archive.check_revisions(archive_dir, series, observed, as_of)
+        except archive.RevisionHold as hold:
+            del fetched[series.id]
+            skipped[series.id] = ("held", str(hold))
     ran_today = archive.ran_on(archive_dir, today)
     model, runs, issued = None, [], {}
     for series, observed, as_of, upstream in fetched.values():
@@ -188,12 +192,13 @@ def main(api_dir: Path, archive_dir: Path) -> None:
     if not entries:
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")
     publish_catalog(api_dir, entries, levels, generated_at)
-    # The series the page now shows as late, read from what it reads, for daily.yml to open an issue on.
+    # The series the page now shows as late, read from what it reads, and the held ones, for daily.yml's issues.
     if "GITHUB_OUTPUT" in os.environ:
         catalog = json.loads((api_dir / "series.json").read_text(encoding="utf-8"))
         late = [s["series_id"] for s in catalog["series"] if s["stale_since"]]
+        held = [id for id, (status, _) in skipped.items() if status == "held"]
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as file:
-            file.write(f"stale={','.join(late)}\n")
+            file.write(f"stale={','.join(late)}\nrevision_hold={','.join(held)}\n")
 
 
 def report(rows) -> None:
@@ -209,9 +214,4 @@ def report(rows) -> None:
 
 
 if __name__ == "__main__":
-    try:
-        main(Path(sys.argv[1]), Path(sys.argv[2]))
-    except archive.RevisionHold as hold:
-        print(hold, file=sys.stderr)
-        # 3, not 1, so daily.yml can tell a hold from a crash and open an issue.
-        sys.exit(3)
+    main(Path(sys.argv[1]), Path(sys.argv[2]))

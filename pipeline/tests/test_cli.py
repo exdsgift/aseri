@@ -4,8 +4,6 @@ import hashlib
 import io
 import json
 import re
-import runpy
-import sys
 from dataclasses import replace
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -524,43 +522,6 @@ def test_a_revision_without_a_new_day_is_archived_as_it_is_seen(
     assert day2["forecasts"] == day1["forecasts"]
 
 
-def test_a_rewrite_older_than_the_revision_window_stops_the_run_before_it_archives_or_publishes(
-    tmp_path, monkeypatch, capsys
-):
-    archive_dir = tmp_path / "archive"
-    days = pd.date_range("2023-01-01", "2026-10-26", freq="D")
-    history = pd.DataFrame({"date": days, "GPRD": 100.0 + np.arange(len(days)) % 50})
-    archive.write(
-        archive_dir,
-        [
-            archive.SeriesRun(
-                GPR_DAILY, [], history.set_index("date")["GPRD"], date(2026, 10, 27), {}
-            )
-        ],
-        code_commit="0" * 40,
-        run_url=None,
-        generated_at=datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
-    )
-    archive_before = files(archive_dir)
-    history.loc[history["date"] == "2023-05-01", "GPRD"] = 250.0
-    rewritten = io.BytesIO()
-    history.to_stata(rewritten, write_index=False, convert_dates={"date": "td"})
-    monkeypatch.setattr(gpr, "download", lambda url: (rewritten.getvalue(), HEADERS))
-    # runpy runs __main__ afresh, so the guard goes where it imports load_model from.
-    monkeypatch.setattr("aseri.forecast.load_model", no_model)
-    monkeypatch.delitem(sys.modules, "aseri.__main__")
-    monkeypatch.setattr(sys, "argv", ["aseri", str(tmp_path / "api"), str(archive_dir)])
-
-    # As daily.yml runs it: exit 3 is how the workflow tells a hold from a crash.
-    with pytest.raises(SystemExit) as stopped:
-        runpy.run_module("aseri", run_name="__main__")
-
-    assert stopped.value.code == 3
-    assert "2023-05-01" in capsys.readouterr().err
-    assert files(archive_dir) == archive_before
-    assert not (tmp_path / "api").exists()
-
-
 def test_a_reviewed_rewrite_goes_through_once_it_is_accepted(
     tmp_path, monkeypatch, stub_model
 ):
@@ -638,8 +599,9 @@ def test_data_past_its_expected_lag_warns_in_the_run_summary_and_on_the_page_and
     assert entry["latest_reference_date"] == "2026-10-26"
     # The same day every run: the page and the alert agree with the summary, with no state kept.
     assert entry["stale_since"] == stale_since
-    assert outputs.read_text(encoding="utf-8") == (
-        "stale=gpr_daily\n" if stale_since else "stale=\n"
+    assert (
+        outputs.read_text(encoding="utf-8")
+        == ("stale=gpr_daily\n" if stale_since else "stale=\n") + "revision_hold=\n"
     )
 
 
@@ -967,6 +929,52 @@ def test_a_series_whose_source_fails_keeps_its_last_good_files_while_the_others_
         read(day2 / "actuals.json")["observation"]
         == read(day1 / "actuals.json")["observation"]
     )
+
+
+def test_a_rewrite_older_than_the_revision_window_holds_only_its_own_series_and_names_it_for_the_alert(
+    tmp_path, monkeypatch, stub_model, summary, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
+
+    # The next weekly batch, with Suez rewritten four months back, far past its 30-day revision window.
+    lanes = sea_lanes("2026-11-01")
+    lanes["Suez Canal"].loc["2026-07-01"] = 50
+    serve(monkeypatch, lanes, edited=NEXT_EDIT)
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 5, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    # Nothing of the rewritten file is archived, while the other lanes go on.
+    manifest = read(archive_dir / "runs" / "2026-11-05.json")
+    assert "suez_transits" not in manifest["upstream"]
+    assert {f["target"] for f in manifest["forecasts"]} == {
+        "hormuz_transits",
+        "bab_el_mandeb_transits",
+        "taiwan_strait_transits",
+    }
+    deltas = pd.read_csv(archive_dir / "target-data" / "deltas" / "2026-11-05.csv")
+    assert "suez_transits" not in set(deltas["target"])
+    row = [line for line in summary().splitlines() if "suez" in line][-1]
+    assert row.startswith("| suez_transits | held | 2026-10-25 |")
+    assert "2026-07-01" in row
+    day1 = tmp_path / "day1" / "series" / "suez_transits"
+    day2 = tmp_path / "day2" / "series" / "suez_transits"
+    assert read(day2 / "latest.json") == read(day1 / "latest.json")
+    assert "revision_hold=suez_transits\n" in output.read_text(encoding="utf-8")
 
 
 class SuezBreaksTheModel(StubModel):

@@ -80,17 +80,9 @@ jobs:
         env:
           # Empty on the cron, "true" only on a manual run with the box ticked.
           ASERI_ACCEPT_REVISIONS: ${{ inputs.accept_revisions }}
-        run: |
-          # Exit 3 is a revision hold (aseri/__main__.py): flagged here, by a step that succeeds, and failed in the next.
-          status=0
-          uv run python -m aseri ../site/api/v1 ../archive || status=$?
-          if [ "$status" -eq 3 ]; then echo "revision_hold=true" >> "$GITHUB_OUTPUT"; else exit "$status"; fi
-      - name: Hold publication after a rewrite older than the revision window
-        if: steps.run.outputs.revision_hold == 'true'
-        run: |
-          # Failing the build skips archive and deploy, so the last good site stays up.
-          echo "::error::Upstream rewrote data older than its revision window: nothing is archived or deployed. See the step above."
-          exit 1
+        # A series whose upstream rewrote data older than its revision window is held: it keeps its last good files,
+        # and its id goes to the revision_hold output, for revision-alert. The other series go on.
+        run: uv run python -m aseri ../site/api/v1 ../archive
       - name: Collect the files this run adds to the archive
         id: adds
         working-directory: archive
@@ -166,7 +158,7 @@ jobs:
   revision-alert:
     needs: build
     # Like archive and deploy, only master's runs count: a test run on a branch opens no issue.
-    if: failure() && github.ref == 'refs/heads/master' && needs.build.outputs.revision_hold == 'true'
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' && needs.build.outputs.revision_hold != '' }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -175,19 +167,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          HELD: ${{ needs.build.outputs.revision_hold }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          title="Revision hold: upstream rewrote data older than its revision window"
-          # Every daily run fails the same way until someone acts, so one open issue is enough.
+          title="Revision hold: $HELD"
+          # Every daily run holds the same series until someone acts, so one open issue is enough.
           if [ "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq length)" -gt 0 ]; then
             echo "An issue is open already"
             exit 0
           fi
-          gh issue create --title "$title" --body "The daily run stopped before archiving or deploying anything: upstream changed values older than the series' revision window. The site keeps its last good forecasts.
+          gh issue create --title "$title" --body "Upstream changed values older than the revision window of these series, so the daily run archived none of their new data and kept their last good files up. The other series went on as usual.
 
           Run: $RUN_URL
 
-          The step \"Fetch, forecast, archive and publish\" names the series and the oldest changed day. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite, and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
+          The run summary names the oldest changed day of each held series. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite (for every series, so check none is still broken), and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
 
   # Opens an issue when the page shows a series as late; like revision-alert it runs only gh, with issues: write alone.
   stale-alert:
