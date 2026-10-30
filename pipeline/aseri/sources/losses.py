@@ -26,6 +26,7 @@ def fetch(url: str) -> tuple[pd.Series, date, dict]:
         "sha256": hashlib.sha256(raw).hexdigest(),
         "etag": headers.get("ETag"),
         # Flagged, never clipped: a fall is the General Staff correcting its own total.
+        # shortcut: flagged in the run manifest only, as none happened in 1,709 reports; say so on the page if one does.
         "revisions": observed.index[observed < 0].strftime("%Y-%m-%d").tolist(),
     }
     return observed, as_of, upstream
