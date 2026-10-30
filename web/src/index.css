@@ -198,4 +198,42 @@
   html {
     @apply font-sans;
   }
+  /* A picked card brings the panel into view: smoothly, unless the reader asks for less motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/* A panel change: the 4x4 Bayer dither of the bands, 3 px a cell, in 8 steps of 30 ms,
+   from 2 cells in 16 to all of them. Used with motion-safe: only. */
+@theme {
+  --animate-dither-in: dither-in 240ms step-end;
+  @keyframes dither-in {
+    0% {
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 4 4' shape-rendering='crispEdges'><path d='M0 0h1v1H0zM2 2h1v1H2z'/></svg>");
+    }
+    12.5% {
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 4 4' shape-rendering='crispEdges'><path d='M0 0h1v1H0zM2 0h1v1H2zM0 2h1v1H0zM2 2h1v1H2z'/></svg>");
+    }
+    25% {
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 4 4' shape-rendering='crispEdges'><path d='M0 0h1v1H0zM2 0h1v1H2zM1 1h1v1H1zM0 2h1v1H0zM2 2h1v1H2zM3 3h1v1H3z'/></svg>");
+    }
+    37.5% {
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 4 4' shape-rendering='crispEdges'><path d='M0 0h1v1H0zM2 0h1v1H2zM1 1h1v1H1zM3 1h1v1H3zM0 2h1v1H0zM2 2h1v1H2zM1 3h1v1H1zM3 3h1v1H3z'/></svg>");
+    }
+    50% {
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 4 4' shape-rendering='crispEdges'><path d='M0 0h1v1H0zM1 0h1v1H1zM2 0h1v1H2zM1 1h1v1H1zM3 1h1v1H3zM0 2h1v1H0zM2 2h1v1H2zM3 2h1v1H3zM1 3h1v1H1zM3 3h1v1H3z'/></svg>");
+    }
+    62.5% {
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 4 4' shape-rendering='crispEdges'><path d='M0 0h1v1H0zM1 0h1v1H1zM2 0h1v1H2zM3 0h1v1H3zM1 1h1v1H1zM3 1h1v1H3zM0 2h1v1H0zM1 2h1v1H1zM2 2h1v1H2zM3 2h1v1H3zM1 3h1v1H1zM3 3h1v1H3z'/></svg>");
+    }
+    75% {
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 4 4' shape-rendering='crispEdges'><path d='M0 0h1v1H0zM1 0h1v1H1zM2 0h1v1H2zM3 0h1v1H3zM0 1h1v1H0zM1 1h1v1H1zM3 1h1v1H3zM0 2h1v1H0zM1 2h1v1H1zM2 2h1v1H2zM3 2h1v1H3zM1 3h1v1H1zM2 3h1v1H2zM3 3h1v1H3z'/></svg>");
+    }
+    87.5% {
+      mask-image: none;
+    }
+  }
 }

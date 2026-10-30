@@ -1,5 +1,5 @@
 import { Wordmark } from "@/components/Wordmark"
-import { type GprToday } from "@/lib/api"
+import { type Today } from "@/lib/api"
 import {
   dayLabel,
   formatValue,
@@ -8,7 +8,7 @@ import {
   weekday,
 } from "@/lib/format"
 
-export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
+export function Hero({ today, failed }: { today?: Today; failed: boolean }) {
   return (
     <section className="flex min-h-svh flex-col items-center justify-center gap-9 px-4 py-14 text-center text-primary uppercase">
       <Wordmark />
@@ -28,7 +28,7 @@ export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
               <span className="whitespace-nowrap">{today.baselineLabel}</span>
             </p>
             <p>
-              {dayLabel(today.targetDate)}, {today.weeksAhead} weeks from the
+              {dayLabel(today.targetDate)}, {today.daysAhead / 7} weeks from the
               last data: most likely {formatValue(today.mostLikely)}. 8 in 10
               between {formatValue(today.low)} and {formatValue(today.high)}.
               (Last {weekday(today.referenceDate)}:{" "}

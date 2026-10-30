@@ -8,6 +8,7 @@ import {
 
 import { type Forecast } from "@/lib/api"
 import { monthDay } from "@/lib/format"
+import { isShortcut } from "@/lib/keys"
 
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -32,14 +33,7 @@ export function ReplaySlider({
   // a focused slider already moves itself on the arrows.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        (event.target instanceof Element &&
-          event.target.closest("input, textarea, select, [contenteditable]"))
-      )
-        return
+      if (!isShortcut(event)) return
       const move = {
         ArrowLeft: (day: number) => Math.max(0, day - 1),
         ArrowRight: (day: number) => Math.min(last, day + 1),

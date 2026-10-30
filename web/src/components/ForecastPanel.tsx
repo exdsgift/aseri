@@ -3,7 +3,7 @@ import { useId, useState } from "react"
 import { Intervals } from "@/components/Intervals"
 import { PixelForecastChart } from "@/components/PixelForecastChart"
 import { ReplaySlider } from "@/components/ReplaySlider"
-import { type Gpr } from "@/lib/api"
+import { type Series } from "@/lib/api"
 import { formatValue, monthDay } from "@/lib/format"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 
@@ -19,9 +19,9 @@ const legend = [
 
 // A game sheet: today's forecast or a past one from the replay, its pixel chart,
 // its intervals and where the data comes from.
-export function ForecastPanel({ gpr }: { gpr: Gpr }) {
+export function ForecastPanel({ series }: { series: Series }) {
   const title = useId()
-  const { forecasts, steps, today, staleSince, madeOn } = gpr
+  const { forecasts, steps, today, staleSince, madeOn, note } = series
   // UTC, like every date the pipeline writes.
   const madeToday = madeOn === new Date().toISOString().slice(0, 10)
   const last = forecasts.length - 1
@@ -61,6 +61,8 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
           </span>
         </p>
       </div>
+      {/* Such as Taiwan's tracking dropouts, or a newest value under review. */}
+      {note && <p className="text-key">Note: {note}</p>}
       {/* The same lines whatever the day, each short enough not to wrap on a 360 px phone,
           so that the chart and the slider never move under a finger dragging the replay. */}
       {/* Not a live region: re-read on every slider step, it would pile up announcements;

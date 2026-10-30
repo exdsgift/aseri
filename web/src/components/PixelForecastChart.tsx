@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -11,36 +12,37 @@ import { type Forecast } from "@/lib/api"
 import {
   chartLayout,
   dateTicks,
+  miniChartLayout,
   nudgeApart,
   paintChart,
   pixel,
   textWidth,
   valueTicks,
   type ChartLayout,
+  type Layout,
 } from "@/lib/chart"
 import { formatValue, monthDay } from "@/lib/format"
 
-export function PixelForecastChart({
-  forecast,
-  summary,
-}: {
-  forecast: Forecast
-  summary: string
-}) {
-  const box = useRef<HTMLDivElement>(null)
+// Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens.
+function usePixelChart<L extends Layout>(
+  forecast: Forecast,
+  layout: (forecast: Forecast, width: number) => L
+) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
-  const [hovered, setHovered] = useState<number>()
   const chart = useMemo(
-    () => (width ? chartLayout(forecast, width) : undefined),
-    [forecast, width]
+    () => (width ? layout(forecast, width) : undefined),
+    [forecast, width, layout]
   )
-
-  useEffect(() => {
+  const box = useCallback((element: HTMLElement | null) => {
+    if (!element) return
+    // At once too, before the first paint: a chart mounted as a new series opens would
+    // otherwise show a frame with no height, and everything under it would jump.
+    setWidth(Math.floor(element.getBoundingClientRect().width))
     const observer = new ResizeObserver(([entry]) =>
       setWidth(Math.floor(entry.contentRect.width))
     )
-    observer.observe(box.current!)
+    observer.observe(element)
     return () => observer.disconnect()
   }, [])
 
@@ -69,6 +71,47 @@ export function PixelForecastChart({
     )
   }, [chart, forecast])
 
+  // Nothing until the box is measured: the canvas's default 300 px would widen it.
+  const size = {
+    width: chart?.art.width ?? 0,
+    height: chart?.art.height ?? 0,
+    style: chart && {
+      width: chart.art.width * pixel,
+      height: chart.art.height * pixel,
+    },
+  }
+  return { box, canvas, width, chart, size }
+}
+
+// A card's chart: the same drawing, small and silent, since the card says it in words.
+// A span, as a button may hold only phrasing content.
+export function MiniForecastChart({ forecast }: { forecast: Forecast }) {
+  const { box, canvas, size } = usePixelChart(forecast, miniChartLayout)
+  return (
+    <span ref={box} className="block">
+      <canvas
+        ref={canvas}
+        aria-hidden
+        {...size}
+        className="block [image-rendering:pixelated]"
+      />
+    </span>
+  )
+}
+
+export function PixelForecastChart({
+  forecast,
+  summary,
+}: {
+  forecast: Forecast
+  summary: string
+}) {
+  const { box, canvas, width, chart, size } = usePixelChart(
+    forecast,
+    chartLayout
+  )
+  const [hovered, setHovered] = useState<number>()
+
   const point = (event: PointerEvent<HTMLCanvasElement>) =>
     chart &&
     setHovered(
@@ -84,15 +127,8 @@ export function PixelForecastChart({
         ref={canvas}
         role="img"
         aria-label={summary}
-        width={chart?.art.width ?? 0}
-        height={chart?.art.height ?? 0}
+        {...size}
         className="block [image-rendering:pixelated]"
-        style={
-          chart && {
-            width: chart.art.width * pixel,
-            height: chart.art.height * pixel,
-          }
-        }
         onPointerMove={point}
         onPointerDown={point}
         // A tap's tooltip stays up: touch fires pointerleave as the finger lifts.

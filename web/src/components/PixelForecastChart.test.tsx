@@ -1,11 +1,11 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
-import actuals from "@/fixtures/actuals.json"
-import latest from "@/fixtures/latest.json"
-import replay from "@/fixtures/replay.json"
 import catalog from "@/fixtures/series.json"
-import { loadGpr, type Forecast } from "@/lib/api"
+import actuals from "@/fixtures/series/gpr_daily/actuals.json"
+import latest from "@/fixtures/series/gpr_daily/latest.json"
+import replay from "@/fixtures/series/gpr_daily/replay.json"
+import { loadSeries, type Forecast } from "@/lib/api"
 
 import { PixelForecastChart } from "./PixelForecastChart"
 
@@ -37,13 +37,12 @@ beforeEach(async () => {
     fillRect() {},
   } as never)
   const published: Record<string, unknown> = {
-    "api/v1/series.json": catalog,
     "api/v1/series/gpr_daily/latest.json": latest,
     "api/v1/series/gpr_daily/actuals.json": actuals,
     "api/v1/series/gpr_daily/replay.json": replay,
   }
   vi.stubGlobal("fetch", async (url: string) => Response.json(published[url]))
-  const { forecasts } = await loadGpr()
+  const { forecasts } = await loadSeries(catalog.series[0], { replay: true })
   forecast = forecasts.at(-1)!
   backtest = forecasts[0]
 })

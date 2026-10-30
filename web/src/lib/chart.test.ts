@@ -5,6 +5,7 @@ import {
   chartLayout,
   dateTicks,
   forecastAt,
+  miniChartLayout,
   nudgeApart,
   paintChart,
   valueScale,
@@ -145,6 +146,71 @@ describe("chartLayout", () => {
       expect(chart.dayAt(0)).toBe(chart.first)
       expect(chart.dayAt(chart.art.width)).toBe(chart.origin + 28)
     }
+  })
+})
+
+describe("miniChartLayout", () => {
+  // 400 days with a spike, then `ahead` days with the five levels the chart draws.
+  const forecast = (ahead: number): Forecast => {
+    const values = Array.from({ length: 400 }, (_, day) =>
+      day === 390 ? 300 : day % 7 === 3 ? 20 : 40
+    )
+    return {
+      series: "",
+      unit: "",
+      attribution: "",
+      dates: Array(400).fill(""),
+      values,
+      averages: values,
+      targetDates: Array(ahead).fill(""),
+      quantiles: Object.fromEntries(
+        [
+          ["0.1", 0],
+          ["0.25", 30],
+          ["0.5", 38],
+          ["0.75", 45],
+          ["0.9", 60],
+        ].map(([level, value]) => [level, Array(ahead).fill(value)])
+      ),
+      actuals: [],
+      backtest: false,
+    }
+  }
+  const colors = {
+    gold: "gold",
+    pale: "pale",
+    muted: "muted",
+    frame: "frame",
+    focus: "focus",
+    label: "label",
+    real: "real",
+  }
+
+  it("fills a card's 64 px canvas edge to edge, and paints nothing outside it", () => {
+    const shown = forecast(28)
+    const chart = miniChartLayout(shown, 300)
+    expect(chart.art).toEqual({ width: 150, height: 32 })
+    const calls: { x: number; y: number; color: string }[] = []
+    paintChart(
+      (x, y, color) => calls.push({ x, y, color }),
+      chart,
+      shown,
+      colors
+    )
+
+    const xs = calls.map(({ x }) => x)
+    const ys = calls.map(({ y }) => y)
+    expect([Math.min(...xs), Math.max(...xs)]).toEqual([1, 149])
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(0)
+    expect(Math.max(...ys)).toBe(31)
+    // Like the panel's chart, the forecast starts on the last daily value, its main mark.
+    const now = { x: chart.x(chart.origin), y: chart.y(shown.values[399]) }
+    expect(calls.find(({ color }) => color === "pale")).toMatchObject(now)
+  })
+
+  it("shows the days of the panel's wide chart", () => {
+    expect(miniChartLayout(forecast(28), 300).first).toBe(400 - 56)
+    expect(miniChartLayout(forecast(14), 300).first).toBe(400 - 28)
   })
 })
 

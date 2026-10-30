@@ -71,21 +71,50 @@ export function valueTicks(lo: number, hi: number, parts = 3) {
   return ticks
 }
 
-// Where everything sits, in art pixels. Days count from the first of the daily
-// values: the origin is the last one, and the forecast days follow it.
+// Where the panel's chart puts everything, in art pixels.
 export function chartLayout(forecast: Forecast, width: number) {
   const narrow = width < 480
   const ahead = forecast.targetDates.length
+  return {
+    narrow,
+    // Room for the value ticks on the left, the end values on the right and the dates below.
+    ...layout(
+      forecast,
+      { width: Math.floor(width / pixel), height: narrow ? 130 : 160 },
+      narrow ? Math.max(21, ahead) : Math.max(28, 2 * ahead),
+      { left: 20, right: 27, top: 10, bottom: 13 }
+    ),
+  }
+}
+
+// A card's chart: the days of the panel's wide chart, 64 px tall, with no labels to make room for.
+export function miniChartLayout(forecast: Forecast, width: number) {
+  return layout(
+    forecast,
+    { width: Math.floor(width / pixel), height: 32 },
+    Math.max(28, 2 * forecast.targetDates.length),
+    // Just enough for the 3x3 marks at the ends and the base line.
+    { left: 1, right: 2, top: 1, bottom: 2 }
+  )
+}
+
+// Days count from the first of the daily values: the origin is the last one, and the
+// forecast days follow it. `shown` days of history, then the days ahead, fill the art
+// less its margins.
+function layout(
+  forecast: Forecast,
+  art: { width: number; height: number },
+  shown: number,
+  margin: { left: number; right: number; top: number; bottom: number }
+) {
+  const ahead = forecast.targetDates.length
   const origin = forecast.values.length - 1
-  const shown = narrow ? Math.max(21, ahead) : Math.max(28, 2 * ahead)
   const first = Math.max(0, origin + 1 - shown)
   const span = origin + ahead - first
-  const art = { width: Math.floor(width / pixel), height: narrow ? 130 : 160 }
-  // Room for the value ticks on the left, the end values on the right and the dates below.
-  const left = 20
-  const right = art.width - 27
-  const top = 10
-  const bottom = art.height - 13
+  const left = margin.left
+  const right = art.width - margin.right
+  const top = margin.top
+  const bottom = art.height - margin.bottom
   const x = (day: number) =>
     left + Math.round(((day - first) * (right - left)) / span)
   const dayAt = (artX: number) =>
@@ -108,7 +137,6 @@ export function chartLayout(forecast: Forecast, width: number) {
     bottom
   )
   return {
-    narrow,
     ahead,
     origin,
     first,
@@ -125,6 +153,7 @@ export function chartLayout(forecast: Forecast, width: number) {
 }
 
 export type ChartLayout = ReturnType<typeof chartLayout>
+export type Layout = ReturnType<typeof layout>
 type Plot = (x: number, y: number, color: string) => void
 type Point = [number, number]
 type Colors = Record<
@@ -166,7 +195,7 @@ function square(plot: Plot, x: number, y: number, size: number, color: string) {
 
 export function paintChart(
   plot: Plot,
-  chart: ChartLayout,
+  chart: Layout,
   forecast: Forecast,
   color: Colors
 ) {
