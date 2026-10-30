@@ -44,36 +44,50 @@ export function Sun({ radius }: { radius?: number }) {
       faint: css.getPropertyValue("--border"),
     }
     const draw = (frame: SunFrame) => {
-      context.clearRect(0, 0, width, artHeight)
+      // Pixels grouped by colour, in the order first painted, so later colours stay on top.
+      const byColor = new Map<string, number[]>()
       paintSun(
         (x, y, color) => {
-          context.fillStyle = color
-          context.fillRect(x, y, 1, 1)
+          if (!byColor.has(color)) byColor.set(color, [])
+          byColor.get(color)!.push(x, y)
         },
         width,
         radius,
         frame,
         colors
       )
+      context.clearRect(0, 0, width, artHeight)
+      for (const [color, xy] of byColor) {
+        context.fillStyle = color
+        for (let i = 0; i < xy.length; i += 2)
+          context.fillRect(xy[i], xy[i + 1], 1, 1)
+      }
     }
     if (reduced) return draw(stillSun)
 
-    // One tick every 260 ms, and none while the tab is hidden.
+    // One tick every 260 ms, and none while the tab is hidden or the hero is off screen.
     let step = 0
-    draw(sunFrame(step))
-    const run = () =>
-      document.hidden
-        ? undefined
-        : setInterval(() => draw(sunFrame(++step)), tick)
-    let timer = run()
-    const onVisibility = () => {
+    let onScreen = true
+    let timer: ReturnType<typeof setInterval> | undefined
+    const update = () => {
       clearInterval(timer)
-      timer = run()
+      timer =
+        onScreen && !document.hidden
+          ? setInterval(() => draw(sunFrame(++step)), tick)
+          : undefined
     }
-    document.addEventListener("visibilitychange", onVisibility)
+    const observer = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting
+      update()
+    })
+    draw(sunFrame(step))
+    update()
+    observer.observe(element)
+    document.addEventListener("visibilitychange", update)
     return () => {
       clearInterval(timer)
-      document.removeEventListener("visibilitychange", onVisibility)
+      observer.disconnect()
+      document.removeEventListener("visibilitychange", update)
     }
   }, [width, radius, reduced])
 
@@ -85,12 +99,10 @@ export function Sun({ radius }: { radius?: number }) {
       {/* Exactly 4 CSS px an art pixel: a few px wider than the layer, centred and clipped. */}
       <canvas
         ref={canvas}
-        className={`h-full shrink-0 origin-[50%_136px] [mask-image:linear-gradient(to_bottom,#000_40%,transparent_100%)] [image-rendering:pixelated] ${reduced ? "" : "animate-sun-pulse"}`}
+        className="h-full shrink-0 origin-[50%_136px] [mask-image:linear-gradient(to_bottom,#000_40%,transparent_100%)] [image-rendering:pixelated] motion-safe:animate-sun-pulse"
         style={{ width: width * art }}
       />
-      <div
-        className={`absolute inset-0 vignette ${reduced ? "opacity-70" : "animate-breathe"}`}
-      />
+      <div className="absolute inset-0 opacity-70 vignette motion-safe:animate-breathe" />
     </div>
   )
 }

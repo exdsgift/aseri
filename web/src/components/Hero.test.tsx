@@ -36,6 +36,8 @@ function advance(ms: number) {
   }
 }
 let fillRect: ReturnType<typeof vi.fn>
+// Says whether the sun is on screen, as an IntersectionObserver would.
+let onScreen: (shown: boolean) => void
 
 // jsdom lays nothing out and has no canvas: the test sets the size and counts the drawing.
 beforeEach(() => {
@@ -60,6 +62,20 @@ beforeEach(() => {
           this as never
         )
       }
+      disconnect() {}
+    }
+  )
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      constructor(callback: IntersectionObserverCallback) {
+        onScreen = (shown) =>
+          callback(
+            [{ isIntersecting: shown } as IntersectionObserverEntry],
+            this as never
+          )
+      }
+      observe() {}
       disconnect() {}
     }
   )
@@ -119,6 +135,18 @@ it("stops the sun while the tab is hidden, and starts it again on return", () =>
   expect(fillRect.mock.calls.length).toBeGreaterThan(drawn)
 })
 
+it("stops the sun while the hero is scrolled off screen", () => {
+  render(<Hero today={today} failed={false} />)
+
+  onScreen(false)
+  const drawn = fillRect.mock.calls.length
+  vi.advanceTimersByTime(2600)
+  expect(fillRect.mock.calls.length).toBe(drawn)
+  onScreen(true)
+  vi.advanceTimersByTime(260)
+  expect(fillRect.mock.calls.length).toBeGreaterThan(drawn)
+})
+
 it("dithers the wordmark in, then leaves it whole", () => {
   render(<Hero failed={false} />)
 
@@ -134,8 +162,26 @@ it("keeps everything still when motion is reduced, with the sun drawn once", () 
 
   expect(screen.getByText("181").dataset.count).toBeUndefined()
   expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
-  expect(container.querySelector("[class*=animate-]")).toBeNull()
   expect(frames.size).toBe(0)
   expect(vi.getTimerCount()).toBe(0)
   expect(fillRect).toHaveBeenCalled()
+  // The CSS animations, the pulse and the breathing, run only where motion is safe.
+  const animations = [...container.querySelectorAll("[class*=animate-]")]
+    .flatMap((element) => [...element.classList])
+    .filter((name) => name.includes("animate-"))
+  expect(animations).toHaveLength(2)
+  for (const name of animations) expect(name).toMatch(/^motion-safe:/)
+})
+
+it("never replays the intro when reduced motion is turned off later", () => {
+  prefers(true)
+  render(<Hero today={today} failed={false} />)
+
+  act(() => {
+    prefers(false).dispatchEvent(new Event("change"))
+  })
+  advance(100)
+  expect(screen.getByText("181").dataset.count).toBeUndefined()
+  expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
+  expect(frames.size).toBe(0)
 })

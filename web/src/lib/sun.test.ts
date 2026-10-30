@@ -13,6 +13,11 @@ describe("sunRadius", () => {
     expect(sunRadius(1000, 100)).toBe(15)
   })
 
+  it("never shrinks below 6, so a negative value still has a disc under its glow", () => {
+    expect(sunRadius(-50, 100)).toBe(6)
+    expect(sunRadius(-1000, 100)).toBe(6)
+  })
+
   it("draws no sun when today's value or its baseline is missing", () => {
     expect(sunRadius(181, 0)).toBeUndefined()
     expect(sunRadius(Number.NaN, 100)).toBeUndefined()

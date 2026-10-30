@@ -1,12 +1,12 @@
-import { ditherMask, useSteps } from "@/lib/motion"
+import { ditherMasks, useSteps } from "@/lib/motion"
 
 // Dithers in on load, in 8 steps of 30 ms.
 export function Wordmark() {
-  const step = useSteps(8, 30)
+  const step = useSteps(ditherMasks.length, 30)
   return (
     <h1
       className="flex flex-col items-center gap-3.5 text-primary"
-      style={step === undefined ? undefined : { maskImage: ditherMask(step) }}
+      style={step === undefined ? undefined : { maskImage: ditherMasks[step] }}
     >
       <span lang="ja" className="font-wordmark text-[64px]/none sm:text-[96px]">
         焦り

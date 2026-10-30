@@ -7,12 +7,12 @@ const centreY = 34
 const glowWidth = 20
 const haloRadius = 26
 
-// 6 art pixels, and 3 more for each multiple of the baseline, up to three. No radius
-// when the ratio is not a number, so a broken file draws no sun rather than a wrong one.
+// 6 art pixels, and 3 more for each multiple of the baseline, from none up to three. No
+// radius when the ratio is not a number, so a broken file draws no sun rather than a wrong one.
 export function sunRadius(value: number, baseline: number) {
   const ratio = value / baseline
   return Number.isFinite(ratio)
-    ? Math.round(6 + 3 * Math.min(ratio, 3))
+    ? Math.round(6 + 3 * Math.min(Math.max(ratio, 0), 3))
     : undefined
 }
 

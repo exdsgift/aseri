@@ -66,6 +66,34 @@
   );
 }
 
+/* While `data-count` is set, the count is drawn over the number, whose own text stays the
+   real value for screen readers and copying: the empty alternative after the slash keeps
+   the count unspoken. Browsers without that syntax keep the first content line. */
+@utility count-up {
+  &[data-count] {
+    position: relative;
+    color: transparent;
+    &::after {
+      content: attr(data-count);
+      content: attr(data-count) / "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      /* Centred on the number even when wider: the digits are not all one width. */
+      translate: -50%;
+      white-space: nowrap;
+      color: var(--primary);
+    }
+    /* High contrast paints all text in one colour: show only the real number. */
+    @media (forced-colors: active) {
+      color: inherit;
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
 /* The replay slider: a pixel ruler with a gold block thumb, white on hover and press.
    No transition, so the thumb stays under the pointer. */
 @utility pixel-range {
@@ -116,6 +144,9 @@
   @keyframes breathe {
     from {
       opacity: 0.35;
+    }
+    to {
+      opacity: 1;
     }
   }
   --animate-sun-pulse: sun-pulse 3.2s ease-in-out infinite alternate;
@@ -222,30 +253,5 @@
   }
   html {
     @apply font-sans;
-  }
-  /* A count-up is drawn over the number, whose own text stays the real value for screen
-     readers and copying: the empty alternative after the slash keeps the count unspoken.
-     Browsers without that syntax keep the first content line, and still draw the count. */
-  [data-count] {
-    position: relative;
-    color: transparent;
-    &::after {
-      content: attr(data-count);
-      content: attr(data-count) / "";
-      position: absolute;
-      top: 0;
-      left: 50%;
-      /* Centred on the number even when wider: the digits are not all one width. */
-      translate: -50%;
-      white-space: nowrap;
-      color: var(--primary);
-    }
-    /* High contrast paints all text in one colour: show only the real number. */
-    @media (forced-colors: active) {
-      color: inherit;
-      &::after {
-        display: none;
-      }
-    }
   }
 }

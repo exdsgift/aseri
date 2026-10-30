@@ -52,13 +52,13 @@ export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
 }
 
 // The giant number counts up on arrival, 40 ms a step. The count is drawn over the
-// number's own text (see index.css), so screen readers and copying get the real value.
+// number's own text (`count-up` in index.css), so screen readers and copying get the real value.
 function CountUp({ value }: { value: number }) {
   const shown = useMemo(() => countUp(value), [value])
   const step = useSteps(shown.length, 40)
   return (
     <p
-      className="font-display text-[144px]/[108px] md:text-[192px]/[144px]"
+      className="count-up font-display text-[144px]/[108px] md:text-[192px]/[144px]"
       data-count={step === undefined ? undefined : shown[step]}
     >
       {formatValue(value)}

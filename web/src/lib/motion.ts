@@ -17,43 +17,48 @@ export const ditherCells = (step: number) =>
     threshold < 2 * (step + 1) ? [[i % 4, Math.floor(i / 4)]] : []
   )
 
-// The same step as a CSS mask: the tile repeats every 12 px, in dots of 3 px.
-export function ditherMask(step: number) {
+// The 8 steps as CSS masks, made once: the tile repeats every 12 px, in dots of 3 px.
+export const ditherMasks = Array.from({ length: 8 }, (_, step) => {
   const dots = ditherCells(step)
     .map(([x, y]) => `<rect x="${3 * x}" y="${3 * y}" width="3" height="3"/>`)
     .join("")
   const tile = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">${dots}</svg>`
   return `url("data:image/svg+xml,${encodeURIComponent(tile)}")`
-}
+})
 
-// Made once: every render reads it.
-const reduce = matchMedia("(prefers-reduced-motion: reduce)")
+// Made on first use, so importing this module needs no DOM, then kept: every render reads it.
+let reduce: MediaQueryList | undefined
+const reduceQuery = () =>
+  (reduce ??= matchMedia("(prefers-reduced-motion: reduce)"))
 
 function onReduceChange(changed: () => void) {
-  reduce.addEventListener("change", changed)
-  return () => reduce.removeEventListener("change", changed)
+  reduceQuery().addEventListener("change", changed)
+  return () => reduceQuery().removeEventListener("change", changed)
 }
 
 // True while the reader asks for less motion: then nothing on the page moves.
 export const useReducedMotion = () =>
-  useSyncExternalStore(onReduceChange, () => reduce.matches)
+  useSyncExternalStore(onReduceChange, () => reduceQuery().matches)
 
-// Steps 0 to count - 1, `ms` apart, then undefined: the resting state, and the only
-// one under reduced motion. Animation frames wait while the tab is hidden, and so
-// does the sequence.
+// Steps 0 to count - 1, `ms` apart, then undefined: the resting state. Already there
+// under reduced motion at load, so turning it off later never replays the sequence.
+// Timed from the first animation frame: a tab hidden midway gets no frames, and on
+// its return the sequence skips to its end.
 export function useSteps(count: number, ms: number) {
   const reduced = useReducedMotion()
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(reduced ? count : 0)
+  const finished = step >= count
   useEffect(() => {
-    if (reduced) return
+    if (reduced || finished) return
     let start: number | undefined
+    let shown = -1
     let frame = requestAnimationFrame(function next(now) {
       start ??= now
-      const reached = Math.floor((now - start) / ms)
-      setStep(reached)
+      const reached = Math.min(count, Math.floor((now - start) / ms))
+      if (reached !== shown) setStep((shown = reached))
       if (reached < count) frame = requestAnimationFrame(next)
     })
     return () => cancelAnimationFrame(frame)
-  }, [count, ms, reduced])
-  return reduced || step >= count ? undefined : step
+  }, [count, ms, reduced, finished])
+  return reduced || finished ? undefined : step
 }
