@@ -352,7 +352,7 @@ it("opens a picked card's series in the panel and brings it into view, then load
 
   fireEvent.click(card(/^Suez Canal/))
 
-  expect(panelTitle()).toBe("[F] Suez Canal · forecast made Oct 29")
+  expect(panelTitle()).toBe("[F] Suez Canal · forecast made today")
   expect(card(/^Suez Canal/).getAttribute("aria-pressed")).toBe("true")
   expect(card(/^Geopolitical risk/).getAttribute("aria-pressed")).toBe("false")
   const panel = screen.getByRole("region", { name: /^\[F\] Suez Canal/ })
@@ -371,14 +371,14 @@ it("opens a series with its card's key, unless a field has the focus", async () 
     fireEvent.keyDown(target, { key })
 
   press("3")
-  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made Oct 29")
+  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
   expect(scrollIntoView).toHaveBeenCalled()
 
   // The slider takes its own keys.
   const slider = await screen.findByRole("slider")
   slider.focus()
   press("1", slider)
-  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made Oct 29")
+  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
 
   // No sixth card, and no shortcut with a modifier.
   press("6")

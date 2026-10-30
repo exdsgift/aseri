@@ -240,7 +240,7 @@ it("shows a sea lane with its own horizon, steps and baseline", async () => {
   const hormuz = await loadSeries(entry("hormuz_transits"), { replay: true })
   render(<ForecastPanel series={hormuz} />)
 
-  expect(title()).toBe("[F] Strait of Hormuz · forecast made Oct 29")
+  expect(title()).toBe("[F] Strait of Hormuz · forecast made today")
   expect(screen.getByText(/^ships a day/).textContent).toBe(
     "ships a day · data to Oct 25"
   )
