@@ -200,6 +200,7 @@ def test_a_run_manifest_records_the_modes_provenance_inputs_and_checksums(tmp_pa
     delta_file = "target-data/deltas/2026-10-29.csv"
     assert manifest == {
         "forecast_date": "2026-10-29",
+        "model_id": "aseri-timestral209m",
         "forecasts": [
             {
                 "target": "gpr_daily",
@@ -282,3 +283,20 @@ def test_archived_forecasts_read_back_oldest_first_with_the_run_that_issued_them
 
 def test_an_empty_archive_has_no_forecasts(tmp_path):
     assert archive.read(tmp_path, "gpr_daily") == []
+
+
+def test_archived_forecasts_keep_the_model_that_made_them_after_a_model_change(
+    tmp_path, monkeypatch
+):
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-26")],
+        days_to("2026-10-26", [120.5, 98.23, 101.3]),
+        date(2026, 10, 29),
+    )
+    monkeypatch.setattr(archive, "MODEL_ID", "aseri-timestral209m-v2")
+
+    (archived,) = archive.read(tmp_path, "gpr_daily")
+
+    assert archived.model_id == "aseri-timestral209m"
+    assert archived.forecast.quantiles.shape == (2, 3)

@@ -27,6 +27,7 @@ class Archived:
     """A forecast as the archive holds it, with the date and provenance of the run that issued it."""
 
     forecast: Forecast
+    model_id: str
     forecast_date: str
     provenance: dict
 
@@ -37,9 +38,11 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
     # Each run only adds dates after the last archived one, so run order is reference-date order.
     for path in sorted((archive_dir / RUNS).glob("*.json")):
         run = json.loads(path.read_text(encoding="utf-8"))
-        rows = pd.read_csv(
-            archive_dir / ROUNDS / f"{run['forecast_date']}-{MODEL_ID}.csv"
-        )
+        if not run["forecasts"]:
+            continue  # a run that only recorded revised observations
+        # The manifest's own path, so a later model change cannot lose the older rounds.
+        round_file = next(p for p in run["files"] if p.startswith("model-output/"))
+        rows = pd.read_csv(archive_dir / round_file)
         for issued in run["forecasts"]:
             if issued["target"] != series_id:
                 continue
@@ -54,6 +57,7 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
                         levels=tuple(table.columns.tolist()),
                         quantiles=table.to_numpy(),
                     ),
+                    model_id=run["model_id"],
                     forecast_date=run["forecast_date"],
                     provenance=run["provenance"]
                     | {
@@ -75,6 +79,23 @@ def new_reference_dates(
     return observed.index[observed.index > last_reference_date].tolist()
 
 
+def ran_on(archive_dir: Path, day: date) -> bool:
+    """Whether a run on `day` is archived already: its files are never rewritten, so anything newer waits."""
+    return (archive_dir / RUNS / f"{day.isoformat()}.json").exists()
+
+
+def has_new_observations(
+    archive_dir: Path, series_id: str, observed: pd.Series
+) -> bool:
+    return not observation_delta(
+        observed, _latest_vintage(archive_dir, series_id)
+    ).empty
+
+
+def timestamp(moment: datetime) -> str:
+    return f"{moment:%Y-%m-%dT%H:%M:%SZ}"
+
+
 def observation_delta(observed: pd.Series, vintage: pd.Series) -> pd.Series:
     """The observed (date, value) pairs that `vintage` lacks or holds with another value."""
     return observed[vintage.reindex(observed.index) != observed]
@@ -94,6 +115,7 @@ def write(
     """Archive one run: its forecasts of `series` as a Hubverse round, the observations new since the last run, and a manifest.
 
     The newest forecast is live; the earlier ones were issued after the fact, so they are retrospective.
+    A run with no forecasts records only the revised observations.
     """
     forecast_date = generated_at.date().isoformat()
     round_file = ROUNDS / f"{forecast_date}-{MODEL_ID}.csv"
@@ -115,7 +137,10 @@ def write(
         for step, values in enumerate(forecast.quantiles, start=1)
         for level, value in zip(forecast.levels, values)
     ]
-    _write_csv(archive_dir / round_file, pd.DataFrame(rounds))
+    written = [delta_file]
+    if forecasts:
+        _write_csv(archive_dir / round_file, pd.DataFrame(rounds))
+        written.insert(0, round_file)
     _write_csv(
         archive_dir / delta_file,
         pd.DataFrame(
@@ -129,6 +154,7 @@ def write(
     )
     manifest = {
         "forecast_date": forecast_date,
+        "model_id": MODEL_ID,
         "forecasts": [
             {
                 "target": series.id,
@@ -157,12 +183,12 @@ def write(
             },
             "inference": {"package": "timestral", "package_commit": PACKAGE_COMMIT},
             "code": {"commit": code_commit, "run": run_url},
-            "generated_at": f"{generated_at:%Y-%m-%dT%H:%M:%SZ}",
+            "generated_at": timestamp(generated_at),
             "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic.",
         },
         "files": {
             path.as_posix(): _sha256((archive_dir / path).read_bytes())
-            for path in (round_file, delta_file)
+            for path in written
         },
     }
     (archive_dir / RUNS).mkdir(exist_ok=True)

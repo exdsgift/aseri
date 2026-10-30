@@ -6,14 +6,20 @@ from pathlib import Path
 
 import pandas as pd
 
-from aseri.archive import Archived
+from aseri.archive import Archived, timestamp
 from aseri.forecast import MODEL_ID, WEIGHTS, WEIGHTS_REVISION
 from aseri.series import Series
 
 SCHEMA_VERSION = "1.0.0"
-FORECAST_CREDIT = (
-    f"Forecasts: aseri (model {MODEL_ID}, {WEIGHTS.split('/')[1]} by Mistral AI)."
-)
+
+
+def credit(model_id: str, weights: str) -> str:
+    return (
+        f"Forecasts: aseri (model {model_id}, {weights.split('/')[1]} by Mistral AI)."
+    )
+
+
+FORECAST_CREDIT = credit(MODEL_ID, WEIGHTS)
 
 
 def publish(
@@ -64,7 +70,7 @@ def _forecast(series, archived) -> dict:
     return {
         "schema_version": SCHEMA_VERSION,
         "series_id": series.id,
-        "model_id": MODEL_ID,
+        "model_id": archived.model_id,
         "forecast_date": archived.forecast_date,
         "reference_date": forecast.reference_date.date().isoformat(),
         "forecast_mode": archived.provenance["forecast_mode"],
@@ -73,12 +79,13 @@ def _forecast(series, archived) -> dict:
         "horizon": list(range(1, steps + 1)),
         "target_end_date": target_end_dates.strftime("%Y-%m-%d").tolist(),
         "output_type": "quantile",
-        # Four decimals drop the float32 noise and keep enough digits for scoring.
+        # Already rounded to four decimals by the archive.
         "quantiles": {
-            str(level): [round(float(v), 4) for v in forecast.quantiles[:, i]]
+            str(level): [float(v) for v in forecast.quantiles[:, i]]
             for i, level in enumerate(forecast.levels)
         },
-        "attribution": f"{series.license['attribution']} {FORECAST_CREDIT}",
+        # The model that made this forecast: a later model change must not rewrite its credit.
+        "attribution": f"{series.license['attribution']} {credit(archived.model_id, archived.provenance['model']['id'])}",
         "provenance": archived.provenance,
         "links": {"catalog": "../../../series.json"},
         # The run's, not today's: republishing a forecast never changes its file.
@@ -99,7 +106,7 @@ def _index(series, archived, generated_at) -> dict:
             }
             for forecast in archived
         ],
-        "generated_at": _timestamp(generated_at),
+        "generated_at": timestamp(generated_at),
     }
 
 
@@ -115,14 +122,14 @@ def _actuals(series, observed, as_of, generated_at) -> dict:
         # Four decimals drop the float32 noise of the upstream file.
         "observation": [round(float(v), 4) for v in observed],
         "attribution": series.license["attribution"],
-        "generated_at": _timestamp(generated_at),
+        "generated_at": timestamp(generated_at),
     }
 
 
 def _catalog(series, observed, newest, links, generated_at) -> dict:
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": _timestamp(generated_at),
+        "generated_at": timestamp(generated_at),
         "model": {
             "model_id": MODEL_ID,
             "hf_id": WEIGHTS,
@@ -154,10 +161,6 @@ def _catalog(series, observed, newest, links, generated_at) -> dict:
             }
         ],
     }
-
-
-def _timestamp(moment: datetime) -> str:
-    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _write(path: Path, document: dict) -> None:

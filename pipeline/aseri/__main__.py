@@ -26,26 +26,37 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         if "GITHUB_RUN_ID" in os.environ
         else None
     )
+    generated_at = datetime.now(UTC)
     observed, as_of = gpr.fetch(GPR_DAILY.source["data_url"])
     archived = archive.read(archive_dir, GPR_DAILY.id)
-    new_dates = archive.new_reference_dates(
-        observed, archived[-1].forecast.reference_date if archived else None
+    ran_today = archive.ran_on(archive_dir, generated_at.date())
+    new_dates = (
+        []
+        if ran_today
+        else archive.new_reference_dates(
+            observed, archived[-1].forecast.reference_date if archived else None
+        )
     )
-    if new_dates:
-        model = load_model()
+    if not ran_today and (
+        new_dates or archive.has_new_observations(archive_dir, GPR_DAILY.id, observed)
+    ):
+        forecasts = []
+        if new_dates:
+            model = load_model()
+            # Each forecast sees only the data up to its own date.
+            forecasts = [
+                forecast(model, observed.loc[:day], GPR_DAILY.horizon)
+                for day in new_dates
+            ]
         archive.write(
             archive_dir,
             GPR_DAILY,
-            # Each forecast sees only the data up to its own date.
-            [
-                forecast(model, observed.loc[:day], GPR_DAILY.horizon)
-                for day in new_dates
-            ],
+            forecasts,
             observed=observed,
             as_of=as_of,
             code_commit=code_commit,
             run_url=run_url,
-            generated_at=datetime.now(UTC),
+            generated_at=generated_at,
         )
         archived = archive.read(archive_dir, GPR_DAILY.id)
     publish(
@@ -54,7 +65,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         archived,
         observed=observed,
         as_of=as_of,
-        generated_at=datetime.now(UTC),
+        generated_at=generated_at,
     )
     print(
         f"{GPR_DAILY.id}: {len(new_dates)} new forecasts, the latest from "

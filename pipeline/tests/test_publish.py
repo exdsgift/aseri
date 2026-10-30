@@ -40,9 +40,11 @@ def archived(reference_date, forecast_mode, forecast_date="2026-10-29"):
             reference_date=pd.Timestamp(reference_date),
             levels=(0.1, 0.5, 0.9),
             quantiles=np.array(
-                [[90.1, 100.2, 110.3], [85.4, 101.5, 120.6]], dtype=np.float32
+                # As the archive reads them back: already rounded, in float64.
+                [[90.1, 100.2, 110.3], [85.4, 101.5, 120.6]]
             ),
         ),
+        model_id="aseri-timestral209m",
         forecast_date=forecast_date,
         provenance=PROVENANCE | {"forecast_mode": forecast_mode},
     )

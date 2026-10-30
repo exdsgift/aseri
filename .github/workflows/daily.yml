@@ -87,7 +87,8 @@ jobs:
   # Holds the write rights, so it runs only git and shell: no Python packages, no model.
   archive:
     needs: build
-    if: needs.build.outputs.archive_adds == 'true'
+    # Only master's runs are permanent: a manual run on another branch builds but never archives.
+    if: github.ref == 'refs/heads/master' && needs.build.outputs.archive_adds == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -139,8 +140,8 @@ jobs:
 
   deploy:
     needs: [build, archive]
-    # Also on a day with nothing new to archive, when archive is skipped; never after a failure.
-    if: ${{ !cancelled() && !failure() }}
+    # Also on a day with nothing new to archive, when archive is skipped; never after a failure, never off master.
+    if: ${{ github.ref == 'refs/heads/master' && !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

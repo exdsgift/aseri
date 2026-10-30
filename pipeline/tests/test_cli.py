@@ -226,3 +226,65 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
         assert (rerun / forecast["url"]).read_bytes() == (
             series / forecast["url"]
         ).read_bytes()
+
+
+def test_a_second_run_the_same_day_with_new_data_waits_for_tomorrow(
+    tmp_path, monkeypatch, stub_model
+):
+    archive_dir = tmp_path / "archive"
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-25"),
+        tmp_path / "morning",
+        archive_dir,
+    )
+    archive_before = files(archive_dir)
+    monkeypatch.setattr(cli, "load_model", no_model)
+
+    # Upstream adds 2026-10-26 in the afternoon: today's run is archived, so it publishes what it has.
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 15, 0, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "afternoon",
+        archive_dir,
+    )
+
+    assert files(archive_dir) == archive_before
+    latest = read(tmp_path / "afternoon" / "series" / "gpr_daily" / "latest.json")
+    assert latest["reference_date"] == "2026-10-25"
+
+
+def test_a_revision_without_a_new_day_is_archived_as_it_is_seen(
+    tmp_path, monkeypatch, stub_model
+):
+    archive_dir = tmp_path / "archive"
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+    revised = pd.read_stata(RECORDED_GPR)
+    revised.loc[revised["date"] == "2026-10-22", "GPRD"] = 250.0
+    raw = io.BytesIO()
+    revised.to_stata(raw, write_index=False, convert_dates={"date": "td"})
+    monkeypatch.setattr(cli, "load_model", no_model)
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 28, 7, 2, tzinfo=UTC),
+        raw.getvalue(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    delta = pd.read_csv(archive_dir / "target-data" / "deltas" / "2026-10-28.csv")
+    assert delta[["target_end_date", "observation", "as_of"]].values.tolist() == [
+        ["2026-10-22", 250.0, "2026-10-28"]
+    ]
+    assert read(archive_dir / "runs" / "2026-10-28.json")["forecasts"] == []
+    index = read(tmp_path / "day2" / "series" / "gpr_daily" / "forecasts.json")
+    assert [f["reference_date"] for f in index["forecasts"]] == ["2026-10-26"]
