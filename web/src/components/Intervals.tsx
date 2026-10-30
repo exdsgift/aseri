@@ -47,7 +47,7 @@ export function Intervals({
       <i className="absolute top-[7px] h-0.5 bg-border" style={span(year)} />
       <i className={`${mark} bg-secondary`} style={{ left: at(baseline) }} />
       <i
-        className="absolute top-0 -ml-px h-4 border-l-2 border-dotted border-focus"
+        className="absolute top-0 -ml-px h-4 border-l-2 border-dotted border-secondary"
         style={{ left: at(thatDay) }}
       />
       {marks}
@@ -59,7 +59,7 @@ export function Intervals({
 
   return (
     <div className="flex flex-col gap-1.5 border-t-2 border-border pt-2.5">
-      <p id={title} className="text-key">
+      <p id={title} className="text-secondary">
         [I] Intervals · how sure the model is
       </p>
       <ol aria-labelledby={title} className="flex flex-col gap-1.5">
@@ -101,16 +101,14 @@ export function Intervals({
               </span>{" "}
               <span>
                 most likely{" "}
-                <b className="text-[12px] font-normal text-gold-pale">
+                <b className="text-[12px] font-normal text-primary">
                   {formatValue(row.mostLikely)}
                 </b>
               </span>
               {row.real !== undefined && (
                 <>
                   {" "}
-                  <span
-                    className={row.inside ? "text-inside" : "text-destructive"}
-                  >
+                  <span>
                     Real {formatValue(row.real)} ·{" "}
                     {row.inside ? "inside" : "outside"}
                   </span>
@@ -120,7 +118,7 @@ export function Intervals({
             {lane(
               <>
                 <i
-                  className="absolute top-0.5 h-3 border-x-2 border-secondary dither-25"
+                  className="absolute top-0.5 h-3 border-x-2 border-dim dither-25"
                   style={span(row.eightInTen)}
                 />
                 <i
@@ -128,7 +126,7 @@ export function Intervals({
                   style={span(row.fiveInTen)}
                 />
                 <i
-                  className={`${mark} bg-gold-pale`}
+                  className={`${mark} bg-muted-foreground`}
                   style={{ left: at(row.mostLikely) }}
                 />
                 {row.real !== undefined && (

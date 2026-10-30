@@ -14,6 +14,8 @@ import {
 } from "@/lib/api"
 
 const gprId = "gpr_daily"
+const engravingSource =
+  "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg"
 
 export function App() {
   // Every series of the catalog that loaded, with its entry, to load its replay from.
@@ -82,39 +84,54 @@ export function App() {
   }
 
   return (
-    <main>
-      <Hero today={gpr?.today} updated={updated} failed={failed} />
-      {signals && panel && (
-        <>
-          <div ref={panelBox} className="scroll-mt-4 px-4 pb-14">
-            {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
+    <>
+      <main>
+        <Hero today={gpr?.today} updated={updated} failed={failed} />
+        {signals && panel && (
+          <>
+            <div ref={panelBox} className="scroll-mt-4 px-4 pb-14">
+              {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
                 or on the past forecast a square of the record opened. */}
-            <div key={picked} className="motion-safe:animate-dither-in">
-              <ForecastPanel
-                key={`${panel.forecasts.length} ${opened} ${taps}`}
-                series={panel}
-                opened={opened}
-              />
+              <div key={picked} className="motion-safe:animate-dither-in">
+                <ForecastPanel
+                  key={`${panel.forecasts.length} ${opened} ${taps}`}
+                  series={panel}
+                  opened={opened}
+                />
+              </div>
             </div>
-          </div>
-          <Signals
-            series={signals.map((s) => s.series)}
-            picked={picked}
-            onPick={pick}
-          />
-          {records && (
-            <TrackRecord
-              records={records}
-              entries={signals.map((s) => s.entry)}
-              onOpen={(id, date) => {
-                pick(id)
-                setOpened(date)
-                setTaps((count) => count + 1)
-              }}
+            <Signals
+              series={signals.map((s) => s.series)}
+              picked={picked}
+              onPick={pick}
             />
-          )}
-        </>
-      )}
-    </main>
+            {records && (
+              <TrackRecord
+                records={records}
+                entries={signals.map((s) => s.entry)}
+                onOpen={(id, date) => {
+                  pick(id)
+                  setOpened(date)
+                  setTaps((count) => count + 1)
+                }}
+              />
+            )}
+          </>
+        )}
+      </main>
+      {/* The hero's engraving is in the public domain, cropped and dithered for the page. */}
+      <footer className="mx-auto max-w-[72ch] px-4 pb-14 text-center text-[8px]/[14px] text-muted-foreground uppercase">
+        <p>
+          Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury,
+          probably 1592, National Gallery of Art, CC0.{" "}
+          <a
+            href={engravingSource}
+            className="wrap-anywhere underline hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {engravingSource.slice(8)}
+          </a>
+        </p>
+      </footer>
+    </>
   )
 }

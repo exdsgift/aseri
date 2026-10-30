@@ -78,6 +78,19 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
   ])
 })
 
+it("credits the engraving behind the hero, with its source", () => {
+  serve(published)
+  render(<App />)
+
+  const commons =
+    "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg"
+  const credit = screen.getByText(/^Engraving:/)
+  expect(credit.textContent).toBe(
+    `Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art, CC0. ${commons.slice(8)}`
+  )
+  expect(within(credit).getByRole("link").getAttribute("href")).toBe(commons)
+})
+
 // GitHub pauses an idle repository's schedule, and nothing else would say the files stopped.
 it("cautions when the site was last updated more than 2 days ago", async () => {
   serve(published)
@@ -97,7 +110,7 @@ it("cautions when the site was last updated more than 2 days ago", async () => {
   expect(caution()!.textContent).toBe(
     `Site last updated ${monthDay(catalog.generated_at.slice(0, 10))}: the daily update may have stopped.`
   )
-  expect(caution()!.className).toContain("text-destructive")
+  expect(caution()!.className).toContain("caution")
 })
 
 // The words beside the numbers prevent the known misreadings: a median read as a promise,
@@ -421,7 +434,7 @@ it("groups a card for each series in the catalog, with its 7-day average, its ch
   expect(suez.getAttribute("aria-keyshortcuts")).toBe("2")
 })
 
-it("cautions on a stale series' card, in words as well as in colour", async () => {
+it("cautions on a stale series' card, in words and with a caution's marker", async () => {
   serve({
     ...published,
     "api/v1/series.json": {
@@ -439,7 +452,7 @@ it("cautions on a stale series' card, in words as well as in colour", async () =
   const suez = await screen.findByRole("button", { name: /^Suez Canal/ })
   const dataTo = within(suez).getByText(/^7-day average to/)
   expect(dataTo.textContent).toBe("7-day average to Oct 25, stale since Nov 04")
-  expect(dataTo.className).toContain("text-destructive")
+  expect(dataTo.className).toContain("caution")
 })
 
 it("leaves out the card of a series whose files are broken, and keeps the page", async () => {

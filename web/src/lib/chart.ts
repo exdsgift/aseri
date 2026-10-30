@@ -166,14 +166,15 @@ export type Layout = ReturnType<typeof layout>
 type Plot = (x: number, y: number, color: string) => void
 type Point = [number, number]
 
-// The page's token behind each colour of the chart.
+// The page's token behind each mark of the chart, in black and white: the daily values white,
+// the model's path a grey apart from them, the 7-day average and the bands dim.
 export const chartTokens = {
-  gold: "--primary",
-  pale: "--gold-pale",
-  muted: "--secondary",
+  daily: "--primary",
+  path: "--muted-foreground",
+  average: "--dim",
+  band: "--dim",
   frame: "--border",
-  focus: "--focus",
-  label: "--muted-foreground",
+  origin: "--secondary",
   real: "--white",
 }
 export type Colors = Record<keyof typeof chartTokens, string>
@@ -245,13 +246,13 @@ export function paintChart(
         py === y10 ||
         bayer[(py % 4) * 4 + (px % 4)] < (inner ? 8 : 4)
       )
-        plot(px, py, color.muted)
+        plot(px, py, color.band)
     }
   }
   polyline(
     plot,
     path.map((value, k): Point => [x(origin + k), y(value)]),
-    color.pale
+    color.path
   )
 
   // The 7-day average, dimmer: context only, since the forecast is of the daily value.
@@ -260,13 +261,13 @@ export function paintChart(
     averages
       .slice(first)
       .map((average, i): Point => [x(first + i), y(average)]),
-    color.label
+    color.average
   )
   // The daily values, the quantity forecast, so the forecast carries on from where they end.
   polyline(
     plot,
     values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
-    color.gold
+    color.daily
   )
   // What happened after the forecast was made, in white over the bands,
   // as dots 2 art pixels wide when the days are far enough apart.
@@ -275,9 +276,9 @@ export function paintChart(
     square(plot, x(origin + 1 + k), y(value), dot, color.real)
   )
 
-  for (let py = top; py <= bottom; py += 2) plot(xo, py, color.focus)
+  for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
-  square(plot, xo - 1, y(last) - 1, 3, color.gold)
+  square(plot, xo - 1, y(last) - 1, 3, color.daily)
   if (actuals.length === chart.ahead)
     square(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, 3, color.real)
 }

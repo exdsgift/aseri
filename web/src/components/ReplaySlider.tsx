@@ -97,8 +97,8 @@ export function ReplaySlider({
       <p className="flex justify-between gap-2 text-muted-foreground">
         <span>{made(0)}</span>{" "}
         <span>
-          <span className="text-key">[‹][›]</span> 1 day ·{" "}
-          <span className="text-key">[T]</span> today
+          <span className="text-secondary">[‹][›]</span> 1 day ·{" "}
+          <span className="text-secondary">[T]</span> today
         </span>{" "}
         <span>Today</span>
       </p>

@@ -83,7 +83,7 @@ it("collects the live record until 30 live forecasts have resolved, with the bac
   ])
 })
 
-it("draws the last 8 weekly forecasts 7 days ahead as squares, green inside the 8 in 10 range and red outside", () => {
+it("draws the last 8 weekly forecasts 7 days ahead as squares, filled inside the 8 in 10 range and hollow outside", () => {
   const onOpen = vi.fn()
   render(<TrackRecord records={[suez]} entries={entries} onOpen={onOpen} />)
 
@@ -102,21 +102,22 @@ it("draws the last 8 weekly forecasts 7 days ahead as squares, green inside the 
     "Sep 13: outside its 8 in 10 range 7 days ahead. Open it in the replay",
     "Sep 20: inside its 8 in 10 range 7 days ahead. Open it in the replay",
   ])
+  // By shape, not colour: a filled square, or only its outline.
   expect(
     squares.map(
-      (square) => square.className.match(/\bbg-(inside|destructive)\b/)![0]
+      (square) => square.className.match(/\b(bg-primary|border-2)\b/)![0]
     )
   ).toEqual([
-    "bg-inside",
-    "bg-inside",
-    "bg-destructive",
-    "bg-inside",
-    "bg-inside",
-    "bg-inside",
-    "bg-destructive",
-    "bg-inside",
+    "bg-primary",
+    "bg-primary",
+    "border-2",
+    "bg-primary",
+    "bg-primary",
+    "bg-primary",
+    "border-2",
+    "bg-primary",
   ])
-  // In words too, so the record never rests on colour alone.
+  // In words too.
   expect(card("Suez Canal").getByText(/^6 of 8/).textContent).toBe(
     "6 of 8 inside the 8 in 10 range"
   )

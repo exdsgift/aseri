@@ -36,11 +36,13 @@ function advance(ms: number) {
     act(() => due.forEach((frame) => frame(now)))
   }
 }
-let fillRect: ReturnType<typeof vi.fn>
-// Says whether the sun is on screen, as an IntersectionObserver would.
+// Every call the art makes on its canvases, by method: a frame starts with clearRect.
+let canvas: Record<string, ReturnType<typeof vi.fn>>
+const drawn = () => canvas.clearRect?.mock.calls.length ?? 0
+// Says whether the art is on screen, as an IntersectionObserver would.
 let onScreen: (shown: boolean) => void
 
-// jsdom lays nothing out and has no canvas: the test sets the size and counts the drawing.
+// jsdom lays nothing out and has no canvas: the test sets the sizes and records the drawing.
 beforeEach(() => {
   frames = new Map()
   now = 0
@@ -58,12 +60,19 @@ beforeEach(() => {
         this.callback = callback
       }
       observe() {
-        this.callback(
-          [{ contentRect: { width: 800 } } as ResizeObserverEntry],
-          this as never
-        )
+        this.callback([], this as never)
       }
       disconnect() {}
+    }
+  )
+  // An 800 x 900 hero, its text in a column from 224 px down.
+  vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+    function (this: Element) {
+      return (
+        this.tagName === "DIV" && this.querySelector("h1")
+          ? new DOMRect(124, 224, 552, 620)
+          : new DOMRect(0, 0, 800, 900)
+      ) as DOMRect
     }
   )
   vi.stubGlobal(
@@ -80,12 +89,27 @@ beforeEach(() => {
       disconnect() {}
     }
   )
-  fillRect = vi.fn()
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    clearRect() {},
-    fillRect,
-  } as never)
-  // The sun ticks on an interval.
+  canvas = {}
+  const context = new Proxy(
+    {},
+    {
+      get: (_, method: string) =>
+        (canvas[method] ??= vi.fn((width: number, height: number) =>
+          // The veil is drawn into image data.
+          method === "createImageData"
+            ? { width, height, data: new Uint8ClampedArray(width * height * 4) }
+            : undefined
+        )),
+      set: () => true,
+    }
+  )
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+    context as never
+  )
+  // The two tokens the art paints with, as index.css gives them.
+  document.head.innerHTML =
+    "<style>canvas { --primary: #f2efe8; --background: #050505 }</style>"
+  // The art ticks on an interval.
   vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] })
 })
 afterEach(() => {
@@ -94,6 +118,23 @@ afterEach(() => {
   prefers(false)
   // Back to jsdom's own visible document.
   delete (document as { hidden?: boolean }).hidden
+})
+
+it("draws its text over the art, which stays behind it and out of the way", () => {
+  const { container } = render(<Hero today={today} failed={false} />)
+
+  const art = container.querySelector("canvas")!.parentElement!
+  expect(art.getAttribute("aria-hidden")).toBe("true")
+  expect(art.className).toMatch(/\babsolute inset-0 -z-10\b/)
+  expect(art.className).toContain("pointer-events-none")
+  // Clipped to the hero, so the art never widens the page.
+  expect(art.className).toContain("overflow-hidden")
+  for (const text of [
+    screen.getByRole("heading", { level: 1 }),
+    screen.getByText("181"),
+    screen.getByText(/^Monday Nov 23/),
+  ])
+    expect(art.contains(text)).toBe(false)
 })
 
 it("counts the number up over its real value, which is the text all along", () => {
@@ -109,15 +150,26 @@ it("counts the number up over its real value, which is the text all along", () =
   expect(number.textContent).toBe("181")
   expect(frames.size).toBe(0)
   // The art keeps moving, out of the screen reader's way.
-  const drawn = fillRect.mock.calls.length
-  vi.advanceTimersByTime(260)
-  expect(fillRect.mock.calls.length).toBeGreaterThan(drawn)
+  const before = drawn()
+  vi.advanceTimersByTime(100)
+  expect(drawn()).toBeGreaterThan(before)
   expect(
     container.querySelector("canvas")!.closest("[aria-hidden]")
   ).not.toBeNull()
 })
 
-it("stops the sun while the tab is hidden, and starts it again on return", () => {
+it("marks the baseline with dashed rays once today's value is in, and draws no rays before", () => {
+  prefers(true)
+  render(<Hero failed={false} />)
+  expect(drawn()).toBeGreaterThan(0)
+  expect(canvas.setLineDash).toBeUndefined()
+  cleanup()
+
+  render(<Hero today={today} failed={false} />)
+  expect(canvas.setLineDash).toHaveBeenCalledWith([3, 5])
+})
+
+it("stops the art while the tab is hidden, and starts it again on return", () => {
   render(<Hero today={today} failed={false} />)
   const hide = (hidden: boolean) => {
     Object.defineProperty(document, "hidden", {
@@ -128,24 +180,24 @@ it("stops the sun while the tab is hidden, and starts it again on return", () =>
   }
 
   hide(true)
-  const drawn = fillRect.mock.calls.length
+  const before = drawn()
   vi.advanceTimersByTime(2600)
-  expect(fillRect.mock.calls.length).toBe(drawn)
+  expect(drawn()).toBe(before)
   hide(false)
-  vi.advanceTimersByTime(260)
-  expect(fillRect.mock.calls.length).toBeGreaterThan(drawn)
+  vi.advanceTimersByTime(100)
+  expect(drawn()).toBeGreaterThan(before)
 })
 
-it("stops the sun while the hero is scrolled off screen", () => {
+it("stops the art while the hero is scrolled off screen", () => {
   render(<Hero today={today} failed={false} />)
 
   onScreen(false)
-  const drawn = fillRect.mock.calls.length
+  const before = drawn()
   vi.advanceTimersByTime(2600)
-  expect(fillRect.mock.calls.length).toBe(drawn)
+  expect(drawn()).toBe(before)
   onScreen(true)
-  vi.advanceTimersByTime(260)
-  expect(fillRect.mock.calls.length).toBeGreaterThan(drawn)
+  vi.advanceTimersByTime(100)
+  expect(drawn()).toBeGreaterThan(before)
 })
 
 it("dithers the wordmark in, then leaves it whole", () => {
@@ -157,7 +209,7 @@ it("dithers the wordmark in, then leaves it whole", () => {
   expect(wordmark.style.maskImage).toBe("")
 })
 
-it("keeps everything still when motion is reduced, with the sun drawn once", () => {
+it("keeps everything still when motion is reduced, with the art drawn once, whole", () => {
   prefers(true)
   const { container } = render(<Hero today={today} failed={false} />)
 
@@ -165,13 +217,11 @@ it("keeps everything still when motion is reduced, with the sun drawn once", () 
   expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
   expect(frames.size).toBe(0)
   expect(vi.getTimerCount()).toBe(0)
-  expect(fillRect).toHaveBeenCalled()
-  // The CSS animations, the pulse and the breathing, run only where motion is safe.
-  const animations = [...container.querySelectorAll("[class*=animate-]")]
-    .flatMap((element) => [...element.classList])
-    .filter((name) => name.includes("animate-"))
-  expect(animations).toHaveLength(2)
-  for (const name of animations) expect(name).toMatch(/^motion-safe:/)
+  expect(drawn()).toBeGreaterThan(0)
+  // The rays at their full length: the baseline's dashed rays are drawn.
+  expect(canvas.setLineDash).toHaveBeenCalledWith([3, 5])
+  // Nothing moves by CSS either: the art moves only from script.
+  expect(container.querySelector("[class*=animate-]")).toBeNull()
 })
 
 it("never replays the intro when reduced motion is turned off later", () => {

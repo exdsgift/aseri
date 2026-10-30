@@ -12,12 +12,12 @@ import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 // `line` names the line ahead: the most likely value, or a possible path.
 const legend = (line: string) => [
   ["Daily value", "h-0.5 w-4 bg-primary"],
-  ["7-day average", "h-0.5 w-4 bg-muted-foreground"],
+  ["7-day average", "h-0.5 w-4 bg-dim"],
   ["What happened", "size-1 bg-white"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
-  [line, "h-0.5 w-4 bg-gold-pale"],
-  ["Forecast made", "h-3 border-l-2 border-dotted border-focus"],
+  [line, "h-0.5 w-4 bg-muted-foreground"],
+  ["Forecast made", "h-3 border-l-2 border-dotted border-secondary"],
 ]
 
 // The chart draws one of these at a time, never several: overlapping paths read as nothing.
@@ -83,7 +83,7 @@ export function ForecastPanel({
       aria-labelledby={title}
       className="mx-auto flex max-w-[720px] flex-col gap-3 border-2 border-border px-3 pt-2 pb-3 text-[8px]/[12px] uppercase chip"
     >
-      <div className="flex flex-wrap justify-between gap-2 border-b-2 border-border pb-2 text-key">
+      <div className="flex flex-wrap justify-between gap-2 border-b-2 border-border pb-2 text-secondary">
         {/* As long today as in replay, so it wraps the same way on a phone. */}
         <h2 id={title}>
           [F] {forecast.series} ·{" "}
@@ -93,8 +93,8 @@ export function ForecastPanel({
         </h2>
         <p>
           {forecast.unit} ·{" "}
-          {/* Said in words too, so the warning never rests on colour alone. */}
-          <span className={staleSince ? "text-destructive" : undefined}>
+          {/* Said in words too, so the warning never rests on its marker alone. */}
+          <span className={staleSince ? "caution" : undefined}>
             data to {dataTo}
             {staleSince && `, stale since ${monthDay(staleSince)}`}
           </span>
@@ -108,7 +108,7 @@ export function ForecastPanel({
         {id === "gpr_daily" && ", preliminary for about 4 weeks"}.
       </p>
       {/* Such as Taiwan's tracking dropouts, or a newest value under review. */}
-      {note && <p className="text-key">Note: {note}</p>}
+      {note && <p className="text-secondary">Note: {note}</p>}
       {/* The same lines whatever the day, each short enough not to wrap on a 360 px phone,
           so that the chart and the slider never move under a finger dragging the replay. */}
       {/* Not a live region: re-read on every slider step, it would pile up announcements;
@@ -117,13 +117,12 @@ export function ForecastPanel({
         {/* The range first: a median alone reads as a promise. */}
         <p>
           {target} · 8 in 10:{" "}
-          <b className="font-normal text-gold-pale">
+          <b className="font-normal text-primary">
             {at("0.1")}-{at("0.9")}
           </b>
           <span className="max-[480px]:hidden"> ·</span>{" "}
           <span className="max-[480px]:block">
-            most likely{" "}
-            <b className="font-normal text-gold-pale">{at("0.5")}</b>
+            most likely <b className="font-normal text-primary">{at("0.5")}</b>
           </span>
         </p>
         <p>
@@ -135,14 +134,7 @@ export function ForecastPanel({
               <b className="font-normal text-white">
                 {formatValue(targetDay.real)}
               </b>{" "}
-              ·{" "}
-              <span
-                className={
-                  targetDay.inside ? "text-inside" : "text-destructive"
-                }
-              >
-                {targetDay.inside ? "inside" : "outside"} the range
-              </span>
+              · {targetDay.inside ? "inside" : "outside"} the range
             </>
           )}
         </p>
