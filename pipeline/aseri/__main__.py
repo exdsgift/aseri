@@ -7,9 +7,9 @@ import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from aseri import archive
+from aseri import archive, record
 from aseri.forecast import forecast, load_model, make_context, under_review
-from aseri.publish import publish, publish_catalog
+from aseri.publish import publish, publish_catalog, publish_scores
 from aseri.series import (
     BAB_EL_MANDEB_TRANSITS,
     GPR_DAILY,
@@ -139,7 +139,8 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             run_url=run_url,
             generated_at=generated_at,
         )
-    entries, rows, levels = [], [], None
+    # After the archive: a target due today is scored against the values this run has just archived.
+    entries, rows, levels, records, red = [], [], None, [], []
     for series, _ in SOURCES:
         archived = archive.read(archive_dir, series.id)
         # A fresh series with no archive waits for tomorrow: today's run was archived before it had data.
@@ -190,17 +191,33 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         )
         levels = archived[-1].forecast.levels
         rows.append((series.id, status, f"{observed.index[-1]:%Y-%m-%d}", detail))
+        vintages = archive.vintages(archive_dir, series.id)
+        scored = record.scored(series, archived, vintages, today)
+        records.append(
+            record.summary(
+                series,
+                scored,
+                record.scored(series, archived, vintages, today, latest=True),
+            )
+        )
+        if "red" in record.calibration(series, scored).values():
+            red.append(series.id)
     report(rows)
     if not entries:
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")
     publish_catalog(api_dir, entries, levels, generated_at)
-    # The series the page now shows as late, read from what it reads, and the held ones, for daily.yml's issues.
+    publish_scores(api_dir, records, generated_at)
+    # The series the page now shows as late, read from what it reads, the held ones, and those whose live
+    # ranges the monitor finds far off, for daily.yml's issues.
     if "GITHUB_OUTPUT" in os.environ:
         catalog = json.loads((api_dir / "series.json").read_text(encoding="utf-8"))
         late = [s["series_id"] for s in catalog["series"] if s["stale_since"]]
         held = [id for id, (status, _) in skipped.items() if status == "held"]
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as file:
-            file.write(f"stale={','.join(late)}\nrevision_hold={','.join(held)}\n")
+            file.write(
+                f"stale={','.join(late)}\nrevision_hold={','.join(held)}\n"
+                f"calibration_red={','.join(red)}\n"
+            )
 
 
 def report(rows) -> None:

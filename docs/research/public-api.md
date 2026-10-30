@@ -233,8 +233,8 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `series/{series_id}/forecasts.json` | Index of every issued forecast: `reference_date`, `forecast_date`, mode, URL. Needed because static hosts cannot list directories | Daily, grows about 100 bytes per forecast |
 | `series/{series_id}/forecasts/{reference_date}.json` | One forecast | **Never** |
 | `series/{series_id}/actuals.json` | Latest vintage of the observed series (`date[]`, `observation[]`, flags) with `as_of` | Daily |
-| `series/{series_id}/scores.json` | Track record for one series: summary by horizon bucket and by horizon, for the model and baselines | Daily |
-| `scores.json` | Cross-series summary for the site's scoreboard | Daily |
+| `series/{series_id}/scores.json` | Track record for one series, live and retrospective forecasts apart, never combined. Per horizon bucket (1-7, 8-28): 50% and 80% coverage with an exact CI, WIS and its components, the median's absolute error and its ratio to each baseline with a block-bootstrap CI and a verdict, and MASE. Also `n`, `min_n_to_display`, the primary baseline, the weekly forecasts of the record's squares, the method (WIS convention, L, block length, resamples, seed) and the latest-vintage sensitivity check (see 4.4) | Daily |
+| `scores.json` | Cross-series summary for the site's record: each series' file without its sensitivity check | Daily |
 | `bulk/forecasts-{YYYY}.parquet`, `bulk/forecasts-{YYYY}.csv.gz` | Every forecast of a year in collected-hub shape: `model_id` plus the Hubverse columns. The current year is rebuilt daily; past years are frozen | Current year daily |
 | `bulk/time-series.parquet`, `bulk/time-series-{source}.csv` | Hubverse time series with columns `target, target_end_date, observation, as_of`, stored as a change-log (see 3.3). The CSVs are split by upstream source so each carries one licence | Daily |
 | `bulk/oracle-output.csv` | `target, target_end_date, oracle_value` used for scoring [HV-TD] | Daily |
@@ -409,7 +409,9 @@ Every per-series file repeats `attribution`, and `bulk/datapackage.json` carries
 ### 4.4 Revised data
 
 - GPR's latest values are preliminary and revised [GPR], and older vintages are available on the GPR page.
-- Store the change-log, and score against a vintage declared in advance. The suggestion is the latest vintage, with `observation_as_of` recorded on every score row [HV-TD].
+- Store the change-log, and score against a vintage declared in advance. **Corrected (#134):** not the latest vintage, which would restate the record whenever a source revises. Each target is scored once, `L` days after its `target_end_date`, against its value as known that day: L is 35 days for GPR, 14 for PortWatch and 7 for the rest (`score_lag` in the series registry, `score_lag_days` in each score file). A target its source had not published by then is scored against the first value seen after. The change-log is append-only, so a score never changes: it is recomputed on every run, identically, and no score file is archived.
+- Each score file states the vintages it scored against (`observation_as_of`, the oldest and the newest). The per-row `observation_as_of` comes with `bulk/scores.parquet` (#136).
+- The same targets scored against the latest vintage are published as a sensitivity check only (`latest_vintage` in `series/{series_id}/scores.json`). It matters for GPR.
 - Do not silently re-forecast when only history is revised. A forecast is one per `(series, reference_date)`, issued once.
 
 ### 4.5 Missing days and upstream failures
@@ -616,31 +618,48 @@ Arrays and level sets are abridged. Real files carry all 21 levels and the full 
 }
 ```
 
-`series/suez_transits/scores.json`. The numbers are illustrative only:
+`series/suez_transits/scores.json`, abridged (#134). The numbers are from a local run on the 120-day backfill, scored as of 2026-10-31:
 
 ```json
 {
   "schema_version": "1.0.0",
+  "model_id": "aseri-timestral209m",
   "series_id": "suez_transits",
-  "generated_at": "2026-10-29T06:14:02Z",
-  "scoring": {
-    "observations_as_of": "2026-10-29",
-    "vintage_rule": "latest available vintage at scoring time",
-    "forecast_mode": "live",
-    "metrics": ["wis", "ae_median", "interval_coverage_50", "interval_coverage_80",
-                "interval_coverage_90", "interval_coverage_98", "wis_ratio_vs_baseline"],
-    "baseline": {"model_id": "aseri-snaive7", "definition": "last 7 days repeated, quantiles from its own past h-step errors"},
-    "code_commit": "<GITHUB_SHA>",
-    "min_n_to_display": 30
+  "n": 0,
+  "min_n_to_display": 30,
+  "primary_baseline": "mean28",
+  "score_lag_days": 14,
+  "live": {"n": 0, "since": null, "observation_as_of": null,
+           "buckets": {"1-7": {"n": 0}, "8-28": {"n": 0}}, "weekly": []},
+  "retrospective": {
+    "n": 106, "since": "2026-06-27", "observation_as_of": ["2026-10-31", "2026-10-31"],
+    "buckets": {
+      "1-7": {
+        "n": 106,
+        "coverage_50": {"hits": 374, "targets": 742, "rate": 0.504, "ci": [0.4674, 0.5406]},
+        "coverage_80": {"hits": 577, "targets": 742, "rate": 0.7776, "ci": [0.746, 0.8071]},
+        "wis": {"wis": 3.5324, "dispersion": 1.4453, "overprediction": 0.9591, "underprediction": 1.128,
+                "vs_probabilistic_naive": {"ratio": 0.687, "ci": [0.6494, 0.7279], "verdict": "beats"}},
+        "ae_median": {"mean": 5.1475, "vs": {
+          "naive": {"ratio": 0.6793, "ci": [0.6404, 0.7231], "verdict": "beats"},
+          "snaive7": {"ratio": 0.6926, "ci": [0.6396, 0.762], "verdict": "beats"},
+          "mean28": {"ratio": 0.9944, "ci": [0.9851, 1.0031], "verdict": "ties"}}},
+        "mase": 0.744
+      },
+      "8-28": {"n": 85, "...": "the same fields"}
+    },
+    "weekly": [{"reference_date": "2026-08-16", "inside_80": true}, "... 8 in all, oldest first"]
   },
-  "summary": [
-    {"model_id": "aseri-timestral209m", "horizon_bucket": "1-7", "n": 52, "wis": 2.91, "ae_median": 4.10,
-     "interval_coverage_50": 0.49, "interval_coverage_80": 0.81, "interval_coverage_90": 0.90,
-     "interval_coverage_98": 0.97, "wis_ratio_vs_baseline": 0.83}
-  ],
-  "by_horizon_url": "../../bulk/scores.parquet"
+  "latest_vintage": {"live": {"...": "the same, against the latest vintage"}, "retrospective": {}},
+  "method": {"wis": "...", "observation": "...", "bootstrap": {"block_length": {"1-7": 7, "8-28": 28},
+             "resamples": 2000, "seed": 0, "interval": 0.95}, "...": "..."},
+  "license": {"name": "CC BY-NC 4.0", "...": "..."},
+  "generated_at": "2026-10-31T07:00:00Z",
+  "links": {"catalog": "../../series.json", "scores": "../../scores.json"}
 }
 ```
+
+`scores.json` at the root lists every series in this shape, without `latest_vintage`.
 
 `bulk/datapackage.json`, abridged:
 

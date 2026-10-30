@@ -258,21 +258,29 @@ def newest_as_of(archive_dir: Path, series_id: str) -> date:
     return date.fromisoformat(rows.loc[rows["target"] == series_id, "as_of"].max())
 
 
-def as_of_view(archive_dir: Path, series_id: str, t: date) -> pd.Series:
-    """`series_id` as the archive knew it on day `t`: every date up to `t`, each with its latest value seen by `t`."""
+def vintages(archive_dir: Path, series_id: str) -> pd.DataFrame:
+    """Every value the archive has seen of `series_id`: its `target_end_date`, `observation` and `as_of`, the day first seen."""
     deltas = sorted((archive_dir / DELTAS).glob("*.csv"))
     if not deltas:
-        return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+        return pd.DataFrame(columns=["target_end_date", "observation", "as_of"])
     rows = pd.concat(
         pd.read_csv(path, parse_dates=["target_end_date", "as_of"]) for path in deltas
     )
+    return rows.loc[
+        rows["target"] == series_id, ["target_end_date", "observation", "as_of"]
+    ]
+
+
+def as_of_view(archive_dir: Path, series_id: str, t: date) -> pd.Series:
+    """`series_id` as the archive knew it on day `t`: every date up to `t`, each with its latest value seen by `t`."""
+    return view(vintages(archive_dir, series_id), t)
+
+
+def view(vintages: pd.DataFrame, t) -> pd.Series:
+    """The series of `vintages` as known on day `t`, as `as_of_view` reads it from the archive."""
     t = pd.Timestamp(t)
     rows = (
-        rows[
-            (rows["target"] == series_id)
-            & (rows["as_of"] <= t)
-            & (rows["target_end_date"] <= t)
-        ]
+        vintages[(vintages["as_of"] <= t) & (vintages["target_end_date"] <= t)]
         .sort_values("as_of", kind="stable")
         .drop_duplicates("target_end_date", keep="last")
         .sort_values("target_end_date")

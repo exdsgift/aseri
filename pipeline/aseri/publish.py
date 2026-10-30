@@ -8,6 +8,7 @@ import pandas as pd
 
 from aseri.archive import REPLAY_DAYS, Archived, timestamp
 from aseri.forecast import MODEL_ID, WEIGHTS, WEIGHTS_REVISION
+from aseri.record import METHOD
 from aseri.series import Series
 
 SCHEMA_VERSION = "1.0.0"
@@ -56,6 +57,8 @@ def publish(
         "forecasts": f"series/{series.id}/forecasts.json",
         "replay": f"series/{series.id}/replay.json",
         "actuals": f"series/{series.id}/actuals.json",
+        # Written by publish_scores.
+        "scores": f"series/{series.id}/scores.json",
     }
     for forecast in archived:
         _write(
@@ -99,6 +102,41 @@ def publish_catalog(
             "license": FORECAST_LICENSE,
             "series": entries,
         },
+    )
+
+
+def publish_scores(api_dir: Path, records: list[dict], generated_at: datetime) -> None:
+    """Write each series' track record, `series/{id}/scores.json`, and all of them for the page, `scores.json`.
+
+    `records` are what `record.summary` returns. The page's file leaves out the latest-vintage sensitivity check.
+    """
+    head = {"schema_version": SCHEMA_VERSION, "model_id": MODEL_ID}
+    tail = {
+        "method": METHOD,
+        "license": FORECAST_LICENSE,
+        "generated_at": timestamp(generated_at),
+    }
+    for record in records:
+        _write(
+            api_dir / "series" / record["series_id"] / "scores.json",
+            head
+            | record
+            | tail
+            | {
+                "links": {"catalog": "../../series.json", "scores": "../../scores.json"}
+            },
+        )
+    _write(
+        api_dir / "scores.json",
+        head
+        | {
+            "series": [
+                {k: v for k, v in record.items() if k != "latest_vintage"}
+                | {"links": {"scores": f"series/{record['series_id']}/scores.json"}}
+                for record in records
+            ]
+        }
+        | tail,
     )
 
 

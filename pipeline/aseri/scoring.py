@@ -7,20 +7,7 @@ from aseri.forecast import BOUNDS, Forecast
 
 # The record's horizon buckets; a bucket's longest horizon is also its bootstrap block.
 BUCKETS = {"1-7": range(1, 8), "8-28": range(8, 29)}
-# Days a target waits for its observation to settle before it is scored, once (research report,
-# "Score against a vintage fixed in advance"): GPR revises its last month, PortWatch's revisions are
-# unmeasured. To measure later from the archive: the age past which 95% of revisions are under 1%.
-LAG_DAYS = {
-    "gpr_daily": 35,
-    "suez_transits": 14,
-    "hormuz_transits": 14,
-    "bab_el_mandeb_transits": 14,
-    "taiwan_strait_transits": 14,
-    "wiki_ww3_views": 7,
-    "brent_spot": 7,
-    "ua_air_raid_hours": 7,
-    "ua_drones_downed_claimed": 7,
-}
+# How long a target waits for its observation to settle is each series' `score_lag`, in the registry.
 # The window, in days of each origin's own context, of the MASE scale and the probabilistic naive's changes.
 WINDOW = 365
 # Every interval is 95%.
@@ -87,7 +74,9 @@ def probabilistic_naive(
     for h in range(1, horizon + 1):
         changes = x[h:] - x[:-h]
         changes = changes[~np.isnan(changes)]
-        rows.append(x[-1] + np.quantile(np.r_[changes, -changes], levels))
+        # A history too short for any h-day change gives no spread: the naive forecast alone.
+        spread = np.r_[changes, -changes] if changes.size else np.zeros(1)
+        rows.append(x[-1] + np.quantile(spread, levels))
     return np.clip(np.array(rows), *BOUNDS[kind])
 
 
@@ -122,9 +111,11 @@ def score(forecast: Forecast, history, observed, kind: str = "index") -> pd.Data
         interval_coverage_50=inside(quantiles, y, forecast.levels, 0.5),
         interval_coverage_80=inside(quantiles, y, forecast.levels, 0.8),
         ae_median=error,
-        ase_median=error / scale,
+        # A history flat week on week has no scale: no MASE rather than an infinite one.
+        ase_median=error / scale if scale > 0 else np.nan,
         ae_naive=np.abs(y - x[-1]),
-        ae_snaive7=np.abs(y - x[-7:][(horizon - 1) % 7]),
+        # A history under a week has no value a week back for its first days.
+        ae_snaive7=np.abs(y - np.r_[np.full(7, np.nan), x][-7:][(horizon - 1) % 7]),
         ae_mean28=np.abs(y - np.nanmean(x[-28:])),
         wis_naive=wis(spread, y, forecast.levels)["wis"],
     )

@@ -7,7 +7,7 @@ import pytest
 
 from aseri.archive import Archived
 from aseri.forecast import Forecast
-from aseri.publish import publish, publish_catalog
+from aseri.publish import publish, publish_catalog, publish_scores
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 
 PROVENANCE = {
@@ -315,6 +315,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
                 "forecasts": "series/gpr_daily/forecasts.json",
                 "replay": "series/gpr_daily/replay.json",
                 "actuals": "series/gpr_daily/actuals.json",
+                "scores": "series/gpr_daily/scores.json",
             },
         }
     ]
@@ -381,3 +382,50 @@ def test_catalog_lists_every_series_with_its_365_day_mean_where_it_has_no_fixed_
     assert read(tmp_path / "series" / "taiwan_strait_transits" / "latest.json")[
         "attribution"
     ].startswith("Sources: UN Global Platform; IMF PortWatch")
+
+
+# What record.summary returns for a series, cut to the keys the files carry around it.
+RECORD = {
+    "series_id": "gpr_daily",
+    "n": 0,
+    "min_n_to_display": 30,
+    "primary_baseline": "mean28",
+    "score_lag_days": 35,
+    "live": {"n": 0, "buckets": {"1-7": {"n": 0}}, "weekly": []},
+    "retrospective": {"n": 2, "buckets": {"1-7": {"n": 2}}, "weekly": []},
+    "latest_vintage": {"live": {"n": 0}, "retrospective": {"n": 2}},
+}
+
+
+def test_each_series_has_its_track_record_and_the_page_one_file_of_them_all(
+    tmp_path,
+):
+    publish_scores(tmp_path, [RECORD], GENERATED_AT)
+
+    record = read(tmp_path / "series" / "gpr_daily" / "scores.json")
+    assert {k: record[k] for k in RECORD} == RECORD
+    assert record["schema_version"] == "1.0.0"
+    assert record["model_id"] == "aseri-timestral209m"
+    assert record["method"]["bootstrap"] == {
+        "method": record["method"]["bootstrap"]["method"],
+        "block_length": {"1-7": 7, "8-28": 28},
+        "resamples": 2000,
+        "seed": 0,
+        "interval": 0.95,
+    }
+    assert "twice the plain pinball loss" in record["method"]["wis"]
+    assert record["license"] == FORECAST_LICENSE
+    assert record["generated_at"] == "2026-10-30T07:01:05Z"
+    # The page's file: every series, without the sensitivity check it does not show.
+    everything = read(tmp_path / "scores.json")
+    assert everything["method"] == record["method"]
+    assert everything["series"] == [
+        {k: v for k, v in RECORD.items() if k != "latest_vintage"}
+        | {"links": {"scores": "series/gpr_daily/scores.json"}}
+    ]
+
+
+def test_catalog_links_each_series_to_its_track_record(api_dir):
+    entry = read(api_dir / "series.json")["series"][0]
+
+    assert entry["links"]["scores"] == "series/gpr_daily/scores.json"

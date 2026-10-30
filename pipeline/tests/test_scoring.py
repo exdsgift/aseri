@@ -8,7 +8,6 @@ from hypothesis.extra.numpy import arrays
 from aseri.forecast import Forecast
 from aseri.scoring import (
     BUCKETS,
-    LAG_DAYS,
     bootstrap,
     clopper_pearson,
     inside,
@@ -20,6 +19,7 @@ from aseri.scoring import (
     verdict,
     wis,
 )
+from aseri.series import GPR_DAILY, SUEZ_TRANSITS, TAIWAN_STRAIT_TRANSITS, Series
 
 # Timestral's 21 levels.
 LEVELS = (0.01, 0.05, *np.round(np.arange(0.1, 0.91, 0.05), 2).tolist(), 0.95, 0.99)
@@ -142,6 +142,28 @@ def test_the_probabilistic_naive_spreads_the_past_changes_both_ways_around_the_l
         assert row.tolist() == [35.0 - h] * 10 + [35.0] + [35.0 + h] * 10
 
 
+def test_a_history_under_a_week_has_no_seasonal_naive_for_the_days_it_lacks():
+    stub = Forecast(
+        reference_date=pd.Timestamp("2026-10-26"),
+        levels=LEVELS,
+        quantiles=np.full((7, 21), 4.0),
+    )
+
+    rows = score(stub, [1.0, 2.0, 3.0], [4.0] * 7)
+
+    # Day 5's weekday a week back is the first of the three days, 3 below it.
+    np.testing.assert_array_equal(rows["ae_snaive7"], [np.nan] * 4 + [3.0, 2.0, 1.0])
+    assert rows["ase_median"].isna().all()
+
+
+def test_the_probabilistic_naive_has_no_spread_where_the_history_has_no_change_that_long():
+    # Two days give one 1-day change, and no 2 or 3-day change to spread the next two days.
+    quantiles = probabilistic_naive([4.0, 6.0], LEVELS, horizon=3)
+
+    assert (quantiles[0, 0], quantiles[0, -1]) == pytest.approx((4.04, 7.96))
+    assert quantiles[1:].tolist() == [[6.0] * 21] * 2
+
+
 def test_the_probabilistic_naive_of_a_count_stays_at_zero_or_above():
     quantiles = probabilistic_naive([2.0, 0.0] * 20, LEVELS, horizon=1, kind="count")
 
@@ -216,18 +238,32 @@ def test_the_page_says_beats_or_loses_only_when_the_whole_interval_does(
     assert verdict(low, high) == said
 
 
+def test_a_flat_history_has_no_mase_rather_than_an_infinite_one():
+    # A week-on-week change of zero everywhere: no scale to divide by.
+    stub = Forecast(
+        reference_date=pd.Timestamp("2026-10-26"),
+        levels=LEVELS,
+        quantiles=np.full((2, 21), 3.0),
+    )
+
+    rows = score(stub, np.full(40, 3.0), [3.0, 5.0], kind="count")
+
+    assert rows["ae_median"].tolist() == [0.0, 2.0]
+    assert rows["ase_median"].isna().all()
+
+
 @pytest.mark.parametrize(
-    ("series_id", "scored"),
+    ("lag_days", "scored"),
     [
-        ("gpr_daily", "2026-11-23"),
-        ("suez_transits", "2026-11-02"),
-        ("taiwan_strait_transits", "2026-11-02"),
-        ("brent_spot", "2026-10-26"),
-        ("ua_air_raid_hours", "2026-10-26"),
+        (GPR_DAILY.score_lag, "2026-11-23"),
+        (SUEZ_TRANSITS.score_lag, "2026-11-02"),
+        (TAIWAN_STRAIT_TRANSITS.score_lag, "2026-11-02"),
+        # Brent and the war series, not registered yet, take the default.
+        (Series.__dataclass_fields__["score_lag"].default, "2026-10-26"),
     ],
 )
-def test_a_target_is_scored_its_series_lag_after_its_date(series_id, scored):
-    assert scoreable_on("2026-10-19", LAG_DAYS[series_id]) == pd.Timestamp(scored)
+def test_a_target_is_scored_its_series_lag_after_its_date(lag_days, scored):
+    assert scoreable_on("2026-10-19", lag_days) == pd.Timestamp(scored)
 
 
 # GPR's 2026-10-19 as three runs saw it: first released, revised a week later (the research's real
@@ -242,7 +278,7 @@ VINTAGES = pd.DataFrame(
 
 
 def test_a_target_is_scored_against_the_vintage_known_on_its_scoring_day():
-    day = scoreable_on("2026-10-19", LAG_DAYS["gpr_daily"])
+    day = scoreable_on("2026-10-19", GPR_DAILY.score_lag)
 
     assert known_on(VINTAGES, "2026-10-19", day) == (
         220.8,
@@ -251,7 +287,7 @@ def test_a_target_is_scored_against_the_vintage_known_on_its_scoring_day():
 
 
 def test_a_frozen_score_ignores_every_vintage_after_its_scoring_day():
-    day = scoreable_on("2026-10-19", LAG_DAYS["gpr_daily"])
+    day = scoreable_on("2026-10-19", GPR_DAILY.score_lag)
 
     assert known_on(VINTAGES.iloc[:2], "2026-10-19", day) == known_on(
         VINTAGES, "2026-10-19", day

@@ -18,7 +18,7 @@ import torch
 
 import aseri.__main__ as cli
 import aseri.forecast as forecast_module
-from aseri import archive
+from aseri import archive, record
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 from aseri.sources import gpr, portwatch
 
@@ -601,7 +601,8 @@ def test_data_past_its_expected_lag_warns_in_the_run_summary_and_on_the_page_and
     assert entry["stale_since"] == stale_since
     assert (
         outputs.read_text(encoding="utf-8")
-        == ("stale=gpr_daily\n" if stale_since else "stale=\n") + "revision_hold=\n"
+        == ("stale=gpr_daily\n" if stale_since else "stale=\n")
+        + "revision_hold=\ncalibration_red=\n"
     )
 
 
@@ -1042,6 +1043,60 @@ def test_a_model_error_in_one_series_fails_only_that_series_and_still_archives_i
 def with_day(lanes, port, day, ships):
     lanes[port][pd.Timestamp(day)] = ships
     return lanes
+
+
+def test_the_record_scores_each_series_from_the_archive_and_names_a_red_band_for_the_alert(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
+    # From one weekly forecast, for this test: in a real record one miss alone is no alarm.
+    monkeypatch.setattr(record, "MIN_N", 1)
+
+    # Three weeks on, with Taiwan's Nov 1, 7 days after the live forecast of Oct 25, a tracking dropout.
+    serve(
+        monkeypatch,
+        with_day(sea_lanes("2026-11-15"), "Taiwan Strait", "2026-11-01", 24),
+        edited=NEXT_EDIT,
+    )
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 16, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    api = tmp_path / "day2"
+    taiwan = read(api / "series" / "taiwan_strait_transits" / "scores.json")
+    suez = read(api / "series" / "suez_transits" / "scores.json")
+    # Due by Nov 16 with a 14-day wait: the days to Nov 2, so the first 7 of Oct 25's live forecast.
+    assert taiwan["n"] == 1
+    assert taiwan["live"]["weekly"] == [
+        {"reference_date": "2026-10-25", "inside_80": False}
+    ]
+    assert suez["live"]["weekly"] == [
+        {"reference_date": "2026-10-25", "inside_80": True}
+    ]
+    # Apart: the 14 backfilled before it, and Oct 26, forecast on Nov 16 from the data of that day.
+    assert taiwan["retrospective"]["n"] == 15
+    page = read(api / "scores.json")
+    assert [s["series_id"] for s in page["series"]] == ["gpr_daily", *PORTS]
+    assert read(api / "series.json")["series"][4]["links"]["scores"] == (
+        "series/taiwan_strait_transits/scores.json"
+    )
+    assert "calibration_red=taiwan_strait_transits\n" in output.read_text(
+        encoding="utf-8"
+    )
 
 
 def test_a_suspect_newest_value_moves_the_origin_back_a_day_and_the_note_says_so_only_while_it_does(

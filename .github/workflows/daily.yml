@@ -27,6 +27,7 @@ jobs:
       archive_adds: ${{ steps.adds.outputs.any }}
       revision_hold: ${{ steps.run.outputs.revision_hold }}
       stale: ${{ steps.run.outputs.stale }}
+      calibration_red: ${{ steps.run.outputs.calibration_red }}
     defaults:
       run:
         working-directory: pipeline
@@ -208,6 +209,35 @@ jobs:
           Run: $RUN_URL
 
           The run summary says for each series whether its source failed or simply has not published. Check the source; nothing needs doing if it catches up by itself."
+
+  # Opens an issue when the live calibration monitor finds a range far off; like stale-alert it runs only gh,
+  # with issues: write alone. A red zone is news, not a broken run: this job never fails the workflow.
+  calibration-alert:
+    needs: [build, deploy]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' && needs.build.outputs.calibration_red != '' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      issues: write
+    steps:
+      - name: Open an issue, unless one is open already
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RED: ${{ needs.build.outputs.calibration_red }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Calibration red: $RED"
+          # The record changes once a week per series, so the same set stays red for days: one open issue is enough.
+          if [ "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq length)" -gt 0 ]; then
+            echo "An issue is open already"
+            exit 0
+          fi
+          gh issue create --title "$title" --body "On the weekly live forecasts of these series, the 5 in 10 or the 8 in 10 range held far more or far fewer real values than it should: the red zone of Basel's binomial traffic light, in at least one horizon bucket. Too few is a range too narrow; too many, one too wide.
+
+          Run: $RUN_URL
+
+          Each series' api/v1/series/{id}/scores.json gives the coverage per bucket. Check whether the data changed (a level shift, a source fault) before judging the model; any calibration change gets a new model ID (#146)."
 
   deploy:
     needs: [build, archive]
