@@ -20,5 +20,8 @@ const inUtc = (isoDate: string, options: Intl.DateTimeFormatOptions) =>
 
 export const weekday = (isoDate: string) => inUtc(isoDate, { weekday: "long" })
 
+export const monthDay = (isoDate: string) =>
+  `${inUtc(isoDate, { month: "short" })} ${isoDate.slice(8, 10)}`
+
 export const dayLabel = (isoDate: string) =>
-  `${weekday(isoDate)} ${inUtc(isoDate, { month: "short" })} ${isoDate.slice(8, 10)}`
+  `${weekday(isoDate)} ${monthDay(isoDate)}`

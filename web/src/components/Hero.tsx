@@ -1,20 +1,8 @@
-import { useEffect, useState } from "react"
-
 import { Wordmark } from "@/components/Wordmark"
-import { loadGprToday, type GprToday } from "@/lib/api"
+import { type GprToday } from "@/lib/api"
 import { dayLabel, formatValue, versusBaseline, weekday } from "@/lib/format"
 
-export function Hero() {
-  const [today, setToday] = useState<GprToday>()
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    loadGprToday().then(setToday, (error) => {
-      console.error(error)
-      setFailed(true)
-    })
-  }, [])
-
+export function Hero({ today, failed }: { today?: GprToday; failed: boolean }) {
   return (
     <section className="flex min-h-svh flex-col items-center justify-center gap-9 px-4 py-14 text-center text-primary uppercase">
       <Wordmark />

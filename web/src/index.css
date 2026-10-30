@@ -24,6 +24,35 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Frames are 2 px with chipped corners, like the game's sheets. */
+@utility chip {
+  clip-path: polygon(
+    2px 0,
+    calc(100% - 2px) 0,
+    100% 2px,
+    100% calc(100% - 2px),
+    calc(100% - 2px) 100%,
+    2px 100%,
+    0 calc(100% - 2px),
+    0 2px
+  );
+}
+
+/* The chart's band dither, 25% and 50% of each 2 px art pixel, for the legend swatches. */
+@utility dither-25 {
+  background: conic-gradient(var(--secondary) 0 90deg, transparent 90deg) 0 0 /
+    4px 4px;
+}
+@utility dither-50 {
+  background: conic-gradient(
+      var(--secondary) 0 90deg,
+      transparent 90deg 180deg,
+      var(--secondary) 180deg 270deg,
+      transparent 270deg
+    )
+    0 0 / 4px 4px;
+}
+
 @theme inline {
   /* Pixel fonts stay sharp only at whole-pixel sizes. */
   --font-heading: var(--font-sans);
