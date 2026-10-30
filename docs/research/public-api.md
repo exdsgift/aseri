@@ -228,10 +228,11 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 
 | Path | Purpose | Changes |
 |---|---|---|
-| `series.json` | Catalog. Per series: title, unit, `target_type`, horizon, day definition, source, licence and attribution text, cadence (ISO 8601 duration), last observation date, latest reference and forecast dates, links. Also global model info, quantile levels, `generated_at` and `errata` | Daily |
+| `series.json` | Catalog. Per series: title, unit, `target_type`, horizon, day definition, source, licence and attribution text, cadence (ISO 8601 duration), last observation date, latest reference and forecast dates, the day-to-day tie (`day_to_day_tie`, below), links. Also global model info, quantile levels, `generated_at` and `errata` | Daily |
 | `series/{series_id}/latest.json` | Latest forecast. A copy of the newest dated file, with `links.canonical` pointing to that file | Daily |
 | `series/{series_id}/forecasts.json` | Index of every issued forecast: `reference_date`, `forecast_date`, mode, URL. Needed because static hosts cannot list directories | Daily, grows about 100 bytes per forecast |
 | `series/{series_id}/forecasts/{reference_date}.json` | One forecast | **Never** |
+| `series/{series_id}/replay.json` | The forecasts of the 120 days to the latest, for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
 | `series/{series_id}/actuals.json` | Latest vintage of the observed series (`date[]`, `observation[]`, flags) with `as_of` | Daily |
 | `series/{series_id}/scores.json` | Track record for one series, live and retrospective forecasts apart, never combined. Per horizon bucket (1-7, 8-28): 50% and 80% coverage with an exact CI, WIS and its components, the median's absolute error and its ratio to each baseline with a block-bootstrap CI and a verdict, and MASE. Also `n`, `min_n_to_display`, the primary baseline, the weekly forecasts of the record's squares, the method (WIS convention, L, block length, resamples, seed) and the latest-vintage sensitivity check (see 4.4) | Daily |
 | `scores.json` | Cross-series summary for the site's record: each series' file without its sensitivity check | Daily |
@@ -244,6 +245,10 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `licenses/*.txt` | Full texts that must travel with the data: the two MIT notices, CC BY 4.0 and the IMF terms link | Rarely |
 
 The HTML page at `/api/` holds the human docs and a schema.org `Dataset` JSON-LD block [SO].
+
+**The day-to-day tie** (additive to v1, #147). Each catalog entry's `day_to_day_tie` says how the real days moved together within a forecast; the page draws its possible paths with it:
+- `rho`: the lag-1 correlation, across consecutive horizons of the same forecast, of the normal scores of where each real day fell. Where a day fell is its PIT, read off the 21 archived quantiles by straight lines and clipped to [0.005, 0.995]; a value on tied quantiles takes the middle of their levels. Over the resolved forecasts of the 120 days to the latest, scored against the first vintage that resolved each day. Rounded to 2 decimals, and 0 below 100 pairs.
+- `n`: its number of pairs.
 
 ### 3.3 Shapes, the bulk format, and where they deviate from Hubverse
 
@@ -486,6 +491,7 @@ https://<owner>.github.io/aseri/
 │       │   ├── latest.json
 │       │   ├── forecasts.json          index of issued forecasts
 │       │   ├── forecasts/{reference_date}.json   immutable
+│       │   ├── replay.json             the last 120 days at seven levels
 │       │   ├── actuals.json
 │       │   └── scores.json
 │       └── bulk/
@@ -533,6 +539,7 @@ Arrays and level sets are abridged. Real files carry all 21 levels and the full 
       "last_observation_date": "2026-10-25",
       "latest_reference_date": "2026-10-25",
       "latest_forecast_date": "2026-10-29",
+      "day_to_day_tie": {"rho": -0.26, "n": 2862},
       "status": "active",
       "source": {"title": "IMF PortWatch, Daily Chokepoints Data",
                  "url": "https://portwatch.imf.org/",

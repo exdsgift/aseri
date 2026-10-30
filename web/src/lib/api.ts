@@ -13,6 +13,8 @@ export type CatalogEntry = {
   stale_since?: string | null
   // What a reader must know about the data, such as Taiwan's tracking dropouts.
   note?: string | null
+  // How the real days moved together within a forecast: the possible paths follow it.
+  day_to_day_tie?: { rho: number; n: number }
   links: { latest: string; actuals: string; replay: string }
 }
 type Latest = {
@@ -74,6 +76,7 @@ export type Forecast = {
 // `steps` are the days ahead of the intervals block: 7, 14 and 28 for GPR.
 // `staleSince` is the day the data fell behind, while the pipeline cannot refresh it.
 // `madeOn` is the day today's forecast was made: GPR moves weekly, so often not today.
+// `rho` ties each day of a possible path to the day before.
 export type Series = {
   id: string
   today: Today
@@ -82,6 +85,7 @@ export type Series = {
   staleSince: string | null
   madeOn: string
   note: string | null
+  rho: number
 }
 
 // Relative to the page, which Pages serves under /aseri/.
@@ -245,5 +249,7 @@ export async function loadSeries(
     staleSince: entry.stale_since ?? null,
     madeOn: latest.forecast_date,
     note: entry.note ?? null,
+    // A catalog cached from before the tie was published draws independent days.
+    rho: entry.day_to_day_tie?.rho ?? 0,
   }
 }

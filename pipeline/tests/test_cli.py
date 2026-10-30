@@ -19,6 +19,7 @@ import torch
 import aseri.__main__ as cli
 import aseri.forecast as forecast_module
 from aseri import archive, record
+from aseri.publish import shown
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 from aseri.sources import gpr, portwatch
 
@@ -443,7 +444,7 @@ def test_a_later_run_backfills_the_days_before_an_archived_forecast_and_latest_s
     ]
     assert replay["forecasts"][-1]["forecast_mode"] == "live"
     assert replay["forecasts"][-1]["quantiles"] == {
-        level: [round(v, 1) for v in latest["quantiles"][level]]
+        level: [shown(v) for v in latest["quantiles"][level]]
         for level in replay["quantile_levels"]
     }
     assert replay["forecasts"][-1]["quantiles"] != {

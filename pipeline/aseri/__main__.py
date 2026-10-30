@@ -182,6 +182,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 series,
                 archived,
                 observed=observed,
+                first_seen=archive.first_seen(archive_dir, series.id),
                 as_of=as_of,
                 generated_at=generated_at,
                 note=note,

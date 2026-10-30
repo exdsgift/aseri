@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -49,7 +50,16 @@ beforeEach(async () => {
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
+  prefers(false)
+  // Back to jsdom's own visible document.
+  delete (document as { hidden?: boolean }).hidden
 })
+
+// The page reads the one list jsdom's stand-in gives for the query (see test-setup.ts).
+const prefers = (reduce: boolean) =>
+  Object.assign(matchMedia("(prefers-reduced-motion: reduce)"), {
+    matches: reduce,
+  })
 
 // latest.json's forecast was made on 2026-10-30: that day, the page calls it today.
 beforeEach(() => {
@@ -276,4 +286,152 @@ it("shows a sea lane with its own horizon, steps and baseline", async () => {
   expect(screen.getByText(/^Sources?:/).textContent).toBe(
     hormuzLatest.attribution
   )
+})
+
+// The possible paths turn on an interval, which these tests advance by hand.
+const turning = () =>
+  vi.useFakeTimers({
+    now: new Date("2026-10-30T12:00:00Z"),
+    toFake: ["Date", "setInterval", "clearInterval"],
+  })
+const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))
+const pathShown = () => screen.getByText(/^Possible path/).textContent
+const button = (name: string) => screen.getByRole("button", { name })
+
+const legendNames = () =>
+  screen
+    .getAllByRole("listitem")
+    .map((item) => item.textContent)
+    .filter((name) => /^(Most likely|One possible path)$/.test(name ?? ""))
+
+it("opens on the most likely value of each day, and turns no path until asked", () => {
+  turning()
+  render(<ForecastPanel series={gpr} />)
+
+  wait(6000)
+  expect(screen.queryByText(/^Possible path/)).toBeNull()
+  expect(screen.getByText(/^The line ahead/).textContent).toBe(
+    "The line ahead is the most likely value of each day: the real days go up and down around it, 8 in 10 inside the band."
+  )
+  expect(legendNames()).toEqual(["Most likely"])
+  expect(button("Show possible paths")).toBeTruthy()
+})
+
+it("keeps the keyboard focus on the one button that switches the two views", () => {
+  render(<ForecastPanel series={gpr} />)
+  const toggle = button("Show possible paths")
+  toggle.focus()
+
+  fireEvent.click(toggle)
+  expect(document.activeElement).toBe(toggle)
+  expect(toggle.textContent).toBe("Most likely")
+  fireEvent.click(toggle)
+  expect(document.activeElement).toBe(toggle)
+  expect(toggle.textContent).toBe("Show possible paths")
+})
+
+it("shows the possible paths in order, one every 1.2 s, until paused or back on the most likely", () => {
+  turning()
+  render(<ForecastPanel series={gpr} />)
+
+  fireEvent.click(button("Show possible paths"))
+  expect(pathShown()).toBe("Possible path 1 of 20")
+  expect(legendNames()).toEqual(["One possible path"])
+  wait(1200)
+  expect(pathShown()).toBe("Possible path 2 of 20")
+  wait(19 * 1200)
+  expect(pathShown()).toBe("Possible path 1 of 20")
+
+  fireEvent.click(button("Pause"))
+  wait(6000)
+  expect(pathShown()).toBe("Possible path 1 of 20")
+  fireEvent.click(button("Play"))
+  wait(1200)
+  expect(pathShown()).toBe("Possible path 2 of 20")
+  fireEvent.click(button("Next path"))
+  expect(pathShown()).toBe("Possible path 3 of 20")
+
+  fireEvent.click(button("Most likely"))
+  wait(6000)
+  expect(screen.queryByText(/^Possible path/)).toBeNull()
+  expect(legendNames()).toEqual(["Most likely"])
+})
+
+it("says beside the chart that the line is one possible path, not the forecast", () => {
+  render(<ForecastPanel series={gpr} />)
+  fireEvent.click(button("Show possible paths"))
+  expect(screen.getByText(/^The line ahead/).textContent).toBe(
+    "The line ahead is one possible path, not the forecast: no one knows which days turn out high."
+  )
+})
+
+it("turns no path while the tab is hidden or the panel is off screen", () => {
+  let onScreen: (shown: boolean) => void = () => {}
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      constructor(callback: IntersectionObserverCallback) {
+        onScreen = (shown) =>
+          callback(
+            [{ isIntersecting: shown } as IntersectionObserverEntry],
+            this as never
+          )
+      }
+      observe() {}
+      disconnect() {}
+    }
+  )
+  const hide = (hidden: boolean) => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: hidden,
+    })
+    document.dispatchEvent(new Event("visibilitychange"))
+  }
+  turning()
+  render(<ForecastPanel series={gpr} />)
+  fireEvent.click(button("Show possible paths"))
+
+  hide(true)
+  wait(6000)
+  expect(pathShown()).toBe("Possible path 1 of 20")
+  hide(false)
+  wait(1200)
+  expect(pathShown()).toBe("Possible path 2 of 20")
+
+  act(() => onScreen(false))
+  wait(6000)
+  expect(pathShown()).toBe("Possible path 2 of 20")
+  act(() => onScreen(true))
+  wait(1200)
+  expect(pathShown()).toBe("Possible path 3 of 20")
+})
+
+it("turns no path under reduced motion, and still steps through them on demand", () => {
+  prefers(true)
+  turning()
+  render(<ForecastPanel series={gpr} />)
+
+  fireEvent.click(button("Show possible paths"))
+  wait(6000)
+  expect(vi.getTimerCount()).toBe(0)
+  expect(pathShown()).toBe("Possible path 1 of 20")
+  expect(screen.queryByRole("button", { name: /^(Pause|Play)$/ })).toBeNull()
+  fireEvent.click(button("Next path"))
+  expect(pathShown()).toBe("Possible path 2 of 20")
+})
+
+it("labels the slider's handle with the day it picks, on the side with room", () => {
+  render(<ForecastPanel series={gpr} />)
+  const handle = () => screen.getByTestId("handle-label")
+  // Today's forecast, at the right end: its label sits left of the handle.
+  expect(handle().textContent).toBe("Forecast")
+  expect(handle().style.translate).toMatch(/^calc\(-100%/)
+
+  fireEvent.change(slider(), { target: { value: "0" } })
+  expect(handle().textContent).toBe("Jun 28")
+  expect(handle().style.translate).toBe("12px")
+  // Its words are for the eye: the slider says the day itself.
+  expect(handle().closest("[aria-hidden]")).not.toBeNull()
+  expect(slider().getAttribute("aria-valuetext")).toBe("Jun 28, backtest")
 })
