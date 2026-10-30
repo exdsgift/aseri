@@ -413,7 +413,7 @@ docs/                     research, specs
 - **How to implement WIS:** reuse Hubverse tooling or write it with tests.
 - **The format of the observation-delta files** for revisions, and the errata format.
 - **The CI details:** caching, concurrency, retries.
-- **The 60-day pause.** GitHub pauses scheduled workflows in public repositories after 60 days without activity. Verify whether the daily commit to `archive` counts as activity, and add a keepalive if it does not.
+- **The 60-day pause.** GitHub pauses scheduled workflows in public repositories after 60 days without activity, which it does not define; pushes to the non-default `archive` branch likely do not count. No keepalive: the best-known keepalive action was disabled by GitHub for a terms violation (checked 2026-10-30). Instead the page itself says when the site has not been updated for more than 2 days (#143), so a paused schedule can never pass for current data.
 - **Rounding of published values:** keep enough digits for scoring.
 - **The texts** of the API docs page and README.
 

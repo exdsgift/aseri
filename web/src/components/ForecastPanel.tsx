@@ -21,7 +21,9 @@ const legend = [
 // its intervals and where the data comes from.
 export function ForecastPanel({ gpr }: { gpr: Gpr }) {
   const title = useId()
-  const { forecasts, steps, today, staleSince } = gpr
+  const { forecasts, steps, today, staleSince, madeOn } = gpr
+  // UTC, like every date the pipeline writes.
+  const madeToday = madeOn === new Date().toISOString().slice(0, 10)
   const last = forecasts.length - 1
   const [shown, setShown] = useState(last)
   const forecast = forecasts[shown]
@@ -47,7 +49,7 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
         <h2 id={title}>
           [F] {forecast.series} ·{" "}
           {live
-            ? "forecast made today"
+            ? `forecast made ${madeToday ? "today" : monthDay(madeOn)}`
             : `${forecast.backtest ? "backtest from" : "forecast made"} ${made}`}
         </h2>
         <p>

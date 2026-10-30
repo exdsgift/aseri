@@ -14,6 +14,7 @@ type Catalog = {
 }
 type Latest = {
   reference_date: string
+  forecast_date: string
   forecast_mode: string
   horizon: number[]
   target_end_date: string[]
@@ -65,11 +66,13 @@ export type Forecast = {
 // `forecasts` holds the replay's 120 days, oldest first, then today's forecast.
 // `steps` are the days ahead of the intervals block: 7, 14 and 28 for GPR.
 // `staleSince` is the day the data fell behind, while the pipeline cannot refresh it.
+// `madeOn` is the day today's forecast was made: GPR moves weekly, so often not today.
 export type Gpr = {
   today: GprToday
   forecasts: Forecast[]
   steps: number[]
   staleSince: string | null
+  madeOn: string
 }
 
 // Relative to the page, which Pages serves under /aseri/.
@@ -185,5 +188,6 @@ export async function loadGpr(): Promise<Gpr> {
     ],
     steps: gpr.interval_steps,
     staleSince: gpr.stale_since ?? null,
+    madeOn: latest.forecast_date,
   }
 }

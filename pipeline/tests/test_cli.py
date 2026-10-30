@@ -583,8 +583,9 @@ def test_a_reviewed_rewrite_goes_through_once_it_is_accepted(
 
 @pytest.fixture(autouse=True)
 def no_step_summary(monkeypatch):
-    # Actions sets it for the test step too, and the runs under test must not write to its summary.
+    # Actions sets both for the test step too, and the runs under test must not write to its summary or outputs.
     monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
 
 
 @pytest.fixture
@@ -595,15 +596,17 @@ def summary(tmp_path, monkeypatch):
     return lambda: path.read_text(encoding="utf-8")
 
 
-# The recorded file ends on 2026-10-26, and GPR's expected lag is 8 days.
+# The recorded file ends on 2026-10-26, and GPR's expected lag is 8 days: late from 10 days old, Nov 5.
 @pytest.mark.parametrize(
-    ("run_day", "status"),
-    [(4, "ok"), (5, "late"), (9, "late")],
+    ("run_day", "status", "stale_since"),
+    [(4, "ok", None), (5, "late", "2026-11-05"), (9, "late", "2026-11-05")],
     ids=["9 days old", "10 days old: 2 past the lag", "14 days old"],
 )
-def test_data_past_its_expected_lag_warns_in_the_run_summary_and_still_publishes(
-    tmp_path, monkeypatch, stub_model, summary, run_day, status
+def test_data_past_its_expected_lag_warns_in_the_run_summary_and_on_the_page_and_still_publishes(
+    tmp_path, monkeypatch, stub_model, summary, run_day, status, stale_since
 ):
+    outputs = tmp_path / "outputs"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(outputs))
     run_on(
         monkeypatch,
         datetime(2026, 11, run_day, 7, 2, tzinfo=UTC),
@@ -615,7 +618,11 @@ def test_data_past_its_expected_lag_warns_in_the_run_summary_and_still_publishes
     assert f"| gpr_daily | {status} | 2026-10-26 |" in summary()
     entry = read(tmp_path / "api" / "series.json")["series"][0]
     assert entry["latest_reference_date"] == "2026-10-26"
-    assert entry["stale_since"] is None
+    # The same day every run: the page and the alert agree with the summary, with no state kept.
+    assert entry["stale_since"] == stale_since
+    assert outputs.read_text(encoding="utf-8") == (
+        "stale=gpr_daily\n" if stale_since else "stale=\n"
+    )
 
 
 def test_data_7_days_past_its_expected_lag_is_skipped_and_keeps_its_last_forecast_labelled_stale(
@@ -650,9 +657,11 @@ def test_data_7_days_past_its_expected_lag_is_skipped_and_keeps_its_last_forecas
         read(day2 / "actuals.json")["observation"]
         == read(day1 / "actuals.json")["observation"]
     )
+    # As of the vintage it holds, not the day it was republished.
+    assert read(day2 / "actuals.json")["as_of"] == "2026-10-27"
     entry = read(tmp_path / "day2" / "series.json")["series"][0]
-    # The first day the data was older than GPR's 8-day lag allows.
-    assert entry["stale_since"] == "2026-11-04"
+    # The first day the data was 2 days past GPR's 8-day lag.
+    assert entry["stale_since"] == "2026-11-05"
     assert entry["last_observation_date"] == "2026-10-26"
 
 
@@ -695,8 +704,8 @@ def test_a_source_that_fails_its_contract_is_skipped_and_keeps_its_last_forecast
     latest = read(tmp_path / "day2" / "series" / "gpr_daily" / "latest.json")
     assert (latest["reference_date"], latest["forecast_mode"]) == ("2026-10-19", "live")
     entry = read(tmp_path / "day2" / "series.json")["series"][0]
-    # Its data was not overdue yet, and the run keeps no state: the failure is dated today.
-    assert entry["stale_since"] == "2026-10-25"
+    # Its data, to Oct 19, is not late yet: the page is as current as on any day, and only the summary says it failed.
+    assert entry["stale_since"] is None
 
 
 def test_a_run_with_nothing_to_publish_fails_and_says_why(

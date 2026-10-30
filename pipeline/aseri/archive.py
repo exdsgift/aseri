@@ -239,6 +239,15 @@ def write(
         json.dump(manifest, file, indent=2)
 
 
+def newest_as_of(archive_dir: Path, series_id: str) -> date:
+    """The day of the newest vintage the archive holds of `series_id`."""
+    rows = pd.concat(
+        pd.read_csv(path, usecols=["target", "as_of"])
+        for path in (archive_dir / DELTAS).glob("*.csv")
+    )
+    return date.fromisoformat(rows.loc[rows["target"] == series_id, "as_of"].max())
+
+
 def as_of_view(archive_dir: Path, series_id: str, t: date) -> pd.Series:
     """`series_id` as the archive knew it on day `t`: every date up to `t`, each with its latest value seen by `t`."""
     deltas = sorted((archive_dir / DELTAS).glob("*.csv"))

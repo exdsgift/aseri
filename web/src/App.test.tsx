@@ -26,7 +26,14 @@ beforeEach(() => {
     }
   )
 })
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
+// The day latest.json's forecast was made, so the panel calls it today.
+beforeEach(() => {
+  vi.useFakeTimers({ now: new Date("2026-10-30T12:00:00Z"), toFake: ["Date"] })
+})
 
 it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on", async () => {
   vi.stubGlobal("fetch", async (url: string) => Response.json(published[url]))

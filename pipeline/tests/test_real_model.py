@@ -126,6 +126,15 @@ def test_a_live_forecast_is_made_again_from_its_archived_vintage(live, model):
     assert_well_formed(result, GPR_DAILY)
 
 
+@pytest.mark.slow
+def test_the_model_forecasts_from_a_context_with_registered_errors_blanked(model):
+    # make_context sends a registered measurement error as NaN: the model must still give a whole forecast.
+    context = gpr.parse(RECORDED_GPR.read_bytes())
+    context.iloc[[20, 21, 22, -1]] = np.nan
+
+    assert_well_formed(forecast(model, context, GPR_DAILY.horizon), GPR_DAILY)
+
+
 if __name__ == "__main__":
     # Never over the goldens of the same MODEL_ID: other numbers mean another model, so a new MODEL_ID.
     if (

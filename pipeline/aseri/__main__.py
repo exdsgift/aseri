@@ -1,5 +1,6 @@
 """The daily run: fetch each series, forecast every new day, archive and publish. Usage: python -m aseri API_DIR ARCHIVE_DIR"""
 
+import json
 import os
 import subprocess
 import sys
@@ -16,6 +17,11 @@ from aseri.sources import gpr
 SOURCES = ((GPR_DAILY, gpr),)
 # Days past its expected lag at which a series' data warns, and at which the series is skipped as stale.
 LATE_DAYS, STALE_DAYS = 2, 7
+
+
+def late_since(series, last_day):
+    """The day a series' data turns late: from it on, the page and the alert say so, the same day on every run."""
+    return last_day + timedelta(days=series.expected_lag + LATE_DAYS)
 
 
 def main(api_dir: Path, archive_dir: Path) -> None:
@@ -114,6 +120,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 generated_at=generated_at,
             )
             archived = archive.read(archive_dir, series.id)
+        since = late_since(series, observed.index[-1].date())
         publish(
             api_dir,
             series,
@@ -122,6 +129,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             as_of=as_of,
             generated_at=generated_at,
             note=note,
+            stale_since=since if as_of >= since else None,
         )
         status = "late" if lag >= series.expected_lag + LATE_DAYS else "ok"
         rows.append(
@@ -138,6 +146,12 @@ def main(api_dir: Path, archive_dir: Path) -> None:
     # A row without a "data to" date published nothing.
     if not any(data_to for _, _, data_to, _ in rows):
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")
+    # The series the page now shows as late, read from what it reads, for daily.yml to open an issue on.
+    if "GITHUB_OUTPUT" in os.environ:
+        catalog = json.loads((api_dir / "series.json").read_text(encoding="utf-8"))
+        late = [s["series_id"] for s in catalog["series"] if s["stale_since"]]
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as file:
+            file.write(f"stale={','.join(late)}\n")
 
 
 def publish_stale(api_dir, archive_dir, series, generated_at, status, problem):
@@ -148,15 +162,17 @@ def publish_stale(api_dir, archive_dir, series, generated_at, status, problem):
     today = generated_at.date()
     observed = archive.as_of_view(archive_dir, series.id, today)
     last_day = observed.index[-1].date()
+    since = late_since(series, last_day)
     publish(
         api_dir,
         series,
         archived,
         observed=observed,
-        as_of=today,
+        # The vintage it republishes, not the day it failed to fetch a newer one.
+        as_of=archive.newest_as_of(archive_dir, series.id),
         generated_at=generated_at,
-        # The first day its data was older than its lag allows; no state, so a failure before that is dated today.
-        stale_since=min(today, last_day + timedelta(days=series.expected_lag + 1)),
+        # A failure before the data is late leaves the page as current as on any day: the summary says it failed.
+        stale_since=since if today >= since else None,
     )
     return series.id, status, f"{last_day:%Y-%m-%d}", f"{problem}; last good files kept"
 

@@ -26,6 +26,7 @@ jobs:
       archive_exists: ${{ steps.archive.outputs.exists }}
       archive_adds: ${{ steps.adds.outputs.any }}
       revision_hold: ${{ steps.run.outputs.revision_hold }}
+      stale: ${{ steps.run.outputs.stale }}
     defaults:
       run:
         working-directory: pipeline
@@ -188,20 +189,32 @@ jobs:
 
           The step \"Fetch, forecast, archive and publish\" names the series and the oldest changed day. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite, and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
 
-  # GitHub pauses a public repo's scheduled workflows after 60 days without activity, which it does not
-  # define; the archive's bot pushes go to a branch that is not the default, so they may not count.
-  # Enabling the workflow again restarts that clock. It needs no build, so a failing day still runs it.
-  keepalive:
-    if: github.event_name == 'schedule'
+  # Opens an issue when the page shows a series as late; like revision-alert it runs only gh, with issues: write alone.
+  stale-alert:
+    needs: [build, deploy]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' && needs.build.outputs.stale != '' }}
     runs-on: ubuntu-latest
     permissions:
-      actions: write
+      issues: write
     steps:
-      - name: Re-enable this workflow
+      - name: Open an issue, unless one is open already
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh api --method PUT "repos/$GH_REPO/actions/workflows/daily.yml/enable"
+          STALE: ${{ needs.build.outputs.stale }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Late data: $STALE"
+          # Every daily run says the same until the source catches up, so one open issue per set of series is enough.
+          if [ "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq length)" -gt 0 ]; then
+            echo "An issue is open already"
+            exit 0
+          fi
+          gh issue create --title "$title" --body "The page shows these series as late: their data is more than 2 days past its expected lag. Their last good forecasts stay up, labelled with the day they turned late; from 7 days past, no new forecast is made.
+
+          Run: $RUN_URL
+
+          The run summary says for each series whether its source failed or simply has not published. Check the source; nothing needs doing if it catches up by itself."
 
   deploy:
     needs: [build, archive]

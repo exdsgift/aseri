@@ -38,7 +38,15 @@ beforeEach(async () => {
   serve(published)
   gpr = await loadGpr()
 })
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
+
+// latest.json's forecast was made on 2026-10-30: that day, the page calls it today.
+beforeEach(() => {
+  vi.useFakeTimers({ now: new Date("2026-10-30T12:00:00Z"), toFake: ["Date"] })
+})
 
 const title = () => screen.getByRole("heading", { level: 2 }).textContent
 const slider = () =>
@@ -54,6 +62,12 @@ const intervals = () =>
     .getAllByRole("listitem")
     .map((li) => lines(li).join(" "))
 const source = () => screen.getByText(/^Source:/).textContent
+
+it("names the day today's forecast was made, unless it is today", () => {
+  vi.setSystemTime(new Date("2026-11-02T12:00:00Z"))
+  render(<ForecastPanel gpr={gpr} />)
+  expect(title()).toBe("[F] Geopolitical risk · forecast made Oct 30")
+})
 
 it("replays the forecast of the day before with ←, then today's with → or T", () => {
   render(<ForecastPanel gpr={gpr} />)
