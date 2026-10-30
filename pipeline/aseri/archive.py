@@ -147,14 +147,16 @@ def write(
 ) -> None:
     """Archive one run: its forecasts of `series` as a Hubverse round, the observations new since the last run, and a manifest.
 
-    A forecast is live only from the newest observed day and after every archived one;
+    A forecast is live only from the newest day the run forecasts, and after every archived one;
     the others, backfill included, were issued after the fact, so they are retrospective.
+    That day is the newest observed one, or the day before while the newest is under review.
     A run with no forecasts records only the revised observations.
     """
     newest_archived = max(
         (a.forecast.reference_date for a in read(archive_dir, series.id)),
         default=pd.Timestamp.min,
     )
+    newest = max((f.reference_date for f in forecasts), default=None)
     forecast_date = generated_at.date().isoformat()
     round_file = ROUNDS / f"{forecast_date}-{MODEL_ID}.csv"
     delta_file = DELTAS / f"{forecast_date}.csv"
@@ -198,14 +200,15 @@ def write(
                 "target": series.id,
                 "reference_date": f"{forecast.reference_date:%Y-%m-%d}",
                 "forecast_mode": "live"
-                if forecast.reference_date == observed.index[-1]
+                if forecast.reference_date == newest
                 and forecast.reference_date > newest_archived
                 else "retrospective",
                 "data": {
                     "source_url": series.source["data_url"],
                     "as_of": as_of.isoformat(),
+                    # With the anomaly register of the run's code commit, as make_context applies it.
                     "input_sha256": input_sha256(
-                        make_context(observed, forecast.reference_date)
+                        make_context(series, observed, forecast.reference_date)
                     ),
                 },
             }

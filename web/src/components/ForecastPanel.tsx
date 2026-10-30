@@ -21,7 +21,7 @@ const legend = [
 // its intervals and where the data comes from.
 export function ForecastPanel({ gpr }: { gpr: Gpr }) {
   const title = useId()
-  const { forecasts, steps, today } = gpr
+  const { forecasts, steps, today, staleSince } = gpr
   const last = forecasts.length - 1
   const [shown, setShown] = useState(last)
   const forecast = forecasts[shown]
@@ -51,7 +51,12 @@ export function ForecastPanel({ gpr }: { gpr: Gpr }) {
             : `${forecast.backtest ? "backtest from" : "forecast made"} ${made}`}
         </h2>
         <p>
-          {forecast.unit} · data to {dataTo}
+          {forecast.unit} ·{" "}
+          {/* Said in words too, so the warning never rests on colour alone. */}
+          <span className={staleSince ? "text-destructive" : undefined}>
+            data to {dataTo}
+            {staleSince && `, stale since ${monthDay(staleSince)}`}
+          </span>
         </p>
       </div>
       {/* The same lines whatever the day, each short enough not to wrap on a 360 px phone,

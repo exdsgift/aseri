@@ -111,7 +111,7 @@ def test_a_live_forecast_is_made_again_from_its_archived_vintage(live, model):
     vintage = archive.as_of_view(
         ARCHIVE, GPR_DAILY.id, date.fromisoformat(data["as_of"])
     )
-    context = make_context(vintage, live.forecast.reference_date)
+    context = make_context(GPR_DAILY, vintage, live.forecast.reference_date)
     assert archive.input_sha256(context) == data["input_sha256"], (
         "the archive no longer rebuilds the context this forecast was made from"
     )

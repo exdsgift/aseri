@@ -113,7 +113,7 @@ Each series is a daily value. The page shows the daily values, their 7-day avera
 | `bab_el_mandeb_transits` | Bab el-Mandeb | same, `portname='Bab el-Mandeb Strait'` | none | ships a day | 14 | 3, 7, 14 | same |
 | `taiwan_strait_transits` | Taiwan Strait | same, `portname='Taiwan Strait'` | none; known AIS tracking dropouts, label them | ships a day | 28 | 7, 14, 28 | same |
 | `ua_air_raid_hours` | Air-raid alerts | `Vadimkin/ukrainian-air-raid-sirens-dataset`, `volunteer_data_en.csv` | hours of alert per UTC day, summed over regions, alerts split at UTC midnight, today dropped (partial) | alert hours a day, all regions | 7 | 1, 3, 7 | MIT (repo); volunteer data |
-| `ua_drones_downed_claimed` | Drones downed | `PetroIvaniuk/2022-Ukraine-Russia-War-Dataset`, `russia_losses_equipment.json`, field `drone` | daily difference of the cumulative count, clipped at 0 | a day, as claimed by Ukraine | 7 | 1, 3, 7 | MIT (repo); **always labelled "claimed by Ukraine's General Staff, one side's figures"** |
+| `ua_drones_downed_claimed` | Drones downed | `PetroIvaniuk/2022-Ukraine-Russia-War-Dataset`, `russia_losses_equipment.json`, field `drone` | daily difference of the cumulative count; a negative difference is the source correcting itself, flagged as a revision, not clipped | a day, as claimed by Ukraine | 7 | 1, 3, 7 | MIT (repo); **always labelled "claimed by Ukraine's General Staff, one side's figures"** |
 
 Notes:
 - **The `id` column holds the public IDs (my call).** They are the API path segment and the Hubverse `target` value, so they can never be renamed. They are taken from `docs/research/public-api.md`. Short names are only display labels.
@@ -154,15 +154,17 @@ One workflow, `daily.yml`, on a cron.
 1. **Fetch:** one adapter per source.
    - Retry with exponential backoff, validate the content, record `as_of`.
    - Raw downloads are never committed: re-download, or use `actions/cache`.
-2. **Validate:**
-   - every series is a continuous daily index, apart from Brent's trading days;
-   - known fills are applied (Brent carries values forward only for display, the alert hours treat missing days as zero);
-   - freshness against the expected lag;
-   - plausible ranges.
+2. **Validate:** one contract per source, which fails closed:
+   - every series is a continuous daily index, apart from Brent's trading days, with no day after the fetch day;
+   - known fills are applied:
+     - Brent carries values forward only for display;
+     - the alert hours treat a missing day as zero only up to the source's freshness cutoff, its latest event or commit, so a stale file never becomes trailing zeros that read as a ceasefire;
+   - freshness against each series' expected lag: a warning at the lag plus 2 days, a stale series at plus 7;
+   - plausible ranges and finite values.
 
-   A failing series is skipped for the day and marked stale. The rest still publish.
+   A failing or stale series is skipped for the day. It keeps its last good forecast and data, labelled "stale since {date}" in the catalog. The rest still publish.
 3. **Forecast:** run Timestral on each series whose `reference_date` moved.
-   - Clamp quantiles that would be negative for count series to 0. Sort the quantiles if they cross (none crossed in testing).
+   - Clamp count quantiles at 0 and the alert hours at 600 (25 regions times 24 hours). Sort the quantiles after any offset (none crossed in testing), and stop on a non-finite value.
    - Write the Hubverse round file.
 4. **Archive:** append the round file, the observation deltas and a run manifest to the `archive` branch (6.7).
    - The manifest holds provenance, input hashes and output checksums.
@@ -176,7 +178,7 @@ One workflow, `daily.yml`, on a cron.
 
 **Weights cache.** Use `actions/cache` keyed by the model revision. Cold start downloads the 837 MB weights once.
 
-**Failure policy.** The job fails loudly when nothing could be published, or when the schemas fail. A single stale source is a warning, and the page shows "data to {date}" in that series' colour of caution.
+**Failure policy.** The job fails loudly when nothing could be published, or when the schemas fail. A failing or stale source fails only its own series: the run summary lists each source's status, and the page shows "data to {date}" in the caution colour.
 
 ### 6.4 Track record
 

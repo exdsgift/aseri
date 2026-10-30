@@ -27,6 +27,7 @@ markers = ["slow: runs the real model; opt in with pytest -m slow"]
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.170.14",
     "pytest>=9.2.0",
     "ruff>=0.17.3",
 ]

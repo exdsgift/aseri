@@ -43,10 +43,13 @@ def publish(
     observed: pd.Series,
     as_of: date,
     generated_at: datetime,
+    stale_since: date | None = None,
+    note: str | None = None,
 ) -> None:
     """Write the catalog, and every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`.
 
-    `archived` is oldest reference date first, as `archive.read` returns it.
+    `archived` is oldest reference date first, as `archive.read` returns it. A series the run skipped
+    has a `stale_since` date; a `note` says why its latest forecast starts before its last observation.
     """
     links = {
         "latest": f"series/{series.id}/latest.json",
@@ -77,7 +80,7 @@ def publish(
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
     _write(
         api_dir / "series.json",
-        _catalog(series, observed, newest, links, generated_at),
+        _catalog(series, observed, newest, links, generated_at, stale_since, note),
     )
 
 
@@ -191,7 +194,7 @@ def _actuals(series, observed, as_of, generated_at) -> dict:
     }
 
 
-def _catalog(series, observed, newest, links, generated_at) -> dict:
+def _catalog(series, observed, newest, links, generated_at, stale_since, note) -> dict:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": timestamp(generated_at),
@@ -215,6 +218,9 @@ def _catalog(series, observed, newest, links, generated_at) -> dict:
                 "last_observation_date": observed.index[-1].date().isoformat(),
                 "latest_reference_date": newest.forecast.reference_date.date().isoformat(),
                 "latest_forecast_date": newest.forecast_date,
+                # Additive to v1: null while the series is fresh and its forecast starts from its last observation.
+                "stale_since": stale_since and stale_since.isoformat(),
+                "note": note,
                 "source": series.source,
                 "license": series.license,
                 "links": links,

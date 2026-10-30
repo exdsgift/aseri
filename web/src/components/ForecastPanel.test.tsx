@@ -17,6 +17,15 @@ import { ForecastPanel } from "./ForecastPanel"
 
 let gpr: Gpr
 
+const published: Record<string, unknown> = {
+  "api/v1/series.json": catalog,
+  "api/v1/series/gpr_daily/latest.json": latest,
+  "api/v1/series/gpr_daily/actuals.json": actuals,
+  "api/v1/series/gpr_daily/replay.json": replay,
+}
+const serve = (files: Record<string, unknown>) =>
+  vi.stubGlobal("fetch", async (url: string) => Response.json(files[url]))
+
 // jsdom lays nothing out and has no canvas: the chart draws nothing.
 beforeEach(async () => {
   vi.stubGlobal(
@@ -26,13 +35,7 @@ beforeEach(async () => {
       disconnect() {}
     }
   )
-  const published: Record<string, unknown> = {
-    "api/v1/series.json": catalog,
-    "api/v1/series/gpr_daily/latest.json": latest,
-    "api/v1/series/gpr_daily/actuals.json": actuals,
-    "api/v1/series/gpr_daily/replay.json": replay,
-  }
-  vi.stubGlobal("fetch", async (url: string) => Response.json(published[url]))
+  serve(published)
   gpr = await loadGpr()
 })
 afterEach(cleanup)
@@ -166,6 +169,27 @@ it("calls a past live forecast a forecast, not a backtest", () => {
   expect(title()).toBe("[F] Geopolitical risk · forecast made Oct 25")
   expect(slider().getAttribute("aria-valuetext")).toBe("Oct 25")
   expect(source()).toBe(`Source: ${latest.attribution}`)
+})
+
+it("puts the data date in the caution colour, and says so, while the series is stale", async () => {
+  const dataTo = () => screen.getByText(/^data to/)
+  render(<ForecastPanel gpr={gpr} />)
+  expect(dataTo().textContent).toBe("data to Oct 26")
+  expect(dataTo().className).not.toContain("text-destructive")
+  cleanup()
+
+  // A run that skipped GPR keeps its last files and dates the staleness in the catalog.
+  const [entry] = catalog.series
+  serve({
+    ...published,
+    "api/v1/series.json": {
+      ...catalog,
+      series: [{ ...entry, stale_since: "2026-11-04" }],
+    },
+  })
+  render(<ForecastPanel gpr={await loadGpr()} />)
+  expect(dataTo().textContent).toBe("data to Oct 26, stale since Nov 04")
+  expect(dataTo().className).toContain("text-destructive")
 })
 
 it("announces nothing as a live region, so slider steps never pile up", () => {

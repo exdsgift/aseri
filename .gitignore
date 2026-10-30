@@ -17,6 +17,7 @@ node_modules/
 
 # Tool caches
 .ruff_cache/
+.hypothesis/
 
 # Generated site and API: published as a Pages artifact, never committed
 /site/

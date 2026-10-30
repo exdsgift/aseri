@@ -301,7 +301,9 @@ def test_a_forecast_from_the_archive_is_blind_to_every_value_and_vintage_after_i
     def forecast_from(archive_dir):
         model = RecordingStub()
         context = make_context(
-            archive.as_of_view(archive_dir, "gpr_daily", origin), pd.Timestamp(origin)
+            GPR_DAILY,
+            archive.as_of_view(archive_dir, "gpr_daily", origin),
+            pd.Timestamp(origin),
         )
         return forecast(model, context, horizon=3), model.contexts
 

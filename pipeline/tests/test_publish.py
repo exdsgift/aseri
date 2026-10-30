@@ -302,6 +302,8 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "last_observation_date": "2026-10-27",
             "latest_reference_date": "2026-10-26",
             "latest_forecast_date": "2026-10-29",
+            "stale_since": None,
+            "note": None,
             "source": GPR_DAILY.source,
             "license": GPR_DAILY.license,
             "links": {

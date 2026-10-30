@@ -1,6 +1,8 @@
 import hashlib
 import io
+from datetime import datetime
 from http.client import IncompleteRead
+from types import SimpleNamespace
 from urllib.error import HTTPError
 
 import pandas as pd
@@ -100,6 +102,19 @@ def test_fetch_records_the_hash_of_the_file_and_its_upstream_stamps(monkeypatch)
         "last_modified": "Mon, 26 Oct 2026 17:55:26 GMT",
         "etag": '"6adf940e-185ee0"',
     }
+
+
+def test_fetch_rejects_a_day_after_the_day_it_downloads_the_file(monkeypatch):
+    raw = gpr_file([120.5, 98.25], ["2026-10-25", "2026-10-26"])
+    monkeypatch.setattr(
+        gpr.urllib.request, "urlopen", lambda url, timeout: Response(raw, {})
+    )
+    monkeypatch.setattr(
+        gpr, "datetime", SimpleNamespace(now=lambda tz: datetime(2026, 10, 25, 7, 2))
+    )
+
+    with pytest.raises(ValueError, match="2026-10-26, after the fetch day 2026-10-25"):
+        gpr.fetch("https://example.org/gpr.dta")
 
 
 def test_download_does_not_retry_a_client_error(monkeypatch):

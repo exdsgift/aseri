@@ -188,6 +188,21 @@ jobs:
 
           The step \"Fetch, forecast, archive and publish\" names the series and the oldest changed day. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite, and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
 
+  # GitHub pauses a public repo's scheduled workflows after 60 days without activity, which it does not
+  # define; the archive's bot pushes go to a branch that is not the default, so they may not count.
+  # Enabling the workflow again restarts that clock. It needs no build, so a failing day still runs it.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Re-enable this workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh api --method PUT "repos/$GH_REPO/actions/workflows/daily.yml/enable"
+
   deploy:
     needs: [build, archive]
     # Also on a day with nothing new to archive, when archive is skipped; never after a failure, never off master.
