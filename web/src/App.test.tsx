@@ -325,6 +325,21 @@ it("leaves out the card of a series whose files are broken, and keeps the page",
   ).toBeNull()
 })
 
+it("shows GPR as soon as it loads, while another series' files are still on their way", async () => {
+  vi.stubGlobal("fetch", (url: string) =>
+    url.includes("taiwan_strait_transits")
+      ? new Promise(() => {})
+      : Promise.resolve(Response.json(published[url]))
+  )
+
+  render(<App />)
+
+  await screen.findByText("181", { selector: "p" })
+  const signals = within(await screen.findByRole("region", { name: "Signals" }))
+  expect(signals.getAllByRole("button")).toHaveLength(4)
+  expect(signals.queryByRole("button", { name: /^Taiwan Strait/ })).toBeNull()
+})
+
 it("draws no group without a series in the catalog", async () => {
   serve({
     ...published,
@@ -361,6 +376,30 @@ it("opens a picked card's series in the panel and brings it into view, then load
   // The replay's 120 past forecasts, then today's.
   expect((await screen.findByRole("slider")).getAttribute("max")).toBe("120")
   expect(screen.getByText("181", { selector: "p" })).toBeTruthy()
+})
+
+it("asks for a series' replay once, however often its card is picked, even when the replay is missing", async () => {
+  const replayUrl = "api/v1/series/hormuz_transits/replay.json"
+  const fetch = vi.fn(async (url: string) =>
+    url === replayUrl
+      ? new Response("", { status: 404 })
+      : Response.json(published[url])
+  )
+  vi.stubGlobal("fetch", fetch)
+  vi.spyOn(console, "error").mockImplementation(() => {})
+  render(<App />)
+  await screen.findByRole("button", { name: /^Strait of Hormuz/ })
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+  fireEvent.click(card(/^Strait of Hormuz/))
+  fireEvent.click(card(/^Strait of Hormuz/))
+  await settle()
+  fireEvent.click(card(/^Geopolitical risk/))
+  fireEvent.click(card(/^Strait of Hormuz/))
+  await settle()
+
+  expect(fetch.mock.calls.filter(([url]) => url === replayUrl)).toHaveLength(1)
+  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
 })
 
 it("opens a series with its card's key, unless a field has the focus", async () => {

@@ -20,30 +20,28 @@ export function App() {
   // The series in the panel. The hero stays on GPR.
   const [picked, setPicked] = useState(gprId)
   const panelBox = useRef<HTMLDivElement>(null)
+  // The series whose replay was asked for: GPR's comes with the page.
+  const replayed = useRef(new Set([gprId]))
   const find = (id: string) => signals?.find((s) => s.series.id === id)
   const gpr = find(gprId)?.series
   const panel = find(picked)?.series
 
   // The cards need every series' forecast and daily values; only GPR's replay, the panel's first.
+  // Each series shows as it loads, so the hero and the panel wait for GPR alone.
   useEffect(() => {
     loadCatalog()
-      .then(async (catalog) => {
+      .then((catalog) => {
         if (!catalog.some((entry) => entry.series_id === gprId))
           throw new Error("The catalog has no gpr_daily")
-        const loaded = await Promise.all(
-          catalog.map((entry) =>
-            loadSeries(entry, { replay: entry.series_id === gprId }).then(
-              (series) => [{ entry, series }],
-              (error) => {
-                // One broken series costs its card, not the page: only GPR's are vital.
-                if (entry.series_id === gprId) throw error
-                console.error(error)
-                return []
-              }
-            )
+        for (const entry of catalog)
+          loadSeries(entry, { replay: entry.series_id === gprId }).then(
+            (series) => setSignals((all = []) => [...all, { entry, series }]),
+            (error) => {
+              console.error(error)
+              // One broken series costs its card, not the page: only GPR's are vital.
+              if (entry.series_id === gprId) setFailed(true)
+            }
           )
-        )
-        setSignals(loaded.flat())
       })
       .catch((error) => {
         console.error(error)
@@ -55,9 +53,10 @@ export function App() {
     setPicked(id)
     // Smooth unless the reader asks for less motion: see index.css.
     panelBox.current!.scrollIntoView({ block: "start" })
-    const { entry, series } = find(id)!
-    // Only today's forecast so far: the replay loads once the series is picked.
-    if (series.forecasts.length === 1)
+    const { entry } = find(id)!
+    // Only today's forecast so far: the replay loads the first time the series is picked, whatever comes back.
+    if (!replayed.current.has(id)) {
+      replayed.current.add(id)
       loadSeries(entry, { replay: true }).then(
         (full) =>
           setSignals((all) =>
@@ -65,6 +64,7 @@ export function App() {
           ),
         console.error
       )
+    }
   }
 
   return (
