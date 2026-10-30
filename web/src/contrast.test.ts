@@ -21,10 +21,13 @@ const luminance = (hex: string) => {
   })
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
+const hex = (name: string) => {
+  if (!tokens[name])
+    throw new Error(`${name} is not a 6-digit hex in index.css's :root`)
+  return tokens[name]
+}
 const contrast = (a: string, b: string) => {
-  const [high, low] = [tokens[a], tokens[b]]
-    .map(luminance)
-    .toSorted((x, y) => y - x)
+  const [high, low] = [hex(a), hex(b)].map(luminance).toSorted((x, y) => y - x)
   return (high + 0.05) / (low + 0.05)
 }
 const on = (colors: string[], surfaces: string[]) =>

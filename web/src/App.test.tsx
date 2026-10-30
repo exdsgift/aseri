@@ -3,6 +3,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
@@ -48,6 +49,15 @@ afterEach(() => {
 beforeEach(() => {
   vi.useFakeTimers({ now: new Date("2026-10-30T12:00:00Z"), toFake: ["Date"] })
 })
+
+// The cards fill in as each series loads, so a test waits for the last one it expects.
+const signals = async (cards: number) => {
+  const region = await screen.findByRole("region", { name: "Signals" })
+  await waitFor(() =>
+    expect(within(region).getAllByRole("button")).toHaveLength(cards)
+  )
+  return within(region)
+}
 
 it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on", async () => {
   vi.stubGlobal("fetch", async (url: string) => Response.json(published[url]))
@@ -393,11 +403,11 @@ it("groups a card for each series in the catalog, with its 7-day average, its ch
 
   render(<App />)
 
-  const signals = within(await screen.findByRole("region", { name: "Signals" }))
+  const cards = await signals(5)
   expect(
-    signals.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)
+    cards.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)
   ).toEqual(["Risk, attention and oil", "Sea lanes"])
-  expect(signals.getAllByRole("button").map((b) => b.textContent)).toEqual([
+  expect(cards.getAllByRole("button").map((b) => b.textContent)).toEqual([
     "Geopolitical risk [1] 181 index (1985-2019 average = 100) 7-day average to Oct 26 81% above its 1985-2019 average In 28 days: 111-251 8 in 10 for Nov 23 alone",
     "Suez Canal [2] 41 ships a day 7-day average to Oct 25 1% above its 365-day mean In 28 days: 33-51 8 in 10 for Nov 22 alone",
     "Strait of Hormuz [3] 3 ships a day 7-day average to Oct 25 88% below its 365-day mean In 14 days: 0-6 8 in 10 for Nov 08 alone",
@@ -405,7 +415,7 @@ it("groups a card for each series in the catalog, with its 7-day average, its ch
     "Taiwan Strait [5] 190 ships a day 7-day average to Oct 25 18% below its 365-day mean In 28 days: 183-268 8 in 10 for Nov 22 alone",
   ])
   // The key hint is for the eye: the button says it as a shortcut.
-  const suez = signals.getByRole("button", { name: /^Suez Canal 41 ships/ })
+  const suez = cards.getByRole("button", { name: /^Suez Canal 41 ships/ })
   expect(suez.getAttribute("aria-keyshortcuts")).toBe("2")
 })
 
@@ -440,15 +450,11 @@ it("leaves out the card of a series whose files are broken, and keeps the page",
 
   render(<App />)
 
-  const signals = within(await screen.findByRole("region", { name: "Signals" }))
+  const cards = await signals(4)
   expect(
-    signals
-      .getAllByRole("button")
-      .map((b) => b.getAttribute("aria-keyshortcuts"))
+    cards.getAllByRole("button").map((b) => b.getAttribute("aria-keyshortcuts"))
   ).toEqual(["1", "2", "3", "4"])
-  expect(
-    signals.queryByRole("button", { name: /^Strait of Hormuz/ })
-  ).toBeNull()
+  expect(cards.queryByRole("button", { name: /^Strait of Hormuz/ })).toBeNull()
 })
 
 it("shows GPR as soon as it loads, while another series' files are still on their way", async () => {
@@ -461,9 +467,9 @@ it("shows GPR as soon as it loads, while another series' files are still on thei
   render(<App />)
 
   await screen.findByText("181", { selector: "p" })
-  const signals = within(await screen.findByRole("region", { name: "Signals" }))
-  expect(signals.getAllByRole("button")).toHaveLength(4)
-  expect(signals.queryByRole("button", { name: /^Taiwan Strait/ })).toBeNull()
+  const cards = await signals(4)
+  expect(cards.getAllByRole("button")).toHaveLength(4)
+  expect(cards.queryByRole("button", { name: /^Taiwan Strait/ })).toBeNull()
 })
 
 it("draws no group without a series in the catalog", async () => {
@@ -474,11 +480,11 @@ it("draws no group without a series in the catalog", async () => {
 
   render(<App />)
 
-  const signals = within(await screen.findByRole("region", { name: "Signals" }))
+  const cards = await signals(1)
   expect(
-    signals.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)
+    cards.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)
   ).toEqual(["Risk, attention and oil"])
-  expect(signals.getAllByRole("button")).toHaveLength(1)
+  expect(cards.getAllByRole("button")).toHaveLength(1)
 })
 
 const card = (name: RegExp) => screen.getByRole("button", { name })
@@ -489,7 +495,7 @@ it("opens a picked card's series in the panel and brings it into view, then load
   const fetch = vi.fn(async (url: string) => Response.json(published[url]))
   vi.stubGlobal("fetch", fetch)
   render(<App />)
-  await screen.findByRole("region", { name: "Signals" })
+  await signals(5)
 
   fireEvent.click(card(/^Suez Canal/))
 
@@ -531,7 +537,7 @@ it("asks for a series' replay once, however often its card is picked, even when 
 it("opens a series with its card's key, unless a field has the focus", async () => {
   serve(published)
   render(<App />)
-  await screen.findByRole("region", { name: "Signals" })
+  await signals(5)
   const press = (key: string, target: Element = document.body) =>
     fireEvent.keyDown(target, { key })
 

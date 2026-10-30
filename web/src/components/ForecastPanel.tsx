@@ -62,7 +62,9 @@ export function ForecastPanel({ series }: { series: Series }) {
           </span>
         </p>
       </div>
-      {/* The real values of a replay are as read that day; GPR's source revises its last month. */}
+      {/* The real values of a replay are as read that day; GPR's source revises its last month.
+          shortcut: GPR's notes key on its id; read catalog flags (revised, weekly) once #133 adds
+          Wikipedia views, which follow the week. */}
       <p className="text-muted-foreground">
         Data as of {monthDay(today.asOf)}
         {id === "gpr_daily" && ", preliminary for about 4 weeks"}.

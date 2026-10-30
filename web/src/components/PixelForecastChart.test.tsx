@@ -13,6 +13,8 @@ let resize: (width: number) => void
 let forecast: Forecast
 // The oldest of the replay, made on Jun 28: every day of it is known.
 let backtest: Forecast
+// Made 10 days before today's: its chart shows most of the same days, shifted.
+let older: Forecast
 
 // jsdom lays nothing out and has no canvas: the test sets the width and drops the drawing.
 beforeEach(async () => {
@@ -45,6 +47,7 @@ beforeEach(async () => {
   const { forecasts } = await loadSeries(catalog.series[0], { replay: true })
   forecast = forecasts.at(-1)!
   backtest = forecasts[0]
+  older = forecasts.at(-11)!
 })
 afterEach(cleanup)
 
@@ -104,6 +107,19 @@ it("drops a tap's readout past the end of an older forecast the replay moves to"
   expect(screen.queryByText(/^Most likely \d/)).not.toBeNull()
   rerender(<PixelForecastChart forecast={backtest} summary="" />)
   expect(screen.queryByText(/^Most likely \d/)).toBeNull()
+})
+
+it("drops a tap's readout once the replay moves to another forecast, even on a day both show", () => {
+  const { rerender } = render(
+    <PixelForecastChart forecast={forecast} summary="" />
+  )
+  resize(692)
+
+  // A day of history in the middle of today's chart.
+  fireEvent.pointerDown(screen.getByRole("img"), { clientX: 300 })
+  expect(screen.queryByText(/^Daily value \d/)).not.toBeNull()
+  rerender(<PixelForecastChart forecast={older} summary="" />)
+  expect(screen.queryByText(/^Daily value \d/)).toBeNull()
 })
 
 it("drops the readout when a mouse or a pen leaves, but keeps a tap's", () => {

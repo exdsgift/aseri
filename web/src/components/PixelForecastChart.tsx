@@ -108,16 +108,18 @@ export function PixelForecastChart({
     forecast,
     chartLayout
   )
-  const [hovered, setHovered] = useState<number>()
+  // A day is an index into the forecast's days, so it holds only for the forecast it was picked on.
+  const [hovered, setHovered] = useState<{ forecast: Forecast; day: number }>()
 
   const point = (event: PointerEvent<HTMLCanvasElement>) =>
     chart &&
-    setHovered(
-      chart.dayAt(
+    setHovered({
+      forecast,
+      day: chart.dayAt(
         (event.clientX - event.currentTarget.getBoundingClientRect().left) /
           pixel
-      )
-    )
+      ),
+    })
 
   return (
     <div ref={box} className="relative touch-pan-y">
@@ -135,16 +137,14 @@ export function PixelForecastChart({
         }
       />
       {chart && <ChartLabels chart={chart} forecast={forecast} />}
-      {/* A narrower chart starts later, and an older forecast of the replay ends earlier,
-          than the day a tap may have left up. */}
+      {/* A narrower chart starts later than the day a tap may have left up. */}
       {chart &&
-        hovered !== undefined &&
-        hovered >= chart.first &&
-        hovered <= chart.origin + chart.ahead && (
+        hovered?.forecast === forecast &&
+        hovered.day >= chart.first && (
           <DayTip
             chart={chart}
             forecast={forecast}
-            day={hovered}
+            day={hovered.day}
             width={width}
           />
         )}
