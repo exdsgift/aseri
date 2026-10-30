@@ -4,6 +4,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
+from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlsplit
 
 import pandas as pd
@@ -52,7 +53,10 @@ class Server:
             assert url == QUERY.split("/query?")[0] + "?f=json"
             name = "layer"
         if self.queued.get(name):
-            return Response(self.queued[name].pop(0))
+            body = self.queued[name].pop(0)
+            if isinstance(body, Exception):
+                raise body
+            return Response(body)
         return Response((RECORDED / f"{name}.json").read_bytes())
 
 
@@ -119,6 +123,16 @@ def test_an_error_body_that_never_clears_fails_the_fetch_after_5_minutes_of_atte
     with pytest.raises(ValueError, match="Invalid query parameters"):
         portwatch.fetch(QUERY)
     assert server.sleeps == [10, 20, 40, 60, 60, 60, 60]
+
+
+def test_an_http_400_is_retried_too_as_the_layer_outage_answers_with_one(serve):
+    outage = HTTPError(QUERY, 400, "Layer does not exist or is inaccessible", {}, None)
+    server = serve(layer=[outage])
+
+    observed, _, _ = portwatch.fetch(QUERY)
+
+    assert len(observed) == 55
+    assert server.sleeps == [10]
 
 
 def test_a_page_cut_off_mid_body_is_retried(serve):

@@ -6,7 +6,6 @@ import time
 import urllib.request
 from datetime import UTC, date, datetime
 from http.client import HTTPException
-from urllib.error import HTTPError
 
 import pandas as pd
 
@@ -67,9 +66,9 @@ def get(url: str) -> dict:
             if "error" in body or body.get("features") == []:
                 raise ValueError(f"PortWatch answered {body.get('error', 'no rows')}")
             return body
-        except (OSError, HTTPException, ValueError) as error:
-            # A real 4xx will not fix itself; an error body, a 5xx, a timeout or a cut connection may.
-            if attempt == 7 or (isinstance(error, HTTPError) and error.code < 500):
+        # Even a 4xx: the layer's outage of 2026-10-29 said 400 and cleared within 15 minutes.
+        except (OSError, HTTPException, ValueError):
+            if attempt == 7:
                 raise
             time.sleep(min(10 * 2**attempt, 60))
 
