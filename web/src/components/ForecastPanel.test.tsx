@@ -253,4 +253,8 @@ it("shows a sea lane with its own horizon, steps and baseline", async () => {
   ])
   expect(screen.getByText("365-day mean")).toBeTruthy()
   expect(slider().getAttribute("max")).toBe("120")
+  // PortWatch's own citation starts with "Sources:": no second label before it.
+  expect(screen.getByText(/^Sources?:/).textContent).toBe(
+    hormuzLatest.attribution
+  )
 })

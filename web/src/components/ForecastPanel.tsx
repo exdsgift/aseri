@@ -138,7 +138,8 @@ export function ForecastPanel({ series }: { series: Series }) {
       />
       {/* The URLs in it are longer than a phone is wide. */}
       <p className="wrap-anywhere text-muted-foreground">
-        Source: {forecast.attribution}
+        {/^Sources?:/.test(forecast.attribution) ? "" : "Source: "}
+        {forecast.attribution}
         {forecast.backtest &&
           ` Backtest: made after the fact, with only the data up to ${made}, but as published later: it may have been revised since. The model's training cutoff is not published, so backtests may be optimistic.`}
       </p>
