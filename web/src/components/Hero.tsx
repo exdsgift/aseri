@@ -26,14 +26,14 @@ export function Hero() {
           </p>
           <div className="flex max-w-[46ch] flex-col gap-[18px] text-balance">
             <p>
-              {versusBaseline(today.sevenDayAverage, today.baseline)} its{" "}
-              <span className="whitespace-nowrap">1985-2019</span> average
+              {versusBaseline(today.sevenDayAverage, today.baseline)}{" "}
+              <span className="whitespace-nowrap">{today.baselineLabel}</span>
             </p>
             <p>
-              {dayLabel(today.targetDate)}, 4 weeks from the last data: most
-              likely {formatValue(today.mostLikely)}. 8 in 10 between{" "}
-              {formatValue(today.low)} and {formatValue(today.high)}. (Last{" "}
-              {weekday(today.referenceDate)}:{" "}
+              {dayLabel(today.targetDate)}, {today.weeksAhead} weeks from the
+              last data: most likely {formatValue(today.mostLikely)}. 8 in 10
+              between {formatValue(today.low)} and {formatValue(today.high)}.
+              (Last {weekday(today.referenceDate)}:{" "}
               {formatValue(today.referenceValue)})
             </p>
           </div>

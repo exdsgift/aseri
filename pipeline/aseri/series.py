@@ -10,6 +10,7 @@ class Series:
     unit: str
     # What the "vs" figures compare with.
     baseline: float
+    baseline_label: str
     horizon: int
     interval_steps: tuple[int, ...]
     source: dict
@@ -21,6 +22,7 @@ GPR_DAILY = Series(
     title="Geopolitical risk",
     unit="index (1985-2019 average = 100)",
     baseline=100,
+    baseline_label="its 1985-2019 average",
     horizon=28,
     interval_steps=(7, 14, 28),
     source={

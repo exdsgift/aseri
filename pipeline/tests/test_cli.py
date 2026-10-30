@@ -37,7 +37,9 @@ def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actua
     monkeypatch.setattr(gpr, "download", lambda url: RECORDED_GPR.read_bytes())
     monkeypatch.setattr(cli, "load_model", StubModel)
 
+    before = datetime.now(UTC).date().isoformat()
     cli.main(tmp_path)
+    run_days = {before, datetime.now(UTC).date().isoformat()}
 
     catalog = json.loads((tmp_path / "series.json").read_text(encoding="utf-8"))
     latest = json.loads(
@@ -50,7 +52,7 @@ def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actua
     assert len(actuals["date"]) == len(actuals["observation"]) == 60
     assert actuals["date"][-1] == latest["reference_date"]
     assert actuals["observation"][-3:] == [164.2596, 81.5903, 165.2528]
-    assert actuals["as_of"] == datetime.now(UTC).date().isoformat()
+    assert actuals["as_of"] in run_days
     assert catalog["series"][0]["latest_reference_date"] == "2026-10-26"
     assert len(catalog["quantile_levels"]) == 21
     assert latest["reference_date"] == "2026-10-26"
@@ -63,7 +65,7 @@ def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actua
     assert (np.diff(by_step, axis=1) >= 0).all()
     provenance = latest["provenance"]
     assert re.fullmatch(r"[0-9a-f]{40}", provenance["code"]["commit"])
-    assert provenance["data"]["as_of"] == datetime.now(UTC).date().isoformat()
+    assert provenance["data"]["as_of"] in run_days
     assert provenance["inference"]["package_commit"]
     assert provenance["model"]["revision"]
     assert provenance["generated_at"].startswith(latest["forecast_date"])

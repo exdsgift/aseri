@@ -148,6 +148,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "title": "Geopolitical risk",
             "unit": "index (1985-2019 average = 100)",
             "baseline": 100,
+            "baseline_label": "its 1985-2019 average",
             "horizon_unit": "day",
             "horizon_max": 28,
             "interval_steps": [7, 14, 28],

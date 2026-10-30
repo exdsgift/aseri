@@ -13,6 +13,15 @@ export default defineConfig({
   },
   // Relative URLs, because Pages serves the site under /aseri/.
   base: "./",
+  // `npm run dev` has no API of its own, so it reads the published one.
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://exdsgift.github.io/aseri",
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     outDir: "../site",
     // The pipeline writes the API into site/api/v1, which a build must not wipe.
@@ -20,6 +29,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    unstubGlobals: true,
+    restoreMocks: true,
     // West of UTC, so a date read in local time lands on the wrong day and fails a test.
     env: { TZ: "America/New_York" },
   },

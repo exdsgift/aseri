@@ -43,3 +43,22 @@ it("says so in one plain line when the data cannot be loaded", async () => {
     "Couldn't load today's data. Refresh to try again."
   )
 })
+
+it("averages the 7 days that end on the forecast's reference date, even when the actuals run a day ahead", async () => {
+  const aheadByOneDay = {
+    ...actuals,
+    date: [...actuals.date, "2026-10-27"],
+    observation: [...actuals.observation, 1000],
+  }
+  vi.stubGlobal("fetch", async (url: string) =>
+    Response.json(
+      { ...published, "api/v1/series/gpr_daily/actuals.json": aheadByOneDay }[
+        url
+      ]
+    )
+  )
+
+  render(<Hero />)
+
+  expect(await screen.findByText("181")).toBeTruthy()
+})

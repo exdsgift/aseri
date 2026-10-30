@@ -130,6 +130,7 @@ def _catalog(series, forecast, links, generated_at) -> dict:
                 "title": series.title,
                 "unit": series.unit,
                 "baseline": series.baseline,
+                "baseline_label": series.baseline_label,
                 "horizon_unit": "day",
                 "horizon_max": series.horizon,
                 "interval_steps": list(series.interval_steps),
