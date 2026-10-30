@@ -34,14 +34,35 @@ PROVENANCE = {
 }
 
 
+QUANTILES = {
+    "0.1": [90.1, 85.4],
+    "0.25": [95.2, 93.5],
+    "0.5": [100.2, 101.5],
+    "0.75": [105.3, 110.6],
+    "0.9": [110.3, 120.6],
+}
+ATTRIBUTION = (
+    'Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", '
+    "American Economic Review 112(4), 1194-1225. "
+    "Data: https://www.matteoiacoviello.com/gpr.htm "
+    "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)."
+)
+FORECAST_LICENSE = {
+    "name": "CC BY-NC 4.0",
+    "url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "attribution": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI).",
+    "note": "Upstream terms still apply to the underlying data: see each series' license.",
+}
+
+
 def archived(reference_date, forecast_mode, forecast_date="2026-10-29"):
     return Archived(
         forecast=Forecast(
             reference_date=pd.Timestamp(reference_date),
-            levels=(0.1, 0.5, 0.9),
+            levels=(0.1, 0.25, 0.5, 0.75, 0.9),
             quantiles=np.array(
                 # As the archive reads them back: already rounded, in float64.
-                [[90.1, 100.2, 110.3], [85.4, 101.5, 120.6]]
+                [[90.1, 95.2, 100.2, 105.3, 110.3], [85.4, 93.5, 101.5, 110.6, 120.6]]
             ),
         ),
         model_id="aseri-timestral209m",
@@ -109,11 +130,7 @@ def test_a_forecast_keys_each_quantile_level_without_float_noise(api_dir):
     forecast = dated(api_dir, "2026-10-26")
 
     assert forecast["output_type"] == "quantile"
-    assert forecast["quantiles"] == {
-        "0.1": [90.1, 85.4],
-        "0.5": [100.2, 101.5],
-        "0.9": [110.3, 120.6],
-    }
+    assert forecast["quantiles"] == QUANTILES
 
 
 def test_a_forecast_carries_the_provenance_of_the_run_that_issued_it(api_dir):
@@ -128,12 +145,7 @@ def test_a_forecast_carries_the_provenance_of_the_run_that_issued_it(api_dir):
 def test_a_forecast_credits_the_source_and_the_model(api_dir):
     forecast = dated(api_dir, "2026-10-26")
 
-    assert forecast["attribution"] == (
-        'Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", '
-        "American Economic Review 112(4), 1194-1225. "
-        "Data: https://www.matteoiacoviello.com/gpr.htm "
-        "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)."
-    )
+    assert forecast["attribution"] == ATTRIBUTION
 
 
 def test_a_forecast_is_self_describing(api_dir):
@@ -152,8 +164,46 @@ def test_latest_is_the_newest_forecast_linking_to_its_dated_file(api_dir):
     assert latest["links"] == {
         "catalog": "../../series.json",
         "canonical": "forecasts/2026-10-26.json",
+        "replay": "replay.json",
     }
     assert latest | {"links": None} == newest | {"links": None}
+
+
+def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_levels(
+    tmp_path,
+):
+    publish_gpr(
+        tmp_path,
+        days_to("2026-10-27", range(200)),
+        [
+            archived("2026-06-27", "retrospective", forecast_date="2026-10-30"),
+            archived("2026-06-28", "retrospective", forecast_date="2026-10-30"),
+            archived("2026-10-26", "live"),
+        ],
+    )
+
+    replay = read(tmp_path / "series" / "gpr_daily" / "replay.json")
+
+    assert replay == {
+        "series_id": "gpr_daily",
+        "model_id": "aseri-timestral209m",
+        "horizon": [1, 2],
+        "quantile_levels": ["0.1", "0.25", "0.5", "0.75", "0.9"],
+        "forecasts": [
+            {
+                "reference_date": "2026-06-28",
+                "forecast_mode": "retrospective",
+                "quantiles": QUANTILES,
+            },
+            {
+                "reference_date": "2026-10-26",
+                "forecast_mode": "live",
+                "quantiles": QUANTILES,
+            },
+        ],
+        "license": FORECAST_LICENSE,
+        "attribution": ATTRIBUTION,
+    }
 
 
 def test_the_index_lists_every_forecast_oldest_first(api_dir):
@@ -223,7 +273,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
         "hf_id": "mistralai/Timestral-209M",
         "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
     }
-    assert catalog["quantile_levels"] == [0.1, 0.5, 0.9]
+    assert catalog["quantile_levels"] == [0.1, 0.25, 0.5, 0.75, 0.9]
     assert catalog["series"] == [
         {
             "series_id": "gpr_daily",
@@ -242,6 +292,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "links": {
                 "latest": "series/gpr_daily/latest.json",
                 "forecasts": "series/gpr_daily/forecasts.json",
+                "replay": "series/gpr_daily/replay.json",
                 "actuals": "series/gpr_daily/actuals.json",
             },
         }
@@ -251,9 +302,4 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
 def test_catalog_states_the_forecast_licence(api_dir):
     catalog = read(api_dir / "series.json")
 
-    assert catalog["license"] == {
-        "name": "CC BY-NC 4.0",
-        "url": "https://creativecommons.org/licenses/by-nc/4.0/",
-        "attribution": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI).",
-        "note": "Upstream terms still apply to the underlying data: see each series' license.",
-    }
+    assert catalog["license"] == FORECAST_LICENSE

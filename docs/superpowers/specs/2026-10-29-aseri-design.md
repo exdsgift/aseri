@@ -238,6 +238,7 @@ Follow `docs/research/public-api.md`. The essentials:
   - `series/{id}/latest.json`;
   - `series/{id}/forecasts.json`: the index;
   - `series/{id}/forecasts/{reference_date}.json`: immutable;
+  - `series/{id}/replay.json`: the forecasts of the last 120 days at the page's five levels, for the replay slider;
   - `series/{id}/actuals.json`;
   - `series/{id}/scores.json`;
   - `scores.json`;

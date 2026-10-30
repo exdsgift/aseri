@@ -3,7 +3,7 @@
 import io
 import json
 import re
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -13,6 +13,8 @@ import pytest
 import torch
 
 import aseri.__main__ as cli
+from aseri import archive
+from aseri.series import GPR_DAILY
 from aseri.sources import gpr
 
 # The last 60 days of the upstream file as downloaded on 2026-10-29.
@@ -131,7 +133,7 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
     rounds = archive_dir / "model-output" / "aseri-timestral209m"
     deltas = archive_dir / "target-data" / "deltas"
 
-    # Day 1, on an empty archive: one live forecast from the newest day.
+    # Day 1, on an empty archive: the launch backfill, every recorded day, only the newest live.
     run_on(
         monkeypatch,
         datetime(2026, 10, 20, 7, 2, tzinfo=UTC),
@@ -147,12 +149,16 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
         "runs/2026-10-20.json",
         "target-data/deltas/2026-10-20.csv",
     ]
-    assert len(pd.read_csv(rounds / "2026-10-20-aseri-timestral209m.csv")) == 28 * 21
+    assert len(pd.read_csv(rounds / "2026-10-20-aseri-timestral209m.csv")) == (
+        53 * 28 * 21
+    )
     assert len(pd.read_csv(deltas / "2026-10-20.csv")) == 53
     day1 = read(tmp_path / "day1" / "series" / "gpr_daily" / "forecasts.json")
-    assert [(f["reference_date"], f["forecast_mode"]) for f in day1["forecasts"]] == [
-        ("2026-10-19", "live")
-    ]
+    assert len(day1["forecasts"]) == 53
+    assert day1["forecasts"][0]["reference_date"] == "2026-08-28"
+    assert [
+        f["reference_date"] for f in day1["forecasts"] if f["forecast_mode"] == "live"
+    ] == ["2026-10-19"]
 
     # Day 2, after GPR's weekly update: one forecast per new day, only the newest live.
     run_on(
@@ -165,9 +171,10 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
 
     series = tmp_path / "day2" / "series" / "gpr_daily"
     index = read(series / "forecasts.json")
+    assert len(index["forecasts"]) == 60
     assert [
         (f["reference_date"], f["forecast_date"], f["forecast_mode"])
-        for f in index["forecasts"]
+        for f in index["forecasts"][-8:]
     ] == [
         ("2026-10-19", "2026-10-20", "live"),
         ("2026-10-20", "2026-10-27", "retrospective"),
@@ -228,6 +235,72 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
         ).read_bytes()
 
 
+def test_a_later_run_backfills_the_days_before_an_archived_forecast_and_latest_stays_the_newest(
+    tmp_path, monkeypatch, stub_model
+):
+    archive_dir = tmp_path / "archive"
+    # The archive as it stood before the backfill existed: one live forecast, from the newest day.
+    observed = gpr.parse(RECORDED_GPR.read_bytes())
+    archive.write(
+        archive_dir,
+        GPR_DAILY,
+        [cli.forecast(StubModel(), observed, GPR_DAILY.horizon)],
+        observed=observed,
+        as_of=date(2026, 10, 30),
+        code_commit="0" * 40,
+        run_url=None,
+        generated_at=datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+    )
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 31, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        archive_dir,
+    )
+
+    series = tmp_path / "api" / "series" / "gpr_daily"
+    index = read(series / "forecasts.json")["forecasts"]
+    assert [f["reference_date"] for f in index] == pd.date_range(
+        "2026-08-28", "2026-10-26"
+    ).strftime("%Y-%m-%d").tolist()
+    assert [
+        (f["reference_date"], f["forecast_date"])
+        for f in index
+        if f["forecast_mode"] == "live"
+    ] == [("2026-10-26", "2026-10-30")]
+    assert {f["forecast_date"] for f in index[:-1]} == {"2026-10-31"}
+    latest = read(series / "latest.json")
+    assert latest["reference_date"] == "2026-10-26"
+    assert latest["forecast_date"] == "2026-10-30"
+    assert latest["forecast_mode"] == "live"
+    assert read(tmp_path / "api" / "series.json")["series"][0][
+        "latest_reference_date"
+    ] == ("2026-10-26")
+    # The replay ends on the latest forecast, at the page's levels and to one decimal.
+    replay = read(series / "replay.json")
+    assert [f["reference_date"] for f in replay["forecasts"]] == [
+        f["reference_date"] for f in index
+    ]
+    assert replay["forecasts"][-1]["forecast_mode"] == "live"
+    assert replay["forecasts"][-1]["quantiles"] == {
+        level: [round(v, 1) for v in latest["quantiles"][level]]
+        for level in replay["quantile_levels"]
+    }
+    assert replay["forecasts"][-1]["quantiles"] != {
+        level: latest["quantiles"][level] for level in replay["quantile_levels"]
+    }
+    # Written once: the backfill never forecasts the archived day again.
+    backfill = pd.read_csv(
+        archive_dir
+        / "model-output"
+        / "aseri-timestral209m"
+        / "2026-10-31-aseri-timestral209m.csv"
+    )
+    assert backfill["reference_date"].max() == "2026-10-25"
+
+
 def test_a_second_run_the_same_day_with_new_data_waits_for_tomorrow(
     tmp_path, monkeypatch, stub_model
 ):
@@ -286,5 +359,6 @@ def test_a_revision_without_a_new_day_is_archived_as_it_is_seen(
         ["2026-10-22", 250.0, "2026-10-28"]
     ]
     assert read(archive_dir / "runs" / "2026-10-28.json")["forecasts"] == []
-    index = read(tmp_path / "day2" / "series" / "gpr_daily" / "forecasts.json")
-    assert [f["reference_date"] for f in index["forecasts"]] == ["2026-10-26"]
+    day1 = read(tmp_path / "day1" / "series" / "gpr_daily" / "forecasts.json")
+    day2 = read(tmp_path / "day2" / "series" / "gpr_daily" / "forecasts.json")
+    assert day2["forecasts"] == day1["forecasts"]

@@ -34,7 +34,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         []
         if ran_today
         else archive.new_reference_dates(
-            observed, archived[-1].forecast.reference_date if archived else None
+            observed, [a.forecast.reference_date for a in archived]
         )
     )
     if not ran_today and (
@@ -43,11 +43,14 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         forecasts = []
         if new_dates:
             model = load_model()
-            # Each forecast sees only the data up to its own date.
-            forecasts = [
-                forecast(model, observed.loc[:day], GPR_DAILY.horizon)
-                for day in new_dates
-            ]
+            for day in new_dates:
+                # Each forecast sees only the data up to its own date.
+                forecasts.append(forecast(model, observed.loc[:day], GPR_DAILY.horizon))
+                # The launch backfill takes minutes, so the log shows it moving.
+                print(
+                    f"{GPR_DAILY.id}: forecast {len(forecasts)} of {len(new_dates)}, from {day:%Y-%m-%d}",
+                    flush=True,
+                )
         archive.write(
             archive_dir,
             GPR_DAILY,

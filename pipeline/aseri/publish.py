@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from aseri.archive import Archived, timestamp
+from aseri.archive import REPLAY_DAYS, Archived, timestamp
 from aseri.forecast import MODEL_ID, WEIGHTS, WEIGHTS_REVISION
 from aseri.series import Series
 
@@ -20,6 +20,14 @@ def credit(model_id: str, weights: str) -> str:
 
 
 FORECAST_CREDIT = credit(MODEL_ID, WEIGHTS)
+FORECAST_LICENSE = {
+    "name": "CC BY-NC 4.0",
+    "url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "attribution": FORECAST_CREDIT,
+    "note": "Upstream terms still apply to the underlying data: see each series' license.",
+}
+# The page's 8-in-10 and 5-in-10 ranges and its most likely value.
+REPLAY_LEVELS = (0.1, 0.25, 0.5, 0.75, 0.9)
 
 
 def publish(
@@ -31,10 +39,14 @@ def publish(
     as_of: date,
     generated_at: datetime,
 ) -> None:
-    """Write the catalog, and every archived forecast of `series`, their index, the latest one and the observed values, under `api_dir`."""
+    """Write the catalog, and every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`.
+
+    `archived` is oldest reference date first, as `archive.read` returns it.
+    """
     links = {
         "latest": f"series/{series.id}/latest.json",
         "forecasts": f"series/{series.id}/forecasts.json",
+        "replay": f"series/{series.id}/replay.json",
         "actuals": f"series/{series.id}/actuals.json",
     }
     for forecast in archived:
@@ -43,12 +55,20 @@ def publish(
             _forecast(series, forecast),
         )
     newest = archived[-1]
+    latest = _forecast(series, newest)
     _write(
         api_dir / links["latest"],
-        _forecast(series, newest)
-        | {"links": {"catalog": "../../series.json", "canonical": _dated(newest)}},
+        latest
+        | {
+            "links": {
+                "catalog": "../../series.json",
+                "canonical": _dated(newest),
+                "replay": "replay.json",
+            }
+        },
     )
     _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
+    _write(api_dir / links["replay"], _replay(series, archived, latest["attribution"]))
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
     _write(
         api_dir / "series.json",
@@ -110,6 +130,36 @@ def _index(series, archived, generated_at) -> dict:
     }
 
 
+def _replay(series, archived, attribution) -> dict:
+    """The forecasts of the replay window, at the page's levels only, in one file for the slider."""
+    newest = archived[-1].forecast
+    start = newest.reference_date - pd.Timedelta(days=REPLAY_DAYS)
+    return {
+        "series_id": series.id,
+        "model_id": archived[-1].model_id,
+        "horizon": list(range(1, len(newest.quantiles) + 1)),
+        "quantile_levels": [str(level) for level in REPLAY_LEVELS],
+        "forecasts": [
+            {
+                "reference_date": f"{a.forecast.reference_date:%Y-%m-%d}",
+                "forecast_mode": a.provenance["forecast_mode"],
+                # One decimal keeps 121 GPR days at 37 KB gzipped, not 68 KB; the dated files keep four.
+                "quantiles": {
+                    str(level): [
+                        round(float(v), 1)
+                        for v in a.forecast.quantiles[:, a.forecast.levels.index(level)]
+                    ]
+                    for level in REPLAY_LEVELS
+                },
+            }
+            for a in archived
+            if a.forecast.reference_date >= start
+        ],
+        "license": FORECAST_LICENSE,
+        "attribution": attribution,
+    }
+
+
 def _actuals(series, observed, as_of, generated_at) -> dict:
     # shortcut: the last 400 days, enough for the page; the full history comes with the bulk files (#136).
     observed = observed.iloc[-400:]
@@ -136,12 +186,7 @@ def _catalog(series, observed, newest, links, generated_at) -> dict:
             "revision": WEIGHTS_REVISION,
         },
         "quantile_levels": list(newest.forecast.levels),
-        "license": {
-            "name": "CC BY-NC 4.0",
-            "url": "https://creativecommons.org/licenses/by-nc/4.0/",
-            "attribution": FORECAST_CREDIT,
-            "note": "Upstream terms still apply to the underlying data: see each series' license.",
-        },
+        "license": FORECAST_LICENSE,
         "series": [
             {
                 "series_id": series.id,

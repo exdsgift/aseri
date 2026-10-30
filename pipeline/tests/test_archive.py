@@ -77,26 +77,46 @@ def test_a_round_holds_every_level_of_every_forecast_in_the_long_hubverse_shape(
     ]
 
 
-def test_an_empty_archive_forecasts_from_the_newest_date_alone():
-    observed = days_to("2026-10-26", [120.5, 98.23, 101.3])
+def test_an_empty_archive_backfills_the_newest_date_and_the_120_days_before_it():
+    observed = days_to("2026-10-26", range(200))
 
-    assert archive.new_reference_dates(observed, None) == [pd.Timestamp("2026-10-26")]
+    dates = archive.new_reference_dates(observed, [])
+
+    assert dates == pd.date_range("2026-06-28", "2026-10-26").tolist()
+    assert len(dates) == 121
+
+
+def test_an_archive_with_only_a_later_forecast_backfills_the_days_before_it():
+    observed = days_to("2026-10-26", range(200))
+
+    dates = archive.new_reference_dates(observed, [pd.Timestamp("2026-10-26")])
+
+    assert dates == pd.date_range("2026-06-28", "2026-10-25").tolist()
 
 
 def test_a_jump_of_several_days_forecasts_from_every_new_date_in_order():
-    observed = days_to("2026-10-26", range(10))
+    observed = days_to("2026-10-26", range(200))
+    archived = observed.index[observed.index <= "2026-10-23"].tolist()
 
-    assert archive.new_reference_dates(observed, pd.Timestamp("2026-10-23")) == [
+    assert archive.new_reference_dates(observed, archived) == [
         pd.Timestamp("2026-10-24"),
         pd.Timestamp("2026-10-25"),
         pd.Timestamp("2026-10-26"),
     ]
 
 
-def test_data_that_has_not_moved_forecasts_nothing():
-    observed = days_to("2026-10-26", range(10))
+def test_a_jump_past_the_window_still_forecasts_every_day_after_the_archive():
+    observed = days_to("2026-10-26", range(200))
 
-    assert archive.new_reference_dates(observed, pd.Timestamp("2026-10-26")) == []
+    dates = archive.new_reference_dates(observed, [pd.Timestamp("2026-05-01")])
+
+    assert dates == pd.date_range("2026-05-02", "2026-10-26").tolist()
+
+
+def test_data_that_has_not_moved_forecasts_nothing():
+    observed = days_to("2026-10-26", range(200))
+
+    assert archive.new_reference_dates(observed, observed.index.tolist()) == []
 
 
 def test_the_first_delta_holds_the_whole_series():
@@ -243,6 +263,32 @@ def test_a_run_manifest_records_the_modes_provenance_inputs_and_checksums(tmp_pa
             delta_file: sha256((tmp_path / delta_file).read_bytes()),
         },
     }
+
+
+def test_a_forecast_from_the_newest_day_is_retrospective_when_the_archive_holds_a_newer_one(
+    tmp_path,
+):
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-26")],
+        days_to("2026-10-26", [120.5, 98.23, 101.3]),
+        date(2026, 10, 29),
+    )
+
+    # Upstream has dropped its newest day, and the backfill fills the days before the archived forecast.
+    archive_run(
+        tmp_path,
+        [two_step_forecast("2026-10-24"), two_step_forecast("2026-10-25")],
+        days_to("2026-10-25", [120.5, 98.23]),
+        date(2026, 10, 30),
+    )
+
+    manifest = json.loads(
+        (tmp_path / "runs" / "2026-10-30.json").read_text(encoding="utf-8")
+    )
+    assert [
+        (f["reference_date"], f["forecast_mode"]) for f in manifest["forecasts"]
+    ] == [("2026-10-24", "retrospective"), ("2026-10-25", "retrospective")]
 
 
 def test_archived_forecasts_read_back_oldest_first_with_the_run_that_issued_them(

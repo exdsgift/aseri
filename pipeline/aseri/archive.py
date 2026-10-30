@@ -20,6 +20,8 @@ from aseri.series import Series
 ROUNDS = Path("model-output", MODEL_ID)
 DELTAS = Path("target-data", "deltas")
 RUNS = Path("runs")
+# The replay slider's reach: the newest date and the 120 days before it, each with its own forecast.
+REPLAY_DAYS = 120
 
 
 @dataclass(frozen=True)
@@ -35,7 +37,6 @@ class Archived:
 def read(archive_dir: Path, series_id: str) -> list[Archived]:
     """Every archived forecast of `series_id`, oldest reference date first."""
     archived = []
-    # Each run only adds dates after the last archived one, so run order is reference-date order.
     for path in sorted((archive_dir / RUNS).glob("*.json")):
         run = json.loads(path.read_text(encoding="utf-8"))
         if not run["forecasts"]:
@@ -66,17 +67,19 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
                     },
                 )
             )
-    return archived
+    # Run order is not date order: a backfill archives days older than the forecasts before it.
+    return sorted(archived, key=lambda a: a.forecast.reference_date)
 
 
 def new_reference_dates(
-    observed: pd.Series, last_reference_date: pd.Timestamp | None
+    observed: pd.Series, archived: list[pd.Timestamp]
 ) -> list[pd.Timestamp]:
-    """The dates to forecast from: every observed date after the last archived reference date."""
-    # shortcut: an empty archive starts from the newest date alone, until the 120-day backfill (#131).
-    if last_reference_date is None:
-        return [observed.index[-1]]
-    return observed.index[observed.index > last_reference_date].tolist()
+    """The dates to forecast from: every date of the replay window the archive lacks, and every date after its newest."""
+    days = observed.index
+    wanted = days >= days[-1] - pd.Timedelta(days=REPLAY_DAYS)
+    if archived:
+        wanted |= days > max(archived)
+    return days[wanted & ~days.isin(archived)].tolist()
 
 
 def ran_on(archive_dir: Path, day: date) -> bool:
@@ -114,9 +117,14 @@ def write(
 ) -> None:
     """Archive one run: its forecasts of `series` as a Hubverse round, the observations new since the last run, and a manifest.
 
-    The newest forecast is live; the earlier ones were issued after the fact, so they are retrospective.
+    A forecast is live only from the newest observed day and after every archived one;
+    the others, backfill included, were issued after the fact, so they are retrospective.
     A run with no forecasts records only the revised observations.
     """
+    newest_archived = max(
+        (a.forecast.reference_date for a in read(archive_dir, series.id)),
+        default=pd.Timestamp.min,
+    )
     forecast_date = generated_at.date().isoformat()
     round_file = ROUNDS / f"{forecast_date}-{MODEL_ID}.csv"
     delta_file = DELTAS / f"{forecast_date}.csv"
@@ -160,7 +168,8 @@ def write(
                 "target": series.id,
                 "reference_date": f"{forecast.reference_date:%Y-%m-%d}",
                 "forecast_mode": "live"
-                if forecast is forecasts[-1]
+                if forecast.reference_date == observed.index[-1]
+                and forecast.reference_date > newest_archived
                 else "retrospective",
                 "data": {
                     "source_url": series.source["data_url"],
