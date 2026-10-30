@@ -54,6 +54,9 @@ jobs:
         with:
           path: ~/.cache/huggingface/hub
           key: timestral-209m-${{ steps.weights.outputs.revision }}
+      # Before anything is archived: a dependency or model change that moves the numbers stops here, under its old MODEL_ID.
+      - name: Check the model still gives its golden quantiles
+        run: uv run pytest -m slow -k golden_quantiles -rs
       - name: Find the archive branch, or start from an empty archive
         id: archive
         run: |

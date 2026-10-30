@@ -204,11 +204,8 @@ def write(
                 "data": {
                     "source_url": series.source["data_url"],
                     "as_of": as_of.isoformat(),
-                    # The exact context, as `date,value` lines: rebuilt from the deltas, it must hash the same.
-                    "input_sha256": _sha256(
+                    "input_sha256": input_sha256(
                         make_context(observed, forecast.reference_date)
-                        .to_csv(header=False, lineterminator="\n")
-                        .encode()
                     ),
                 },
             }
@@ -263,6 +260,11 @@ def as_of_view(archive_dir: Path, series_id: str, t: date) -> pd.Series:
         index=pd.DatetimeIndex(rows["target_end_date"]),
         dtype=float,
     )
+
+
+def input_sha256(context: pd.Series) -> str:
+    """The hash of a model context as `date,value` lines: rebuilt from the deltas, it must hash the same."""
+    return _sha256(context.to_csv(header=False, lineterminator="\n").encode())
 
 
 def _sha256(content: bytes) -> str:

@@ -5,6 +5,7 @@ Regenerate the goldens, only together with a new MODEL_ID: `uv run python -m tes
 
 import hashlib
 import json
+import os
 from datetime import date
 from pathlib import Path
 
@@ -32,9 +33,19 @@ GOLDEN = FIXTURES / "golden_quantiles.json"
 ARCHIVE = Path(__file__).parents[2] / "archive"
 
 
+# GitHub Actions sets CI: there a missing model or archive fails the check, so a green run has checked something.
+IN_CI = bool(os.environ.get("CI"))
+# Every level the archive and the API carry, the replay's five among them.
+LEVELS = (
+    0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+    0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99,
+)  # fmt: skip
+
+
 @pytest.fixture(scope="module")
 def model():
-    if not isinstance(
+    # In CI it downloads the weights if they are missing; elsewhere it skips.
+    if not IN_CI and not isinstance(
         try_to_load_from_cache(WEIGHTS, "model.safetensors", revision=WEIGHTS_REVISION),
         str,
     ):
@@ -51,13 +62,17 @@ def assert_well_formed(result, series):
         assert (result.quantiles >= 0).all()
 
 
-def test_the_goldens_are_of_the_model_in_the_code():
+def test_the_goldens_are_of_the_model_and_the_input_in_the_code():
     golden = json.loads(GOLDEN.read_text(encoding="utf-8"))
 
     assert (golden["model_id"], golden["weights_revision"]) == (
         MODEL_ID,
         WEIGHTS_REVISION,
     ), "a new model needs a new MODEL_ID and new goldens: see this module's docstring"
+    # test_cli shares the input: re-recording it must not pass for model drift.
+    assert (
+        golden["input_sha256"] == hashlib.sha256(RECORDED_GPR.read_bytes()).hexdigest()
+    ), f"{RECORDED_GPR.name} changed: the goldens were made from another input"
 
 
 @pytest.mark.slow
@@ -68,7 +83,7 @@ def test_the_model_forecasts_the_golden_quantiles(model):
         model, gpr.parse(RECORDED_GPR.read_bytes()), len(golden["quantiles"])
     )
 
-    assert result.levels == tuple(golden["levels"])
+    assert result.levels == tuple(golden["levels"]) == LEVELS
     np.testing.assert_allclose(result.quantiles, golden["quantiles"], rtol=1e-4)
     assert_well_formed(result, GPR_DAILY)
 
@@ -77,7 +92,7 @@ def test_the_model_forecasts_the_golden_quantiles(model):
 def live():
     """The newest live forecast of the model in the code: the one the site shows."""
     if not (ARCHIVE / "runs").is_dir():
-        pytest.skip(
+        (pytest.fail if IN_CI else pytest.skip)(
             f"no archive at {ARCHIVE}; from the repo root: git worktree add archive origin/archive"
         )
     issued = [
@@ -97,12 +112,9 @@ def test_a_live_forecast_is_made_again_from_its_archived_vintage(live, model):
         ARCHIVE, GPR_DAILY.id, date.fromisoformat(data["as_of"])
     )
     context = make_context(vintage, live.forecast.reference_date)
-    assert (
-        hashlib.sha256(
-            context.to_csv(header=False, lineterminator="\n").encode()
-        ).hexdigest()
-        == data["input_sha256"]
-    ), "the archive no longer rebuilds the context this forecast was made from"
+    assert archive.input_sha256(context) == data["input_sha256"], (
+        "the archive no longer rebuilds the context this forecast was made from"
+    )
 
     result = forecast(model, context, len(live.forecast.quantiles))
 
@@ -132,6 +144,7 @@ if __name__ == "__main__":
                 "model_id": MODEL_ID,
                 "weights_revision": WEIGHTS_REVISION,
                 "input": RECORDED_GPR.name,
+                "input_sha256": hashlib.sha256(RECORDED_GPR.read_bytes()).hexdigest(),
                 "levels": result.levels,
                 "quantiles": result.quantiles.tolist(),
             },

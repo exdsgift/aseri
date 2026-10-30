@@ -2,6 +2,7 @@
   "model_id": "aseri-timestral209m",
   "weights_revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
   "input": "gpr_daily_recent.dta",
+  "input_sha256": "7cbbed370679f2afcfe1f43cbe91e39d7e10301c485ffcc20c934defda0f4924",
   "levels": [
     0.01,
     0.05,

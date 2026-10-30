@@ -7,10 +7,10 @@ on:
     - cron: "0 9 * * 1"
   push:
     branches: [master]
+    # Anything under pipeline/ can move the numbers or the archive's hashes: the inputs, the code, the goldens.
     paths:
-      - pipeline/pyproject.toml
-      - pipeline/uv.lock
-      - pipeline/aseri/forecast.py
+      - pipeline/**
+      - .github/workflows/model-check.yml
   workflow_dispatch:
 
 permissions:
@@ -38,14 +38,11 @@ jobs:
         with:
           path: ~/.cache/huggingface/hub
           key: timestral-209m-${{ steps.weights.outputs.revision }}
-      - name: Download the weights on a cache miss, so the model tests never skip for lack of them
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: uv run python -c "from aseri.forecast import load_model; load_model()"
       - name: Check out the archive, shallow
         uses: actions/checkout@v7
         with:
           ref: archive
           path: archive
       - name: Golden quantiles, and the newest live forecast made again from its archived vintage
-        # -rs prints why a test skipped, such as no live forecast yet after a new MODEL_ID.
+        # CI is set, so a missing model or archive fails; -rs prints any skip, such as no live forecast yet after a new MODEL_ID.
         run: uv run pytest -m slow -rs
