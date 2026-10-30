@@ -25,10 +25,12 @@ import {
 } from "@/lib/chart"
 import { formatValue, monthDay } from "@/lib/format"
 
-// Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens.
+// Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens,
+// with a possible `path` in the most likely value's place.
 function usePixelChart<L extends Layout>(
   forecast: Forecast,
-  layout: (forecast: Forecast, width: number) => L
+  layout: (forecast: Forecast, width: number) => L,
+  path?: number[]
 ) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
@@ -65,9 +67,10 @@ function usePixelChart<L extends Layout>(
           mark,
           css.getPropertyValue(name),
         ])
-      ) as Colors
+      ) as Colors,
+      path
     )
-  }, [chart, forecast])
+  }, [chart, forecast, path])
 
   // Nothing until the box is measured: the canvas's default 300 px would widen it.
   const size = {
@@ -99,14 +102,17 @@ export function MiniForecastChart({ forecast }: { forecast: Forecast }) {
 
 export function PixelForecastChart({
   forecast,
+  path,
   summary,
 }: {
   forecast: Forecast
+  path: number[]
   summary: string
 }) {
   const { box, canvas, width, chart, size } = usePixelChart(
     forecast,
-    chartLayout
+    chartLayout,
+    path
   )
   // A day is an index into the forecast's days, so it holds only for the forecast it was picked on.
   const [hovered, setHovered] = useState<{ forecast: Forecast; day: number }>()
@@ -188,10 +194,10 @@ function ChartLabels({
   const xo = x(origin)
   const end = (level: string) => forecast.quantiles[level][ahead - 1]
   const real = forecast.actuals[ahead - 1]
-  // Top to bottom, so that each label clears the one above.
+  // Top to bottom, so that each label clears the one above. No most likely value: the chart
+  // draws a possible path instead, and labelling its end would make it read as the forecast.
   const ends = [
     { value: end("0.9"), className: "" },
-    { value: end("0.5"), className: "text-[12px] text-gold-pale" },
     { value: end("0.1"), className: "" },
     ...(real === undefined
       ? []

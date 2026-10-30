@@ -1,28 +1,36 @@
-import { useId, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 
 import { Intervals } from "@/components/Intervals"
 import { PixelForecastChart } from "@/components/PixelForecastChart"
 import { ReplaySlider } from "@/components/ReplaySlider"
 import { type Series } from "@/lib/api"
 import { formatValue, monthDay } from "@/lib/format"
+import { tickWhileShown, useReducedMotion } from "@/lib/motion"
+import { path } from "@/lib/paths"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 
-// The ranges before the most likely value, as in the readout.
 const legend = [
   ["Daily value", "h-0.5 w-4 bg-primary"],
   ["7-day average", "h-0.5 w-4 bg-muted-foreground"],
   ["What happened", "size-1 bg-white"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
-  ["Most likely", "h-0.5 w-4 bg-gold-pale"],
+  ["One possible path", "h-0.5 w-4 bg-gold-pale"],
   ["Forecast made", "h-3 border-l-2 border-dotted border-focus"],
 ]
+
+// The chart draws one of these at a time, never several: overlapping paths read as nothing.
+const paths = 20
+
+// Flat blocks that turn white on hover, like Back to today.
+const control =
+  "cursor-pointer bg-secondary px-2 py-1.5 text-background uppercase hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160"
 
 // A game sheet: today's forecast or a past one from the replay, its pixel chart,
 // its intervals and where the data comes from.
 export function ForecastPanel({ series }: { series: Series }) {
   const title = useId()
-  const { id, forecasts, steps, today, staleSince, madeOn, note } = series
+  const { id, forecasts, steps, today, staleSince, madeOn, note, rho } = series
   // UTC, like every date the pipeline writes.
   const madeToday = madeOn === new Date().toISOString().slice(0, 10)
   const last = forecasts.length - 1
@@ -39,9 +47,22 @@ export function ForecastPanel({ series }: { series: Series }) {
   // The target day is the hero's step, the last one.
   const [targetDay] = stepRows(forecast, [end + 1])
   const sofar = insideSoFar(forecast)
+  // Which possible path the chart draws, the next one every 1.2 s: none turns under reduced
+  // motion, nor while nobody can see the panel.
+  const [drawn, setDrawn] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const reduced = useReducedMotion()
+  const panel = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (reduced || paused) return
+    return tickWhileShown(panel.current!, 1200, () =>
+      setDrawn((k) => (k + 1) % paths)
+    )
+  }, [reduced, paused])
 
   return (
     <section
+      ref={panel}
       aria-labelledby={title}
       className="mx-auto flex max-w-[720px] flex-col gap-3 border-2 border-border px-3 pt-2 pb-3 text-[8px]/[12px] uppercase chip"
     >
@@ -124,8 +145,34 @@ export function ForecastPanel({ series }: { series: Series }) {
       </div>
       <PixelForecastChart
         forecast={forecast}
+        path={path(forecast, rho, drawn)}
         summary={`${forecast.series}: daily values, ${lastValue} on ${made} (7-day average ${average}), then the ${forecast.backtest ? "backtest" : "forecast"} of the daily value to ${target}: 8 in 10 between ${at("0.1")} and ${at("0.9")}, most likely ${at("0.5")}.${sofar.of ? ` What happened: ${sofar.inside} of ${sofar.of} days inside.` : ""}`}
       />
+      <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+        {!reduced && (
+          <button
+            type="button"
+            onClick={() => setPaused(!paused)}
+            // As wide as either word, so the controls after it never move.
+            className={`min-w-14 ${control}`}
+          >
+            {paused ? "Play" : "Pause"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setDrawn((k) => (k + 1) % paths)}
+          className={control}
+        >
+          Another path
+        </button>
+        <span>{`Possible path ${drawn + 1} of ${paths}`}</span>
+      </div>
+      {/* A path drawn from the forecast reads like data: the words keep it from reading as the forecast. */}
+      <p className="text-muted-foreground">
+        The line ahead is one possible path, not the forecast: no one knows
+        which days turn out high.
+      </p>
       <ul className="flex flex-wrap gap-x-4 gap-y-2 text-muted-foreground">
         {legend.map(([name, swatch]) => (
           <li key={name} className="flex items-center gap-2">

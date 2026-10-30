@@ -46,18 +46,37 @@ export function ReplaySlider({
     return () => removeEventListener("keydown", onKey)
   }, [last, setShown])
 
+  // Where a day sits on the track: the handle's centre runs 10 px in from each end.
+  const at = (index: number) => `calc(10px + (100% - 20px) * ${index / last})`
+
   return (
     <div className="flex flex-col gap-1.5 border-t-2 border-border pt-2.5">
-      <p className="flex items-baseline justify-between gap-2 text-muted-foreground">
-        <label htmlFor={id}>Replay a past forecast</label>{" "}
-        <span>
-          Made{" "}
-          <b className="font-normal text-primary">
-            {live ? "today" : made(shown)}
-          </b>
-        </span>
+      <p className="text-muted-foreground">
+        <label htmlFor={id}>Replay a past forecast</label>
       </p>
-      <div>
+      <div className="relative">
+        {/* A dotted track, one dot a week counted back from today, and the handle's day beside it,
+            on the side with room. For the eye: the slider says the day itself. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          {Array.from({ length: Math.floor(last / 7) + 1 }, (_, week) => (
+            <i
+              key={week}
+              className={`absolute top-1/2 -mt-0.5 -ml-0.5 size-1 ${last - 7 * week <= shown ? "bg-muted-foreground" : "bg-border"}`}
+              style={{ left: at(last - 7 * week) }}
+            />
+          ))}
+          {/* 12 px off the handle's centre, past its 10 px half, on the page colour over the dots. */}
+          <span
+            data-testid="handle-label"
+            className="absolute top-1/2 -mt-1.5 bg-background px-1 whitespace-nowrap text-primary"
+            style={{
+              left: at(shown),
+              translate: shown > last / 2 ? "calc(-100% - 12px)" : "12px",
+            }}
+          >
+            {live ? "Forecast" : made(shown)}
+          </span>
+        </div>
         <input
           ref={slider}
           id={id}
@@ -72,20 +91,8 @@ export function ReplaySlider({
               : `${made(shown)}${forecasts[shown].backtest ? ", backtest" : ""}`
           }
           onChange={(event) => setShown(event.target.valueAsNumber)}
-          className={`pixel-range block h-6 w-full ${focusRing}`}
+          className={`relative pixel-range block h-7 w-full ${focusRing}`}
         />
-        {/* One tick a week, counted back from today; the thumb's centre runs 6 px in from each end. */}
-        <div aria-hidden className="relative h-1.5">
-          {Array.from({ length: Math.floor(last / 7) + 1 }, (_, week) => (
-            <i
-              key={week}
-              className="absolute top-0 h-1.5 w-0.5 bg-border"
-              style={{
-                left: `calc(5px + (100% - 12px) * ${(last - 7 * week) / last})`,
-              }}
-            />
-          ))}
-        </div>
       </div>
       <p className="flex justify-between gap-2 text-muted-foreground">
         <span>{made(0)}</span>{" "}

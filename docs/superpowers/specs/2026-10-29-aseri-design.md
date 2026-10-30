@@ -129,7 +129,13 @@ Notes:
 
 - **The model:** Timestral-209M, univariate, CPU, 4 torch threads, full history as context. The 28M model is as good on calm series but 10 to 20% worse on Hormuz's regime shift (spike).
 - **The target is the raw daily value,** validated in both spikes. The 7-day average is display context only, never forecast separately.
-- **Archive all 21 quantile levels** so WIS can be computed properly. The page shows 0.1, 0.25, 0.5, 0.75 and 0.9 as "8 in 10" and "5 in 10" ranges, and 0.5 as "most likely".
+- **Archive all 21 quantile levels** so WIS can be computed properly. The page shows 0.1, 0.25, 0.5, 0.75 and 0.9 as "8 in 10" and "5 in 10" ranges, and 0.5 as "most likely" in its text. The panel's chart draws a possible path instead of the median.
+- **The possible path (#147).** A flat median beside a jagged past reads as a promise, so the panel draws one possible path of the days ahead, from the last daily value:
+  - day h is that day's quantile function at u = Phi(z_h), read off the published levels by straight lines and held at the end levels, with z a Gaussian AR(1);
+  - its rho, the series' day-to-day tie, is the lag-1 correlation, across consecutive horizons of the same forecast, of the normal scores of the real days' PITs. The PITs come from the 21 archived quantiles, clipped to [0.005, 0.995], over the resolved forecasts of the last 120 days, against the first vintage that resolved each day. Below 100 pairs it is 0. The catalog publishes it with its pair count;
+  - 20 paths, seeded by series, reference date and index, so a path always looks the same.
+
+  On the backtest of 2026-10-30 rho was 0.45 for GPR, -0.26 for Suez, 0.30 for Bab el-Mandeb, 0.14 for Taiwan and 0.08 for Hormuz.
 - **One forecast per series per new `reference_date`.** If a source has not moved forward (GPR during the week, for example), no new forecast is issued for that series that day. `(model_id, series_id, reference_date)` identifies a forecast; it is written once and never edited.
 - **Batches and missed runs (my call).** When a source jumps several days at once (GPR and Brent weekly, or any source after a missed run), the job issues one forecast for every new date.
   - Each one uses only the data up to its own date.
@@ -236,11 +242,11 @@ Follow `docs/research/public-api.md`. The essentials:
 
 - **The format is Hubverse model output:** `reference_date`, `target`, `horizon`, `target_end_date`, `output_type = quantile`, `output_type_id`, `value`. The model ID is `aseri-timestral209m`.
 - **Base URL:** `https://<owner>.github.io/aseri/api/v1/`, every path ending in a file name:
-  - `series.json`: catalog, with unit, horizon, cadence, last observation, source, licence and attribution text per series, model info, quantile levels, errata;
+  - `series.json`: catalog, with unit, horizon, cadence, last observation, source, licence, attribution text and day-to-day tie per series, model info, quantile levels, errata;
   - `series/{id}/latest.json`;
   - `series/{id}/forecasts.json`: the index;
   - `series/{id}/forecasts/{reference_date}.json`: immutable;
-  - `series/{id}/replay.json`: the forecasts of the last 120 days at the page's five levels, for the replay slider;
+  - `series/{id}/replay.json`: the forecasts of the last 120 days, for the replay slider, at nine levels: the page's five and the tails a possible path reaches (0.01, 0.05, 0.95, 0.99);
   - `series/{id}/actuals.json`;
   - `series/{id}/scores.json`;
   - `scores.json`;
@@ -291,9 +297,10 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
    The sun's size encodes today's GPR against the baseline.
 2. **The forecast panel,** a game-sheet frame with the title row `[F] {series} · forecast made today | {unit} · data to {date}`:
    - a readout line;
-   - the pixel chart (6.9);
+   - the pixel chart (6.9), with one possible path (6.2) on the forecast side;
+   - under it, Pause or Play, "Another path" and "Possible path N of 20", then the line "The line ahead is one possible path, not the forecast: no one knows which days turn out high." One path at a time, never several: overlapping paths read as nothing;
    - a legend;
-   - the replay slider: 120 days, weekly ticks, ←/→ for one day, T for today, "Back to today";
+   - the replay slider, in the look of Timestral's: a dotted track with one dot a week, a square handle with a vertical bar, and the day beside the handle ("Forecast" on today), on the side with room. 120 days, ←/→ for one day, T for today, "Back to today";
    - the intervals block: a row for "today, that day", then one row per interval step with the 5-in-10 and 8-in-10 ranges, then the most likely value and, in replay, the real value with inside or outside, all on one value scale with the 1-year range and the GPR baseline;
    - the source line, with attribution and the backtest/live note.
 3. **Signals:** nine cards in three groups: "Risk, attention and oil", "Sea lanes", "War in Ukraine". Each card shows:
@@ -315,9 +322,12 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - the dashed halo ring turns;
   - pixel stars twinkle;
   - the vignette breathes (6 s);
-  - the sun pulses (3.2 s, scale 1 to 1.04).
+  - the sun pulses (3.2 s, scale 1 to 1.04);
+  - the panel draws the next possible path every 1.2 s.
+
+  The sun and the paths stop while the tab is hidden or they are off screen.
 - **UI transitions** take 160 ms. Panel changes use the 8-step Bayer dither (30 ms per step).
-- **`prefers-reduced-motion`** turns all of it off: a static sun, no count-up, no scan, no dither transitions.
+- **`prefers-reduced-motion`** turns all of it off: a static sun, no count-up, no scan, no dither transitions, one path that turns only on "Another path".
 - **Data loading (my call):** first load fetches `series.json`, every `latest.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data.
 - **Accessibility:**
   - every control is a real button or input, with a visible focus (2 px gold outline);
@@ -346,14 +356,16 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 - **Charts are custom canvas components,** not Recharts.
   - Draw at 2 CSS px per art pixel with `image-rendering: pixelated`, and Bresenham lines.
   - Daily values: a gold line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
-  - The 7-day average: a label-grey line that stops at the origin. The median: a pale gold line.
+  - The 7-day average: a label-grey line that stops at the origin.
+  - The panel's forecast side: one possible path, a pale gold line from the last daily value, with no label at its end; the bands keep theirs. The cards' mini charts keep the median, a pale gold line to a 3x3 square.
   - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in muted gold with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted blue line.
   - Labels are real text over the canvas.
-  - The scale ignores the 2% most extreme daily values, which sit on the edge.
+  - The scale ignores the 2% most extreme daily values, which sit on the edge. The panel's also fits the outer published levels, the reach of a possible path, so no path is clipped and the scale holds still as the paths turn.
 - **Copy** that prevents the known misreadings (a range read as a high and a low, a median read as a promise), checked by a text lint in `web/src/App.test.tsx`:
   - a range always comes before "most likely", with a fixed denominator of 10: "8 in 10 between {lo} and {hi}, 2 in 10 outside". No median stands alone anywhere, a social preview included;
+  - beside the chart, what the line ahead is: "The line ahead is one possible path, not the forecast: no one knows which days turn out high". #147 asked for "which days will be high"; "turn out" keeps the rule below;
   - beside the chart, what the band is and is not: "where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call"; for GPR alone, that daily values can follow the week, so a day compares with the same weekday ("compare Monday with Monday" in the hero). The sea lanes have no weekly cycle;
   - "data as of {date}", from each `actuals.json`'s `as_of`; for GPR, "preliminary for about 4 weeks";
   - never "will" and never "% confidence";

@@ -9,3 +9,10 @@ window.matchMedia = (media: string) => {
     )
   return lists.get(media)!
 }
+
+// jsdom has no IntersectionObserver either: this one never calls back, so whatever it
+// watches stays on screen. A test stubs its own to move something off screen.
+window.IntersectionObserver = class {
+  observe() {}
+  disconnect() {}
+} as never
