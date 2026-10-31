@@ -24,9 +24,18 @@ import {
   type Layout,
 } from "@/lib/chart"
 import { daysAhead, formatValue, monthDay } from "@/lib/format"
+import { countMs, countSteps, easeOut, useSteps } from "@/lib/motion"
+
+// The series each kind of chart, by its layout, has begun to scan in since the page loaded. A
+// chart mounted again for one of them, as the panel is when its replay arrives or a square of
+// the record opens it, is drawn whole.
+const scannedIn = new Map<unknown, Set<string>>()
 
 // Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens,
-// with `path`, one of the model's paths, on the forecast side.
+// with `path`, one of the model's paths, on the forecast side. The first time a series' chart of
+// this kind comes into view, never under reduced motion, its marks scan in from the left, stepping
+// with the hero's count-up and slowing into the end a column at a time; the frame and the labels
+// are there from the first frame.
 function usePixelChart<L extends Layout>(
   forecast: Forecast,
   layout: (forecast: Forecast, width: number) => L,
@@ -34,43 +43,98 @@ function usePixelChart<L extends Layout>(
 ) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(0)
+  const [seen, setSeen] = useState(false)
   const chart = useMemo(
     () => (width ? layout(forecast, width) : undefined),
     [forecast, width, layout]
   )
+  const [fresh] = useState(() => !scannedIn.get(layout)?.has(forecast.series))
+  const step = useSteps(countSteps, countMs, fresh && seen)
+  const revealed = !fresh || step === undefined ? 1 : easeOut(step / countSteps)
+  useEffect(() => {
+    if (fresh && seen)
+      scannedIn.set(
+        layout,
+        (scannedIn.get(layout) ?? new Set<string>()).add(forecast.series)
+      )
+  }, [fresh, seen, layout, forecast.series])
   const box = useCallback((element: HTMLElement | null) => {
     if (!element) return
     // At once too, before the first paint: a chart mounted as a new series opens would
     // otherwise show a frame with no height, and everything under it would jump.
     setWidth(Math.floor(element.getBoundingClientRect().width))
-    const observer = new ResizeObserver(([entry]) =>
+    const resized = new ResizeObserver(([entry]) =>
       setWidth(Math.floor(entry.contentRect.width))
     )
-    observer.observe(element)
-    return () => observer.disconnect()
+    // The scan waits for the chart to show, if only in part.
+    const shown = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setSeen(true)
+    })
+    resized.observe(element)
+    shown.observe(element)
+    return () => {
+      resized.disconnect()
+      shown.disconnect()
+    }
   }, [])
 
+  // The chart painted whole off screen, once for each drawing, and its frame alone while the
+  // marks have still to scan in over it: each step of the scan only reveals more of the whole.
+  // The colours are read once.
+  const layers = useRef<{
+    drawn?: unknown[]
+    colors?: Colors
+    whole?: HTMLCanvasElement
+    frame?: HTMLCanvasElement
+  }>({})
   useEffect(() => {
     if (!chart) return
-    const context = canvas.current!.getContext("2d")!
-    const css = getComputedStyle(canvas.current!)
-    context.clearRect(0, 0, chart.art.width, chart.art.height)
-    paintChart(
-      (x, y, color) => {
-        context.fillStyle = color
-        context.fillRect(x, y, 1, 1)
-      },
-      chart,
-      forecast,
-      Object.fromEntries(
+    const at = layers.current
+    if (!at.colors) {
+      const css = getComputedStyle(canvas.current!)
+      at.colors = Object.fromEntries(
         Object.entries(chartTokens).map(([mark, name]) => [
           mark,
           css.getPropertyValue(name),
         ])
-      ) as Colors,
-      path
-    )
-  }, [chart, forecast, path])
+      ) as Colors
+    }
+    const layer = (marks: boolean) => {
+      const painted = document.createElement("canvas")
+      painted.width = chart.art.width
+      painted.height = chart.art.height
+      const context = painted.getContext("2d")!
+      paintChart(
+        (x, y, color) => {
+          context.fillStyle = color
+          context.fillRect(x, y, 1, 1)
+        },
+        chart,
+        forecast,
+        at.colors!,
+        path,
+        marks
+      )
+      return painted
+    }
+    const drawing = [chart, forecast, path]
+    if (!at.drawn || at.drawn.some((part, i) => part !== drawing[i])) {
+      at.drawn = drawing
+      at.whole = layer(true)
+      at.frame = undefined
+    }
+    const { width, height } = chart.art
+    // Up to the column past the right end, where what happened's ring ends.
+    const shown =
+      revealed < 1
+        ? Math.ceil(chart.left + revealed * (chart.right + 2 - chart.left))
+        : width
+    const context = canvas.current!.getContext("2d")!
+    context.clearRect(0, 0, width, height)
+    if (shown < width) context.drawImage((at.frame ??= layer(false)), 0, 0)
+    if (shown > 0)
+      context.drawImage(at.whole!, 0, 0, shown, height, 0, 0, shown, height)
+  }, [chart, forecast, path, revealed])
 
   // Nothing until the box is measured: the canvas's default 300 px would widen it.
   const size = {

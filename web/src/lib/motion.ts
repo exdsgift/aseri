@@ -7,7 +7,7 @@ import { formatValue } from "@/lib/format"
 export const easeOut = (k: number) => 1 - (1 - Math.min(Math.max(k, 0), 1)) ** 3
 
 // The count-up: 16 steps of 40 ms from 0 to the value.
-const countSteps = 16
+export const countSteps = 16
 export const countMs = 40
 
 // The share of the value the count shows `ms` after it started, step by step, so that
@@ -77,14 +77,14 @@ export function tickWhileShown(element: Element, ms: number, tick: () => void) {
 
 // Steps 0 to count - 1, `ms` apart, then undefined: the resting state. Already there
 // under reduced motion at load, so turning it off later never replays the sequence.
-// Timed from the first animation frame: a tab hidden midway gets no frames, and on
-// its return the sequence skips to its end.
-export function useSteps(count: number, ms: number) {
+// Held on step 0 until `ready`, which once true stays so. Timed from the first animation
+// frame: a tab hidden midway gets no frames, and on its return the sequence skips to its end.
+export function useSteps(count: number, ms: number, ready = true) {
   const reduced = useReducedMotion()
   const [step, setStep] = useState(reduced ? count : 0)
   const finished = step >= count
   useEffect(() => {
-    if (reduced || finished) return
+    if (reduced || finished || !ready) return
     let start: number | undefined
     let shown = -1
     let frame = requestAnimationFrame(function next(now) {
@@ -94,6 +94,6 @@ export function useSteps(count: number, ms: number) {
       if (reached < count) frame = requestAnimationFrame(next)
     })
     return () => cancelAnimationFrame(frame)
-  }, [count, ms, reduced, finished])
+  }, [count, ms, reduced, finished, ready])
   return reduced || finished ? undefined : step
 }
