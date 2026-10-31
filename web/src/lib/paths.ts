@@ -61,22 +61,15 @@ export const PATHS = 20
 // A tie of 1 would leave no room to move: the pipeline's correlations stay inside it.
 const tied = (rho: number) => Math.max(-0.99, Math.min(0.99, rho))
 
-// The paths the page shows, the most likely first: ranked by their log-likelihood under
-// the AR(1) they are drawn from, in normal scores, so the first is the most typical of them.
+// The paths the page shows, the most likely first: ranked by how likely each of their days is,
+// the sum of the days' log-densities in normal scores. Ranking by the whole AR(1) likelihood
+// instead favoured smooth paths, which under a strong tie may drift and stay out of the band.
 export function ranked(forecast: Forecast, rho: number) {
   rho = tied(rho)
   return Array.from({ length: PATHS }, (_, index) => draw(forecast, rho, index))
     .map(({ values, z }) => ({
       values,
-      logLikelihood: z.reduce(
-        (sum, now, day) =>
-          sum -
-          (day === 0
-            ? now * now
-            : (now - rho * z[day - 1]) ** 2 / (1 - rho * rho)) /
-            2,
-        0
-      ),
+      logLikelihood: z.reduce((sum, score) => sum - (score * score) / 2, 0),
     }))
     .toSorted((a, b) => b.logLikelihood - a.logLikelihood)
 }
