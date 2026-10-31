@@ -46,6 +46,9 @@ class Series:
     # to the archived value. The defaults hold on any change there: a source whose revisions are unmeasured.
     deep_revision_tolerance: float = 0.0
     deep_revision_days: int = 0
+    # And whatever the count, when one of those values ends up more than this many times larger or smaller than
+    # archived: a unit or scale error on a few days. None turns it off, as the defaults above hold on any change.
+    deep_revision_ratio: float | None = None
     # What a forecast step is: a calendar "day", or a "trading_day" for a price that has none on weekends and holidays.
     horizon_unit: str = "day"
     # Whether its values follow the week, so the page says to compare a day with the same weekday.
@@ -69,15 +72,19 @@ GPR_DAILY = Series(
     horizon=28,
     interval_steps=(7, 14, 28),
     # GPR rewrites its last month every week, and older days too: 148 of the authors' 277 weekly updates
-    # from 2022-03 to 2026-10 changed a day older than 90 days, single days by up to 57%. Counted as days
-    # moved by more than 1%, a normal update moved at most 77 (2024-05-13), and the February 2024 fix of
-    # missing articles since 2021 moved 298 to 746 in each of its four files. 150 sits about twice as far
-    # from both. The fix holds by design: a rewrite of years is for a human to review. A uniform shift of the
-    # whole history above 1%, as a rebase would make, holds too. Calibration: prototypes/gpr-realtime-backtest/
-    # revisions.py, docs/research/gpr-realtime-backtest.md "The deep-revision rule".
+    # from 2022-03 to 2026-10 changed a day older than 90 days. Counted as days moved by more than 1%, a
+    # normal update moved at most 77 (2024-05-13), and at most 82, 91 and 95 over 2, 3 and 4 updates when the
+    # archive misses weeks; the February 2024 fix of missing articles since 2021 moved 298 to 749 in each of
+    # its four files, against the vintage before it or the one before the fix. 150 sits 1.6 to 2 times from
+    # both. The fix holds by design: a rewrite of years is for a human to review. A uniform shift of the whole
+    # history above 1%, as a rebase would make, holds too. One old day revised ended at 0.636 to 1.571 times
+    # its archived value (the fix: 0.627 to 1.414), so a day past 3-fold, 1.9 times farther, is a unit or
+    # scale error. Calibration: prototypes/gpr-realtime-backtest/revisions.py, and
+    # docs/research/gpr-realtime-backtest.md, "The deep-revision rule".
     revision_window=90,
     deep_revision_tolerance=0.01,
     deep_revision_days=150,
+    deep_revision_ratio=3.0,
     # Updated on Mondays, Tuesdays after a US holiday, with data to that same day at about 18:00 UTC (the
     # authors' 2026 vintages): the 07:00 run sees data 1 to 7 days old, 8 in a holiday week.
     expected_lag=8,

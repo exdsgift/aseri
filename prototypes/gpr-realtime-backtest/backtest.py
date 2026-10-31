@@ -90,7 +90,7 @@ def deltas(vintages: dict) -> pd.DataFrame:
 
 
 def oddities(vintages: dict) -> dict:
-    """What the used vintages hold that a reader should know, by file date: their last day, empty updates, and rewrites `archive.check_revisions` would hold for review."""
+    """What the used vintages hold that a reader should know, by file date: their last day, empty updates, and deep rewrites (of days older than the revision window, which the rule before #149 held on any change; #149's rule holds only the four files of the February 2024 fix)."""
     notes = {
         k: {} for k in ("last_day_not_file_date", "no_change", "past_revision_window")
     }
@@ -410,7 +410,7 @@ def report(result):
         )
     )
     print(
-        f"rewrites past the revision window: {len(deep)} vintages, by year {deep.groupby(years).size().to_dict()}; "
+        f"deep rewrites, past the revision window (held by the rule before #149; #149's rule holds only the February 2024 fix): {len(deep)} vintages, by year {deep.groupby(years).size().to_dict()}; "
         f"by more than 1 point: {int(big.sum())}, by year {deep[big].groupby(years[big]).size().to_dict()}"
     )
     print(

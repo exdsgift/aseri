@@ -105,7 +105,36 @@ def has_new_observations(
 
 
 class RevisionHold(Exception):
-    """Upstream changed values older than the series' revision window: a method change or a broken file, for a human to review."""
+    """Upstream dropped archived days, or rewrote its history past its revision window beyond a normal update (more old
+    values moved than its series allows, or one scaled past its limit): a method change or a broken file, for a human to review.
+    """
+
+
+class DeepRevision(NamedTuple):
+    """An update's revisions of archived days older than its series' revision window."""
+
+    # Every such day it changed.
+    days: pd.DatetimeIndex
+    # Those moved by more than `deep_revision_tolerance` of their archived value.
+    moved: pd.DatetimeIndex
+    # Those now more than `deep_revision_ratio` times larger or smaller than archived.
+    scaled: pd.DatetimeIndex
+
+
+def deep_revision(
+    series: Series, known: pd.Series, observed: pd.Series
+) -> DeepRevision:
+    """What `observed` rewrites of `known` past the revision window: the one definition the hold and its calibration share."""
+    revised = observation_delta(observed, known).index.intersection(known.index)
+    days = revised[
+        revised < observed.index[-1] - pd.Timedelta(days=series.revision_window)
+    ]
+    old, new = known[days], observed[days]
+    moved = days[(new - old).abs() > series.deep_revision_tolerance * old.abs()]
+    k = series.deep_revision_ratio
+    # A day once 0 and now not, or now 0, divides to infinity or to 0: scaled either way.
+    scaled = days[(new / old > k) | (new / old < 1 / k)] if k else days[:0]
+    return DeepRevision(days, moved, scaled)
 
 
 def check_revisions(
@@ -113,9 +142,12 @@ def check_revisions(
 ) -> str | None:
     """Raise RevisionHold if `observed` drops archived days, or rewrites more of them past the revision window than a normal update does.
 
-    Past `series.revision_window` days before its newest, more than `series.deep_revision_days` values
-    moved by more than `series.deep_revision_tolerance` hold the run. What passes there is recorded as
-    any revision is, and returned as a line for the run summary; None when nothing that old changed.
+    Past `series.revision_window` days before its newest, an update holds when it moves more than
+    `series.deep_revision_days` values by more than `series.deep_revision_tolerance`, or any one past
+    `series.deep_revision_ratio`. What passes there is archived as any revision is, and described in a
+    line for the run summary; None when nothing that old changed.
+    shortcut: each update is weighed against the archive alone, so a rewrite spread over several weeks,
+    say 140 old days a week, passes week after week; count the old days moved over recent weeks if one is seen.
     """
     known = as_of_view(archive_dir, series.id, as_of)
     # A broken file can be continuous and unchanged where it has data, yet shorter.
@@ -127,35 +159,39 @@ def check_revisions(
             f"{dropped.min():%Y-%m-%d} to {dropped.max():%Y-%m-%d}. "
             "Nothing is archived or published until someone has reviewed the file."
         )
-    revised = observation_delta(observed, known).index.intersection(known.index)
-    oldest_allowed = observed.index[-1] - pd.Timedelta(days=series.revision_window)
-    deep = revised[revised < oldest_allowed]
-    if deep.empty:
-        return None
-    change = (observed[deep] - known[deep]).abs()
-    # Negated, so that a value blank before or now always counts as moved.
-    moved = deep[~(change <= series.deep_revision_tolerance * known[deep].abs())]
-    by = (
-        f" by more than {series.deep_revision_tolerance:.0%}"
-        if series.deep_revision_tolerance
-        else ""
-    )
+    deep = deep_revision(series, known, observed)
     window = f"{series.revision_window}-day revision window"
-    if len(moved) > series.deep_revision_days:
+    by = f" by more than {series.deep_revision_tolerance * 100:g}%"
+    review = "Nothing is archived or published until someone has reviewed the rewrite."
+    if len(deep.scaled):
+        raise RevisionHold(
+            f"{series.id}: upstream changed {_values(len(deep.scaled))} older than its {window} "
+            f"more than {series.deep_revision_ratio:g}-fold, up or down, the oldest on "
+            f"{deep.scaled.min():%Y-%m-%d}: a unit or scale error, or a method change. {review}"
+        )
+    if len(deep.moved) > series.deep_revision_days:
         normal = (
             f", more than the {series.deep_revision_days} a normal update moves"
             if series.deep_revision_days
             else ""
         )
         raise RevisionHold(
-            f"{series.id}: upstream changed {len(moved)} archived values older than its "
-            f"{window}{by}, the oldest on {moved.min():%Y-%m-%d}{normal}. "
-            "Nothing is archived or published until someone has reviewed the rewrite."
+            f"{series.id}: upstream changed {_values(len(deep.moved))} older than its {window}"
+            f"{by if series.deep_revision_tolerance else ''}, the oldest on "
+            f"{deep.moved.min():%Y-%m-%d}{normal}. {review}"
         )
+    if deep.days.empty:
+        return None
+    ratio = series.deep_revision_ratio
     return (
-        f"{len(deep)} archived values older than its {window} revised, the oldest on "
-        f"{deep.min():%Y-%m-%d}, {len(moved)}{by} (it holds above {series.deep_revision_days}): recorded"
+        f"{_values(len(deep.days))} older than its {window} revised, the oldest on "
+        f"{deep.days.min():%Y-%m-%d}, {len(deep.moved)}{by} (it holds above "
+        f"{series.deep_revision_days}{f', or on one past {ratio:g}-fold' if ratio else ''})"
     )
+
+
+def _values(n: int) -> str:
+    return f"{n} archived value" + ("" if n == 1 else "s")
 
 
 def timestamp(moment: datetime) -> str:

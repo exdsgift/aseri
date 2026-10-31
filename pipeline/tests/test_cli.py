@@ -980,6 +980,136 @@ def test_a_rewrite_older_than_the_revision_window_holds_only_its_own_series_and_
     assert "revision_hold=suez_transits\n" in output.read_text(encoding="utf-8")
 
 
+@pytest.fixture
+def suez_takes_one_deep_revision(monkeypatch):
+    """Suez with a GPR-like rule: one value older than its window may move by more than 1%, a second holds."""
+    monkeypatch.setattr(
+        cli,
+        "SOURCES",
+        tuple(
+            (
+                replace(series, deep_revision_tolerance=0.01, deep_revision_days=1)
+                if series.id == "suez_transits"
+                else series,
+                source,
+            )
+            for series, source in cli.SOURCES
+        ),
+    )
+
+
+def suez_rewritten(ships_by_day):
+    """The next weekly batch, with Suez days four months back rewritten; the ships stay in the weekly cycle's 41 to 43."""
+    lanes = sea_lanes("2026-11-01")
+    for day, ships in ships_by_day.items():
+        lanes["Suez Canal"].loc[day] = ships
+    return lanes
+
+
+def test_a_deep_revision_the_rule_lets_pass_is_archived_and_named_and_a_rerun_says_it_is_not(
+    tmp_path,
+    monkeypatch,
+    stub_model,
+    summary,
+    short_backfill,
+    suez_takes_one_deep_revision,
+):
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+
+    # 2026-07-01, a Wednesday, had 43 ships: 41 is 4.7% fewer.
+    serve(monkeypatch, suez_rewritten({"2026-07-01": 41}), edited=NEXT_EDIT)
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 5, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    row = [line for line in summary().splitlines() if "suez" in line][-1]
+    assert row.startswith("| suez_transits | ok | 2026-11-01 |")
+    assert row.endswith(
+        "; 1 archived value older than its 30-day revision window revised, the oldest on 2026-07-01, "
+        "1 by more than 1% (it holds above 1): recorded |"
+    )
+    deltas = pd.read_csv(archive_dir / "target-data" / "deltas" / "2026-11-05.csv")
+    suez = deltas[deltas["target"] == "suez_transits"].set_index("target_end_date")
+    assert suez.loc["2026-07-01", "observation"] == 41
+
+    # A second run that day sees another rewrite, but archives nothing: today's run is archived.
+    # 2026-07-02, a Thursday, had 41 ships.
+    serve(
+        monkeypatch,
+        suez_rewritten({"2026-07-01": 41, "2026-07-02": 43}),
+        edited=NEXT_EDIT,
+    )
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 5, 9, 30, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "rerun",
+        archive_dir,
+    )
+
+    row = [line for line in summary().splitlines() if "suez" in line][-1]
+    assert row.endswith(
+        "the oldest on 2026-07-02, 1 by more than 1% (it holds above 1): seen; today's run is already archived |"
+    )
+    assert (
+        archive.as_of_view(archive_dir, "suez_transits", date(2026, 11, 5))[
+            "2026-07-02"
+        ]
+        == 41
+    )
+
+
+def test_a_deep_revision_of_a_series_whose_forecast_fails_is_still_named(
+    tmp_path, monkeypatch, summary, short_backfill, suez_takes_one_deep_revision
+):
+    archive_dir = tmp_path / "archive"
+    monkeypatch.setattr(cli, "load_model", StubModel)
+    serve(monkeypatch, sea_lanes())
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+
+    monkeypatch.setattr(cli, "load_model", SuezBreaksTheModel)
+    serve(monkeypatch, suez_rewritten({"2026-07-01": 41}), edited=NEXT_EDIT)
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 5, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    # Its observations are archived all the same, the revision with them, and the summary says so.
+    row = [line for line in summary().splitlines() if "suez" in line][-1]
+    assert row.startswith("| suez_transits | failed |")
+    assert (
+        "the oldest on 2026-07-01, 1 by more than 1% (it holds above 1): recorded |"
+        in row
+    )
+    assert (
+        archive.as_of_view(archive_dir, "suez_transits", date(2026, 11, 5))[
+            "2026-07-01"
+        ]
+        == 41
+    )
+
+
 class SuezBreaksTheModel(StubModel):
     """The stub, except on Suez's contexts (only 41, 42 and 43 ships), where it returns NaN as a broken model might."""
 

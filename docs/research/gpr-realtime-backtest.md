@@ -102,17 +102,22 @@ Crossing the inputs with the truth separates the two halves (WIS, then the 80% b
 - **Gaps.** Seven files miss days: the last 1 or 2 days blank in 2022-09-01, 2022-10-24, 2022-12-01 and 2023-03-01; all of January 2022 missing in 2023-02-06; the leap day 2024-02-29 missing in 2024-03-01 and 2024-03-04. The adapter rejects all seven.
 - **A truncated file.** The 2023-01-02 file is the 2022-12-27 vintage cut at 2022-08-31: 118 days fewer. The archive would hold it.
 - **Dating.** Six files end one to three days before their date (2022-10-03 ends on Friday 2022-09-30), and three (2022-11-01, 2023-11-01, 2025-12-02) are identical to the file before them.
-- **Rewrites deep in the past are routine, not rare.** 148 of the 277 accepted updates change at least one day older than 90 days before their newest day, 82 of them by more than 1 index point: 34 of 50 updates in 2026, 26 of them by more than a point. The largest single change is 62.1 points (the 2026-10-01 file). Some old days flip between two values: 2023-03-15 reads 118.71 in the 2024-02-05 file, 101.75 on 2024-02-07, 118.71 on 2024-02-12 and 101.75 on 2024-02-20, and the same change sizes (50.19, 58.03, 38.41 points) recur in files months apart. The February 2024 fix itself is the 2024-02-07 file, which rewrote 881 days back to 2021-01-04.
+- **Rewrites deep in the past are routine, not rare.** 148 of the 277 accepted updates change at least one day older than 90 days before their newest day, 82 of them by more than 1 index point: 34 of 50 updates in 2026, 26 of them by more than a point. The rule before #149 held every one of the 148; #149's rule holds only the four files of the February 2024 fix (below). The largest single change is 62.1 points (the 2026-10-01 file). Some old days flip between two values: 2023-03-15 reads 118.71 in the 2024-02-05 file, 101.75 on 2024-02-07, 118.71 on 2024-02-12 and 101.75 on 2024-02-20, and the same change sizes (50.19, 58.03, 38.41 points) recur in files months apart. The February 2024 fix itself is the 2024-02-07 file, which rewrote 881 days back to 2021-01-04.
 
 The last point matters beyond this backtest: GPR's `revision_window` of 90 days, which then held the series on any older change, would have held it for review in more than half of its weekly updates, and in two thirds of them in 2026. Issue #149 replaced that rule before the 2026-11-02 update, the first the archive checks: see [The deep-revision rule](#the-deep-revision-rule-149).
 
 ## The deep-revision rule (#149)
 
-The archive used to hold a series for review whenever an update changed any archived value older than its `revision_window`. On GPR that would have held 148 of the 277 real updates. The rule is now per series, in the registry: an update holds when it moves more than `deep_revision_days` values older than the window by more than `deep_revision_tolerance` of their archived value. The defaults, 0 days and 0%, keep the old rule for every series whose revisions are unmeasured. GPR sets 150 days and 1%.
+The archive used to hold a series for review whenever an update changed any archived value older than its `revision_window`. On GPR that would have held 148 of the 277 real updates. The rule is now per series, in the registry. Past the window, an update holds when:
+
+- it moves more than `deep_revision_days` values by more than `deep_revision_tolerance` of their archived value, or
+- any one of them ends up more than `deep_revision_ratio` times larger or smaller than archived, whatever the count.
+
+The defaults, 0 days, 0% and no ratio, keep the old rule for every series whose revisions are unmeasured. GPR sets 150 days, 1% and 3-fold. `archive.deep_revision` is the one definition of the moved and scaled days, shared by the hold, its run summary line and the calibration script.
 
 ### Calibration
 
-`prototypes/gpr-realtime-backtest/revisions.py` replays each of the 277 updates (consecutive vintages aseri would have archived) through the production `archive.check_revisions`, with the archive's view set to the vintage before it. It counts the days older than 90 days that each update moves by more than a tolerance:
+`prototypes/gpr-realtime-backtest/revisions.py` replays each of the 277 updates (consecutive vintages aseri would have archived) through the production `archive.check_revisions`, with the archive's view set to the vintage before it, and counts through `archive.deep_revision` the days older than 90 days that each update moves by more than a tolerance:
 
 | Old days moved by more than | Most in a normal update | Fewest in a February 2024 file |
 |---|---|---|
@@ -121,9 +126,23 @@ The archive used to hold a series for review whenever an update changed any arch
 | 5% | 47 (2024-05-13) | 283 (2024-02-05) |
 | 10% | 11 (2024-05-13) | 215 (2024-02-05) |
 
-- **The size of a change cannot separate them.** A normal update moved one old day by 57.1% (2026-10-13), and the median change of a normal update's old days reached 22%, while the February 2024 files' medians were 4.7% to 15.8%. Any rule on the largest or the median change holds normal weeks.
+- **The size of a change cannot separate them.** Normal updates moved single old days by up to 57.1% (2025-09-20 went to 0.636 times its value and back to 1.571 times, in several updates), and the median change of a normal update's old days reached 22%, while the February 2024 files' medians were 4.7% to 15.8%. Any rule on the largest or the median change holds normal weeks.
 - **The number of days moved separates them at every tolerance.** 1% is the smallest tolerance that leaves room on both sides: 150 is about twice the most a normal update moved (77) and half the fewest the fix moved (298). It also holds a shift of the whole history by more than 1%, such as a rebase or a new set of newspapers, which a 10% tolerance would let through. Counting every change (0%) leaves the normal side at 130, too close to any threshold below 298.
-- **Result:** 129 updates change nothing older than 90 days, 144 pass and are recorded, and 4 hold: the four files of the February 2024 fix. The script asserts this, and `tests/test_archive.py` replays five of the pairs from a recorded fixture (`tests/fixtures/gpr_revision_pairs.csv`): the fix's first file, and the four normal updates nearest the rule.
+
+**Missed weeks.** Production compares a new file with the last archived view, not with the previous week's file. After a failed fetch, a broken file or an unaccepted hold, two or more weekly updates arrive together. They do not add up, because the weeks mostly revise the same days again:
+
+| Updates apart | Most old days past 1%, normal periods | Margin to 150 | Ratio of one old day, normal periods |
+|---|---|---|---|
+| 1 | 77 (2024-05-06 to 2024-05-13) | 1.95x | 0.636 to 1.571 |
+| 2 | 82 (2024-04-29 to 2024-05-13) | 1.83x | 0.636 to 1.571 |
+| 3 | 91 (2026-03-09 to 2026-03-30) | 1.65x | 0.636 to 1.571 |
+| 4 | 95 (2026-03-02 to 2026-03-30) | 1.58x | 0.636 to 1.571 |
+
+Every file of the fix still holds against the vintage before the fix, 2024-01-29 (300, 632, 749 and 640 old days past 1%), as against the vintage just before it (300, 746, 298, 306): 1.99 times 150 at the fewest. So 150 tolerates four missed weeks and needed no change. Over 2 to 4 updates apart, every pair that holds contains a file of the fix (asserted).
+
+**A magnitude guard for scale errors.** The count lets through a unit or scale bug on 150 days or fewer, say 140 days multiplied by 10. A single old day never moved past 0.636 to 1.571 times its archived value in a normal period at any of these gaps, nor past 0.627 to 1.414 in the fix. No revised old day was 0 before or after. A limit of 3-fold, up or down, is 1.9 times past the largest normal move on either side, and holds any such day whatever the count. `tests/test_archive.py` holds three days multiplied by 10 and three divided by 100.
+
+- **Result:** 129 updates change nothing older than 90 days, 144 pass and are recorded, and 4 hold: the four files of the February 2024 fix. The script asserts this, and `tests/test_archive.py` replays four pairs from a recorded fixture (`tests/fixtures/gpr_revision_pairs.csv`): the fix's first file against the pre-fix vintage, the normal update with the most old days past 1%, the worst three-update gap and the largest single-day ratio. The test reads the pairs from the fixture itself.
 
 ### The February 2024 rewrite holds, by design
 
@@ -136,15 +155,19 @@ The authors fixed missing articles from 2021 on. The 2024-02-05 file rewrote 300
 | 9, 2022-02-24 to 2022-03-08 | the old layout, no `date` column | the input contract (`gpr.parse`): the fetch fails and the series keeps its last good files |
 | 7: 2022-09-01, 2022-10-24, 2022-12-01, 2023-02-06, 2023-03-01, 2024-03-01, 2024-03-04 | blank or missing days | the input contract |
 | 2023-01-02 | the 2022-12-27 vintage cut at 2022-08-31, 118 days fewer | the dropped-days check of `check_revisions`, which runs before the deep-revision rule (replayed by the script) |
-| a file in a new scale or base, the whole history moved | a method change or a unit bug | the deep-revision rule (a 3% rebase holds in `tests/test_archive.py`) |
+| a file in a new scale or base, the whole history moved | a method change or a unit bug | the count of old days moved (a 3% rebase holds in `tests/test_archive.py`) |
+| a few old days in a wrong unit or scale | a unit or scale bug | the magnitude guard (x10 and /100 on three days hold in `tests/test_archive.py`) |
 
 The new rule changes neither of the first two checks.
 
 ### What passes is still recorded
 
-A passing update is archived like any other: its revised values go into the day's delta, so the as-of view and the record see them, and a test reads the archive back after one. The run summary names it in the series' row, as the 2026-10-26 update would read: "1 archived values older than its 90-day revision window revised, the oldest on 2025-11-01, 1 by more than 1% (it holds above 150): recorded". A hold names the count, the tolerance and the oldest moved day, for the issue daily.yml opens.
+A passing update is archived like any other: its revised values go into the day's delta, so the as-of view and the record see them, and a test reads the archive back after one. The run summary names it in the series' row, as the 2026-10-26 update would read: "1 archived value older than its 90-day revision window revised, the oldest on 2025-11-01, 1 by more than 1% (it holds above 150, or on one past 3-fold): recorded". It says "recorded" only when this run archives the series; a second run on a day already archived says "seen; today's run is already archived", and a stale series "seen; not archived". A series whose forecast fails still archives its observations, and its row still names the revision. A hold names the count or the scale, the tolerance and the oldest day, and the issue daily.yml opens points to the run summary.
 
-**Limits.** The rule is calibrated on GPR's own history, so a future normal update past 150 days would hold once, for one manual review. Days that flip between two values pass, as they did 144 times. The other series keep the old rule until their revisions are measured from the archive.
+**Limits.**
+- The rule is calibrated on GPR's own history, so a future normal update past 150 days would hold once, for one manual review. Days that flip between two values pass, as they did 144 times.
+- **A rewrite split over several weeks passes.** Each update is weighed against the archive alone, so a method change applied 140 old days a week, under the count and the ratio, would pass week after week. Catching it needs a running count of the old days moved over recent weeks; `check_revisions` names this as a shortcut.
+- The other series keep the old rule until their revisions are measured from the archive.
 
 ## What it means for the page's claims
 

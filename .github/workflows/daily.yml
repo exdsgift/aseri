@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       accept_revisions:
-        description: "Accept an upstream rewrite older than the revision window, after reviewing it (this run only)"
+        description: "Accept an upstream rewrite the revision check held (more old values moved than a normal update, or one scaled past its limit), after reviewing it (this run only)"
         type: boolean
         default: false
 
@@ -81,7 +81,7 @@ jobs:
         env:
           # Empty on the cron, "true" only on a manual run with the box ticked.
           ASERI_ACCEPT_REVISIONS: ${{ inputs.accept_revisions }}
-        # A series whose upstream rewrote data older than its revision window is held: it keeps its last good files,
+        # A series whose upstream rewrote its history past its revision window beyond a normal update is held: it keeps its last good files,
         # and its id goes to the revision_hold output, for revision-alert. The other series go on.
         run: uv run python -m aseri ../site/api/v1 ../archive
       # The day's real first load against spec 6.8's budget (CI checks the fixtures). Only a
@@ -182,11 +182,11 @@ jobs:
             echo "An issue is open already"
             exit 0
           fi
-          gh issue create --title "$title" --body "Upstream changed values older than the revision window of these series, so the daily run archived none of their new data and kept their last good files up. The other series went on as usual.
+          gh issue create --title "$title" --body "Upstream rewrote the history of these series beyond a normal update: it dropped archived days, moved more values older than the revision window than the series allows, or scaled one of them past its limit. So the daily run archived none of their new data and kept their last good files up. The other series went on as usual.
 
           Run: $RUN_URL
 
-          The run summary names the oldest changed day of each held series. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite (for every series, so check none is still broken), and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
+          The run summary says, for each held series, how many old values moved, by how much, and the oldest of them. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite (for every series, so check none is still broken), and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
 
   # Opens an issue when the page shows a series as late; like revision-alert it runs only gh, with issues: write alone.
   stale-alert:

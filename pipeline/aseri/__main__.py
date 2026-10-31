@@ -186,8 +186,18 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 f"{issued[series.id]} new forecasts, the latest from "
                 f"{archived[-1].forecast.reference_date:%Y-%m-%d}"
                 + (f". {note}" if note else "")
-                + (f"; {deep_revised[series.id]}" if series.id in deep_revised else "")
             )
+        # A failed or stale series can have passed the check too; say whether this run archived what it saw.
+        if series.id in deep_revised:
+            if any(run.series.id == series.id for run in runs):
+                kept = "recorded"
+            else:
+                kept = (
+                    "seen; today's run is already archived"
+                    if ran_today
+                    else "seen; not archived"
+                )
+            detail = f"{detail}; {deep_revised[series.id]}: {kept}"
         since = late_since(series, observed.index[-1].date())
         entries.append(
             publish(
