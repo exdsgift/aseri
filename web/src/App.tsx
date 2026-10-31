@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { ForecastPanel } from "@/components/ForecastPanel"
 import { Hero } from "@/components/Hero"
+import { SideNav, type Section } from "@/components/SideNav"
 import { Signals } from "@/components/Signals"
 import { TrackRecord } from "@/components/TrackRecord"
 import {
@@ -38,6 +39,22 @@ export function App() {
   const find = (id: string) => signals?.find((s) => s.series.id === id)
   const gpr = find(gprId)?.series
   const panel = find(picked)?.series
+  // The sections on the page so far, for the side navigation.
+  const sections: Section[] = [
+    { id: "today", icon: "risk", label: ["Risk", "today"] },
+  ]
+  if (signals && panel)
+    sections.push(
+      { id: "forecast", icon: "band", label: ["The", "forecast"] },
+      { id: "signals", icon: "grid", label: ["All", "signals"] }
+    )
+  if (signals && panel && records)
+    sections.push({
+      id: "record",
+      icon: "check",
+      label: ["The", "record"],
+      shortcut: "R",
+    })
 
   // The cards need every series' forecast and daily values; only GPR's replay, the panel's first.
   // Each series shows as it loads, so the hero and the panel wait for GPR alone.
@@ -85,11 +102,16 @@ export function App() {
 
   return (
     <>
+      <SideNav sections={sections} />
       <main>
         <Hero today={gpr?.today} updated={updated} failed={failed} />
         {signals && panel && (
           <>
-            <div ref={panelBox} className="scroll-mt-4 px-4 pb-14">
+            <div
+              id="forecast"
+              ref={panelBox}
+              className="scroll-mt-4 px-4 pb-14"
+            >
               {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
                 or on the past forecast a square of the record opened. */}
               <div key={picked} className="motion-safe:animate-dither-in">

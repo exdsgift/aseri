@@ -61,8 +61,9 @@ export function Signals({
 
   return (
     <section
+      id="signals"
       aria-labelledby={title}
-      className="mx-auto flex max-w-[1040px] flex-col gap-8 px-4 pb-14"
+      className="mx-auto flex max-w-[1040px] scroll-mt-4 flex-col gap-8 px-4 pb-14"
     >
       <div className="flex flex-col items-center gap-4 text-center">
         <h2

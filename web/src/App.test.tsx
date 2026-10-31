@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -671,4 +672,142 @@ it("opens a series with its card's key, unless a field has the focus", async () 
   press("1", document.body)
   fireEvent.keyDown(document.body, { key: "2", ctrlKey: true })
   expect(panelTitle()).toBe("[F] Geopolitical risk · forecast made today")
+})
+
+it("jumps to the record with R, unless a field has the focus", async () => {
+  serve(published)
+  render(<App />)
+  const record = await screen.findByRole("region", { name: "Record" })
+  const slider = await screen.findByRole("slider")
+
+  slider.focus()
+  fireEvent.keyDown(slider, { key: "r" })
+  // Ctrl+R reloads the page: never a shortcut.
+  fireEvent.keyDown(document.body, { key: "r", ctrlKey: true })
+  expect(scrollIntoView).not.toHaveBeenCalled()
+
+  fireEvent.keyDown(document.body, { key: "R" })
+  fireEvent.keyDown(document.body, { key: "r" })
+  expect(scrollIntoView.mock.contexts).toEqual([record, record])
+})
+
+it("links every section from the side navigation, lit while it crosses the middle of the screen", async () => {
+  // The scroll-spy's observer, to say which section the middle of the screen crosses.
+  const spies: { callback: IntersectionObserverCallback; seen: Element[] }[] =
+    []
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      seen: Element[] = []
+      constructor(callback: IntersectionObserverCallback) {
+        spies.push({ callback, seen: this.seen })
+      }
+      observe(target: Element) {
+        this.seen.push(target)
+      }
+      disconnect() {}
+    }
+  )
+  serve(published)
+  render(<App />)
+  const record = await screen.findByRole("region", { name: "Record" })
+
+  const nav = within(screen.getByRole("navigation", { name: "Sections" }))
+  const links = nav.getAllByRole("link")
+  expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
+    ["Risk today", "#today"],
+    ["The forecast", "#forecast"],
+    ["All signals", "#signals"],
+    ["The record", "#record"],
+  ])
+  const section = (link: number) =>
+    document.getElementById(links[link].getAttribute("href")!.slice(1))!
+  expect(section(0)).toBe(
+    screen.getByRole("heading", { level: 1 }).closest("section")
+  )
+  expect(
+    within(section(1)).getByRole("region", { name: /^\[F\] Geopolitical/ })
+  ).toBeTruthy()
+  expect(section(2)).toBe(screen.getByRole("region", { name: "Signals" }))
+  expect(section(3)).toBe(record)
+  expect(links[3].getAttribute("aria-keyshortcuts")).toBe("R")
+
+  // The hero first; then whichever section crosses the middle of the screen.
+  const lit = () =>
+    links
+      .filter((a) => a.getAttribute("aria-current") === "location")
+      .map((a) => a.textContent)
+  expect(lit()).toEqual(["Risk today"])
+  const spy = spies.findLast(({ seen }) => seen.includes(record))!
+  expect(spy.seen).toEqual([0, 1, 2, 3].map(section))
+  const cross = (entries: [Element, boolean][]) =>
+    act(() =>
+      spy.callback(
+        entries.map(
+          ([target, isIntersecting]) => ({ target, isIntersecting }) as never
+        ),
+        spy as never
+      )
+    )
+  cross([
+    [section(0), false],
+    [section(2), true],
+  ])
+  expect(lit()).toEqual(["All signals"])
+  cross([
+    [section(2), false],
+    [record, true],
+  ])
+  expect(lit()).toEqual(["The record"])
+  // Past the record, in the footer, the record stays lit.
+  cross([[record, false]])
+  expect(lit()).toEqual(["The record"])
+
+  // Inactive at 30%, and whole when lit, hovered or focused.
+  expect(links[0].className.split(" ")).toEqual(
+    expect.arrayContaining([
+      "opacity-30",
+      "aria-[current=location]:opacity-100",
+      "hover:opacity-100",
+      "focus-visible:opacity-100",
+    ])
+  )
+})
+
+// Every control shows the focus ring's 2 px outline when the keyboard reaches it, and every
+// canvas chart has words: its own label, or the text of the card or hero it is drawn in.
+it("rings every control on keyboard focus, and gives every chart a text equivalent", async () => {
+  serve(published)
+  render(<App />)
+  await screen.findByRole("region", { name: "Record" })
+  await signals(9)
+
+  const controls = [
+    ...document.querySelectorAll(
+      "a[href], button, input, select, textarea, [tabindex]"
+    ),
+  ]
+  // The side navigation's 4, the panel's 3, the 9 cards, the record's squares and the credit.
+  expect(controls.length).toBeGreaterThan(17)
+  const unringed = controls.filter(
+    (control) =>
+      !["focus-visible:outline-2", "focus-visible:outline-primary"].every(
+        (name) => control.classList.contains(name)
+      )
+  )
+  expect(
+    unringed.map((c) => c.getAttribute("aria-label") ?? c.textContent)
+  ).toEqual([])
+
+  const canvases = [...document.querySelectorAll("canvas")]
+  // The hero's art, the panel's chart and the 9 cards' charts.
+  expect(canvases).toHaveLength(11)
+  const words = (canvas: HTMLCanvasElement) =>
+    canvas.closest("[aria-hidden]")
+      ? canvas.closest("button, section")!.textContent
+      : canvas.getAttribute("role") === "img" &&
+        canvas.getAttribute("aria-label")
+  expect(
+    canvases.filter((canvas) => !/8 in 10/.test(words(canvas) || ""))
+  ).toEqual([])
 })
