@@ -393,6 +393,17 @@ const legendLine = () =>
       /^(Model path|Most likely|One possible path)$/.test(name ?? "")
     )
 
+it("gives every mark of the legend its own swatch, what happened's a line to the chart's ring", () => {
+  render(<ForecastPanel series={gpr} />)
+
+  const legend = screen.getByText("What happened").closest("ul")!
+  const swatches = [...legend.querySelectorAll("li > span")].map(
+    (swatch) => swatch.className
+  )
+  expect(swatches).toHaveLength(7)
+  expect(new Set(swatches).size).toBe(swatches.length)
+})
+
 it("opens on the most likely of the model's 20 paths, and turns none until asked", () => {
   turning()
   render(<ForecastPanel series={gpr} />)

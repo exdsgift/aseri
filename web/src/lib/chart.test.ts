@@ -151,20 +151,75 @@ describe("paintChart", () => {
           expect(seen.get(`${end.x + dx},${end.y + dy}`) === "real").toBe(
             dx !== 0 || dy !== 0
           )
-      // Hollow: the line stays out of the ring's middle.
-      expect(seen.get(`${end.x},${end.y}`)).not.toBe("daily")
+      // Hollow: nothing lights the ring's middle.
+      expect(seen.has(`${end.x},${end.y}`)).toBe(false)
       // A line, not dots: the ring's 8 pixels are the only ones in white.
       expect(calls.filter(({ color }) => color === "real")).toHaveLength(8)
-      expect(
-        Math.max(
-          ...calls.filter(({ color }) => color === "daily").map(({ x }) => x)
-        )
-      ).toBe(end.x - 2)
       for (let dx = -1; dx <= 1; dx++)
         for (let dy = -1; dy <= 1; dy++)
           expect(seen.get(`${now.x + dx},${now.y + dy}`)).toBe("daily")
     }
   )
+
+  it("keeps the ring hollow where the band and the path run through it", () => {
+    // The path's value, well inside the 8-in-10 band, on the 10th day.
+    const happened = { ...forecast, actuals: Array(10).fill(185) }
+    const end = { x: chart.x(chart.origin + 10), y: chart.y(185) }
+    const lit: { x: number; y: number; color: string }[] = []
+    paintChart(
+      (x, y, color) => lit.push({ x, y, color }),
+      chart,
+      happened,
+      colors,
+      path
+    )
+    const around = (color: string) =>
+      lit.some(
+        (p) =>
+          p.color === color &&
+          Math.abs(p.x - end.x) <= 2 &&
+          Math.abs(p.y - end.y) <= 2
+      )
+    expect(around("band") && around("path")).toBe(true)
+    expect(lit.filter(({ x, y }) => x === end.x && y === end.y)).toEqual([])
+  })
+
+  it("leaves out a ring that would touch the origin's square, as on a phone with one day known", () => {
+    // A 360 px chart: under 3 art pixels a day.
+    const narrow = chartLayout(forecast, 360)
+    expect((narrow.right - narrow.left) / narrow.span).toBeLessThan(3)
+    // A value next to the last daily value (110): its ring would touch the origin's square.
+    const happened = { ...forecast, actuals: [112] }
+    const seen = new Map<string, string>()
+    paintChart(
+      (x, y, color) => seen.set(`${x},${y}`, color),
+      narrow,
+      happened,
+      colors,
+      [values[narrow.origin], ...Array(28).fill(185)]
+    )
+    expect([...seen.values()]).not.toContain("real")
+    // The line to that day still shows, past the square.
+    const day = { x: narrow.x(narrow.origin + 1), y: narrow.y(112) }
+    expect(day.x - narrow.x(narrow.origin)).toBeLessThanOrEqual(3)
+    expect(Math.abs(day.y - narrow.y(110))).toBeLessThanOrEqual(3)
+    expect(day.x).toBeGreaterThan(narrow.x(narrow.origin) + 1)
+    expect(seen.get(`${day.x},${day.y}`)).toBe("daily")
+  })
+
+  it("paints the frame alone when asked, for the marks to scan in over it", () => {
+    const happened = { ...forecast, actuals: Array(10).fill(150) }
+    const lit = new Set<string>()
+    paintChart(
+      (_x, _y, color) => lit.add(color),
+      chart,
+      happened,
+      colors,
+      path,
+      false
+    )
+    expect([...lit].toSorted()).toEqual(["frame", "origin"])
+  })
 
   it("keeps the 7-day average as a dimmer line that stops at the origin", () => {
     const average = calls.filter(({ color }) => color === "average")
@@ -384,7 +439,7 @@ describe("a day with no value", () => {
     expect(chartLayout(forecast, 692).lo).toBeGreaterThan(1000)
   })
 
-  it("breaks the line of what happened there, and still shows a day alone between two gaps", () => {
+  it("breaks the line of what happened there, and shows a day alone between two gaps as a dot", () => {
     // Known on days 1, 3 and 5.
     const gaps = { ...forecast, actuals: [1600, null, 1700, null, 1650] }
     const chart = chartLayout(gaps, 692)
@@ -407,10 +462,21 @@ describe("a day with no value", () => {
     )
     const line = lit.filter(({ color }) => color === "daily")
     expect(line).toContainEqual({ x: at(1), y: chart.y(1600), color: "daily" })
-    expect(line).toContainEqual({ x: at(3), y: chart.y(1700), color: "daily" })
+    // The day alone, 2 art pixels wide where the days are far enough apart, as the dots were.
+    for (const [dx, dy] of [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ])
+      expect(line).toContainEqual({
+        x: at(3) + dx,
+        y: chart.y(1700) + dy,
+        color: "daily",
+      })
     // Nothing bridges a gap, up to the ring on the last known day.
     expect(line.filter(({ x }) => x > at(1) && x < at(3))).toEqual([])
-    expect(line.filter(({ x }) => x > at(3) && x < at(5) - 1)).toEqual([])
+    expect(line.filter(({ x }) => x > at(3) + 1 && x < at(5) - 1)).toEqual([])
     expect(lit).toContainEqual({
       x: at(5) - 1,
       y: chart.y(1650),

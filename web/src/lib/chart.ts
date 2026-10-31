@@ -221,32 +221,39 @@ function ring(plot: Plot, x: number, y: number, color: string) {
 }
 
 // `path`, the last daily value then one value a day ahead: one of the model's paths, never a
-// median line, which reads as an average. `scanned`, 0 to 1, is the share of the plot from the
-// left whose marks are drawn, as they scan in; the frame and the origin are whole from the start.
+// median line, which reads as an average. Without `marks`, the frame and the origin alone,
+// for the marks to scan in over.
 export function paintChart(
   plot: Plot,
   chart: Layout,
   forecast: Forecast,
   color: Colors,
   path: number[],
-  scanned = 1
+  marks = true
 ) {
   const { left, right, top, bottom, x, y, first, origin } = chart
   const { values, averages, quantiles, actuals } = forecast
   const xo = x(origin)
   const last = values[origin]
-  // Up to the column past the right end, where what happened's ring ends.
-  const edge = left + scanned * (right + 2 - left)
-  const mark: Plot = (px, py, c) => {
-    if (px < edge) plot(px, py, c)
+  // What happened's last known day gets a hollow ring, whose middle nothing lights, but not
+  // where it would touch the origin's filled square, as on a phone with a single day known:
+  // the two would read as one blot over the line between them.
+  const end = actuals.findLastIndex((value) => value !== null)
+  const ex = x(origin + 1 + end)
+  const ey = y(actuals[end]!)
+  const ringed =
+    end >= 0 && (Math.abs(ex - xo) > 3 || Math.abs(ey - y(last)) > 3)
+  const lit: Plot = (px, py, c) => {
+    if (!ringed || px !== ex || py !== ey) plot(px, py, c)
   }
+  const mark: Plot = marks ? lit : () => {}
 
   // The forecast zone gets a diagonal hatch, like the empty slots in the game.
   for (let py = top; py <= bottom; py++)
     for (let px = xo + 1; px <= right; px++)
-      if ((px + py) % 4 === 0) plot(px, py, color.frame)
+      if ((px + py) % 4 === 0) lit(px, py, color.frame)
   for (const tick of valueTicks(chart.lo, chart.hi))
-    for (let px = left; px <= right; px += 2) plot(px, y(tick), color.frame)
+    for (let px = left; px <= right; px += 2) lit(px, y(tick), color.frame)
 
   // The bands, column by column: 5 in 10 at 50% of the dither, 8 in 10 at 25%, with solid edges.
   // From the first day ahead: the last value may still be revised, so no width-zero pinch.
@@ -285,29 +292,25 @@ export function paintChart(
     values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
     color.daily
   )
+  for (let py = top; py <= bottom; py += 2) lit(xo, py, color.origin)
+  for (let px = left; px <= right; px++) lit(px, bottom + 1, color.frame)
+  square(mark, xo - 1, y(last) - 1, 3, color.daily)
+
   // What happened after the forecast was made: the daily values' line carried on over the
   // bands, to compare line with line against the path. A day with no value (the drones' day
-  // without a report) breaks it. It ends on a hollow ring on its last known day, apart by shape
-  // from the path's unmarked end and the filled square at the origin, as their shades are close.
-  const end = actuals.findLastIndex((value) => value !== null)
-  const ex = x(origin + 1 + end)
-  const ey = y(actuals[end] ?? last)
-  // The line stays out of the ring, so its middle stays hollow.
-  const line: Plot = (px, py, c) => {
-    if (Math.abs(px - ex) > 1 || Math.abs(py - ey) > 1) mark(px, py, c)
-  }
-  const runs: Point[][] = [[[xo, y(last)]]]
-  actuals.forEach((value, k) => {
-    if (value === null) runs.push([])
-    else runs.at(-1)!.push([x(origin + 1 + k), y(value)])
-  })
-  // A day alone between two gaps is a single pixel.
-  if (end >= 0)
+  // without a report) breaks it; a day alone between two gaps is a dot, 2 art pixels wide
+  // where the days are far enough apart. The ring sets its end apart by shape from the path's
+  // unmarked end and the filled square at the origin, as their shades are close.
+  if (end >= 0) {
+    const dot = (right - left) / chart.span >= 3 ? 2 : 1
+    const runs: Point[][] = [[[xo, y(last)]]]
+    actuals.forEach((value, k) => {
+      if (value === null) runs.push([])
+      else runs.at(-1)!.push([x(origin + 1 + k), y(value)])
+    })
     for (const run of runs)
-      polyline(line, run.length === 1 ? [run[0], run[0]] : run, color.daily)
-
-  for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
-  for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
-  square(mark, xo - 1, y(last) - 1, 3, color.daily)
-  if (end >= 0) ring(mark, ex - 1, ey - 1, color.real)
+      if (run.length === 1) square(mark, ...run[0], dot, color.daily)
+      else polyline(mark, run, color.daily)
+    if (ringed) ring(mark, ex - 1, ey - 1, color.real)
+  }
 }
