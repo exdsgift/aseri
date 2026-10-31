@@ -84,6 +84,11 @@ jobs:
         # A series whose upstream rewrote data older than its revision window is held: it keeps its last good files,
         # and its id goes to the revision_hold output, for revision-alert. The other series go on.
         run: uv run python -m aseri ../site/api/v1 ../archive
+      # The day's real first load against spec 6.8's budget (CI checks the fixtures). Only a
+      # warning: a heavier day must not take the site down, so it never blocks the deploy.
+      - name: Check the first load against its budget
+        working-directory: web
+        run: node scripts/budget.js ../site/api/v1 || echo "::warning::The page's first load is over its budget (spec 6.8), or could not be measured; see this step's log"
       - name: Collect the files this run adds to the archive
         id: adds
         working-directory: archive

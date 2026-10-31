@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { ForecastPanel } from "@/components/ForecastPanel"
 import { Hero } from "@/components/Hero"
@@ -15,6 +15,18 @@ import {
 } from "@/lib/api"
 
 const gprId = "gpr_daily"
+// The side navigation's entry for each section of the page.
+const nav = {
+  today: { id: "today", icon: "risk", label: ["Risk", "today"] },
+  forecast: { id: "forecast", icon: "band", label: ["The", "forecast"] },
+  signals: { id: "signals", icon: "grid", label: ["All", "signals"] },
+  record: {
+    id: "record",
+    icon: "check",
+    label: ["The", "record"],
+    shortcut: "R",
+  },
+} satisfies Record<string, Section>
 const engravingSource =
   "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg"
 
@@ -39,22 +51,18 @@ export function App() {
   const find = (id: string) => signals?.find((s) => s.series.id === id)
   const gpr = find(gprId)?.series
   const panel = find(picked)?.series
-  // The sections on the page so far, for the side navigation.
-  const sections: Section[] = [
-    { id: "today", icon: "risk", label: ["Risk", "today"] },
-  ]
-  if (signals && panel)
-    sections.push(
-      { id: "forecast", icon: "band", label: ["The", "forecast"] },
-      { id: "signals", icon: "grid", label: ["All", "signals"] }
-    )
-  if (signals && panel && records)
-    sections.push({
-      id: "record",
-      icon: "check",
-      label: ["The", "record"],
-      shortcut: "R",
-    })
+  // Under the hero, the panel and the cards wait for the picked series, and the record for
+  // the scores too. The page and its side navigation both go by these two.
+  const drawn = signals !== undefined && panel !== undefined
+  const recorded = drawn && records !== undefined
+  const sections = useMemo(
+    () => [
+      nav.today,
+      ...(drawn ? [nav.forecast, nav.signals] : []),
+      ...(recorded ? [nav.record] : []),
+    ],
+    [drawn, recorded]
+  )
 
   // The cards need every series' forecast and daily values; only GPR's replay, the panel's first.
   // Each series shows as it loads, so the hero and the panel wait for GPR alone.
@@ -105,7 +113,7 @@ export function App() {
       <SideNav sections={sections} />
       <main>
         <Hero today={gpr?.today} updated={updated} failed={failed} />
-        {signals && panel && (
+        {drawn && (
           <>
             <div
               id="forecast"
@@ -127,7 +135,7 @@ export function App() {
               picked={picked}
               onPick={pick}
             />
-            {records && (
+            {recorded && (
               <TrackRecord
                 records={records}
                 entries={signals.map((s) => s.entry)}

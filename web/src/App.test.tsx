@@ -674,7 +674,10 @@ it("opens a series with its card's key, unless a field has the focus", async () 
   expect(panelTitle()).toBe("[F] Geopolitical risk · forecast made today")
 })
 
+// As its link in the side navigation does: the address says #record, and the next Tab goes
+// on from the record.
 it("jumps to the record with R, unless a field has the focus", async () => {
+  history.replaceState(null, "", location.pathname)
   serve(published)
   render(<App />)
   const record = await screen.findByRole("region", { name: "Record" })
@@ -685,8 +688,16 @@ it("jumps to the record with R, unless a field has the focus", async () => {
   // Ctrl+R reloads the page: never a shortcut.
   fireEvent.keyDown(document.body, { key: "r", ctrlKey: true })
   expect(scrollIntoView).not.toHaveBeenCalled()
+  expect(location.hash).toBe("")
+  expect(document.activeElement).toBe(slider)
 
   fireEvent.keyDown(document.body, { key: "R" })
+  expect(location.hash).toBe("#record")
+  expect(document.activeElement).toBe(record)
+  // Focused for the keyboard's sake, the section draws no ring of its own.
+  expect(record.getAttribute("tabindex")).toBe("-1")
+  expect(record.className.split(" ")).toContain("outline-none")
+  // Again once the reader has scrolled away: the hash is the same, the jump is not.
   fireEvent.keyDown(document.body, { key: "r" })
   expect(scrollIntoView.mock.contexts).toEqual([record, record])
 })
@@ -738,7 +749,12 @@ it("links every section from the side navigation, lit while it crosses the middl
       .filter((a) => a.getAttribute("aria-current") === "location")
       .map((a) => a.textContent)
   expect(lit()).toEqual(["Risk today"])
-  const spy = spies.findLast(({ seen }) => seen.includes(record))!
+  // Set up again once the record is drawn, by an effect that runs after it shows.
+  const spy = await waitFor(() => {
+    const watching = spies.findLast(({ seen }) => seen.includes(record))
+    expect(watching).toBeDefined()
+    return watching!
+  })
   expect(spy.seen).toEqual([0, 1, 2, 3].map(section))
   const cross = (entries: [Element, boolean][]) =>
     act(() =>
@@ -763,15 +779,20 @@ it("links every section from the side navigation, lit while it crosses the middl
   cross([[record, false]])
   expect(lit()).toEqual(["The record"])
 
-  // Inactive at 30%, and whole when lit, hovered or focused.
-  expect(links[0].className.split(" ")).toEqual(
+  // Dimmed when inactive (how far: contrast.test.ts), whole when lit, hovered or focused.
+  // Lit reads by shape too, a 2 px bar on the outer edge, where a hover draws none.
+  const classes = links[0].className.split(" ")
+  expect(classes).toEqual(
     expect.arrayContaining([
-      "opacity-30",
       "aria-[current=location]:opacity-100",
       "hover:opacity-100",
       "focus-visible:opacity-100",
+      "border-r-2",
+      "border-transparent",
+      "aria-[current=location]:border-primary",
     ])
   )
+  expect(classes.filter((name) => name.startsWith("hover:border"))).toEqual([])
 })
 
 // Every control shows the focus ring's 2 px outline when the keyboard reaches it, and every
@@ -782,9 +803,10 @@ it("rings every control on keyboard focus, and gives every chart a text equivale
   await screen.findByRole("region", { name: "Record" })
   await signals(9)
 
+  // Not the record's section: focused only from script, by R, it is no control.
   const controls = [
     ...document.querySelectorAll(
-      "a[href], button, input, select, textarea, [tabindex]"
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
     ),
   ]
   // The side navigation's 4, the panel's 3, the 9 cards, the record's squares and the credit.

@@ -40,5 +40,6 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      # Spec 6.8: under 150 KB gzipped of JS and CSS, under 100 KB of first-load data.
+      # Spec 6.8: under 150 KB gzipped of JS and CSS, under 100 KB of first-load data, on the
+      # fixtures; daily.yml checks each day's real data, as a warning.
       - run: node scripts/budget.js
