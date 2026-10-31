@@ -84,6 +84,11 @@ jobs:
         # A series whose upstream rewrote data older than its revision window is held: it keeps its last good files,
         # and its id goes to the revision_hold output, for revision-alert. The other series go on.
         run: uv run python -m aseri ../site/api/v1 ../archive
+      # Before the archive takes today's forecasts for good, and before deploy: a file off its schema, files
+      # that disagree, or a newest forecast far outside its series' history fails the run. A large change
+      # from the forecast the day before only warns.
+      - name: Check the API against its contract
+        run: uv run python -m aseri.gate ../site/api/v1
       - name: Collect the files this run adds to the archive
         id: adds
         working-directory: archive

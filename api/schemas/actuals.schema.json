@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/actuals.schema.json",
+  "title": "series/{series_id}/actuals.json: the observed values",
+  "description": "The last 400 days of the series as known on as_of, one value per date, oldest first. A day with no value is left out. Recent values can be revised upstream (GPR for about 4 weeks).",
+  "type": "object",
+  "required": ["schema_version", "series_id", "unit", "as_of", "date", "observation", "attribution", "generated_at"],
+  "properties": {
+    "schema_version": {"$ref": "defs.schema.json#/$defs/schema_version"},
+    "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+    "unit": {"type": "string"},
+    "as_of": {"$ref": "defs.schema.json#/$defs/date", "description": "The day the values were fetched: the vintage."},
+    "date": {"type": "array", "minItems": 1, "items": {"$ref": "defs.schema.json#/$defs/date"}},
+    "observation": {"description": "Aligned with date.", "type": "array", "minItems": 1, "items": {"type": "number"}},
+    "attribution": {"type": "string"},
+    "generated_at": {"$ref": "defs.schema.json#/$defs/timestamp"}
+  }
+}

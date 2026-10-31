@@ -1,6 +1,7 @@
 """The public API files, in the Hubverse fields: wide JSON, one array per quantile level."""
 
 import json
+import shutil
 from datetime import date, datetime
 from pathlib import Path
 
@@ -12,7 +13,13 @@ from aseri.record import METHOD
 from aseri.series import Series
 from aseri.tie import day_to_day_tie
 
+# Stays 1.0.0 while v1 only grows: the dated forecast files carry it, and they never change.
 SCHEMA_VERSION = "1.0.0"
+# The API's contract, the repo's source of truth: OpenAPI, the JSON Schemas, the licence texts and
+# the Hubverse model metadata, served as they are under api/v1.
+CONTRACT = Path(__file__).resolve().parents[2] / "api"
+# Corrections to published files, oldest first: appended by hand, never edited. A forecast itself never changes.
+ERRATA: list[dict] = []
 
 
 def credit(model_id: str, weights: str) -> str:
@@ -27,6 +34,7 @@ FORECAST_LICENSE = {
     "url": "https://creativecommons.org/licenses/by-nc/4.0/",
     "attribution": FORECAST_CREDIT,
     "note": "Upstream terms still apply to the underlying data: see each series' license.",
+    "text": "licenses/CC-BY-NC-4.0.txt",
 }
 # The page's 8-in-10 and 5-in-10 ranges and its most likely value, and the 5% and 95% a possible
 # path reaches before the chart's frame: beyond them a path runs along the frame anyway.
@@ -111,9 +119,15 @@ def publish_catalog(
             },
             "quantile_levels": list(levels),
             "license": FORECAST_LICENSE,
+            "errata": ERRATA,
             "series": entries,
         },
     )
+
+
+def publish_contract(api_dir: Path) -> None:
+    """Copy the contract (openapi.json, schemas/, licenses/, model-metadata/) into `api_dir`, next to the files it describes."""
+    shutil.copytree(CONTRACT, api_dir, dirs_exist_ok=True)
 
 
 def publish_scores(api_dir: Path, records: list[dict], generated_at: datetime) -> None:
@@ -223,6 +237,7 @@ def _replay(series, archived, attribution) -> dict:
     newest = archived[-1].forecast
     start = newest.reference_date - pd.Timedelta(days=REPLAY_DAYS)
     return {
+        "schema_version": SCHEMA_VERSION,
         "series_id": series.id,
         "model_id": archived[-1].model_id,
         "horizon": list(range(1, len(newest.quantiles) + 1)),

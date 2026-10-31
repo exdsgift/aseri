@@ -1,0 +1,30 @@
+IMF Copyright and Usage: the terms of the data behind aseri's four sea lanes
+(suez_transits, hormuz_transits, bab_el_mandeb_transits, taiwan_strait_transits)
+
+The terms in full: https://www.imf.org/en/About/copyright-and-terms
+
+Their part on data, as read on 2026-10-31:
+
+  "Users may download, extract, copy, create derivative works, publish,
+  distribute, and use Data obtained from IMF Sites subject to these
+  conditions: Distributed or reproduced Data must appear accurately with
+  attribution to the IMF as the source [...]. Users shall not infringe upon
+  the integrity of the Data and shall refrain from any act of alteration of
+  the Data that intentionally affects its nature or accuracy. If material
+  transformation occurs, it must be stated explicitly along with the required
+  source citation. Users who make IMF Data available to other Users through
+  any type of distribution or download environment agree to take reasonable
+  efforts to communicate and promote compliance by their users with these
+  terms. If IMF Data is sold by Users as a standalone product, sellers must
+  inform purchasers that the Data is available free of charge from the IMF."
+
+  "[...] For any potential commercial reuse of IMF Data, email
+  copyright@imf.org to request permission."
+
+Attribution: Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org).
+
+Transformation: aseri forecasts are model output derived from IMF PortWatch
+daily transit counts; they are not IMF data.
+
+Whoever reuses these series from aseri takes on the same terms. aseri's own
+forecasts of them are also under CC BY-NC 4.0 (CC-BY-NC-4.0.txt).

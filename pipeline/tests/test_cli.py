@@ -18,7 +18,7 @@ import torch
 
 import aseri.__main__ as cli
 import aseri.forecast as forecast_module
-from aseri import archive, record
+from aseri import archive, gate, record
 from aseri.publish import shown
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 from aseri.sources import fred, gpr, losses, portwatch
@@ -140,6 +140,22 @@ def test_a_daily_run_publishes_the_catalog_the_latest_gpr_forecast_and_its_actua
     assert provenance["generated_at"].startswith(latest["forecast_date"])
 
 
+def test_a_daily_run_publishes_an_api_that_keeps_to_its_contract(
+    tmp_path, monkeypatch, stub_model
+):
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 29, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+
+    # Every file, the contract's own included, and their agreement. The stub's bands are no
+    # forecast's, so the bounds are left to test_gate.
+    assert gate.contract(tmp_path / "api") == []
+
+
 def test_a_run_in_github_actions_records_its_commit_and_run(
     tmp_path, monkeypatch, stub_model
 ):
@@ -254,6 +270,11 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
             str(level): by_level.sort_values("horizon")["value"].tolist()
             for level, by_level in rows.groupby("output_type_id")
         }
+    # A later run, with a week more data, republishes the earlier forecasts byte for byte.
+    for forecast in day1["forecasts"]:
+        assert (series / forecast["url"]).read_bytes() == (
+            tmp_path / "day1" / "series" / "gpr_daily" / forecast["url"]
+        ).read_bytes()
     latest = read(series / "latest.json")
     assert latest["links"]["canonical"] == "forecasts/2026-10-26.json"
     assert (

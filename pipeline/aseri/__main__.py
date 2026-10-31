@@ -9,7 +9,7 @@ from pathlib import Path
 
 from aseri import archive, record
 from aseri.forecast import forecast, load_model, make_context, under_review
-from aseri.publish import publish, publish_catalog, publish_scores
+from aseri.publish import publish, publish_catalog, publish_contract, publish_scores
 from aseri.series import (
     BAB_EL_MANDEB_TRANSITS,
     BRENT_SPOT,
@@ -225,6 +225,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")
     publish_catalog(api_dir, entries, levels, generated_at)
     publish_scores(api_dir, records, generated_at)
+    publish_contract(api_dir)
     # The series the page now shows as late, read from what it reads, the held ones, and those whose live
     # ranges the monitor finds far off, for daily.yml's issues.
     if "GITHUB_OUTPUT" in os.environ:

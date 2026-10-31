@@ -5,9 +5,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from aseri.__main__ import SOURCES
 from aseri.archive import Archived
 from aseri.forecast import Forecast
-from aseri.publish import publish, publish_catalog, publish_scores, shown
+from aseri.publish import (
+    CONTRACT,
+    publish,
+    publish_catalog,
+    publish_contract,
+    publish_scores,
+    shown,
+)
 from aseri.series import BRENT_SPOT, GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 
 PROVENANCE = {
@@ -63,6 +71,7 @@ FORECAST_LICENSE = {
     "url": "https://creativecommons.org/licenses/by-nc/4.0/",
     "attribution": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI).",
     "note": "Upstream terms still apply to the underlying data: see each series' license.",
+    "text": "licenses/CC-BY-NC-4.0.txt",
 }
 
 
@@ -240,6 +249,7 @@ def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_le
     }
 
     assert replay == {
+        "schema_version": "1.0.0",
         "series_id": "gpr_daily",
         "model_id": "aseri-timestral209m",
         "horizon": [1, 2],
@@ -371,10 +381,34 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
     ]
 
 
-def test_catalog_states_the_forecast_licence(api_dir):
+def test_catalog_states_the_forecast_licence_and_the_errata_none_so_far(api_dir):
     catalog = read(api_dir / "series.json")
 
     assert catalog["license"] == FORECAST_LICENSE
+    assert catalog["errata"] == []
+
+
+def test_every_licence_text_named_is_in_the_contract():
+    texts = {FORECAST_LICENSE["text"]} | {
+        series.license["text"] for series, _ in SOURCES
+    }
+
+    assert texts == {
+        path.relative_to(CONTRACT).as_posix()
+        for path in (CONTRACT / "licenses").iterdir()
+    }
+
+
+def test_the_contract_is_published_next_to_the_files_it_describes(tmp_path):
+    publish_contract(tmp_path)
+
+    for name in (
+        "openapi.json",
+        "schemas/forecast.schema.json",
+        "licenses/CC-BY-NC-4.0.txt",
+        "model-metadata/aseri-timestral209m.yml",
+    ):
+        assert (tmp_path / name).read_bytes() == (CONTRACT / name).read_bytes()
 
 
 # 400 days: the 35 oldest at 1000, then 364 at 250 and the newest at 615, so the 365 newest average 251.

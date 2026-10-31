@@ -86,14 +86,17 @@ GPR_DAILY = Series(
         "field": "GPRD",
     },
     license={
-        # The source page says "Creative Commons BY" without a version.
-        "name": "CC BY",
-        "url": "https://creativecommons.org/licenses/by/",
+        # The source page's "Creative Commons BY license" links to 4.0 (checked 2026-10-31).
+        "name": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        # Every attribution is in the dated forecast files, which never change: never edit one.
         "attribution": (
             'Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", '
             "American Economic Review 112(4), 1194-1225. "
             "Data: https://www.matteoiacoviello.com/gpr.htm"
         ),
+        "modifications": "aseri forecasts are model output derived from the daily index GPRD; its recent values are preliminary and revised by the authors.",
+        "text": "licenses/CC-BY-4.0.txt",
     },
 )
 
@@ -149,6 +152,7 @@ def chokepoint(
             "attribution": "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org).",
             "modifications": "aseri forecasts are model output derived from IMF PortWatch daily transit counts; they are not IMF data.",
             "commercial_use": "permission required from the IMF (copyright@imf.org)",
+            "text": "licenses/IMF-terms.txt",
         },
         **extra,
     )
@@ -243,6 +247,7 @@ WIKI_WW3_VIEWS = Series(
         "name": "CC0 1.0",
         "url": "https://creativecommons.org/publicdomain/zero/1.0/",
         "attribution": "Data: Wikimedia Foundation, Analytics API (pageviews), English Wikipedia, CC0.",
+        "text": "licenses/CC0-1.0.txt",
     },
 )
 
@@ -286,6 +291,7 @@ BRENT_SPOT = Series(
             "Source: U.S. Energy Information Administration, Europe Brent Spot Price FOB, retrieved through "
             "FRED (DCOILBRENTEU). EIA's price source is Refinitiv, an LSEG business."
         ),
+        "text": "licenses/EIA-public-domain.txt",
     },
 )
 
@@ -336,6 +342,7 @@ UA_AIR_RAID_HOURS = Series(
             "from official alert channels and volunteer records."
         ),
         "modifications": "aseri sums the hours of alert per UTC day over the oblasts, splitting alerts at midnight.",
+        "text": "licenses/MIT-Klymenko.txt",
     },
 )
 
@@ -382,5 +389,6 @@ UA_DRONES_DOWNED_CLAIMED = Series(
             "Staff of the Armed Forces of Ukraine: claimed by Ukraine's General Staff, one side's figures."
         ),
         "modifications": "aseri takes the daily difference of the running total of drones; a fall is kept, not clipped.",
+        "text": "licenses/MIT-Ivaniuk.txt",
     },
 )
