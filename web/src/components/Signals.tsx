@@ -1,9 +1,9 @@
-import { useEffect, useId } from "react"
+import { useId } from "react"
 
 import { type PictogramName } from "@/components/Pictogram"
 import { SignalCard } from "@/components/SignalCard"
 import { type Series } from "@/lib/api"
-import { isShortcut } from "@/lib/keys"
+import { useShortcuts } from "@/lib/keys"
 
 // Spec 6.8's groups, each series with its pictogram, in the order of the cards.
 const groups: [string, Record<string, PictogramName>][] = [
@@ -50,19 +50,16 @@ export function Signals({
     .filter((group) => group.cards.length)
   const cards = drawn.flatMap((group) => group.cards)
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const card = cards.find((c) => c.hint === event.key)
-      if (card && isShortcut(event)) onPick(card.series.id)
-    }
-    addEventListener("keydown", onKey)
-    return () => removeEventListener("keydown", onKey)
+  useShortcuts((key) => {
+    const card = cards.find((c) => c.hint === key)
+    if (card) onPick(card.series.id)
   })
 
   return (
     <section
+      id="signals"
       aria-labelledby={title}
-      className="mx-auto flex max-w-[1040px] flex-col gap-8 px-4 pb-14"
+      className="mx-auto flex max-w-[1040px] scroll-mt-4 flex-col gap-8 px-4 pb-14"
     >
       <div className="flex flex-col items-center gap-4 text-center">
         <h2

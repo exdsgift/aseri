@@ -25,7 +25,10 @@ export function Hero({
   const text = useRef<HTMLDivElement>(null)
   return (
     // From 224 px down: on a narrow screen, Mercury stands in the band above the wordmark.
-    <section className="relative isolate flex min-h-svh flex-col items-center px-4 pt-56 pb-14 text-center text-primary uppercase">
+    <section
+      id="today"
+      className="relative isolate flex min-h-svh flex-col items-center px-4 pt-56 pb-14 text-center text-primary uppercase"
+    >
       <Messenger
         value={today?.sevenDayAverage}
         baseline={today?.baseline}

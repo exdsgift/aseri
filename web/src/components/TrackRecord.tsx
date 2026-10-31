@@ -24,9 +24,13 @@ export function TrackRecord({
   })
 
   return (
+    // Focused by R, so the next Tab goes on from here; a ring round the whole section would
+    // say nothing the jump does not.
     <section
+      id="record"
+      tabIndex={-1}
       aria-labelledby={title}
-      className="mx-auto flex max-w-[1040px] flex-col gap-8 px-4 pb-14"
+      className="mx-auto flex max-w-[1040px] scroll-mt-4 flex-col gap-8 px-4 pb-14 outline-none"
     >
       <div className="flex flex-col items-center gap-4 text-center">
         <h2

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { chartTokens } from "@/lib/chart"
 
+import sideNav from "./components/SideNav.tsx?raw"
 import css from "./index.css?raw"
 
 // The page's colours as index.css ships them, so the test reads the real tokens.
@@ -13,22 +14,32 @@ const tokens: Record<string, string> = Object.fromEntries(
   ].map(([, name, hex]) => [name, hex])
 )
 
-// WCAG 2's relative luminance, then the contrast ratio of two tokens.
-const luminance = (hex: string) => {
-  const [r, g, b] = [1, 3, 5].map((i) => {
-    const c = parseInt(hex.slice(i, i + 2), 16) / 255
+// A colour's 8-bit channels.
+const channels = (hex: string) =>
+  [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+// WCAG 2's relative luminance, then the contrast ratio of two colours.
+const luminance = (rgb: number[]) => {
+  const [r, g, b] = rgb.map((channel) => {
+    const c = channel / 255
     return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
   })
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+const ratio = (a: number[], b: number[]) => {
+  const [high, low] = [a, b].map(luminance).toSorted((x, y) => y - x)
+  return (high + 0.05) / (low + 0.05)
 }
 const hex = (name: string) => {
   if (!tokens[name])
     throw new Error(`${name} is not a 6-digit hex in index.css's :root`)
   return tokens[name]
 }
-const contrast = (a: string, b: string) => {
-  const [high, low] = [hex(a), hex(b)].map(luminance).toSorted((x, y) => y - x)
-  return (high + 0.05) / (low + 0.05)
+const contrast = (a: string, b: string) =>
+  ratio(channels(hex(a)), channels(hex(b)))
+// A colour drawn at `opacity` over a surface, as the browser blends it.
+const over = (color: string, surface: string, opacity: number) => {
+  const [top, under] = [color, surface].map((name) => channels(hex(name)))
+  return top.map((c, i) => Math.round(opacity * c + (1 - opacity) * under[i]))
 }
 const on = (colors: string[], surfaces: string[]) =>
   surfaces.flatMap((surface) => colors.map((color) => [color, surface]))
@@ -68,6 +79,20 @@ describe("text", () => {
     ["--background", "--secondary"],
   ])("%s on %s reads at 4.5:1", (color, surface) => {
     expect(contrast(color, surface)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  // An inactive link of the side navigation is dimmed, its label as far as it still reads
+  // on the ground, and no further: a whole percent less would not.
+  it("dims the side navigation's inactive labels to the lowest opacity that reads at 4.5:1", () => {
+    // The bare utility, not a hover:, focus-visible: or aria-[...]: variant of it.
+    const [, percent] = sideNav.match(/(?<![\w:-])opacity-(\d+)\b/)!
+    const label = (opacity: number) =>
+      ratio(
+        over("--secondary", "--background", opacity / 100),
+        channels(hex("--background"))
+      )
+    expect(label(Number(percent))).toBeGreaterThanOrEqual(4.5)
+    expect(label(Number(percent) - 1)).toBeLessThan(4.5)
   })
 })
 
