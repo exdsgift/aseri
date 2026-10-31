@@ -3,10 +3,13 @@ import { useEffect, useRef, useState } from "react"
 import { ForecastPanel } from "@/components/ForecastPanel"
 import { Hero } from "@/components/Hero"
 import { Signals } from "@/components/Signals"
+import { TrackRecord } from "@/components/TrackRecord"
 import {
   loadCatalog,
+  loadScores,
   loadSeries,
   type CatalogEntry,
+  type ScoreRecord,
   type Series,
 } from "@/lib/api"
 
@@ -21,6 +24,12 @@ export function App() {
   const [updated, setUpdated] = useState<string>()
   // The series in the panel. The hero stays on GPR.
   const [picked, setPicked] = useState(gprId)
+  // How past forecasts did, for the record: the page goes on without it.
+  const [records, setRecords] = useState<ScoreRecord[]>()
+  // The past forecast a square of the record opened in the panel's replay, and a count of
+  // the taps, so that a second tap on the same square opens it again.
+  const [opened, setOpened] = useState<string>()
+  const [taps, setTaps] = useState(0)
   const panelBox = useRef<HTMLDivElement>(null)
   // The series whose replay was asked for: GPR's comes with the page.
   const replayed = useRef(new Set([gprId]))
@@ -50,10 +59,12 @@ export function App() {
         console.error(error)
         setFailed(true)
       })
+    loadScores().then(({ series }) => setRecords(series), console.error)
   }, [])
 
   const pick = (id: string) => {
     setPicked(id)
+    setOpened(undefined)
     // Smooth unless the reader asks for less motion: see index.css.
     panelBox.current!.scrollIntoView({ block: "start" })
     const { entry } = find(id)!
@@ -76,9 +87,14 @@ export function App() {
       {signals && panel && (
         <>
           <div ref={panelBox} className="scroll-mt-4 px-4 pb-14">
-            {/* A new series dithers in. Its replay, arriving later, starts the panel again on today. */}
+            {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
+                or on the past forecast a square of the record opened. */}
             <div key={picked} className="motion-safe:animate-dither-in">
-              <ForecastPanel key={panel.forecasts.length} series={panel} />
+              <ForecastPanel
+                key={`${panel.forecasts.length} ${opened} ${taps}`}
+                series={panel}
+                opened={opened}
+              />
             </div>
           </div>
           <Signals
@@ -86,6 +102,17 @@ export function App() {
             picked={picked}
             onPick={pick}
           />
+          {records && (
+            <TrackRecord
+              records={records}
+              entries={signals.map((s) => s.entry)}
+              onOpen={(id, date) => {
+                pick(id)
+                setOpened(date)
+                setTaps((count) => count + 1)
+              }}
+            />
+          )}
         </>
       )}
     </main>

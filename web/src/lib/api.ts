@@ -9,6 +9,8 @@ export type CatalogEntry = {
   horizon_unit: string
   horizon_max: number
   interval_steps: number[]
+  // Where the replay ends: it holds this day's forecast and those of the 120 days before.
+  latest_reference_date: string
   // Set when the day's run skipped the series and kept its last good files.
   stale_since?: string | null
   // What a reader must know about the data, such as Taiwan's tracking dropouts.
@@ -105,12 +107,52 @@ async function read<T>(path: string): Promise<T> {
 const mean = (values: number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length
 
-// API dates are calendar days, read in UTC.
+// API dates are calendar days, so the arithmetic stays in UTC.
 const day = 86_400_000
+export const daysAfter = (isoDate: string, days: number) =>
+  new Date(Date.parse(isoDate) + days * day).toISOString().slice(0, 10)
 
 // `generated_at` is when the daily run last wrote the site.
 export const loadCatalog = () =>
   read<{ generated_at: string; series: CatalogEntry[] }>("series.json")
+
+// A bucket of days ahead ("1-7", "8-28"): `n` forecasts with every day of it resolved, and
+// their scores once there is one. A ratio's verdict is the pipeline's, from its interval.
+export type Bucket = {
+  n: number
+  coverage_80?: { rate: number; ci: number[] }
+  ae_median?: {
+    vs: Record<
+      string,
+      // All null when the baseline had no error to compare with.
+      {
+        ratio: number | null
+        ci: (number | null)[]
+        verdict: string | null
+      }
+    >
+  }
+}
+// The live or the retrospective forecasts of one series, never combined. `weekly` holds
+// the last 8 forecasts from the series' weekday, oldest first, scored 7 days ahead.
+type Scored = {
+  n: number
+  since: string | null
+  buckets: Record<string, Bucket>
+  weekly: { reference_date: string; inside_80: boolean }[]
+}
+// One series' track record: `n` live forecasts resolved 7 days ahead, shown from
+// `min_n_to_display`; its errors compare with `primary_baseline`.
+export type ScoreRecord = {
+  series_id: string
+  n: number
+  min_n_to_display: number
+  primary_baseline: string
+  live: Scored
+  retrospective: Scored
+}
+
+export const loadScores = () => read<{ series: ScoreRecord[] }>("scores.json")
 
 // A series' forecast and daily values, and the replay's past forecasts when asked for:
 // a card needs only today's.

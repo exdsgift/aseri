@@ -24,12 +24,23 @@ class Series:
     expected_lag: int
     source: dict
     license: dict
+    # The baseline the record's verdict is against, pre-registered: the one with the lowest error on the
+    # backtest, "naive" (last value), "snaive7" (same weekday a week back) or "mean28". Picked on a local run
+    # of the 120-day backfill, scored as of 2026-10-31; #146 may revisit it before the live record reaches 30.
+    primary_baseline: str
+    # The weekday of the record's weekly forecasts, Monday 0: the day its live forecasts start from,
+    # so that each week has one live forecast for the squares and the calibration monitor.
+    record_weekday: int
     # What its values are, which sets the range of its quantiles: "index", "count" (0 and up) or "alert_hours" (0 to 600).
     kind: str = "index"
     # The edge check: a newest value more than this many IQRs outside its 28 days before waits a day. None turns it off.
     edge_iqr: float | None = None
     # A standing caveat on the data, for the page to show with the series.
     note: str | None = None
+    # Days a target waits for its observation to settle before it is scored, once (research report, "Score
+    # against a vintage fixed in advance"). To measure later from the archive: the age past which 95% of
+    # revisions are under 1%.
+    score_lag: int = 7
     # What a forecast step is: a calendar "day", or a "trading_day" for a price that has none on weekends and holidays.
     horizon_unit: str = "day"
     # Whether its values follow the week, so the page says to compare a day with the same weekday.
@@ -61,6 +72,13 @@ GPR_DAILY = Series(
     edge_iqr=None,
     # Its weekends run 12 to 14% under its 28-day median on calm days, and the weekday explains 14% of their swing.
     weekly=True,
+    # Mean absolute error on the backfill as of 2026-10-31, 2,142 settled days: the 28-day mean 42.7,
+    # seasonal naive 50.6, naive 59.3 (Timestral 35.7).
+    primary_baseline="mean28",
+    # Its live forecasts start on Mondays, the day its weekly update runs to.
+    record_weekday=0,
+    # It revises its last month: revisions above 1% reach 3 to 4 weeks back.
+    score_lag=35,
     source={
         "title": "Caldara and Iacoviello, Geopolitical Risk Index, daily",
         "url": "https://www.matteoiacoviello.com/gpr.htm",
@@ -106,6 +124,10 @@ def chokepoint(
         # logged from 2026-03 to 2026-10): the 07:00 run sees data 3 to 10 days old, 11 after a Thursday batch.
         expected_lag=11,
         kind="count",
+        # Each weekly batch runs to a Sunday, the day its live forecast starts from.
+        record_weekday=6,
+        # Its revisions are unmeasured.
+        score_lag=14,
         source={
             "title": "IMF PortWatch, Daily Chokepoints Data",
             "url": "https://portwatch.imf.org/",
@@ -133,14 +155,37 @@ def chokepoint(
 
 
 # Edge check off: its largest departures are real, the Ever Given blockage of March 2021 first, and no error is known.
-SUEZ_TRANSITS = chokepoint("suez_transits", "Suez Canal", "Suez Canal", 28, (7, 14, 28))
+SUEZ_TRANSITS = chokepoint(
+    "suez_transits",
+    "Suez Canal",
+    "Suez Canal",
+    28,
+    (7, 14, 28),
+    # Mean absolute error on the backfill as of 2026-10-31, 2,758 settled days: the 28-day mean 5.27,
+    # seasonal naive 7.32, naive 7.35 (Timestral 5.23).
+    primary_baseline="mean28",
+)
 # Edge check off: its departures are the news, the fall from 78 a day to 3 in March 2026 and convoys of up to 51 since.
 HORMUZ_TRANSITS = chokepoint(
-    "hormuz_transits", "Strait of Hormuz", "Strait of Hormuz", 14, (3, 7, 14)
+    "hormuz_transits",
+    "Strait of Hormuz",
+    "Strait of Hormuz",
+    14,
+    (3, 7, 14),
+    # Mean absolute error on the backfill as of 2026-10-31, 1,477 settled days: naive 3.59, seasonal
+    # naive 4.30, the 28-day mean 4.69 (Timestral 3.04).
+    primary_baseline="naive",
 )
 # Edge check off: no day since 2019 lies more than 4 IQRs outside its 28 days before, so it would hold nothing.
 BAB_EL_MANDEB_TRANSITS = chokepoint(
-    "bab_el_mandeb_transits", "Bab el-Mandeb", "Bab el-Mandeb Strait", 14, (3, 7, 14)
+    "bab_el_mandeb_transits",
+    "Bab el-Mandeb",
+    "Bab el-Mandeb Strait",
+    14,
+    (3, 7, 14),
+    # Mean absolute error on the backfill as of 2026-10-31, 1,477 settled days: the 28-day mean 5.25,
+    # naive 6.72, seasonal naive 7.02 (Timestral 5.43).
+    primary_baseline="mean28",
 )
 TAIWAN_STRAIT_TRANSITS = chokepoint(
     "taiwan_strait_transits",
@@ -148,6 +193,9 @@ TAIWAN_STRAIT_TRANSITS = chokepoint(
     "Taiwan Strait",
     28,
     (7, 14, 28),
+    # Mean absolute error on the backfill as of 2026-10-31, 2,758 settled days: the 28-day mean 27.8,
+    # naive 45.8, seasonal naive 45.9 (Timestral 27.9).
+    primary_baseline="mean28",
     # On: each of the 10 days since 2019 past 6 IQRs is a fall to 10-35% of the usual count, back within two days,
     # and no high value reaches 6. A forecast from such a day would carry the fall into its whole band.
     edge_iqr=6.0,
@@ -175,6 +223,14 @@ WIKI_WW3_VIEWS = Series(
     edge_iqr=None,
     # On calm days of the last 3 years Saturday runs 9% under its 28-day median, and the weekday explains 8% of the swing.
     weekly=True,
+    # Mean absolute error on the backfill as of 2026-10-31, 1,519 settled days: naive 311.3, the 28-day
+    # mean 313.1, seasonal naive 346.4 (Timestral 232.4).
+    primary_baseline="naive",
+    # Every day's views arrive the next day, so every weekday has a live forecast: Sunday, as for the
+    # sea lanes and the war in Ukraine, so that the squares of the page line up.
+    record_weekday=6,
+    # A day's views are final the next day but for a rare bot reclassification.
+    score_lag=7,
     note="Counts attention, not events: views of the English Wikipedia article by people, not bots.",
     source={
         "title": "Wikimedia Foundation, Analytics API (pageviews), English Wikipedia, World War III, agent type user",
@@ -209,6 +265,13 @@ BRENT_SPOT = Series(
     # Off: its departures are real moves, the March 2026 shock first (15 IQRs on 2026-03-06), then March 2022.
     edge_iqr=None,
     horizon_unit="trading_day",
+    # Mean absolute error on the backfill as of 2026-10-31, 1,001 settled trading days: naive 8.71,
+    # seasonal naive (5 prices back) 10.08, the mean of 20 prices 12.21 (Timestral 8.75).
+    primary_baseline="naive",
+    # FRED's weekly batch ends on the Tuesday before its Wednesday release: the live forecast starts from it.
+    record_weekday=1,
+    # Past its worst publication delay: a weekly batch reaches 8 days, and 7 would leave its targets unscorable.
+    score_lag=14,
     note="Prices on trading days only, none on weekends and market holidays, so its days ahead count trading days.",
     source={
         "title": "U.S. Energy Information Administration, Europe Brent Spot Price FOB, through FRED (DCOILBRENTEU)",
@@ -244,6 +307,13 @@ UA_AIR_RAID_HOURS = Series(
     kind="alert_hours",
     # Off: no day since 2022 lies more than 6 IQRs outside its 28 days before; the 10 past 4 are mass attacks.
     edge_iqr=None,
+    # Mean absolute error on the backfill as of 2026-10-31, 784 settled days: the 28-day mean 11.72,
+    # naive 15.51, seasonal naive 16.84 (Timestral 11.81).
+    primary_baseline="mean28",
+    # Committed every day, so every weekday has a live forecast: Sunday, as for the drones.
+    record_weekday=6,
+    # An alert recorded after it ends adds to its last day or two; the longest ran 7.4 days.
+    score_lag=7,
     note=(
         "Volunteer records of the official alerts, by oblast. Luhansk and Crimea, under one alert since 2022, "
         "are left out. A few alerts in the west run for days, which may be an end the records missed."
@@ -285,6 +355,14 @@ UA_DRONES_DOWNED_CLAIMED = Series(
     # On: 3 days since 2022 lie past 6 IQRs. One is 2026-07-26, a 0 while every other category moved, its drones
     # reported the next day; the other two are attack days of 2022-23, 33 and 53 when most days held under 12.
     edge_iqr=6.0,
+    # Mean absolute error on the backfill as of 2026-10-31, 763 settled days: the 28-day mean 203.2,
+    # naive 261.2, seasonal naive 280.4 (Timestral 208.3).
+    primary_baseline="mean28",
+    # Its report day goes without a commit most rarely on Sundays: 3 of 50 days with no live forecast
+    # since March fell on a Sunday, against 4 to 13 on the other weekdays.
+    record_weekday=6,
+    # Its newest report is at most 4 days old, and no report has been revised since March.
+    score_lag=7,
     note="Not independently verified.",
     source={
         "title": "2022 Ukraine Russia War Dataset, Russia's equipment losses as reported by Ukraine's General Staff",

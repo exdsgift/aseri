@@ -1,0 +1,60 @@
+import { useId } from "react"
+
+import { type ScoreRecord } from "@/lib/api"
+import { daysAhead, monthDay } from "@/lib/format"
+
+// The last weekly forecasts at 7 days ahead, oldest first: a square each, green when the
+// real value landed inside its 8 in 10 range, red when not. A tap opens it in the replay,
+// which holds the forecasts from `replayFrom` on: an older square is drawn without a link.
+export function RecordSquares({
+  weekly,
+  horizonUnit,
+  replayFrom,
+  onOpen,
+}: {
+  weekly: ScoreRecord["live"]["weekly"]
+  // Brent's steps are trading days: its squares are 7 trading days ahead.
+  horizonUnit: string
+  replayFrom: string
+  onOpen: (referenceDate: string) => void
+}) {
+  const title = useId()
+  if (!weekly.length) return null
+  const inside = weekly.filter((forecast) => forecast.inside_80).length
+  const ahead = `${daysAhead(7, horizonUnit)} ahead`
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p id={title} className="text-muted-foreground">
+        Last {weekly.length} weekly forecasts, {ahead}
+      </p>
+      <ul aria-labelledby={title} className="flex flex-wrap gap-1">
+        {weekly.map(({ reference_date, inside_80 }) => {
+          const said = `${monthDay(reference_date)}: ${inside_80 ? "inside" : "outside"} its 8 in 10 range ${ahead}`
+          const fill = inside_80 ? "bg-inside" : "bg-destructive"
+          return (
+            <li key={reference_date} className="flex">
+              {reference_date < replayFrom ? (
+                <span
+                  role="img"
+                  aria-label={`${said}, no longer in the replay`}
+                  className={`size-6 ${fill}`}
+                />
+              ) : (
+                <button
+                  type="button"
+                  aria-label={`${said}. Open it in the replay`}
+                  onClick={() => onOpen(reference_date)}
+                  className={`size-6 cursor-pointer ${fill} hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160`}
+                />
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {/* In words too, so the record never rests on colour alone. */}
+      <p>
+        {inside} of {weekly.length} inside the 8 in 10 range
+      </p>
+    </div>
+  )
+}

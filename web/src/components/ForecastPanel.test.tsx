@@ -122,6 +122,16 @@ it("replays the forecast of the day before with ←, then today's with → or T"
   expect(title()).toBe("[F] Geopolitical risk · forecast made today")
 })
 
+it("starts on the past forecast the record opened, or on today's when the replay lacks it", () => {
+  render(<ForecastPanel series={gpr} opened="2026-08-03" />)
+  expect(title()).toBe("[F] Geopolitical risk · backtest from Aug 03")
+  expect(slider().getAttribute("aria-valuetext")).toBe("Aug 03, backtest")
+  cleanup()
+
+  render(<ForecastPanel series={gpr} opened="2025-08-03" />)
+  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
+})
+
 it("goes 120 days back and no further, and no further than today", () => {
   render(<ForecastPanel series={gpr} />)
 
@@ -370,74 +380,51 @@ const turning = () =>
     toFake: ["Date", "setInterval", "clearInterval"],
   })
 const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))
-const pathShown = () => screen.getByText(/^Possible path/).textContent
+const pathShown = () => screen.getByText(/^Path \d+ of 20/).textContent
 const button = (name: string) => screen.getByRole("button", { name })
 
-const legendNames = () =>
+const legendLine = () =>
   screen
     .getAllByRole("listitem")
     .map((item) => item.textContent)
-    .filter((name) => /^(Most likely|One possible path)$/.test(name ?? ""))
+    .filter((name) =>
+      /^(Model path|Most likely|One possible path)$/.test(name ?? "")
+    )
 
-it("opens on the most likely value of each day, and turns no path until asked", () => {
+it("opens on the most likely of the model's 20 paths, and turns none until asked", () => {
   turning()
   render(<ForecastPanel series={gpr} />)
 
   wait(6000)
-  expect(screen.queryByText(/^Possible path/)).toBeNull()
+  expect(pathShown()).toBe("Path 1 of 20, the most likely")
   expect(screen.getByText(/^The line ahead/).textContent).toBe(
-    "The line ahead is the most likely value of each day: the real days go up and down around it, 8 in 10 inside the band."
+    "The line ahead is one of 20 paths drawn from the model's forecast, the most likely first. Together they fall in the band as often as the forecast says."
   )
-  expect(legendNames()).toEqual(["Most likely"])
-  expect(button("Show possible paths")).toBeTruthy()
+  expect(legendLine()).toEqual(["Model path"])
+  expect(screen.queryByRole("button", { name: "Most likely" })).toBeNull()
 })
 
-it("keeps the keyboard focus on the one button that switches the two views", () => {
-  render(<ForecastPanel series={gpr} />)
-  const toggle = button("Show possible paths")
-  toggle.focus()
-
-  fireEvent.click(toggle)
-  expect(document.activeElement).toBe(toggle)
-  expect(toggle.textContent).toBe("Most likely")
-  fireEvent.click(toggle)
-  expect(document.activeElement).toBe(toggle)
-  expect(toggle.textContent).toBe("Show possible paths")
-})
-
-it("shows the possible paths in order, one every 1.2 s, until paused or back on the most likely", () => {
+it("plays the other paths in order, one every 1.2 s, until paused", () => {
   turning()
   render(<ForecastPanel series={gpr} />)
+  const play = button("Play")
+  play.focus()
 
-  fireEvent.click(button("Show possible paths"))
-  expect(pathShown()).toBe("Possible path 1 of 20")
-  expect(legendNames()).toEqual(["One possible path"])
+  fireEvent.click(play)
+  expect(document.activeElement).toBe(play)
+  expect(play.textContent).toBe("Pause")
   wait(1200)
-  expect(pathShown()).toBe("Possible path 2 of 20")
-  wait(19 * 1200)
-  expect(pathShown()).toBe("Possible path 1 of 20")
+  expect(pathShown()).toBe("Path 2 of 20")
+  wait(18 * 1200)
+  expect(pathShown()).toBe("Path 20 of 20")
+  wait(1200)
+  expect(pathShown()).toBe("Path 1 of 20, the most likely")
 
-  fireEvent.click(button("Pause"))
+  fireEvent.click(play)
   wait(6000)
-  expect(pathShown()).toBe("Possible path 1 of 20")
-  fireEvent.click(button("Play"))
-  wait(1200)
-  expect(pathShown()).toBe("Possible path 2 of 20")
+  expect(pathShown()).toBe("Path 1 of 20, the most likely")
   fireEvent.click(button("Next path"))
-  expect(pathShown()).toBe("Possible path 3 of 20")
-
-  fireEvent.click(button("Most likely"))
-  wait(6000)
-  expect(screen.queryByText(/^Possible path/)).toBeNull()
-  expect(legendNames()).toEqual(["Most likely"])
-})
-
-it("says beside the chart that the line is one possible path, not the forecast", () => {
-  render(<ForecastPanel series={gpr} />)
-  fireEvent.click(button("Show possible paths"))
-  expect(screen.getByText(/^The line ahead/).textContent).toBe(
-    "The line ahead is one possible path, not the forecast: no one knows which days turn out high."
-  )
+  expect(pathShown()).toBe("Path 2 of 20")
 })
 
 it("turns no path while the tab is hidden or the panel is off screen", () => {
@@ -465,21 +452,21 @@ it("turns no path while the tab is hidden or the panel is off screen", () => {
   }
   turning()
   render(<ForecastPanel series={gpr} />)
-  fireEvent.click(button("Show possible paths"))
+  fireEvent.click(button("Play"))
 
   hide(true)
   wait(6000)
-  expect(pathShown()).toBe("Possible path 1 of 20")
+  expect(pathShown()).toBe("Path 1 of 20, the most likely")
   hide(false)
   wait(1200)
-  expect(pathShown()).toBe("Possible path 2 of 20")
+  expect(pathShown()).toBe("Path 2 of 20")
 
   act(() => onScreen(false))
   wait(6000)
-  expect(pathShown()).toBe("Possible path 2 of 20")
+  expect(pathShown()).toBe("Path 2 of 20")
   act(() => onScreen(true))
   wait(1200)
-  expect(pathShown()).toBe("Possible path 3 of 20")
+  expect(pathShown()).toBe("Path 3 of 20")
 })
 
 it("turns no path under reduced motion, and still steps through them on demand", () => {
@@ -487,13 +474,12 @@ it("turns no path under reduced motion, and still steps through them on demand",
   turning()
   render(<ForecastPanel series={gpr} />)
 
-  fireEvent.click(button("Show possible paths"))
   wait(6000)
   expect(vi.getTimerCount()).toBe(0)
-  expect(pathShown()).toBe("Possible path 1 of 20")
   expect(screen.queryByRole("button", { name: /^(Pause|Play)$/ })).toBeNull()
+  expect(pathShown()).toBe("Path 1 of 20, the most likely")
   fireEvent.click(button("Next path"))
-  expect(pathShown()).toBe("Possible path 2 of 20")
+  expect(pathShown()).toBe("Path 2 of 20")
 })
 
 it("labels the slider's handle with the day it picks, on the side with room", () => {

@@ -210,14 +210,14 @@ function square(plot: Plot, x: number, y: number, size: number, color: string) {
     for (let dy = 0; dy < size; dy++) plot(x + dx, y + dy, color)
 }
 
-// `path`, the last daily value then one value a day ahead, takes the most likely value's place:
-// the panel opens on the most likely value and, asked, draws possible paths, which read like the past.
+// `path`, the last daily value then one value a day ahead: one of the model's paths, never a
+// median line, which reads as an average.
 export function paintChart(
   plot: Plot,
   chart: Layout,
   forecast: Forecast,
   color: Colors,
-  path?: number[]
+  path: number[]
 ) {
   const { left, right, top, bottom, x, y, first, origin } = chart
   const { values, averages, quantiles, actuals } = forecast
@@ -250,10 +250,7 @@ export function paintChart(
   }
   polyline(
     plot,
-    (path ?? [last, ...quantiles["0.5"]]).map((value, k): Point => [
-      x(origin + k),
-      y(value),
-    ]),
+    path.map((value, k): Point => [x(origin + k), y(value)]),
     color.pale
   )
 
@@ -281,14 +278,6 @@ export function paintChart(
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.focus)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
   square(plot, xo - 1, y(last) - 1, 3, color.gold)
-  if (!path)
-    square(
-      plot,
-      right - 1,
-      y(quantiles["0.5"][chart.ahead - 1]) - 1,
-      3,
-      color.pale
-    )
   if (actuals.length === chart.ahead)
     square(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, 3, color.real)
 }

@@ -134,6 +134,8 @@ it("keeps the copy honest, today and in replay, and in index.html's tags", async
   serve(published)
   render(<App />)
   const chart = await screen.findByRole("img")
+  // The record too, with its verdicts and its notes.
+  await screen.findByRole("region", { name: "Record" })
   // The text nodes, and the text alternatives a screen reader gets instead.
   const copy = () => {
     const walker = document.createTreeWalker(
@@ -359,7 +361,7 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     "What happened",
     "8 in 10",
     "5 in 10",
-    "Most likely",
+    "Model path",
     "Forecast made",
   ])
   // Text beside the chart, not the legend, says what the band is and is not.
@@ -367,7 +369,7 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
     "The 8 in 10 band: where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call. Daily values can follow the week: compare a day with the same weekday."
   )
   expect(panel.getByRole("img").getAttribute("aria-label")).toBe(
-    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: 8 in 10 between 111 and 251, most likely 168."
+    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: 8 in 10 between 111 and 251, most likely 168. The line ahead is path 1 of 20 drawn from the forecast, the most likely first."
   )
   // Every file but the other series' replays, which wait for their card to be picked.
   expect(fetch.mock.calls.map(([url]) => url).toSorted()).toEqual(
@@ -537,6 +539,96 @@ it("asks for a series' replay once, however often its card is picked, even when 
 
   expect(fetch.mock.calls.filter(([url]) => url === replayUrl)).toHaveLength(1)
   expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
+})
+
+it("opens a square of the record in the panel's replay, loading that series' replay first", async () => {
+  serve(published)
+  render(<App />)
+  const record = within(await screen.findByRole("region", { name: "Record" }))
+  // The record of the run of 2026-10-31: no live forecast resolved yet, the backtest apart.
+  const suez = within(
+    record.getByRole("heading", { name: "Suez Canal" }).closest("li")!
+  )
+  expect(suez.getByText(/^Collecting live record/).textContent).toBe(
+    "Collecting live record: 0 of 30"
+  )
+  const backtest = within(
+    suez.getByRole("group", { name: "Backtest, not the live record" })
+  )
+  const squares = backtest.getAllByRole("button")
+  expect(squares).toHaveLength(8)
+
+  fireEvent.click(squares[0])
+
+  // Opened once Suez's replay is in, which today's panel did not have.
+  expect(
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "[F] Suez Canal · backtest from Aug 16",
+    })
+  ).toBeTruthy()
+  expect(screen.getByRole("slider").getAttribute("aria-valuetext")).toBe(
+    "Aug 16, backtest"
+  )
+  expect(scrollIntoView).toHaveBeenCalled()
+})
+
+it("reopens a square's forecast on a second tap, after the reader has moved the replay", async () => {
+  serve(published)
+  render(<App />)
+  const record = within(await screen.findByRole("region", { name: "Record" }))
+  const square = () =>
+    within(
+      record.getByRole("heading", { name: "Suez Canal" }).closest("li")!
+    ).getAllByRole("button")[0]
+  const opened = "[F] Suez Canal · backtest from Aug 16"
+  fireEvent.click(square())
+  await screen.findByRole("heading", { level: 2, name: opened })
+
+  fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
+  expect(panelTitle()).toBe("[F] Suez Canal · backtest from Jun 27")
+  fireEvent.click(square())
+
+  expect(panelTitle()).toBe(opened)
+})
+
+it("opens a square's forecast on its most likely path, with nothing playing", async () => {
+  serve(published)
+  render(<App />)
+  const record = within(await screen.findByRole("region", { name: "Record" }))
+  const panel = () =>
+    within(screen.getByRole("region", { name: /^\[F\] Geopolitical risk/ }))
+  // Today's GPR forecast, playing, on its third path.
+  fireEvent.click(panel().getByRole("button", { name: "Play" }))
+  fireEvent.click(panel().getByRole("button", { name: "Next path" }))
+  fireEvent.click(panel().getByRole("button", { name: "Next path" }))
+  expect(panel().getByText(/^Path \d+ of 20/).textContent).toBe("Path 3 of 20")
+
+  fireEvent.click(
+    within(
+      record.getByRole("heading", { name: "Geopolitical risk" }).closest("li")!
+    ).getAllByRole("button")[0]
+  )
+
+  expect(panelTitle()).toBe("[F] Geopolitical risk · backtest from Jul 27")
+  expect(panel().getByText(/^Path \d+ of 20/).textContent).toBe(
+    "Path 1 of 20, the most likely"
+  )
+  expect(panel().getByRole("button", { name: "Play" })).toBeTruthy()
+})
+
+it("shows the page without the record when the scores cannot be loaded", async () => {
+  vi.stubGlobal("fetch", async (url: string) =>
+    url === "api/v1/scores.json"
+      ? new Response("", { status: 404 })
+      : Response.json(published[url])
+  )
+  vi.spyOn(console, "error").mockImplementation(() => {})
+
+  render(<App />)
+
+  await signals(9)
+  expect(screen.queryByRole("region", { name: "Record" })).toBeNull()
 })
 
 it("opens a series with its card's key, unless a field has the focus", async () => {
