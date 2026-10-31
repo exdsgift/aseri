@@ -203,7 +203,7 @@ One workflow, `daily.yml`, on a cron.
   - median absolute error and its ratio to each naive baseline.
 - **On the page:**
   - **The forecast panel's replay** shows any forecast from the last 120 days, with the real daily values in white, whether the target day fell inside the range, and how many days so far landed inside.
-  - **The record section shows the dots:** the last 8 weekly forecasts, 7 days ahead, green if inside the 8-in-10 range and red if not. Tapping one opens it in the replay.
+  - **The record section shows the dots:** the last 8 weekly forecasts, 7 days ahead, filled if inside the 8-in-10 range and hollow if not (#148). Tapping one opens it in the replay.
   - **A small leaderboard-style table (my call):** per series, 8-in-10 coverage and error vs naive, live only.
 - **Wording rules:**
   - "most likely", never "will";
@@ -285,16 +285,16 @@ Follow `docs/research/public-api.md`. The essentials:
 
 ### 6.8 Website: structure and behaviour
 
-The reference is the prototype `prototypes/forecast-chart/index.html`, in the "statement" style of about.dos-age.com: one idea per screen, gold on deep navy. Rewrite it properly; do not port it.
+The reference is the prototype `prototypes/forecast-chart/index.html`, in the "statement" style of about.dos-age.com: one idea per screen. Rewrite it properly; do not port it. Since #148 the whole site is black and white, after the hero's engraving (6.9).
 
-1. **Hero:**
-   - an animated pixel sun;
+1. **Hero:** study A, "Messenger", of the `prototype-hero-studies` branch (#148, owner's choice), behind the text, its layout and padding unchanged:
+   - Hendrick Goltzius's engraved *Mercury* in his niche, a disc of radial ticks behind him, and a fan of fine rays from each of his winged hat, caduceus, hand, elbow and winged ankle. Beside the text when its margin has room for him (from about 1,050 px), else small in the 224 px band above the wordmark; never under the text, and never past the hero's width;
    - the wordmark 焦り, with "あせり · aseri" under it;
    - the kicker "Geopolitical risk · today";
    - the GPR 7-day average as a giant number;
    - the pitch: "{x}% above its 1985-2019 average", then the 4-week forecast for the same weekday as the last data, compared with that weekday (owner's choice): "{Weekday Mon DD}, 4 weeks from the last data: 8 in 10 between {lo} and {hi}, 2 in 10 outside. Most likely {m}. (Last {weekday}: {v})", the range first (6.9, copy). GPR has a strong weekday cycle, so a single day must never be compared with a day on a different weekday or with the 7-day average.
 
-   The sun's size encodes today's GPR against the baseline.
+   The rays encode GPR's 7-day average against its baseline, on a scale that starts full (`fan` in `web/src/lib/messenger.ts`): at the baseline and under it, 19 rays over 40 degrees, fuller than the study's fans at 181 (owner: a richer scale); each further baseline opens a fan 13 degrees, up to a cap at 4 times the baseline. The rays keep fixed slots 40/18 degrees apart, each with its own length, so an opening fan gains rays only at its edges and none ever jumps while the number counts up: 181 holds 23 rays over 48.9 degrees, 300 holds 29 over 62.2, denser than the study's 27 over 66, the cap 35 over 75.6. Two dashed rays in each fan mark the baseline, at the full fan's edges. The text sits on a calm area: the ground at 91% over the text column and a margin, dissolving in a 48 px dither, so the words read over the art everywhere. The foot of the page credits the engraving: "Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art, CC0", with its Commons URL.
 2. **The forecast panel,** a game-sheet frame with the title row `[F] {series} · forecast made today | {unit} · data to {date}`:
    - a readout line;
    - the pixel chart (6.9), opening on the most likely of the model's 20 paths;
@@ -316,37 +316,41 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 5. **Side navigation** on wide screens: icon plus two-line label, inactive at 30% opacity, scroll-spy.
 
 **Behaviour:**
-- **The first frame is readable at rest.** Then the load sequence runs: the wordmark dithers in, the number counts up, the chart scans in from left to right.
-- **Ambient motion:**
-  - the sun's glow cycles through 6 density steps (about 2.6 s);
-  - the dashed halo ring turns;
-  - pixel stars twinkle;
-  - the vignette breathes (6 s);
-  - the sun pulses (3.2 s, scale 1 to 1.04);
+- **The first frame is readable at rest.** Then the load sequence runs: the wordmark dithers in, the number counts up, the chart scans in from left to right. With the count-up, the hero's disc draws in and its rays grow out over 1.1 s, the fans opening with the number, step for step (`counted` and `easeOut` in `web/src/lib/motion.ts`, shared by both).
+- **Ambient motion,** slow, as in the study:
+  - the disc turns, about once in 10 minutes;
+  - each ray sways by 0.3 degrees, out of step with the others (about 14 s a cycle);
   - once asked, the panel draws the next possible path every 1.2 s.
 
-  The sun and the paths stop while the tab is hidden or they are off screen.
+  The hero's art draws about 30 frames a second while it arrives (1.1 s), then a frame every 200 ms, the same picture: the slow motion after it is a fraction of a pixel a frame. It and the paths stop while the tab is hidden or they are off screen (`tickWhileShown`).
 - **UI transitions** take 160 ms. Panel changes use the 8-step Bayer dither (30 ms per step).
-- **`prefers-reduced-motion`** turns all of it off: a static sun, no count-up, no scan, no dither transitions, and the paths step only on "Next path".
+- **`prefers-reduced-motion`** turns all of it off: the hero's art still and whole (the disc, the figure and the fans at their full width), no count-up, no scan, no dither transitions, and the paths step only on "Next path".
 - **Data loading (my call):** first load fetches `series.json`, every `latest.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data.
 - **Accessibility:**
-  - every control is a real button or input, with a visible focus (2 px gold outline);
+  - every control is a real button or input, with a visible focus (2 px white outline);
   - the canvas charts have text equivalents (the readout and the intervals are real text);
   - the keyboard shortcuts never fire while an input is focused.
 
 ### 6.9 Design system
 
-- **Tokens:** from `docs/research/design-dos-age.md` section 10 and the prototype, dark only.
-  - background `#071324`, frame `#253a56`, row `#222034`, picked `#3d3524`;
-  - text `#cbdbfc`, label `#9badb7`;
-  - gold `#ffd23f`, pale gold `#fff0b3`, muted gold `#917d3c`, key-hint gold `#d9a066`;
-  - focus `#7181e5`, inside `#78c283`, outside `#e3858d`.
+- **Tokens:** black and white, dark only, from study A's palette (#148, owner's choice: no gold or navy anywhere). The greys are a paper white's, warm by at most 16 levels between the channels.
+  - ground `#050505` (`--background`), frame `#34322e` (`--border`), row `#1a1917` (`--muted`), picked `#24221f` (`--accent`);
+  - white `#f2efe8` (`--primary`: titles, the numbers, the daily values, the focus ring, the hero's art), and `#ffffff` (`--white`: what happened, a hovered control);
+  - text and secondary text `#cfcac0` (`--foreground`, `--secondary`: the wordmark's reading, section titles, the sheets' labels and key hints, the origin and the baseline, the controls' blocks);
+  - muted text `#a5a19a` (`--muted-foreground`, also the model's path);
+  - the chart's dim marks `#726e68` (`--dim`: the 7-day average and the bands);
+  - caution `#f2efe8` (`--destructive`), always with its marker.
 
-  Map them to shadcn variables (`--background`, `--primary`, and so on) with `--radius: 0`. Focus and outside are the prototype's `#5b6ee1` and `#d95763` lightened at the same hue and saturation, so that they read as text (#143).
+  Map them to shadcn variables with `--radius: 0`.
+- **States read without colour,** by shape and words (#148):
+  - inside and outside: the record's squares are filled or hollow, and the words say it ("inside", "outside", "6 of 8 inside the 8 in 10 range", "beats", "loses"). A hover only outlines a square, so a hollow one never fills;
+  - picked: the card's raised surface, and an inner frame 2 px inside its border; a hover only greys the border;
+  - caution and stale: the `caution` utility, a "!" before the words in white, the marker kept out of the spoken text: a site not updated for 2 days, a stale series, a failed load.
 - **Contrast,** checked by `web/src/contrast.test.ts` from the tokens in `index.css`:
   - text at 4.5:1 on every surface it sits on: the page, an interval row, a picked card;
   - chart and lane marks at 3:1 on the page, a picked card and a row. The frame's hatch and grid lines are exempt: the forecast zone's name and the value ticks say the same in text;
-  - no check between marks that meet: they differ by colour, with no shape cues (owner's choice, 2026-10-30).
+  - every token a grey;
+  - no check between marks that meet: they differ by shade, and no state rests on a shade alone.
 - **Fonts, all OFL and self-hosted:**
   - DotGothic16 for the wordmark;
   - Jacquard 24 for the giant numbers and section titles;
@@ -355,12 +359,12 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   Use ASCII "-" for negative numbers, because Press Start 2P has no U+2212. The original dos-age fonts have no licence and must not be used.
 - **Charts are custom canvas components,** not Recharts.
   - Draw at 2 CSS px per art pixel with `image-rendering: pixelated`, and Bresenham lines.
-  - Daily values: a gold line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
-  - The 7-day average: a label-grey line that stops at the origin.
-  - The forecast side: the most likely of the model's paths, a pale gold line from the last daily value, with no label at its end, on the panel and on the cards' mini charts alike; the bands keep theirs. Played, the panel draws the others in its place.
-  - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart.
-  - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in muted gold with solid edges.
-  - The forecast zone: diagonal hatch. The origin: dotted blue line.
+  - Daily values: a white line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
+  - The 7-day average: a dim grey line that stops at the origin.
+  - The forecast side: the most likely of the model's paths, a grey line (the muted text's) from the last daily value, clearly apart from the history's white, with no label at its end, on the panel and on the cards' mini charts alike; the bands keep theirs. Played, the panel draws the others in its place.
+  - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart. Its last day, once known, is a hollow 3x3 ring, apart by shape from the daily values' filled square at the origin.
+  - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in the dim grey with solid edges.
+  - The forecast zone: diagonal hatch. The origin: dotted light grey line.
   - Labels are real text over the canvas.
   - The scale fits every daily value shown, so the main line is never clipped. The panel's also fits the published levels nearest 5% and 95%, and holds still as the paths turn. A path past them, about a day in ten, runs along the frame: fitting q0.01 to q0.99 squashed Hormuz's 0 to 8 ships into a fifth of the chart.
 - **Copy** that prevents the known misreadings (a range read as a high and a low, a median read as a promise), checked by a text lint in `web/src/App.test.tsx`:
@@ -371,7 +375,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - never "will" and never "% confidence";
   - when the catalog's `generated_at` is more than 2 days old, the hero says "Site last updated {date}: the daily update may have stopped", computed in the browser.
 - **Other primitives:**
-  - the sun is a canvas (Bayer glow, dashed ring);
+  - the hero's art is one canvas the size of the hero (`Messenger`): the engraving ships as `web/src/assets/mercury.png`, the study's crop box-averaged to 360 x 760, 4x4 Bayer dithered between 28% and 82% luminance and cut to its niche (38 KB, three colours), drawn at its own size when he stands beside the text and dithered again at any smaller one, in the tokens' white and ground;
   - the icons are 8x12 pictograms knocked out of a solid block;
   - frames are 2 px with chipped corners;
   - buttons are flat blocks with two-line labels that turn white on hover.
@@ -405,7 +409,7 @@ pipeline/                 Python project (uv)
   tests/
 web/                      Vite + React + TypeScript + Tailwind + shadcn (static build)
   src/components/ui/      shadcn components
-  src/components/         Sun, Wordmark, ForecastPanel, PixelForecastChart, ReplaySlider, Intervals, SignalCard, Record
+  src/components/         Messenger, Wordmark, ForecastPanel, PixelForecastChart, ReplaySlider, Intervals, SignalCard, Record
   src/lib/                api client, formatting, dither and scale helpers
 api/                      openapi.json + schemas (source of truth)
 .github/workflows/        daily.yml, ci.yml, scout.yml

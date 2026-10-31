@@ -7,10 +7,6 @@ const baselines: Record<string, string> = {
   snaive7: "same weekday a week back",
   mean28: "28-day mean",
 }
-const verdictColour: Record<string, string> = {
-  beats: "text-inside",
-  loses: "text-destructive",
-}
 const percent = (share: number) => Math.round(share * 100)
 const ratio = (value: number | null) =>
   value === null ? "-" : value.toFixed(2)
@@ -76,11 +72,8 @@ export function ScoreTable({
                       "-"
                     ) : (
                       <>
-                        <span className={verdictColour[versus.verdict]}>
-                          {versus.verdict}
-                        </span>{" "}
-                        {ratio(versus.ratio)} ({ratio(versus.ci[0])}-
-                        {ratio(versus.ci[1])})
+                        {versus.verdict} {ratio(versus.ratio)} (
+                        {ratio(versus.ci[0])}-{ratio(versus.ci[1])})
                       </>
                     )}
                   </td>

@@ -231,18 +231,18 @@ it("calls a past live forecast a forecast, not a backtest", () => {
   expect(source()).toBe(`Source: ${latest.attribution}`)
 })
 
-it("puts the data date in the caution colour, and says so, while the series is stale", async () => {
+it("marks the data date as a caution, and says so, while the series is stale", async () => {
   const dataTo = () => screen.getByText(/^data to/)
   render(<ForecastPanel series={gpr} />)
   expect(dataTo().textContent).toBe("data to Oct 26")
-  expect(dataTo().className).not.toContain("text-destructive")
+  expect(dataTo().className).not.toContain("caution")
   cleanup()
 
   // A run that skipped GPR keeps its last files and dates the staleness in the catalog.
   const stale = { ...entry("gpr_daily"), stale_since: "2026-11-04" }
   render(<ForecastPanel series={await loadSeries(stale, { replay: true })} />)
   expect(dataTo().textContent).toBe("data to Oct 26, stale since Nov 04")
-  expect(dataTo().className).toContain("text-destructive")
+  expect(dataTo().className).toContain("caution")
 })
 
 it("shows the catalog's note on the data, when it has one", async () => {

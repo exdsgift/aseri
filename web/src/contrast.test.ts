@@ -36,32 +36,21 @@ const on = (colors: string[], surfaces: string[]) =>
 describe("text", () => {
   // Each text colour on each surface it is drawn on.
   it.each([
-    // The page, the panel and the chart's labels.
+    // The page, the panel, the hero and the chart's labels.
     ...on(
       [
         "--foreground",
         "--muted-foreground",
         "--primary",
-        "--gold-pale",
-        "--key",
         "--secondary",
         "--destructive",
-        "--inside",
-        "--focus",
         "--white",
       ],
       ["--background"]
     ),
-    // An interval row.
+    // An interval row, and the record's backtest.
     ...on(
-      [
-        "--foreground",
-        "--muted-foreground",
-        "--primary",
-        "--gold-pale",
-        "--destructive",
-        "--inside",
-      ],
+      ["--foreground", "--muted-foreground", "--primary", "--secondary"],
       ["--muted"]
     ),
     // A picked card.
@@ -70,13 +59,12 @@ describe("text", () => {
         "--foreground",
         "--muted-foreground",
         "--primary",
-        "--gold-pale",
-        "--key",
+        "--secondary",
         "--destructive",
       ],
       ["--accent"]
     ),
-    // Back to today.
+    // Back to today, and the panel's controls.
     ["--background", "--secondary"],
   ])("%s on %s reads at 4.5:1", (color, surface) => {
     expect(contrast(color, surface)).toBeGreaterThanOrEqual(4.5)
@@ -93,15 +81,25 @@ describe("marks", () => {
   it.each([
     // The panel's chart, and a card's chart once the card is picked.
     ...on(chart, ["--background", "--accent"]),
-    // The interval lanes on their rows: the bands, the median, the baseline, the day the
-    // forecast was made, that day's value and what happened.
+    // The interval lanes on their rows: the bands, the most likely value, the baseline and
+    // the day the forecast was made, that day's value and what happened. The record's
+    // squares, filled or hollow, on a card and in its backtest.
     ...on(
-      ["--secondary", "--gold-pale", "--focus", "--primary", "--white"],
+      ["--dim", "--muted-foreground", "--secondary", "--primary", "--white"],
       ["--muted"]
     ),
   ])("%s on %s stands out at 3:1", (mark, surface) => {
     expect(contrast(mark, surface)).toBeGreaterThanOrEqual(3)
   })
 
-  // No check between paired marks, at 3:1 or by shape: the owner chose no shape cues (#143).
+  // No check between marks that meet: they differ by shade, and a state never rests on it
+  // alone (#148): the record's squares are filled or hollow, a caution has its marker.
+})
+
+it("leaves no gold and no navy: every token is a grey", () => {
+  for (const [name, value] of Object.entries(tokens)) {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(value.slice(i, i + 2), 16))
+    // A warm paper white at most: 16 levels between the channels.
+    expect(Math.max(r, g, b) - Math.min(r, g, b), name).toBeLessThanOrEqual(16)
+  }
 })

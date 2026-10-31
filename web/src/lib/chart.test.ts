@@ -41,12 +41,12 @@ describe("paintChart", () => {
     backtest: false,
   }
   const colors = {
-    gold: "gold",
-    pale: "pale",
-    muted: "muted",
+    daily: "daily",
+    path: "path",
+    average: "average",
+    band: "band",
     frame: "frame",
-    focus: "focus",
-    label: "label",
+    origin: "origin",
     real: "real",
   }
   const chart = chartLayout(forecast, 692)
@@ -70,41 +70,41 @@ describe("paintChart", () => {
 
   it("starts the possible path on the point it marks as now: the last daily value, the quantity forecast", () => {
     expect(forecast.averages[chart.origin]).toBeGreaterThan(145)
-    expect(seen.get(`${now.x},${now.y}`)).toBe("gold")
-    const start = calls.find(({ color }) => color === "pale")
+    expect(seen.get(`${now.x},${now.y}`)).toBe("daily")
+    const start = calls.find(({ color }) => color === "path")
     expect(start).toMatchObject(now)
     // The history's main line runs through every daily value it shows.
     for (let day = chart.first; day <= chart.origin; day++)
       expect(calls).toContainEqual({
         x: chart.x(day),
         y: chart.y(values[day]),
-        color: "gold",
+        color: "daily",
       })
   })
 
-  it("draws the possible path through every day ahead, in pale gold", () => {
+  it("draws the possible path through every day ahead, in a grey apart from the daily values' white", () => {
     for (let day = 1; day <= 28; day++)
       expect(calls).toContainEqual({
         x: chart.x(chart.origin + day),
         y: chart.y(185),
-        color: "pale",
+        color: "path",
       })
-    // No most likely line and no mark at its end: past the first day, only the path is pale.
+    // No most likely line and no mark at its end: past the first day, only the path is in its grey.
     const ahead = calls.filter(
-      ({ x, color }) => color === "pale" && x > chart.x(chart.origin + 1)
+      ({ x, color }) => color === "path" && x > chart.x(chart.origin + 1)
     )
     expect(new Set(ahead.map(({ y }) => y))).toEqual(new Set([chart.y(185)]))
   })
 
   it("draws the same bands whatever path it draws", () => {
     const bands = (drawn: typeof calls) =>
-      drawn.filter(({ color }) => color === "muted")
+      drawn.filter(({ color }) => color === "band")
     const low = [values[chart.origin], ...Array(28).fill(125)]
     expect(bands(calls)).toEqual(bands(paint(low)))
   })
 
   it("starts the bands on the first day ahead, never pinched to the last value", () => {
-    const band = calls.filter(({ color }) => color === "muted")
+    const band = calls.filter(({ color }) => color === "band")
     const firstDay = chart.x(chart.origin + 1)
     expect(Math.min(...band.map(({ x }) => x))).toBe(firstDay)
     // The 8-in-10 range of that day, edge to edge.
@@ -112,16 +112,37 @@ describe("paintChart", () => {
       expect(band).toContainEqual({
         x: firstDay,
         y: chart.y(value),
-        color: "muted",
+        color: "band",
       })
   })
 
+  it("ends what happened on a hollow ring, apart by shape from the daily value's filled square", () => {
+    const happened = { ...forecast, actuals: Array(28).fill(150) }
+    const seen = new Map<string, string>()
+    paintChart(
+      (x, y, color) => seen.set(`${x},${y}`, color),
+      chart,
+      happened,
+      colors,
+      path
+    )
+    const end = { x: chart.right, y: chart.y(150) }
+    for (let dx = -1; dx <= 1; dx++)
+      for (let dy = -1; dy <= 1; dy++)
+        expect(seen.get(`${end.x + dx},${end.y + dy}`) === "real").toBe(
+          dx !== 0 || dy !== 0
+        )
+    for (let dx = -1; dx <= 1; dx++)
+      for (let dy = -1; dy <= 1; dy++)
+        expect(seen.get(`${now.x + dx},${now.y + dy}`)).toBe("daily")
+  })
+
   it("keeps the 7-day average as a dimmer line that stops at the origin", () => {
-    const average = calls.filter(({ color }) => color === "label")
+    const average = calls.filter(({ color }) => color === "average")
     expect(average).toContainEqual({
       x: now.x,
       y: chart.y(forecast.averages[chart.origin]),
-      color: "label",
+      color: "average",
     })
     expect(Math.max(...average.map(({ x }) => x))).toBe(now.x)
   })
@@ -230,12 +251,12 @@ describe("miniChartLayout", () => {
     }
   }
   const colors = {
-    gold: "gold",
-    pale: "pale",
-    muted: "muted",
+    daily: "daily",
+    path: "path",
+    average: "average",
+    band: "band",
     frame: "frame",
-    focus: "focus",
-    label: "label",
+    origin: "origin",
     real: "real",
   }
 
@@ -261,18 +282,18 @@ describe("miniChartLayout", () => {
     expect(Math.max(...ys)).toBe(31)
     // Like the panel's chart, the forecast starts on the last daily value, its main mark.
     const now = { x: chart.x(chart.origin), y: chart.y(shown.values[399]) }
-    expect(calls.find(({ color }) => color === "pale")).toMatchObject(now)
+    expect(calls.find(({ color }) => color === "path")).toMatchObject(now)
     // As on the panel, the path it is given, with no mark at its end.
     for (let day = 1; day <= 28; day++)
       expect(calls).toContainEqual({
         x: chart.x(chart.origin + day),
         y: chart.y(38),
-        color: "pale",
+        color: "path",
       })
     expect(calls).not.toContainEqual({
       x: chart.right + 1,
       y: chart.y(38) + 1,
-      color: "pale",
+      color: "path",
     })
   })
 
@@ -342,12 +363,12 @@ describe("a day with no value", () => {
       chart,
       forecast,
       {
-        gold: "gold",
-        pale: "pale",
-        muted: "muted",
+        daily: "daily",
+        path: "path",
+        average: "average",
+        band: "band",
         frame: "frame",
-        focus: "focus",
-        label: "label",
+        origin: "origin",
         real: "real",
       },
       Array(8).fill(1500)

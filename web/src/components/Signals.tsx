@@ -78,7 +78,9 @@ export function Signals({
       </div>
       {drawn.map((group) => (
         <div key={group.name} className="flex flex-col gap-2.5">
-          <h3 className="text-[8px]/[12px] text-key uppercase">{group.name}</h3>
+          <h3 className="text-[8px]/[12px] text-secondary uppercase">
+            {group.name}
+          </h3>
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(232px,1fr))] gap-2">
             {group.cards.map(({ series, icon, hint }) => (
               <li key={series.id} className="flex">

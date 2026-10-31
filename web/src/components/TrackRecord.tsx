@@ -94,7 +94,7 @@ function RecordCard({
 
   return (
     <li className="flex flex-col gap-3 border-2 border-border px-2.5 pt-2 pb-2.5 text-[8px]/[12px] uppercase chip">
-      <h3 className="text-key">{entry.title}</h3>
+      <h3 className="text-secondary">{entry.title}</h3>
       {record.n >= needed ? (
         <>
           <p>
@@ -115,7 +115,7 @@ function RecordCard({
             aria-labelledby={backtest}
             className="flex flex-col gap-2 bg-muted px-2 py-1.5"
           >
-            <p id={backtest} className="text-key">
+            <p id={backtest} className="text-secondary">
               Backtest, not the live record
             </p>
             {squares(retrospective)}

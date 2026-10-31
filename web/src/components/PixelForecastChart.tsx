@@ -248,7 +248,9 @@ function ChartLabels({
           x={tick.x}
           top={(bottom + 3) * pixel}
           align={tick.align}
-          className={tick.date === forecast.dates[origin] ? "text-focus" : ""}
+          className={
+            tick.date === forecast.dates[origin] ? "text-secondary" : ""
+          }
         >
           {monthDay(tick.date)}
         </Label>
@@ -306,7 +308,7 @@ function DayTip({
     >
       {step < 0 ? (
         <>
-          <span className="block text-key">
+          <span className="block text-secondary">
             {monthDay(forecast.dates[day])}
           </span>
           <span className="block">
@@ -318,7 +320,7 @@ function DayTip({
         </>
       ) : (
         <>
-          <span className="block text-key">
+          <span className="block text-secondary">
             {monthDay(forecast.targetDates[step])}
           </span>
           <span className="block">
