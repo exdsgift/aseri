@@ -367,7 +367,9 @@ it("labels the drones as one side's claims wherever their unit shows", async () 
     /^drones a day, claimed by Ukraine's General Staff, one side's figures · data to /
   )
   expect(source()).toBe(`Source: ${dronesLatest.attribution}`)
-  expect(source()).toMatch(/claimed by Ukraine's General Staff, one side's figures/)
+  expect(source()).toMatch(
+    /claimed by Ukraine's General Staff, one side's figures/
+  )
   expect(screen.getByText(/^The 8 in 10 band/).textContent).not.toMatch(
     /weekday/
   )
