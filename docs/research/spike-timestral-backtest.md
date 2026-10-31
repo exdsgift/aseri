@@ -1,6 +1,8 @@
 # Spike: how far ahead does Timestral forecast our series usefully?
 
 > **Correction, 2026-10-30.** Read the GPR scores as an upper bound. Inputs and actuals came from a revised vintage (GPR revises its last 30 days by a median of 7.6 to 9.2%), and the bootstrap ignored overlapping origins. See [Best practice previsioni probabilistiche](reports/Best%20practice%20previsioni%20probabilistiche.md) and issue #145 for the real-time rebuild.
+>
+> **Measured, 2026-10-31: the GPR scores below are an upper bound.** Rebuilt in real time from the authors' 295 archived vintages, on 232 weekly origins, the production model's WIS is 10.6% higher at 1-7 days [7.2%, 14.0%] and 6.5% higher at 8-28 days [3.5%, 9.3%] than on the latest vintage, and its 80% band holds about 2 points fewer days. Timestral still beats every baseline in real time. See [gpr-realtime-backtest.md](gpr-realtime-backtest.md).
 
 Run on 2026-10-29. Prototype and rerun commands: `prototypes/timestral-backtest/` (see its README). Model background: [timestral-model.md](timestral-model.md). Data sources: [data-sources.md](data-sources.md).
 
@@ -72,6 +74,8 @@ How to read the tables:
 - The second table per series is the slice of recent origins: see [Leakage caveat](#leakage-caveat).
 
 ### GPR daily (GPRD)
+
+**Upper bound.** These tables use the latest vintage for both the context and the actuals. The real-time rebuild is about 10% worse in WIS at a week and 6% beyond: [gpr-realtime-backtest.md](gpr-realtime-backtest.md).
 
 Origins: context ends 2025-10-27 to 2026-10-19, history 15274 days, scale (mean |y_t - y_t-7|) at the last origin 32.63
 
