@@ -61,7 +61,7 @@ export function ReplaySlider({
           {Array.from({ length: Math.floor(last / 7) + 1 }, (_, week) => (
             <i
               key={week}
-              className={`absolute top-1/2 -mt-0.5 -ml-0.5 size-1 ${last - 7 * week <= shown ? "bg-muted-foreground" : "bg-border"}`}
+              className={`absolute top-1/2 -mt-0.5 -ml-0.5 size-1 ${last - 7 * week <= shown ? "bg-muted-foreground" : "bg-dim"}`}
               style={{ left: at(last - 7 * week) }}
             />
           ))}

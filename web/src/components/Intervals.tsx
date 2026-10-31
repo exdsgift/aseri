@@ -54,7 +54,7 @@ export function Intervals({
   )
   const lane = (marks: ReactNode) => (
     <div aria-hidden className="relative h-4">
-      <i className="absolute top-[7px] h-0.5 bg-border" style={span(year)} />
+      <i className="absolute top-[7px] h-0.5 bg-dim" style={span(year)} />
       {year[0] < scale.lo && runsOn("low")}
       {year[1] > scale.hi && runsOn("high")}
       <i className={`${mark} bg-secondary`} style={{ left: at(baseline) }} />
@@ -137,7 +137,7 @@ export function Intervals({
                   style={span(row.fiveInTen)}
                 />
                 <i
-                  className={`${mark} bg-muted-foreground`}
+                  className={`${mark} bg-forecast`}
                   style={{ left: at(row.mostLikely) }}
                 />
                 {row.real !== undefined && (

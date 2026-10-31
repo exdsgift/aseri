@@ -168,11 +168,11 @@ export type Layout = ReturnType<typeof layout>
 type Plot = (x: number, y: number, color: string) => void
 type Point = [number, number]
 
-// The page's token behind each mark of the chart, in black and white: the daily values white,
-// the model's path a grey apart from them, the 7-day average and the bands dim.
+// The page's token behind each mark of the chart: the real values white, the model's path
+// in the one gold accent, the 7-day average and the bands dim.
 export const chartTokens = {
   daily: "--primary",
-  path: "--muted-foreground",
+  path: "--forecast",
   average: "--dim",
   band: "--dim",
   frame: "--border",
@@ -184,8 +184,8 @@ export type Colors = Record<keyof typeof chartTokens, string>
 // The thresholds of a 4x4 Bayer matrix, the dither of the bands.
 export const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
 
-// Bresenham through each point in turn: lines stay one art pixel thick, with no smoothing.
-function polyline(plot: Plot, points: Point[], color: string) {
+// Bresenham through each point in turn, `weight` art pixels heavy, with no smoothing.
+function polyline(plot: Plot, points: Point[], color: string, weight = 1) {
   for (let i = 1; i < points.length; i++) {
     let [x0, y0] = points[i - 1]
     const [x1, y1] = points[i]
@@ -193,7 +193,7 @@ function polyline(plot: Plot, points: Point[], color: string) {
     const dy = -Math.abs(y1 - y0)
     let error = dx + dy
     for (;;) {
-      plot(x0, y0, color)
+      square(plot, x0, y0, weight, color)
       if (x0 === x1 && y0 === y1) break
       const twice = 2 * error
       if (twice >= dy) {
@@ -240,6 +240,56 @@ export function paintChart(
       if ((px + py) % 4 === 0) plot(px, py, color.frame)
   for (const tick of valueTicks(chart.lo, chart.hi))
     for (let px = left; px <= right; px += 2) plot(px, y(tick), color.frame)
+  for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
+  for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
+
+  // The lines and marks, laid out first so that the bands can keep clear of them.
+  const marks: [number, number, string][] = []
+  const mark: Plot = (px, py, markColor) => void marks.push([px, py, markColor])
+  polyline(
+    mark,
+    path.map((value, k): Point => [x(origin + k), y(value)]),
+    color.path
+  )
+  // The 7-day average, dimmer: context only, since the forecast is of the daily value.
+  polyline(
+    mark,
+    averages
+      .slice(first)
+      .map((average, i): Point => [x(first + i), y(average)]),
+    color.average
+  )
+  // The daily values, the quantity forecast, so the forecast carries on from where they end.
+  // Twice the path's weight: the real values stand apart from it by weight as well as tint.
+  polyline(
+    mark,
+    values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
+    color.daily,
+    2
+  )
+  // What happened after the forecast was made, in white over the bands,
+  // as dots 2 art pixels wide when the days are far enough apart. Once the forecast's last
+  // day is known, a hollow ring marks it instead: in one white, a filled square
+  // would read as the daily values' mark at the origin.
+  const dot = (right - left) / chart.span >= 3 ? 2 : 1
+  // A day with no value (the drones' day without a report) has no dot.
+  const end = actuals[chart.ahead - 1]
+  const ended = actuals.length === chart.ahead && end !== null
+  actuals.forEach((value, k) => {
+    if (value !== null && (!ended || k < chart.ahead - 1))
+      square(mark, x(origin + 1 + k), y(value), dot, color.real)
+  })
+  square(mark, xo - 1, y(last) - 1, 3, color.daily)
+  if (ended) ring(mark, right - 1, y(end!) - 1, color.real)
+  // An art pixel of the ground round every mark: over the 50% band, the gold path would
+  // average 2.2:1, and beside each band pixel it is 1.35:1.
+  const keyline = new Set(
+    marks.flatMap(([px, py]) =>
+      [-1, 0, 1].flatMap((dx) =>
+        [-1, 0, 1].map((dy) => `${px + dx},${py + dy}`)
+      )
+    )
+  )
 
   // The bands, column by column: 5 in 10 at 50% of the dither, 8 in 10 at 25%, with solid edges.
   // From the first day ahead: the last value may still be revised, so no width-zero pinch.
@@ -251,48 +301,13 @@ export function paintChart(
     for (let py = y90; py <= y10; py++) {
       const inner = py >= y75 && py <= y25
       if (
-        py === y90 ||
-        py === y10 ||
-        bayer[(py % 4) * 4 + (px % 4)] < (inner ? 8 : 4)
+        (py === y90 ||
+          py === y10 ||
+          bayer[(py % 4) * 4 + (px % 4)] < (inner ? 8 : 4)) &&
+        !keyline.has(`${px},${py}`)
       )
         plot(px, py, color.band)
     }
   }
-  polyline(
-    plot,
-    path.map((value, k): Point => [x(origin + k), y(value)]),
-    color.path
-  )
-
-  // The 7-day average, dimmer: context only, since the forecast is of the daily value.
-  polyline(
-    plot,
-    averages
-      .slice(first)
-      .map((average, i): Point => [x(first + i), y(average)]),
-    color.average
-  )
-  // The daily values, the quantity forecast, so the forecast carries on from where they end.
-  polyline(
-    plot,
-    values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
-    color.daily
-  )
-  // What happened after the forecast was made, in white over the bands,
-  // as dots 2 art pixels wide when the days are far enough apart. Once the forecast's last
-  // day is known, a hollow ring marks it instead: in black and white, a filled square
-  // would read as the daily values' mark at the origin.
-  const dot = (right - left) / chart.span >= 3 ? 2 : 1
-  // A day with no value (the drones' day without a report) has no dot.
-  const end = actuals[chart.ahead - 1]
-  const ended = actuals.length === chart.ahead && end !== null
-  actuals.forEach((value, k) => {
-    if (value !== null && (!ended || k < chart.ahead - 1))
-      square(plot, x(origin + 1 + k), y(value), dot, color.real)
-  })
-
-  for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
-  for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
-  square(plot, xo - 1, y(last) - 1, 3, color.daily)
-  if (ended) ring(plot, right - 1, y(end!) - 1, color.real)
+  for (const [px, py, markColor] of marks) plot(px, py, markColor)
 }

@@ -1,7 +1,8 @@
 import { act, cleanup, render, screen } from "@testing-library/react"
-import { afterEach, beforeEach, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { type Today } from "@/lib/api"
+import { heroes } from "@/lib/heroes"
 
 import { Hero } from "./Hero"
 
@@ -133,155 +134,226 @@ afterEach(() => {
   delete (document as { hidden?: boolean }).hidden
 })
 
-it("draws its text over the art, which stays behind it and out of the way", () => {
-  const { container } = render(<Hero today={today} failed={false} />)
+// Each hero's art behaves alike: behind the text, in step with the number, calm behind the
+// words, paused when unseen, and still under reduced motion.
+const engravings = {
+  messenger: "mercury.png",
+  signal: "hercules.png",
+  vortex: "apollo.png",
+}
+describe.each(heroes)("%s", (hero) => {
+  it("draws its text over the art, which stays behind it and out of the way", () => {
+    const { container } = render(
+      <Hero hero={hero} today={today} failed={false} />
+    )
 
-  const art = container.querySelector("canvas")!.parentElement!
-  expect(art.getAttribute("aria-hidden")).toBe("true")
-  expect(art.className).toMatch(/\babsolute inset-0 -z-10\b/)
-  expect(art.className).toContain("pointer-events-none")
-  // Clipped to the hero, so the art never widens the page.
-  expect(art.className).toContain("overflow-hidden")
-  for (const text of [
-    screen.getByRole("heading", { level: 1 }),
-    screen.getByText("181"),
-    screen.getByText(/^Monday Nov 23/),
-  ])
-    expect(art.contains(text)).toBe(false)
-})
-
-it("counts the number up over its real value, which is the text all along", () => {
-  const { container } = render(<Hero today={today} failed={false} />)
-
-  const number = screen.getByText("181")
-  expect(number.dataset.count).toBe("0")
-  advance(300)
-  expect(Number(number.dataset.count)).toBeGreaterThan(0)
-  expect(number.textContent).toBe("181")
-  advance(1000)
-  expect(number.dataset.count).toBeUndefined()
-  expect(number.textContent).toBe("181")
-  expect(frames.size).toBe(0)
-  // The art keeps moving, out of the screen reader's way.
-  const before = drawn()
-  vi.advanceTimersByTime(100)
-  expect(drawn()).toBeGreaterThan(before)
-  expect(
-    container.querySelector("canvas")!.closest("[aria-hidden]")
-  ).not.toBeNull()
-})
-
-it("marks the baseline with dashed rays once today's value is in, and draws no rays before", () => {
-  prefers(true)
-  render(<Hero failed={false} />)
-  expect(drawn()).toBeGreaterThan(0)
-  expect(canvas.setLineDash).toBeUndefined()
-  cleanup()
-
-  render(<Hero today={today} failed={false} />)
-  expect(canvas.setLineDash).toHaveBeenCalledWith([3, 5])
-})
-
-it("stops the art while the tab is hidden, and starts it again on return", () => {
-  render(<Hero today={today} failed={false} />)
-  const hide = (hidden: boolean) => {
-    Object.defineProperty(document, "hidden", {
-      configurable: true,
-      value: hidden,
-    })
-    document.dispatchEvent(new Event("visibilitychange"))
-  }
-
-  hide(true)
-  const before = drawn()
-  vi.advanceTimersByTime(2600)
-  expect(drawn()).toBe(before)
-  hide(false)
-  vi.advanceTimersByTime(100)
-  expect(drawn()).toBeGreaterThan(before)
-})
-
-it("stops the art while the hero is scrolled off screen", () => {
-  render(<Hero today={today} failed={false} />)
-
-  onScreen(false)
-  const before = drawn()
-  vi.advanceTimersByTime(2600)
-  expect(drawn()).toBe(before)
-  onScreen(true)
-  vi.advanceTimersByTime(100)
-  expect(drawn()).toBeGreaterThan(before)
-})
-
-it("draws smoothly while the art arrives, then once every 200 ms: what moves after is slow", () => {
-  render(<Hero today={today} failed={false} />)
-
-  const start = drawn()
-  vi.advanceTimersByTime(500)
-  expect(drawn() - start).toBeGreaterThanOrEqual(12)
-  vi.advanceTimersByTime(1000)
-  const settled = drawn()
-  vi.advanceTimersByTime(1000)
-  expect(drawn() - settled).toBe(5)
-})
-
-it("paints with its tokens in any CSS syntax, as the canvas reads them", () => {
-  tokens("#fff", "rgb(5 5 5)")
-  prefers(true)
-  render(<Hero today={today} failed={false} />)
-
-  expect(styles).toContainEqual(["strokeStyle", "#fff"])
-  // The veil's colour comes from a canvas painting the token, never from parsing it.
-  expect(styles).toContainEqual(["fillStyle", "rgb(5 5 5)"])
-  const veil = canvas.createImageData.mock.results.at(-1)!.value
-  const middle = 4 * (Math.floor(veil.height / 2) * veil.width + veil.width / 2)
-  expect([...veil.data.slice(middle, middle + 4)]).toEqual([1, 2, 3, 232])
-})
-
-it("sizes the veil to the text and its dithered edge, and rebuilds nothing for a resize to the same size", () => {
-  render(<Hero today={today} failed={false} />)
-
-  // The column at (124, 224), 552 x 620: a 20 x 14 px margin, then 48 px of edge, within the hero.
-  expect(canvas.createImageData).toHaveBeenLastCalledWith(688, 738)
-  expect(canvas.drawImage).toHaveBeenCalledWith(expect.anything(), 56, 162)
-  const veils = canvas.createImageData.mock.calls.length
-  act(() => resize())
-  expect(canvas.createImageData.mock.calls.length).toBe(veils)
-})
-
-it("dithers the wordmark in, then leaves it whole", () => {
-  render(<Hero failed={false} />)
-
-  const wordmark = screen.getByRole("heading", { level: 1 })
-  expect(wordmark.style.maskImage).toMatch(/^url\(/)
-  advance(300)
-  expect(wordmark.style.maskImage).toBe("")
-})
-
-it("keeps everything still when motion is reduced, with the art drawn once, whole", () => {
-  prefers(true)
-  const { container } = render(<Hero today={today} failed={false} />)
-
-  expect(screen.getByText("181").dataset.count).toBeUndefined()
-  expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
-  expect(frames.size).toBe(0)
-  expect(vi.getTimerCount()).toBe(0)
-  expect(drawn()).toBeGreaterThan(0)
-  // The rays at their full length: the baseline's dashed rays are drawn.
-  expect(canvas.setLineDash).toHaveBeenCalledWith([3, 5])
-  // Nothing moves by CSS either: the art moves only from script.
-  expect(container.querySelector("[class*=animate-]")).toBeNull()
-})
-
-it("never replays the intro when reduced motion is turned off later", () => {
-  prefers(true)
-  render(<Hero today={today} failed={false} />)
-
-  act(() => {
-    prefers(false).dispatchEvent(new Event("change"))
+    const art = container.querySelector("canvas")!.parentElement!
+    expect(art.getAttribute("aria-hidden")).toBe("true")
+    expect(art.className).toMatch(/\babsolute inset-0 -z-10\b/)
+    expect(art.className).toContain("pointer-events-none")
+    // Clipped to the hero, so the art never widens the page.
+    expect(art.className).toContain("overflow-hidden")
+    for (const text of [
+      screen.getByRole("heading", { level: 1 }),
+      screen.getByText("181"),
+      screen.getByText(/^Monday Nov 23/),
+    ])
+      expect(art.contains(text)).toBe(false)
   })
-  advance(100)
-  expect(screen.getByText("181").dataset.count).toBeUndefined()
-  expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
-  expect(frames.size).toBe(0)
+
+  it("counts the number up over its real value, which is the text all along", () => {
+    const { container } = render(
+      <Hero hero={hero} today={today} failed={false} />
+    )
+
+    const number = screen.getByText("181")
+    expect(number.dataset.count).toBe("0")
+    advance(300)
+    expect(Number(number.dataset.count)).toBeGreaterThan(0)
+    expect(number.textContent).toBe("181")
+    advance(1000)
+    expect(number.dataset.count).toBeUndefined()
+    expect(number.textContent).toBe("181")
+    expect(frames.size).toBe(0)
+    // The art keeps moving, out of the screen reader's way.
+    const before = drawn()
+    vi.advanceTimersByTime(100)
+    expect(drawn()).toBeGreaterThan(before)
+    expect(
+      container.querySelector("canvas")!.closest("[aria-hidden]")
+    ).not.toBeNull()
+  })
+
+  it("stops the art while the tab is hidden, and starts it again on return", () => {
+    render(<Hero hero={hero} today={today} failed={false} />)
+    const hide = (hidden: boolean) => {
+      Object.defineProperty(document, "hidden", {
+        configurable: true,
+        value: hidden,
+      })
+      document.dispatchEvent(new Event("visibilitychange"))
+    }
+
+    hide(true)
+    const before = drawn()
+    vi.advanceTimersByTime(2600)
+    expect(drawn()).toBe(before)
+    hide(false)
+    vi.advanceTimersByTime(100)
+    expect(drawn()).toBeGreaterThan(before)
+  })
+
+  it("stops the art while the hero is scrolled off screen", () => {
+    render(<Hero hero={hero} today={today} failed={false} />)
+
+    onScreen(false)
+    const before = drawn()
+    vi.advanceTimersByTime(2600)
+    expect(drawn()).toBe(before)
+    onScreen(true)
+    vi.advanceTimersByTime(100)
+    expect(drawn()).toBeGreaterThan(before)
+  })
+
+  it("draws smoothly while the art arrives, then once every 200 ms: what moves after is slow", () => {
+    render(<Hero hero={hero} today={today} failed={false} />)
+
+    const start = drawn()
+    vi.advanceTimersByTime(500)
+    expect(drawn() - start).toBeGreaterThanOrEqual(12)
+    vi.advanceTimersByTime(1000)
+    const settled = drawn()
+    vi.advanceTimersByTime(1000)
+    expect(drawn() - settled).toBe(5)
+  })
+
+  it("sizes the veil to the text and its dithered edge, and rebuilds nothing for a resize to the same size", () => {
+    render(<Hero hero={hero} today={today} failed={false} />)
+
+    // The column at (124, 224), 552 x 620: a 20 x 14 px margin, then 48 px of edge, within the hero.
+    expect(canvas.createImageData).toHaveBeenLastCalledWith(688, 738)
+    expect(canvas.drawImage).toHaveBeenCalledWith(expect.anything(), 56, 162)
+    const veils = canvas.createImageData.mock.calls.length
+    act(() => resize())
+    expect(canvas.createImageData.mock.calls.length).toBe(veils)
+  })
+
+  it("keeps everything still when motion is reduced, with the art drawn once, whole", () => {
+    prefers(true)
+    const { container } = render(
+      <Hero hero={hero} today={today} failed={false} />
+    )
+
+    expect(screen.getByText("181").dataset.count).toBeUndefined()
+    expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
+    expect(frames.size).toBe(0)
+    expect(vi.getTimerCount()).toBe(0)
+    expect(drawn()).toBeGreaterThan(0)
+    // Nothing moves by CSS either: the art moves only from script.
+    expect(container.querySelector("[class*=animate-]")).toBeNull()
+  })
+
+  it("loads its own engraving, and no other hero's", () => {
+    const loaded: string[] = []
+    vi.stubGlobal(
+      "Image",
+      class {
+        set src(url: string) {
+          loaded.push(url)
+        }
+      }
+    )
+    render(<Hero hero={hero} today={today} failed={false} />)
+
+    expect(loaded).toEqual([expect.stringContaining(engravings[hero])])
+  })
+})
+
+describe("messenger", () => {
+  const hero = "messenger"
+
+  it("marks the baseline with dashed rays once today's value is in, and draws no rays before", () => {
+    prefers(true)
+    render(<Hero hero={hero} failed={false} />)
+    expect(drawn()).toBeGreaterThan(0)
+    expect(canvas.setLineDash).toBeUndefined()
+    cleanup()
+
+    render(<Hero hero={hero} today={today} failed={false} />)
+    expect(canvas.setLineDash).toHaveBeenCalledWith([3, 5])
+  })
+
+  it("paints with its tokens in any CSS syntax, as the canvas reads them", () => {
+    tokens("#fff", "rgb(5 5 5)")
+    prefers(true)
+    render(<Hero hero={hero} today={today} failed={false} />)
+
+    expect(styles).toContainEqual(["strokeStyle", "#fff"])
+    // The veil's colour comes from a canvas painting the token, never from parsing it.
+    expect(styles).toContainEqual(["fillStyle", "rgb(5 5 5)"])
+    const veil = canvas.createImageData.mock.results.at(-1)!.value
+    const middle =
+      4 * (Math.floor(veil.height / 2) * veil.width + veil.width / 2)
+    expect([...veil.data.slice(middle, middle + 4)]).toEqual([1, 2, 3, 232])
+  })
+
+  it("dithers the wordmark in, then leaves it whole", () => {
+    render(<Hero hero={hero} failed={false} />)
+
+    const wordmark = screen.getByRole("heading", { level: 1 })
+    expect(wordmark.style.maskImage).toMatch(/^url\(/)
+    advance(300)
+    expect(wordmark.style.maskImage).toBe("")
+  })
+
+  it("never replays the intro when reduced motion is turned off later", () => {
+    prefers(true)
+    render(<Hero hero={hero} today={today} failed={false} />)
+
+    act(() => {
+      prefers(false).dispatchEvent(new Event("change"))
+    })
+    advance(100)
+    expect(screen.getByText("181").dataset.count).toBeUndefined()
+    expect(screen.getByRole("heading", { level: 1 }).style.maskImage).toBe("")
+    expect(frames.size).toBe(0)
+  })
+})
+
+describe("signal", () => {
+  const hero = "signal"
+
+  it("frames the baseline small and dotted, and the value large and dashed, each labelled", () => {
+    prefers(true)
+    render(<Hero hero={hero} failed={false} />)
+    expect(canvas.strokeRect).toBeUndefined()
+    cleanup()
+
+    render(<Hero hero={hero} today={today} failed={false} />)
+    expect(canvas.setLineDash).toHaveBeenCalledWith([6, 4])
+    expect(canvas.setLineDash).toHaveBeenCalledWith([2, 3])
+    // Each frame is stroked twice: a band of the ground under the dotted line.
+    const [value, , baseline] = canvas.strokeRect.mock.calls.map(
+      (call) => call[2]
+    )
+    expect(value / baseline).toBeCloseTo(1.81, 1)
+    const labels = canvas.fillText.mock.calls.map((call) => call[0])
+    expect(labels).toEqual(["181", "100"])
+  })
+})
+
+describe("vortex", () => {
+  const hero = "vortex"
+
+  it("turns a solid arm out to the value, and labels it and the baseline's tick", () => {
+    prefers(true)
+    render(<Hero hero={hero} failed={false} />)
+    expect(canvas.fillText).toBeUndefined()
+    cleanup()
+
+    render(<Hero hero={hero} today={today} failed={false} />)
+    expect(canvas.setLineDash).toHaveBeenCalledWith([4, 4])
+    const labels = canvas.fillText.mock.calls.map((call) => call[0])
+    expect(labels.toSorted()).toEqual(["100", "181"])
+  })
 })

@@ -16,7 +16,7 @@ const legend = (line: string) => [
   ["What happened", "size-1 bg-white"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
-  [line, "h-0.5 w-4 bg-muted-foreground"],
+  [line, "h-0.5 w-4 bg-forecast"],
   ["Forecast made", "h-3 border-l-2 border-dotted border-secondary"],
 ]
 

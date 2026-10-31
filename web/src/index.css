@@ -145,6 +145,8 @@
   --font-display: "Jacquard 24", serif;
   --font-wordmark: "DotGothic16", sans-serif;
   --color-dim: var(--dim);
+  --color-white: var(--white);
+  --color-forecast: var(--forecast);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -185,45 +187,48 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Dark only: the spec 6.9 tokens, black and white as the hero's engraving. A state never
-   rests on a shade: it has a shape or a marker, and words. */
+/* The spec 6.9 tokens, option 1 of the colour study (docs/research/reports/Bianchi su blu
+   elettrico.md): two whites for text, two steps of the same white for the chart's marks, all
+   on the line from the electric blue ground to white, and one gold accent for the model.
+   A state never rests on a shade: it has a shape or a marker, and words. */
 :root {
   color-scheme: dark;
   --radius: 0;
-  --background: #050505; /* ground */
-  --foreground: #cfcac0; /* text */
-  --card: #050505;
-  --card-foreground: #cfcac0;
-  --popover: #050505;
-  --popover-foreground: #cfcac0;
-  --primary: #f2efe8; /* white: titles, the numbers, the daily values, the art */
-  --primary-foreground: #050505;
-  --secondary: #cfcac0; /* secondary text, the origin and the baseline, the controls */
-  --secondary-foreground: #050505;
-  --muted: #1a1917; /* row */
-  --muted-foreground: #a5a19a; /* label, and the model's path */
-  --accent: #24221f; /* picked */
-  --accent-foreground: #f2efe8;
-  --destructive: #f2efe8; /* caution, with its marker */
-  --border: #34322e; /* frame */
-  --input: #34322e;
-  --ring: #f2efe8;
-  --chart-1: #f2efe8;
-  --chart-2: #cfcac0;
-  --chart-3: #a5a19a;
-  --chart-4: #726e68;
-  --chart-5: #34322e;
-  --sidebar: #050505;
-  --sidebar-foreground: #a5a19a;
-  --sidebar-primary: #f2efe8;
-  --sidebar-primary-foreground: #050505;
-  --sidebar-accent: #24221f;
-  --sidebar-accent-foreground: #f2efe8;
-  --sidebar-border: #34322e;
-  --sidebar-ring: #f2efe8;
+  --background: #1b1bf2; /* ground */
+  --foreground: #ffffff; /* text */
+  --card: #1b1bf2;
+  --card-foreground: #ffffff;
+  --popover: #1b1bf2;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff; /* white: titles, the numbers, the daily values, the art */
+  --primary-foreground: #1b1bf2;
+  --secondary: #dbdbfd; /* secondary text, the origin and the baseline, the controls */
+  --secondary-foreground: #1b1bf2;
+  --muted: #1818d6; /* row, darker than the ground */
+  --muted-foreground: #dbdbfd; /* label */
+  --accent: #1616c3; /* picked, darker still */
+  --accent-foreground: #ffffff;
+  --destructive: #ffffff; /* caution, with its marker */
+  --border: #5454f5; /* frame: decoration only */
+  --input: #5454f5;
+  --ring: #ffffff;
+  --chart-1: #ffffff;
+  --chart-2: #dbdbfd;
+  --chart-3: #ffc94a;
+  --chart-4: #adadfa;
+  --chart-5: #5454f5;
+  --sidebar: #1b1bf2;
+  --sidebar-foreground: #dbdbfd;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #1b1bf2;
+  --sidebar-accent: #1616c3;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #5454f5;
+  --sidebar-ring: #ffffff;
   /* The tokens shadcn has no variable for. */
-  --dim: #726e68; /* the chart's dim marks: the 7-day average and the bands */
-  --white: #ffffff; /* what happened */
+  --dim: #adadfa; /* the chart's dim marks: the 7-day average and the bands */
+  --white: #ffffff; /* what happened, a hovered control */
+  --forecast: #ffc94a; /* the one accent: the model's path and its marks */
 }
 
 @layer base {

@@ -62,7 +62,7 @@ export function SideNav({ sections }: { sections: Section[] }) {
           href={`#${id}`}
           aria-current={id === lit ? "location" : undefined}
           aria-keyshortcuts={shortcut}
-          className="flex items-center gap-3 border-r-2 border-transparent pr-2 text-[8px]/[12px] text-secondary uppercase opacity-58 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary aria-[current=location]:border-primary aria-[current=location]:opacity-100 motion-safe:transition-opacity motion-safe:duration-160"
+          className="flex items-center gap-3 border-r-2 border-transparent pr-2 text-[8px]/[12px] text-secondary uppercase opacity-82 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary aria-[current=location]:border-primary aria-[current=location]:opacity-100 motion-safe:transition-opacity motion-safe:duration-160"
         >
           <span className="text-primary">
             <Pictogram name={icon} />

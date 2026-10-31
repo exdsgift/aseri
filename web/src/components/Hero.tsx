@@ -1,6 +1,9 @@
 import { useMemo, useRef } from "react"
 
-import { Messenger } from "@/components/Messenger"
+import { HeroArt } from "@/components/HeroArt"
+import { messenger } from "@/components/Messenger"
+import { signal } from "@/components/Signal"
+import { vortex } from "@/components/Vortex"
 import { Wordmark } from "@/components/Wordmark"
 import { type Today } from "@/lib/api"
 import {
@@ -10,26 +13,35 @@ import {
   versusBaseline,
   weekday,
 } from "@/lib/format"
+import { type HeroName } from "@/lib/heroes"
 import { countMs, countUp, useSteps } from "@/lib/motion"
 
-// `updated` is when the daily run last wrote the site.
+const arts = { messenger, signal, vortex }
+
+// `hero` names the art behind the text. `updated` is when the daily run last wrote the site.
 export function Hero({
+  hero,
   today,
   updated,
   failed,
 }: {
+  hero: HeroName
   today?: Today
   updated?: string
   failed: boolean
 }) {
   const text = useRef<HTMLDivElement>(null)
   return (
-    // From 224 px down: on a narrow screen, Mercury stands in the band above the wordmark.
+    // From 224 px down: on a narrow screen, the art stands in the band above the wordmark.
     <section
       id="today"
+      data-hero={hero}
       className="relative isolate flex min-h-svh flex-col items-center px-4 pt-56 pb-14 text-center text-primary uppercase"
     >
-      <Messenger
+      {/* Another hero arrives afresh, and loads only its own engraving. */}
+      <HeroArt
+        key={hero}
+        art={arts[hero]}
         value={today?.sevenDayAverage}
         baseline={today?.baseline}
         text={text}
