@@ -313,7 +313,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 
    Selecting a card (or pressing 1 to 9) opens that series in the panel with a dither transition. The hero stays on GPR.
 4. **The record:** the dots and the table from 6.4.
-5. **Side navigation** on wide screens: icon plus two-line label, inactive at 30% opacity, scroll-spy.
+5. **Side navigation** on wide screens: icon plus two-line label, scroll-spy (`SideNav`). Inactive at 58% opacity, the lowest at which its label still reads at 4.5:1 on the ground (`contrast.test.ts`; the first spec's 30% fell far under); the lit one whole, with a 2 px bar on its outer edge, so it never rests on a shade alone. Down the right edge on the ground, from 1344 px, where the gutter beside the 1040 px sections holds it: Mercury stands on the left. R jumps to the record on any screen, as its link does: the address says `#record`, and the focus moves to the record, so the next Tab goes on from there.
 
 **Behaviour:**
 - **The first frame is readable at rest.** Then the load sequence runs: the wordmark dithers in, the number counts up, the chart scans in from left to right. With the count-up, the hero's disc draws in and its rays grow out over 1.1 s, the fans opening with the number, step for step (`counted` and `easeOut` in `web/src/lib/motion.ts`, shared by both).
@@ -325,7 +325,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   The hero's art draws about 30 frames a second while it arrives (1.1 s), then a frame every 200 ms, the same picture: the slow motion after it is a fraction of a pixel a frame. It and the paths stop while the tab is hidden or they are off screen (`tickWhileShown`).
 - **UI transitions** take 160 ms. Panel changes use the 8-step Bayer dither (30 ms per step).
 - **`prefers-reduced-motion`** turns all of it off: the hero's art still and whole (the disc, the figure and the fans at their full width), no count-up, no scan, no dither transitions, and the paths step only on "Next path".
-- **Data loading (my call):** first load fetches `series.json`, every `latest.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data.
+- **Data loading (my call):** first load fetches `series.json`, `scores.json`, every `latest.json` and `actuals.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data, checked by `web/scripts/budget.js`: in CI on the fixtures, failing the build; in the daily run on the day's real data, as a warning only, since a heavier day must not take the site down.
 - **Accessibility:**
   - every control is a real button or input, with a visible focus (2 px white outline);
   - the canvas charts have text equivalents (the readout and the intervals are real text);
