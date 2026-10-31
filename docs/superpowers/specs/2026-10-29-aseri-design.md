@@ -362,7 +362,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - Daily values: a white line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
   - The 7-day average: a dim grey line that stops at the origin.
   - The forecast side: the most likely of the model's paths, a grey line (the muted text's) from the last daily value, clearly apart from the history's white, with no label at its end, on the panel and on the cards' mini charts alike; the bands keep theirs. Played, the panel draws the others in its place.
-  - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart. Its last day, once known, is a hollow 3x3 ring, apart by shape from the daily values' filled square at the origin.
+  - What happened after a replayed forecast was made: the daily values' line carried on from the origin through every known day, in its colour and style, so the replay compares line with line, the real one against the path (owner's choice: the replay is there to see how closely the forecast sticks to what happened, and dots did not show it). A day with no value breaks it. Its last known day is a hollow 3x3 ring in white, apart by shape from the path's unmarked end and from the daily values' filled square at the origin, since the two lines differ only by shade. The legend's swatch is a line.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in the dim grey with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted light grey line.
   - Labels are real text over the canvas.

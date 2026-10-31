@@ -13,7 +13,8 @@ import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 const legend = (line: string) => [
   ["Daily value", "h-0.5 w-4 bg-primary"],
   ["7-day average", "h-0.5 w-4 bg-dim"],
-  ["What happened", "size-1 bg-white"],
+  // The daily values' line, carried on.
+  ["What happened", "h-0.5 w-4 bg-primary"],
   ["8 in 10", "h-2.5 w-4 dither-25"],
   ["5 in 10", "h-2.5 w-4 dither-50"],
   [line, "h-0.5 w-4 bg-muted-foreground"],

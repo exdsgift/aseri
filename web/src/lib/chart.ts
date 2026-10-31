@@ -278,21 +278,29 @@ export function paintChart(
     values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
     color.daily
   )
-  // What happened after the forecast was made, in white over the bands,
-  // as dots 2 art pixels wide when the days are far enough apart. Once the forecast's last
-  // day is known, a hollow ring marks it instead: in black and white, a filled square
-  // would read as the daily values' mark at the origin.
-  const dot = (right - left) / chart.span >= 3 ? 2 : 1
-  // A day with no value (the drones' day without a report) has no dot.
-  const end = actuals[chart.ahead - 1]
-  const ended = actuals.length === chart.ahead && end !== null
+  // What happened after the forecast was made: the daily values' line carried on over the
+  // bands, to compare line with line against the path. A day with no value (the drones' day
+  // without a report) breaks it. It ends on a hollow ring on its last known day, apart by shape
+  // from the path's unmarked end and the filled square at the origin, as their shades are close.
+  const end = actuals.findLastIndex((value) => value !== null)
+  const ex = x(origin + 1 + end)
+  const ey = y(actuals[end] ?? last)
+  // The line stays out of the ring, so its middle stays hollow.
+  const line: Plot = (px, py, c) => {
+    if (Math.abs(px - ex) > 1 || Math.abs(py - ey) > 1) plot(px, py, c)
+  }
+  const runs: Point[][] = [[[xo, y(last)]]]
   actuals.forEach((value, k) => {
-    if (value !== null && (!ended || k < chart.ahead - 1))
-      square(plot, x(origin + 1 + k), y(value), dot, color.real)
+    if (value === null) runs.push([])
+    else runs.at(-1)!.push([x(origin + 1 + k), y(value)])
   })
+  // A day alone between two gaps is a single pixel.
+  if (end >= 0)
+    for (const run of runs)
+      polyline(line, run.length === 1 ? [run[0], run[0]] : run, color.daily)
 
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
   square(plot, xo - 1, y(last) - 1, 3, color.daily)
-  if (ended) ring(plot, right - 1, y(end!) - 1, color.real)
+  if (end >= 0) ring(plot, ex - 1, ey - 1, color.real)
 }
