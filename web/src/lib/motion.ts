@@ -3,11 +3,23 @@ import { useEffect, useState, useSyncExternalStore } from "react"
 import { bayer } from "@/lib/chart"
 import { formatValue } from "@/lib/format"
 
-// What the number shows on each step of its count-up, 40 ms apart: from 0, slowing
-// down into the value, and ending on exactly the text the page writes for it.
-export const countUp = (value: number, steps = 16) =>
-  Array.from({ length: steps + 1 }, (_, k) =>
-    formatValue(value * (1 - (1 - k / steps) ** 3))
+// Cubic ease-out of `k`, from 0 to 1: fast, then slowing into the end.
+export const easeOut = (k: number) => 1 - (1 - Math.min(Math.max(k, 0), 1)) ** 3
+
+// The count-up: 16 steps of 40 ms from 0 to the value.
+const countSteps = 16
+export const countMs = 40
+
+// The share of the value the count shows `ms` after it started, step by step, so that
+// the hero's art opens in step with the number.
+export const counted = (ms: number) =>
+  easeOut(Math.min(Math.floor(ms / countMs), countSteps) / countSteps)
+
+// What the number shows on each step of its count-up: from 0, slowing down into the
+// value, and ending on exactly the text the page writes for it.
+export const countUp = (value: number) =>
+  Array.from({ length: countSteps + 1 }, (_, k) =>
+    formatValue(value * easeOut(k / countSteps))
   )
 
 // Step k of the 8-step Bayer dither lights the cells of the 4x4 tile whose threshold is

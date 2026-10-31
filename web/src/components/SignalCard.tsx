@@ -29,13 +29,14 @@ export function SignalCard({
     [forecast, series.rho]
   )
   // Spans only, with spaces between them: a button holds phrasing content, and its text is its name.
+  // Picked reads by shape too, an inner frame 2 px inside the border, where a hover only greys it.
   return (
     <button
       type="button"
       aria-pressed={picked}
       aria-keyshortcuts={hint}
       onClick={onPick}
-      className="flex w-full cursor-pointer flex-col gap-2 border-2 border-border px-2.5 pt-2 pb-2.5 text-left text-[8px]/[12px] uppercase chip hover:border-muted-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary active:bg-accent aria-pressed:border-secondary aria-pressed:bg-accent motion-safe:transition-colors motion-safe:duration-160"
+      className="flex w-full cursor-pointer flex-col gap-2 border-2 border-border px-2.5 pt-2 pb-2.5 text-left text-[8px]/[12px] uppercase chip hover:border-muted-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary active:bg-accent aria-pressed:border-secondary aria-pressed:bg-accent aria-pressed:shadow-[inset_0_0_0_2px_var(--accent),inset_0_0_0_4px_var(--secondary)] motion-safe:transition-colors motion-safe:duration-160"
     >
       <span className="flex items-center gap-2">
         <span className="text-primary">

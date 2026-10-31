@@ -26,6 +26,7 @@ export function RecordSquares({
       <ul aria-labelledby={title} className="flex flex-wrap gap-1">
         {weekly.map(({ reference_date, inside_80 }) => {
           const said = `${monthDay(reference_date)}: ${inside_80 ? "inside" : "outside"} its 8 in 10 range 7 days ahead`
+          // A hover adds only an outline, so a hollow square never fills.
           const shape = inside_80 ? "bg-primary" : "border-2 border-primary"
           return (
             <li key={reference_date} className="flex">
@@ -40,7 +41,7 @@ export function RecordSquares({
                   type="button"
                   aria-label={`${said}. Open it in the replay`}
                   onClick={() => onOpen(reference_date)}
-                  className={`size-6 cursor-pointer ${shape} hover:bg-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160`}
+                  className={`size-6 cursor-pointer ${shape} hover:outline-2 hover:outline-offset-1 hover:outline-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160`}
                 />
               )}
             </li>

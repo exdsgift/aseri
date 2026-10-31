@@ -4,16 +4,24 @@ import mercury from "@/assets/mercury.png"
 import {
   engraving,
   fan,
+  fanRays,
   lit,
   messengerLayout,
   type Box,
   type MessengerLayout,
 } from "@/lib/messenger"
-import { tickWhileShown, useReducedMotion } from "@/lib/motion"
+import {
+  counted,
+  easeOut,
+  tickWhileShown,
+  useReducedMotion,
+} from "@/lib/motion"
 
-// About 30 frames a second: the disc turns and the rays sway smoothly, and slowly.
-const frameMs = 33
-const degree = Math.PI / 180
+// About 30 frames a second while the art arrives, over `grown` ms. After it, what moves is a
+// fraction of a pixel a frame: a frame every 200 ms draws the same picture for far less.
+const arriving = 33
+const settled = 200
+const grown = 1100
 
 type Size = { width: number; height: number; text: Box }
 
@@ -37,6 +45,12 @@ export function Messenger({
   // When the art and the value first showed: a resize, or the engraving arriving late,
   // redraws the art without replaying its arrival.
   const since = useRef<{ art?: number; value?: number }>({})
+  // The engraving as last dithered: a resize that keeps its scale skips the dither.
+  const engraved = useRef<{
+    image?: HTMLImageElement
+    scale?: number
+    figure?: HTMLCanvasElement
+  }>({})
 
   useEffect(() => {
     const loading = new Image()
@@ -49,7 +63,7 @@ export function Messenger({
     const observer = new ResizeObserver(() => {
       const hero = layer.getBoundingClientRect()
       const box = text.current!.getBoundingClientRect()
-      setSize({
+      const measured: Size = {
         width: Math.round(hero.width),
         height: Math.round(hero.height),
         text: {
@@ -58,7 +72,11 @@ export function Messenger({
           right: box.right - hero.left,
           bottom: box.bottom - hero.top,
         },
-      })
+      }
+      // The same numbers redraw nothing.
+      setSize((last) =>
+        JSON.stringify(last) === JSON.stringify(measured) ? last : measured
+      )
     })
     observer.observe(layer)
     observer.observe(text.current!)
@@ -76,13 +94,26 @@ export function Messenger({
     const ink = css.getPropertyValue("--primary")
     const ground = css.getPropertyValue("--background")
     const layout = messengerLayout(size.width, size.height, size.text)
-    const figure = image && engrave(image, layout, ink, ground)
+    const { scale } = layout.figure
+    if (
+      image &&
+      (engraved.current.image !== image || engraved.current.scale !== scale)
+    )
+      engraved.current = {
+        image,
+        scale,
+        figure: engrave(image, scale, ink, ground),
+      }
+    const figure = engraved.current.figure
     const veil = calm(size, layout.calm, ground)
     // Far enough to leave the hero from any of the five points.
     const reach = 1.1 * Math.hypot(size.width, size.height)
     const start = performance.now()
     since.current.art ??= start
     if (value !== undefined) since.current.value ??= start
+    // The rays arrive last, with the value: until then, the disc.
+    const arrived = () =>
+      performance.now() - (since.current.value ?? since.current.art!) >= grown
 
     // Under reduced motion, the frame the motion ends on, still.
     const draw = () => {
@@ -92,25 +123,32 @@ export function Messenger({
       context.clearRect(0, 0, size.width, size.height)
       context.strokeStyle = ink
       context.lineWidth = 1
-      disc(context, layout, ease(art / 1100), reduced ? 0 : art * 1e-5)
+      disc(context, layout, easeOut(art / grown), reduced ? 0 : art * 1e-5)
       if (figure) context.drawImage(figure, layout.figure.x, layout.figure.y)
-      // The fans open with the number's count-up, over its 640 ms and its easing.
+      // The fans open with the number, step by step as it counts up.
       const opened =
         value === undefined || baseline === undefined
           ? undefined
-          : fan(value * ease(rays / 640), baseline)
+          : fan(value * counted(rays), baseline)
       if (opened)
         fans(context, layout, opened, {
-          grow: ease(rays / 1100),
+          grow: easeOut(rays / grown),
           reach,
+          held: layout.held,
           sway: reduced ? undefined : rays,
         })
-      context.drawImage(veil, 0, 0)
+      context.drawImage(veil.canvas, veil.left, veil.top)
     }
     draw()
     if (reduced) return
     // None while the tab is hidden or the hero is off screen.
-    return tickWhileShown(element, frameMs, draw)
+    let stop = tickWhileShown(element, arriving, () => {
+      draw()
+      if (!arrived()) return
+      stop()
+      stop = tickWhileShown(element, settled, draw)
+    })
+    return () => stop()
   }, [size, image, value, baseline, reduced])
 
   return (
@@ -123,22 +161,16 @@ export function Messenger({
   )
 }
 
-// Cubic ease-out, as the count-up's, of `k` from 0 to 1.
-const ease = (k: number) => 1 - (1 - Math.min(Math.max(k, 0), 1)) ** 3
-
-// A fixed number from 0 to 1 for each `n`, so each ray keeps its own length.
-const hash = (n: number) => {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
-  return x - Math.floor(x)
+// Any CSS colour as its four channels: a canvas paints it and reads the pixel back, so no
+// token syntax can break the art. A colour the canvas refuses reads as its default, black.
+function channels(color: string) {
+  const context = document
+    .createElement("canvas")
+    .getContext("2d", { willReadFrequently: true })!
+  context.fillStyle = color
+  context.fillRect(0, 0, 1, 1)
+  return context.getImageData(0, 0, 1, 1).data
 }
-
-// A token's "#rrggbb" as its three channels.
-const rgb = (hex: string) =>
-  hex
-    .trim()
-    .slice(1)
-    .match(/../g)!
-    .map((pair) => parseInt(pair, 16))
 
 // The disc behind him: 220 ticks, every fifth longer, drawn in as the page arrives
 // (`shown`, 0 to 1), then turned by `turn` radians.
@@ -160,53 +192,46 @@ function disc(
   context.globalAlpha = 1
 }
 
-// Each fan, held at its point: rays from a little behind it out past the hero, grown to
-// `grow` (0 to 1) of their length, each swaying a fraction of a degree out of step with the
-// others over `sway` ms (none: still); then the baseline's two dashed rays.
+// Each fan's rays (see `fanRays`), then, once it has mostly grown so that they never lead
+// it, the baseline's two dashed rays.
 function fans(
   context: CanvasRenderingContext2D,
   layout: MessengerLayout,
   { rays, baseline }: NonNullable<ReturnType<typeof fan>>,
-  { grow, reach, sway }: { grow: number; reach: number; sway?: number }
+  frame: Parameters<typeof fanRays>[3]
 ) {
-  layout.bundles.forEach(({ x, y, angle }, j) => {
+  layout.bundles.forEach((point, bundle) => {
     context.globalAlpha = 0.85
     context.beginPath()
-    rays.forEach((offset, i) => {
-      const shift =
-        sway === undefined ? 0 : 0.3 * Math.sin(sway / 2300 + i * 1.7 + j * 5)
-      const a = (angle + offset + shift) * degree
-      const far = reach * grow * (0.75 + 0.25 * hash(i * 13 + j * 7))
-      const near = layout.held * grow
-      context.moveTo(x - Math.cos(a) * near, y - Math.sin(a) * near)
-      context.lineTo(x + Math.cos(a) * far, y + Math.sin(a) * far)
-    })
-    context.stroke()
-    // Once the fan has mostly grown, so they never lead it.
-    if (grow > 0.6) {
-      context.globalAlpha = 0.8
-      context.setLineDash([3, 5])
-      context.beginPath()
-      for (const offset of baseline) {
-        const a = (angle + offset) * degree
-        context.moveTo(x, y)
-        context.lineTo(
-          x + Math.cos(a) * reach * grow,
-          y + Math.sin(a) * reach * grow
-        )
-      }
-      context.stroke()
-      context.setLineDash([])
+    for (const { from, to } of fanRays(point, bundle, rays, frame)) {
+      context.moveTo(from[0], from[1])
+      context.lineTo(to[0], to[1])
     }
+    context.stroke()
+    if (frame.grow <= 0.6) return
+    context.globalAlpha = 0.8
+    context.setLineDash([3, 5])
+    context.beginPath()
+    for (const offset of baseline) {
+      const a = ((point.angle + offset) * Math.PI) / 180
+      const length = frame.reach * frame.grow
+      context.moveTo(point.x, point.y)
+      context.lineTo(
+        point.x + Math.cos(a) * length,
+        point.y + Math.sin(a) * length
+      )
+    }
+    context.stroke()
+    context.setLineDash([])
   })
   context.globalAlpha = 1
 }
 
-// The engraving at the layout's scale, dithered again so that it stays in two inks at any
-// size: its paper in the ink, its lines and the niche in the ground, nothing outside the niche.
+// The engraving at `scale`, dithered again so that it stays in two inks at any size: its
+// paper in the ink, its lines and the niche in the ground, nothing outside the niche.
 function engrave(
   image: HTMLImageElement,
-  { figure: { scale } }: MessengerLayout,
+  scale: number,
   ink: string,
   ground: string
 ) {
@@ -215,43 +240,54 @@ function engrave(
   const canvas = document.createElement("canvas")
   canvas.width = width
   canvas.height = height
-  const context = canvas.getContext("2d")!
+  const context = canvas.getContext("2d", { willReadFrequently: true })!
   context.imageSmoothingQuality = "high"
   context.drawImage(image, 0, 0, width, height)
   const pixels = context.getImageData(0, 0, width, height)
-  const [paper, line] = [rgb(ink), rgb(ground)]
+  const data = pixels.data
+  const [paper, line] = [channels(ink), channels(ground)]
   for (let y = 0; y < height; y++)
     for (let x = 0; x < width; x++) {
       const i = 4 * (y * width + x)
-      const kept = lit(x, y, pixels.data[i + 3] / 255)
-      const light = lit(x, y, pixels.data[i] / 255)
-      pixels.data.set(kept ? [...(light ? paper : line), 255] : [0, 0, 0, 0], i)
+      const kept = lit(x, y, data[i + 3] / 255)
+      const color = lit(x, y, data[i] / 255) ? paper : line
+      data[i] = color[0]
+      data[i + 1] = color[1]
+      data[i + 2] = color[2]
+      data[i + 3] = kept ? 255 : 0
     }
   context.putImageData(pixels, 0, 0)
   return canvas
 }
 
 // The calm behind the text: the ground over the text and its margin, nearly opaque, so the
-// art shows only faintly through, dissolving in a dither over 48 px at its edge.
+// art shows only faintly through, dissolving in a dither over 48 px at its edge. Only as
+// big as that, within the hero, and drawn at its `left` and `top`.
 function calm({ width, height }: Size, box: Box, ground: string) {
   const edge = 48
-  const canvas = document.createElement("canvas")
-  canvas.width = width
-  canvas.height = height
-  const context = canvas.getContext("2d")!
-  const pixels = context.createImageData(width, height)
-  const veil = [...rgb(ground), 232]
-  const top = Math.max(0, Math.floor(box.top - edge))
   const left = Math.max(0, Math.floor(box.left - edge))
-  for (let y = top; y < Math.min(height, box.bottom + edge); y++)
-    for (let x = left; x < Math.min(width, box.right + edge); x++) {
+  const top = Math.max(0, Math.floor(box.top - edge))
+  const right = Math.min(width, Math.ceil(box.right + edge))
+  const bottom = Math.min(height, Math.ceil(box.bottom + edge))
+  const canvas = document.createElement("canvas")
+  canvas.width = right - left
+  canvas.height = bottom - top
+  const context = canvas.getContext("2d")!
+  const pixels = context.createImageData(canvas.width, canvas.height)
+  const color = channels(ground)
+  for (let y = top; y < bottom; y++)
+    for (let x = left; x < right; x++) {
       const d = Math.hypot(
         Math.max(box.left - x, 0, x - box.right),
         Math.max(box.top - y, 0, y - box.bottom)
       )
-      if (d === 0 || (d < edge && lit(x, y, 1 - d / edge)))
-        pixels.data.set(veil, 4 * (y * width + x))
+      if (d > 0 && !(d < edge && lit(x, y, 1 - d / edge))) continue
+      const i = 4 * ((y - top) * canvas.width + (x - left))
+      pixels.data[i] = color[0]
+      pixels.data[i + 1] = color[1]
+      pixels.data[i + 2] = color[2]
+      pixels.data[i + 3] = 232
     }
   context.putImageData(pixels, 0, 0)
-  return canvas
+  return { canvas, left, top }
 }

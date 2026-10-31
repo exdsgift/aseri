@@ -10,7 +10,7 @@ import {
   versusBaseline,
   weekday,
 } from "@/lib/format"
-import { countUp, useSteps } from "@/lib/motion"
+import { countMs, countUp, useSteps } from "@/lib/motion"
 
 // `updated` is when the daily run last wrote the site.
 export function Hero({
@@ -93,7 +93,7 @@ export function Hero({
 // number's own text (`count-up` in index.css), so screen readers and copying get the real value.
 function CountUp({ value }: { value: number }) {
   const shown = useMemo(() => countUp(value), [value])
-  const step = useSteps(shown.length, 40)
+  const step = useSteps(shown.length, countMs)
   return (
     <p
       className="count-up font-display text-[144px]/[108px] md:text-[192px]/[144px]"

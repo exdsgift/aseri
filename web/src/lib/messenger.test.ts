@@ -1,28 +1,34 @@
 import { describe, expect, it } from "vitest"
 
-import { engraving, fan, messengerLayout } from "./messenger"
+import { engraving, fan, fanRays, messengerLayout } from "./messenger"
 
 describe("fan", () => {
-  const spread = (value: number) => {
-    const { rays } = fan(value, 100)!
-    return rays.at(-1)! - rays[0]
-  }
-  const count = (value: number) => fan(value, 100)!.rays.length
+  const angles = (value: number) => fan(value, 100)!.rays.map((r) => r.angle)
+  const spread = (value: number) => angles(value).at(-1)! - angles(value)[0]
+  const count = (value: number) => angles(value).length
 
   it("opens a full fan at the baseline, as the study's did at 181: 15 rays over 40 degrees", () => {
     expect(count(100)).toBe(15)
     expect(spread(100)).toBeCloseTo(40)
   })
 
-  it("opens further and adds rays above it: the study's 300 opening at 300, and denser", () => {
-    expect([count(181), spread(181)]).toEqual([20, expect.closeTo(50.53)])
-    expect([count(300), spread(300)]).toEqual([27, expect.closeTo(66)])
+  it("opens further above it and adds rays at its edges, to the study's 300 opening at 300", () => {
+    expect([count(181), spread(181)]).toEqual([17, expect.closeTo(45.71)])
+    // The opening, 66 degrees, holds 23 rays a slot apart.
+    expect([count(300), spread(300)]).toEqual([23, expect.closeTo(62.86)])
   })
 
   it("never closes or thins as the value grows", () => {
     for (let value = 0; value < 600; value += 5) {
       expect(spread(value + 5)).toBeGreaterThanOrEqual(spread(value))
       expect(count(value + 5)).toBeGreaterThanOrEqual(count(value))
+    }
+  })
+
+  it("keeps each ray in its slot as the fan opens, so a ray never jumps while the number counts up", () => {
+    for (let value = 100; value < 450; value += 7) {
+      const wider = fan(value + 7, 100)!.rays
+      for (const ray of fan(value, 100)!.rays) expect(wider).toContainEqual(ray)
     }
   })
 
@@ -33,22 +39,21 @@ describe("fan", () => {
 
   it("stops opening at 4 times the baseline", () => {
     expect(fan(1000, 100)).toEqual(fan(400, 100))
-    expect([count(400), spread(400)]).toEqual([33, expect.closeTo(79)])
+    expect([count(400), spread(400)]).toEqual([27, expect.closeTo(74.29)])
   })
 
   it("spaces the rays evenly about the fan's axis", () => {
-    const { rays } = fan(181, 100)!
+    const rays = angles(181)
     expect(rays[0]).toBeCloseTo(-rays.at(-1)!)
     const gaps = rays.slice(1).map((ray, i) => ray - rays[i])
-    for (const gap of gaps) expect(gap).toBeCloseTo(gaps[0])
+    for (const gap of gaps) expect(gap).toBeCloseTo(40 / 14)
   })
 
   it("marks the baseline with two rays at the full fan's edges, whatever the value", () => {
     for (const value of [50, 181, 300])
       expect(fan(value, 100)!.baseline).toEqual([-20, 20])
-    const { rays, baseline } = fan(100, 100)!
-    expect([rays[0], rays.at(-1)]).toEqual(
-      baseline.map((b) => expect.closeTo(b))
+    expect([angles(100)[0], angles(100).at(-1)]).toEqual(
+      [-20, 20].map((b) => expect.closeTo(b))
     )
   })
 
@@ -56,6 +61,51 @@ describe("fan", () => {
     expect(fan(181, 0)).toBeUndefined()
     expect(fan(Number.NaN, 100)).toBeUndefined()
     expect(fan(181, undefined as never)).toBeUndefined()
+  })
+})
+
+describe("fanRays", () => {
+  const point = { x: 200, y: 300, angle: -25 }
+  const frame = { grow: 1, reach: 1500, held: 300, sway: 4321 }
+  const drawn = (value: number) =>
+    new Map(
+      fanRays(point, 1, fan(value, 100)!.rays, frame).map((ray) => [
+        ray.slot,
+        ray,
+      ])
+    )
+
+  it("draws a ray at a lower value with the same angle and length at a higher one", () => {
+    const wider = drawn(300)
+    for (const [slot, ray] of drawn(181)) expect(wider.get(slot)).toEqual(ray)
+    expect(wider.size).toBeGreaterThan(drawn(181).size)
+  })
+
+  it("runs each ray from behind the point that holds it out to its own length", () => {
+    for (const { from, to } of drawn(181).values()) {
+      const back = Math.hypot(from[0] - point.x, from[1] - point.y)
+      const out = Math.hypot(to[0] - point.x, to[1] - point.y)
+      expect(back).toBeCloseTo(300)
+      expect(out).toBeGreaterThanOrEqual(0.75 * 1500)
+      expect(out).toBeLessThanOrEqual(1500)
+    }
+  })
+
+  it("sways each ray by a fraction of a degree, and none at rest", () => {
+    const still = fanRays(point, 1, fan(181, 100)!.rays, {
+      ...frame,
+      sway: undefined,
+    })
+    for (const [i, { slot, to }] of still.entries()) {
+      const angle =
+        (Math.atan2(to[1] - point.y, to[0] - point.x) * 180) / Math.PI
+      expect(angle).toBeCloseTo(-25 + (slot * 40) / 14)
+      const swayed = [...drawn(181).values()][i].to
+      const moved =
+        (Math.atan2(swayed[1] - point.y, swayed[0] - point.x) * 180) / Math.PI -
+        angle
+      expect(Math.abs(moved)).toBeLessThanOrEqual(0.3 + 1e-9)
+    }
   })
 })
 

@@ -15,25 +15,65 @@ const bundles = [
   { at: [207, 662], wide: 52, narrow: 142 },
 ]
 
+// The angle between neighbouring rays, in degrees: 15 rays over the baseline's 40.
+const slot = 40 / 14
+
+export type Ray = { slot: number; angle: number }
+
 // Each fan opens with GPR's 7-day average against its baseline. At the baseline and under it,
 // already full: 15 rays over 40 degrees, as the study's fans at 181. Each further baseline
-// opens it 13 degrees and adds 6 rays, so 300 opens as wide as the study's 300, and denser,
-// up to 4 times the baseline. The two dashed rays stay at the full fan's edges. The rays are
-// angles off the fan's axis, in degrees; no fan when the ratio is not a number, so a broken
-// file draws no rays rather than wrong ones.
+// opens it 13 degrees, so 300 opens as wide as the study's 300, up to 4 times the baseline.
+// The rays keep fixed slots a slot's angle apart, so the fan gains rays only at its edges as
+// it opens, and none ever moves. The two dashed rays stay at the full fan's edges. Angles are
+// off the fan's axis, in degrees; no fan when the ratio is not a number, so a broken file
+// draws no rays rather than wrong ones.
 export function fan(value: number, baseline: number) {
   const ratio = value / baseline
   if (!Number.isFinite(ratio)) return undefined
-  const above = Math.min(Math.max(ratio, 1), 4) - 1
-  const spread = 40 + 13 * above
-  const count = Math.round(15 + 6 * above)
+  const opening = 40 + 13 * (Math.min(Math.max(ratio, 1), 4) - 1)
+  // A hair over, so the baseline's own edge slots count.
+  const edge = Math.floor(opening / 2 / slot + 1e-9)
   return {
-    rays: Array.from(
-      { length: count },
-      (_, i) => spread * (i / (count - 1) - 0.5)
-    ),
+    rays: Array.from({ length: 2 * edge + 1 }, (_, i): Ray => ({
+      slot: i - edge,
+      angle: (i - edge) * slot,
+    })),
     baseline: [-20, 20],
   }
+}
+
+// A fixed number from 0 to 1 for each `n`.
+const hash = (n: number) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
+  return x - Math.floor(x)
+}
+
+// One fan's rays in a frame, from the point that holds it, the `bundle`th: each from `held`
+// behind the point out to its own length, from 3/4 to all of `reach`, both grown by `grow`
+// (0 to 1). Over `sway` ms each sways by up to 0.3 degrees, out of step with the others;
+// none at rest. Length and sway are its slot's, so a ray looks the same whatever the value.
+export function fanRays(
+  point: { x: number; y: number; angle: number },
+  bundle: number,
+  rays: Ray[],
+  frame: { grow: number; reach: number; held: number; sway?: number }
+) {
+  return rays.map(({ slot, angle }) => {
+    const shift =
+      frame.sway === undefined
+        ? 0
+        : 0.3 * Math.sin(frame.sway / 2300 + slot * 1.7 + bundle * 5)
+    const a = ((point.angle + angle + shift) * Math.PI) / 180
+    const [dx, dy] = [Math.cos(a), Math.sin(a)]
+    const near = frame.held * frame.grow
+    const far =
+      frame.reach * frame.grow * (0.75 + 0.25 * hash(slot * 13 + bundle * 7))
+    return {
+      slot,
+      from: [point.x - dx * near, point.y - dy * near],
+      to: [point.x + dx * far, point.y + dy * far],
+    }
+  })
 }
 
 export type Box = { left: number; top: number; right: number; bottom: number }

@@ -36,11 +36,18 @@ function advance(ms: number) {
     act(() => due.forEach((frame) => frame(now)))
   }
 }
-// Every call the art makes on its canvases, by method: a frame starts with clearRect.
+// Every call the art makes on its canvases, by method, and every property it sets: a frame
+// starts with clearRect. A 1 x 1 read gives back (1, 2, 3), as a canvas would a colour.
 let canvas: Record<string, ReturnType<typeof vi.fn>>
+let styles: [string, unknown][]
 const drawn = () => canvas.clearRect?.mock.calls.length ?? 0
 // Says whether the art is on screen, as an IntersectionObserver would.
 let onScreen: (shown: boolean) => void
+// Calls the ResizeObserver back, as a resize would.
+let resize: () => void
+// The two tokens the art paints with.
+const tokens = (primary: string, background: string) =>
+  (document.head.innerHTML = `<style>canvas { --primary: ${primary}; --background: ${background} }</style>`)
 
 // jsdom lays nothing out and has no canvas: the test sets the sizes and records the drawing.
 beforeEach(() => {
@@ -60,7 +67,8 @@ beforeEach(() => {
         this.callback = callback
       }
       observe() {
-        this.callback([], this as never)
+        resize = () => this.callback([], this as never)
+        resize()
       }
       disconnect() {}
     }
@@ -90,6 +98,7 @@ beforeEach(() => {
     }
   )
   canvas = {}
+  styles = []
   const context = new Proxy(
     {},
     {
@@ -98,19 +107,22 @@ beforeEach(() => {
           // The veil is drawn into image data.
           method === "createImageData"
             ? { width, height, data: new Uint8ClampedArray(width * height * 4) }
-            : undefined
+            : method === "getImageData"
+              ? { data: Uint8ClampedArray.of(1, 2, 3, 255) }
+              : undefined
         )),
-      set: () => true,
+      set: (_, name: string, value) => {
+        styles.push([name, value])
+        return true
+      },
     }
   )
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
     context as never
   )
-  // The two tokens the art paints with, as index.css gives them.
-  document.head.innerHTML =
-    "<style>canvas { --primary: #f2efe8; --background: #050505 }</style>"
-  // The art ticks on an interval.
-  vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] })
+  tokens("#f2efe8", "#050505")
+  // The art ticks on an interval, and times itself by the clock.
+  vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "performance"] })
 })
 afterEach(() => {
   cleanup()
@@ -198,6 +210,42 @@ it("stops the art while the hero is scrolled off screen", () => {
   onScreen(true)
   vi.advanceTimersByTime(100)
   expect(drawn()).toBeGreaterThan(before)
+})
+
+it("draws smoothly while the art arrives, then once every 200 ms: what moves after is slow", () => {
+  render(<Hero today={today} failed={false} />)
+
+  const start = drawn()
+  vi.advanceTimersByTime(500)
+  expect(drawn() - start).toBeGreaterThanOrEqual(12)
+  vi.advanceTimersByTime(1000)
+  const settled = drawn()
+  vi.advanceTimersByTime(1000)
+  expect(drawn() - settled).toBe(5)
+})
+
+it("paints with its tokens in any CSS syntax, as the canvas reads them", () => {
+  tokens("#fff", "rgb(5 5 5)")
+  prefers(true)
+  render(<Hero today={today} failed={false} />)
+
+  expect(styles).toContainEqual(["strokeStyle", "#fff"])
+  // The veil's colour comes from a canvas painting the token, never from parsing it.
+  expect(styles).toContainEqual(["fillStyle", "rgb(5 5 5)"])
+  const veil = canvas.createImageData.mock.results.at(-1)!.value
+  const middle = 4 * (Math.floor(veil.height / 2) * veil.width + veil.width / 2)
+  expect([...veil.data.slice(middle, middle + 4)]).toEqual([1, 2, 3, 232])
+})
+
+it("sizes the veil to the text and its dithered edge, and rebuilds nothing for a resize to the same size", () => {
+  render(<Hero today={today} failed={false} />)
+
+  // The column at (124, 224), 552 x 620: a 20 x 14 px margin, then 48 px of edge, within the hero.
+  expect(canvas.createImageData).toHaveBeenLastCalledWith(688, 738)
+  expect(canvas.drawImage).toHaveBeenCalledWith(expect.anything(), 56, 162)
+  const veils = canvas.createImageData.mock.calls.length
+  act(() => resize())
+  expect(canvas.createImageData.mock.calls.length).toBe(veils)
 })
 
 it("dithers the wordmark in, then leaves it whole", () => {

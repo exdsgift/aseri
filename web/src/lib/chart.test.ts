@@ -116,6 +116,27 @@ describe("paintChart", () => {
       })
   })
 
+  it("ends what happened on a hollow ring, apart by shape from the daily value's filled square", () => {
+    const happened = { ...forecast, actuals: Array(28).fill(150) }
+    const seen = new Map<string, string>()
+    paintChart(
+      (x, y, color) => seen.set(`${x},${y}`, color),
+      chart,
+      happened,
+      colors,
+      path
+    )
+    const end = { x: chart.right, y: chart.y(150) }
+    for (let dx = -1; dx <= 1; dx++)
+      for (let dy = -1; dy <= 1; dy++)
+        expect(seen.get(`${end.x + dx},${end.y + dy}`) === "real").toBe(
+          dx !== 0 || dy !== 0
+        )
+    for (let dx = -1; dx <= 1; dx++)
+      for (let dy = -1; dy <= 1; dy++)
+        expect(seen.get(`${now.x + dx},${now.y + dy}`)).toBe("daily")
+  })
+
   it("keeps the 7-day average as a dimmer line that stops at the origin", () => {
     const average = calls.filter(({ color }) => color === "average")
     expect(average).toContainEqual({

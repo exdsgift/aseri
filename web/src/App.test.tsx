@@ -517,6 +517,11 @@ it("opens a picked card's series in the panel and brings it into view, then load
   expect(panelTitle()).toBe("[F] Suez Canal · forecast made today")
   expect(card(/^Suez Canal/).getAttribute("aria-pressed")).toBe("true")
   expect(card(/^Geopolitical risk/).getAttribute("aria-pressed")).toBe("false")
+  // Picked reads by shape too, an inner frame, and a hover never draws one.
+  expect(card(/^Suez Canal/).className).toMatch(
+    /\baria-pressed:shadow-\[inset_/
+  )
+  expect(card(/^Suez Canal/).className).not.toMatch(/\bhover:shadow-/)
   const panel = screen.getByRole("region", { name: /^\[F\] Suez Canal/ })
   expect(scrollIntoView.mock.contexts.at(-1)).toContain(panel)
   expect(fetch).toHaveBeenCalledWith("api/v1/series/suez_transits/replay.json")

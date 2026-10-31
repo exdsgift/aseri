@@ -211,6 +211,13 @@ function square(plot: Plot, x: number, y: number, size: number, color: string) {
     for (let dy = 0; dy < size; dy++) plot(x + dx, y + dy, color)
 }
 
+// A 3x3 square without its middle.
+function ring(plot: Plot, x: number, y: number, color: string) {
+  for (let dx = 0; dx < 3; dx++)
+    for (let dy = 0; dy < 3; dy++)
+      if (dx !== 1 || dy !== 1) plot(x + dx, y + dy, color)
+}
+
 // `path`, the last daily value then one value a day ahead: one of the model's paths, never a
 // median line, which reads as an average.
 export function paintChart(
@@ -270,15 +277,18 @@ export function paintChart(
     color.daily
   )
   // What happened after the forecast was made, in white over the bands,
-  // as dots 2 art pixels wide when the days are far enough apart.
+  // as dots 2 art pixels wide when the days are far enough apart. Once the forecast's last
+  // day is known, a hollow ring marks it instead: in black and white, a filled square
+  // would read as the daily values' mark at the origin.
   const dot = (right - left) / chart.span >= 3 ? 2 : 1
-  actuals.forEach((value, k) =>
-    square(plot, x(origin + 1 + k), y(value), dot, color.real)
-  )
+  const ended = actuals.length === chart.ahead
+  actuals.forEach((value, k) => {
+    if (!ended || k < chart.ahead - 1)
+      square(plot, x(origin + 1 + k), y(value), dot, color.real)
+  })
 
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
   square(plot, xo - 1, y(last) - 1, 3, color.daily)
-  if (actuals.length === chart.ahead)
-    square(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, 3, color.real)
+  if (ended) ring(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, color.real)
 }

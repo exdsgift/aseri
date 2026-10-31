@@ -117,6 +117,11 @@ it("draws the last 8 weekly forecasts 7 days ahead as squares, filled inside the
     "border-2",
     "bg-primary",
   ])
+  // A hover changes only the outline: a hollow square never fills, so it never reads as inside.
+  for (const square of squares) {
+    expect(square.className).not.toMatch(/hover:(bg|border)-/)
+    expect(square.className).toContain("hover:outline-")
+  }
   // In words too.
   expect(card("Suez Canal").getByText(/^6 of 8/).textContent).toBe(
     "6 of 8 inside the 8 in 10 range"

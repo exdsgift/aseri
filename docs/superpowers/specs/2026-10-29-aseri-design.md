@@ -294,7 +294,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
    - the GPR 7-day average as a giant number;
    - the pitch: "{x}% above its 1985-2019 average", then the 4-week forecast for the same weekday as the last data, compared with that weekday (owner's choice): "{Weekday Mon DD}, 4 weeks from the last data: 8 in 10 between {lo} and {hi}, 2 in 10 outside. Most likely {m}. (Last {weekday}: {v})", the range first (6.9, copy). GPR has a strong weekday cycle, so a single day must never be compared with a day on a different weekday or with the 7-day average.
 
-   The rays encode GPR's 7-day average against its baseline, on a scale that starts full (`fan` in `web/src/lib/messenger.ts`): at the baseline and under it, 15 rays over 40 degrees, as the study's fans at 181; each further baseline opens a fan 13 degrees and adds 6 rays (181: 20 rays over 50.5; 300: 27 over 66, the study's 300 opening and denser), up to a cap at 4 times the baseline (33 rays over 79). Two dashed rays in each fan mark the baseline, at the full fan's edges. The text sits on a calm area: the ground at 91% over the text column and a margin, dissolving in a 48 px dither, so the words read over the art everywhere. The foot of the page credits the engraving: "Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art, CC0", with its Commons URL.
+   The rays encode GPR's 7-day average against its baseline, on a scale that starts full (`fan` in `web/src/lib/messenger.ts`): at the baseline and under it, 15 rays over 40 degrees, as the study's fans at 181; each further baseline opens a fan 13 degrees, up to a cap at 4 times the baseline. The rays keep fixed slots 40/14 degrees apart, each with its own length, so an opening fan gains rays only at its edges and none ever jumps while the number counts up: 181 holds 17 rays over 45.7 degrees, 300 holds 23 over 62.9 within the study's 66-degree opening, the cap 27 over 74.3. Two dashed rays in each fan mark the baseline, at the full fan's edges. The text sits on a calm area: the ground at 91% over the text column and a margin, dissolving in a 48 px dither, so the words read over the art everywhere. The foot of the page credits the engraving: "Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art, CC0", with its Commons URL.
 2. **The forecast panel,** a game-sheet frame with the title row `[F] {series} · forecast made today | {unit} · data to {date}`:
    - a readout line;
    - the pixel chart (6.9), opening on the most likely of the model's 20 paths;
@@ -316,13 +316,13 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 5. **Side navigation** on wide screens: icon plus two-line label, inactive at 30% opacity, scroll-spy.
 
 **Behaviour:**
-- **The first frame is readable at rest.** Then the load sequence runs: the wordmark dithers in, the number counts up, the chart scans in from left to right. With the count-up, the hero's disc draws in and its rays grow out over 1.1 s, the fans opening with the number over its 640 ms and its easing.
+- **The first frame is readable at rest.** Then the load sequence runs: the wordmark dithers in, the number counts up, the chart scans in from left to right. With the count-up, the hero's disc draws in and its rays grow out over 1.1 s, the fans opening with the number, step for step (`counted` and `easeOut` in `web/src/lib/motion.ts`, shared by both).
 - **Ambient motion,** slow, as in the study:
   - the disc turns, about once in 10 minutes;
   - each ray sways by 0.3 degrees, out of step with the others (about 14 s a cycle);
   - once asked, the panel draws the next possible path every 1.2 s.
 
-  The hero's art draws about 30 frames a second, and it and the paths stop while the tab is hidden or they are off screen (`tickWhileShown`).
+  The hero's art draws about 30 frames a second while it arrives (1.1 s), then a frame every 200 ms, the same picture: the slow motion after it is a fraction of a pixel a frame. It and the paths stop while the tab is hidden or they are off screen (`tickWhileShown`).
 - **UI transitions** take 160 ms. Panel changes use the 8-step Bayer dither (30 ms per step).
 - **`prefers-reduced-motion`** turns all of it off: the hero's art still and whole (the disc, the figure and the fans at their full width), no count-up, no scan, no dither transitions, and the paths step only on "Next path".
 - **Data loading (my call):** first load fetches `series.json`, every `latest.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data.
@@ -343,7 +343,8 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 
   Map them to shadcn variables with `--radius: 0`.
 - **States read without colour,** by shape and words (#148):
-  - inside and outside: the record's squares are filled or hollow, and the words say it ("inside", "outside", "6 of 8 inside the 8 in 10 range", "beats", "loses");
+  - inside and outside: the record's squares are filled or hollow, and the words say it ("inside", "outside", "6 of 8 inside the 8 in 10 range", "beats", "loses"). A hover only outlines a square, so a hollow one never fills;
+  - picked: the card's raised surface, and an inner frame 2 px inside its border; a hover only greys the border;
   - caution and stale: the `caution` utility, a "!" before the words in white, the marker kept out of the spoken text: a site not updated for 2 days, a stale series, a failed load.
 - **Contrast,** checked by `web/src/contrast.test.ts` from the tokens in `index.css`:
   - text at 4.5:1 on every surface it sits on: the page, an interval row, a picked card;
@@ -361,7 +362,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - Daily values: a white line, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
   - The 7-day average: a dim grey line that stops at the origin.
   - The forecast side: the most likely of the model's paths, a grey line (the muted text's) from the last daily value, clearly apart from the history's white, with no label at its end, on the panel and on the cards' mini charts alike; the bands keep theirs. Played, the panel draws the others in its place.
-  - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart.
+  - What happened after a replayed forecast was made: white dots 2 art pixels wide, or single pixels when the days are under 3 art pixels apart. Its last day, once known, is a hollow 3x3 ring, apart by shape from the daily values' filled square at the origin.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in the dim grey with solid edges.
   - The forecast zone: diagonal hatch. The origin: dotted light grey line.
   - Labels are real text over the canvas.
