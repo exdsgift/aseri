@@ -120,6 +120,10 @@ Notes:
 - **Horizons:** GPR, Suez, Taiwan and Hormuz come from the backtest spike, which validated 30, 30, 30 and 7 to 14 days. The 30-day horizons are set to 28 so that every horizon is a whole number of weeks (owner's choice, see 6.8). The others are conservative until the live record says otherwise.
 - **Brent's calendar.** The prototype carried Friday's close over the weekend. The API research recommends forecasting trading days and counting the horizon in trading days (`public-api.md` 4.3).
   - **(my call)** Forecast on the trading-day series, and show calendar dates on the page.
+- **Revisions past a series' window hold it only when they exceed a normal update** (`revision_window`, `deep_revision_tolerance` and `deep_revision_days` in the registry). A held series keeps its last good files until a human reviews the change; what passes is archived as any revision is, and the run summary names it.
+  - **GPR** holds when an update moves more than 150 values older than 90 days by more than 1%. Calibrated on the authors' 277 weekly updates of 2022 to 2026: a normal one moved at most 77, the February 2024 fix of missing articles since 2021 moved 298 to 746, and holds by design (`docs/research/gpr-realtime-backtest.md`, "The deep-revision rule").
+  - **Every other series** holds on any change older than its window until its revisions are measured.
+  - A file that drops archived days always holds, and a file that breaks its source's contract fails its series before any of this.
 - **PortWatch reports errors inside HTTP 200 responses,** so a status-code check misses them. Validate the body, retry with backoff (the service had about 15-minute outages during research), and never overwrite good data with a failed fetch.
 - **The baseline in the "vs" figures:**
   - for GPR, its 1985-2019 average (100);

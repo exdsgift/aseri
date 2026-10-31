@@ -69,6 +69,8 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             skipped[series.id] = ("failed", f"{type(error).__name__}: {error}")
     # First, so a deep rewrite holds its series before any of its data is archived: it keeps its last good files,
     # and daily.yml opens an issue. A manual run with accept_revisions ticked, after a human review, records it.
+    # A deep revision that passes is archived, and named in the run summary.
+    deep_revised = {}
     for series, observed, as_of, _ in list(fetched.values()):
         if os.environ.get("ASERI_ACCEPT_REVISIONS") == "true":
             print(
@@ -76,7 +78,8 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             )
             continue
         try:
-            archive.check_revisions(archive_dir, series, observed, as_of)
+            if passed := archive.check_revisions(archive_dir, series, observed, as_of):
+                deep_revised[series.id] = passed
         except archive.RevisionHold as hold:
             del fetched[series.id]
             skipped[series.id] = ("held", str(hold))
@@ -183,6 +186,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 f"{issued[series.id]} new forecasts, the latest from "
                 f"{archived[-1].forecast.reference_date:%Y-%m-%d}"
                 + (f". {note}" if note else "")
+                + (f"; {deep_revised[series.id]}" if series.id in deep_revised else "")
             )
         since = late_since(series, observed.index[-1].date())
         entries.append(

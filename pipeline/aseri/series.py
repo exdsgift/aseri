@@ -18,7 +18,7 @@ class Series:
     baseline_label: str
     horizon: int
     interval_steps: tuple[int, ...]
-    # How many days back from its newest an upstream revision may reach; anything older holds the run.
+    # How many days back from its newest an upstream revision may reach freely. Past it, see `deep_revision_days`.
     revision_window: int
     # How many days old its newest data can be at a run in normal times; 2 days past it the run warns, 7 past it skips the series.
     expected_lag: int
@@ -41,6 +41,11 @@ class Series:
     # against a vintage fixed in advance"). To measure later from the archive: the age past which 95% of
     # revisions are under 1%.
     score_lag: int = 7
+    # An update holds the run, for a human to review a method change or a broken file, when it moves more than
+    # `deep_revision_days` values older than `revision_window` by more than `deep_revision_tolerance`, relative
+    # to the archived value. The defaults hold on any change there: a source whose revisions are unmeasured.
+    deep_revision_tolerance: float = 0.0
+    deep_revision_days: int = 0
     # What a forecast step is: a calendar "day", or a "trading_day" for a price that has none on weekends and holidays.
     horizon_unit: str = "day"
     # Whether its values follow the week, so the page says to compare a day with the same weekday.
@@ -63,8 +68,16 @@ GPR_DAILY = Series(
     baseline_label="its 1985-2019 average",
     horizon=28,
     interval_steps=(7, 14, 28),
-    # GPR rewrites its last month every week; 90 days still catches a rewrite like its 2024 fix back to 2021.
+    # GPR rewrites its last month every week, and older days too: 148 of the authors' 277 weekly updates
+    # from 2022-03 to 2026-10 changed a day older than 90 days, single days by up to 57%. Counted as days
+    # moved by more than 1%, a normal update moved at most 77 (2024-05-13), and the February 2024 fix of
+    # missing articles since 2021 moved 298 to 746 in each of its four files. 150 sits about twice as far
+    # from both. The fix holds by design: a rewrite of years is for a human to review. A uniform shift of the
+    # whole history above 1%, as a rebase would make, holds too. Calibration: prototypes/gpr-realtime-backtest/
+    # revisions.py, docs/research/gpr-realtime-backtest.md "The deep-revision rule".
     revision_window=90,
+    deep_revision_tolerance=0.01,
+    deep_revision_days=150,
     # Updated on Mondays, Tuesdays after a US holiday, with data to that same day at about 18:00 UTC (the
     # authors' 2026 vintages): the 07:00 run sees data 1 to 7 days old, 8 in a holiday week.
     expected_lag=8,

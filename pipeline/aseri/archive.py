@@ -110,8 +110,13 @@ class RevisionHold(Exception):
 
 def check_revisions(
     archive_dir: Path, series: Series, observed: pd.Series, as_of: date
-) -> None:
-    """Raise RevisionHold if `observed` changes an archived value older than `series.revision_window` days before its newest."""
+) -> str | None:
+    """Raise RevisionHold if `observed` drops archived days, or rewrites more of them past the revision window than a normal update does.
+
+    Past `series.revision_window` days before its newest, more than `series.deep_revision_days` values
+    moved by more than `series.deep_revision_tolerance` hold the run. What passes there is recorded as
+    any revision is, and returned as a line for the run summary; None when nothing that old changed.
+    """
     known = as_of_view(archive_dir, series.id, as_of)
     # A broken file can be continuous and unchanged where it has data, yet shorter.
     # A day that has lost its value counts as dropped too: a gap the source opened in its history.
@@ -125,12 +130,32 @@ def check_revisions(
     revised = observation_delta(observed, known).index.intersection(known.index)
     oldest_allowed = observed.index[-1] - pd.Timedelta(days=series.revision_window)
     deep = revised[revised < oldest_allowed]
-    if len(deep):
+    if deep.empty:
+        return None
+    change = (observed[deep] - known[deep]).abs()
+    # Negated, so that a value blank before or now always counts as moved.
+    moved = deep[~(change <= series.deep_revision_tolerance * known[deep].abs())]
+    by = (
+        f" by more than {series.deep_revision_tolerance:.0%}"
+        if series.deep_revision_tolerance
+        else ""
+    )
+    window = f"{series.revision_window}-day revision window"
+    if len(moved) > series.deep_revision_days:
+        normal = (
+            f", more than the {series.deep_revision_days} a normal update moves"
+            if series.deep_revision_days
+            else ""
+        )
         raise RevisionHold(
-            f"{series.id}: upstream changed {len(deep)} archived values older than its "
-            f"{series.revision_window}-day revision window, the oldest on {deep.min():%Y-%m-%d}. "
+            f"{series.id}: upstream changed {len(moved)} archived values older than its "
+            f"{window}{by}, the oldest on {moved.min():%Y-%m-%d}{normal}. "
             "Nothing is archived or published until someone has reviewed the rewrite."
         )
+    return (
+        f"{len(deep)} archived values older than its {window} revised, the oldest on "
+        f"{deep.min():%Y-%m-%d}, {len(moved)}{by} (it holds above {series.deep_revision_days}): recorded"
+    )
 
 
 def timestamp(moment: datetime) -> str:

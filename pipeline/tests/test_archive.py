@@ -1,7 +1,9 @@
 import hashlib
 import json
 from dataclasses import replace
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
+from functools import partial
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -305,13 +307,98 @@ def since_2023(last_day="2026-10-26"):
     return pd.Series(100.0 + np.arange(len(days)) % 50, index=days)
 
 
-def test_a_rewrite_older_than_the_revision_window_holds_the_run(tmp_path):
+def test_on_the_default_rule_one_value_rewritten_past_the_window_holds_the_run(
+    tmp_path,
+):
+    # The registry's defaults, for a source whose revisions are unmeasured: any change that old holds.
+    unmeasured = replace(GPR_DAILY, deep_revision_tolerance=0.0, deep_revision_days=0)
     archive_run(tmp_path, [], since_2023(), date(2026, 10, 27))
     revised = since_2023()
-    revised["2023-05-01"] = 250.0
+    revised["2023-05-01"] += 0.01
 
-    with pytest.raises(archive.RevisionHold, match="90-day.*2023-05-01"):
-        archive.check_revisions(tmp_path, GPR_DAILY, revised, date(2026, 10, 28))
+    with pytest.raises(
+        archive.RevisionHold,
+        match="90-day revision window, the oldest on 2023-05-01\\.",
+    ):
+        archive.check_revisions(tmp_path, unmeasured, revised, date(2026, 10, 28))
+
+
+def test_a_normal_gpr_rewrite_past_the_window_passes_and_is_named(tmp_path):
+    archive_run(tmp_path, [], since_2023(), date(2026, 10, 27))
+    # A weekly update as GPR makes them: a new week, its last month revised, and old days moved too,
+    # 140 of them by 0.5% and 60 by up to 40% (58 past 1%), against 77 past 1% at most in a real update.
+    revised = since_2023("2026-11-02")
+    revised["2026-08-04":] += 1.5
+    revised.iloc[200:340] *= 1.005
+    revised.iloc[400:460] *= np.linspace(0.6, 1.4, 60)
+
+    passed = archive.check_revisions(tmp_path, GPR_DAILY, revised, date(2026, 11, 3))
+
+    assert passed == (
+        "200 archived values older than its 90-day revision window revised, the oldest on "
+        "2023-07-20, 58 by more than 1% (it holds above 150): recorded"
+    )
+    # Recorded as any revision is: the archive's view is the revised file.
+    archive_run(tmp_path, [], revised, date(2026, 11, 3))
+    assert archive.as_of_view(tmp_path, "gpr_daily", date(2026, 11, 3)).equals(revised)
+
+
+def test_a_gpr_method_change_holds_the_run(tmp_path):
+    archive_run(tmp_path, [], since_2023(), date(2026, 10, 27))
+    # A rebase: the whole history 3% higher, as a new base period or a new set of newspapers would make it.
+    rebased = since_2023("2026-11-02") * 1.03
+
+    with pytest.raises(
+        archive.RevisionHold,
+        match="changed 1311 archived values .* by more than 1%, the oldest on 2023-01-01, more than the 150",
+    ):
+        archive.check_revisions(tmp_path, GPR_DAILY, rebased, date(2026, 11, 3))
+
+
+# Real updates of the GPR authors' archive, recorded by prototypes/gpr-realtime-backtest/revisions.py: every
+# day each one changed or added, with its value before and after. The days it left alone are filled in.
+REAL_UPDATES = pd.read_csv(
+    Path(__file__).parent / "fixtures" / "gpr_revision_pairs.csv", parse_dates=["date"]
+)
+
+
+@pytest.mark.parametrize(
+    ("file", "holds"),
+    [
+        # The authors' fix of missing articles since 2021, held by design: 300 old days past 1%.
+        ("2024-02-05", True),
+        # The normal updates nearest the rule: the most old days past 1% (77 and 72), the most old days
+        # changed at all (130) and the largest relative change of one old day (57%).
+        ("2024-05-13", False),
+        ("2026-03-30", False),
+        ("2026-03-16", False),
+        ("2026-10-13", False),
+    ],
+)
+def test_real_gpr_updates_replay_as_calibrated(tmp_path, file, holds):
+    update = REAL_UPDATES[REAL_UPDATES["file"] == file]
+
+    def vintage(column):
+        values = update.set_index("date")[column].dropna()
+        return values.reindex(
+            pd.date_range(update["date"].min(), values.index[-1]), fill_value=100.0
+        )
+
+    before, after = vintage("before"), vintage("after")
+    archive_run(tmp_path, [], before, before.index[-1].date() + timedelta(days=1))
+    check = partial(
+        archive.check_revisions,
+        tmp_path,
+        GPR_DAILY,
+        after,
+        after.index[-1].date() + timedelta(days=1),
+    )
+
+    if holds:
+        with pytest.raises(archive.RevisionHold, match="by more than 1%"):
+            check()
+    else:
+        assert "recorded" in check()
 
 
 def test_revisions_within_the_window_and_new_days_pass(tmp_path):
