@@ -221,18 +221,25 @@ function ring(plot: Plot, x: number, y: number, color: string) {
 }
 
 // `path`, the last daily value then one value a day ahead: one of the model's paths, never a
-// median line, which reads as an average.
+// median line, which reads as an average. `scanned`, 0 to 1, is the share of the plot from the
+// left whose marks are drawn, as they scan in; the frame and the origin are whole from the start.
 export function paintChart(
   plot: Plot,
   chart: Layout,
   forecast: Forecast,
   color: Colors,
-  path: number[]
+  path: number[],
+  scanned = 1
 ) {
   const { left, right, top, bottom, x, y, first, origin } = chart
   const { values, averages, quantiles, actuals } = forecast
   const xo = x(origin)
   const last = values[origin]
+  // Up to the column past the right end, where what happened's ring ends.
+  const edge = left + scanned * (right + 2 - left)
+  const mark: Plot = (px, py, c) => {
+    if (px < edge) plot(px, py, c)
+  }
 
   // The forecast zone gets a diagonal hatch, like the empty slots in the game.
   for (let py = top; py <= bottom; py++)
@@ -255,18 +262,18 @@ export function paintChart(
         py === y10 ||
         bayer[(py % 4) * 4 + (px % 4)] < (inner ? 8 : 4)
       )
-        plot(px, py, color.band)
+        mark(px, py, color.band)
     }
   }
   polyline(
-    plot,
+    mark,
     path.map((value, k): Point => [x(origin + k), y(value)]),
     color.path
   )
 
   // The 7-day average, dimmer: context only, since the forecast is of the daily value.
   polyline(
-    plot,
+    mark,
     averages
       .slice(first)
       .map((average, i): Point => [x(first + i), y(average)]),
@@ -274,7 +281,7 @@ export function paintChart(
   )
   // The daily values, the quantity forecast, so the forecast carries on from where they end.
   polyline(
-    plot,
+    mark,
     values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
     color.daily
   )
@@ -287,7 +294,7 @@ export function paintChart(
   const ey = y(actuals[end] ?? last)
   // The line stays out of the ring, so its middle stays hollow.
   const line: Plot = (px, py, c) => {
-    if (Math.abs(px - ex) > 1 || Math.abs(py - ey) > 1) plot(px, py, c)
+    if (Math.abs(px - ex) > 1 || Math.abs(py - ey) > 1) mark(px, py, c)
   }
   const runs: Point[][] = [[[xo, y(last)]]]
   actuals.forEach((value, k) => {
@@ -301,6 +308,6 @@ export function paintChart(
 
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
-  square(plot, xo - 1, y(last) - 1, 3, color.daily)
-  if (end >= 0) ring(plot, ex - 1, ey - 1, color.real)
+  square(mark, xo - 1, y(last) - 1, 3, color.daily)
+  if (end >= 0) ring(mark, ex - 1, ey - 1, color.real)
 }

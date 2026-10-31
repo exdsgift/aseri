@@ -6,13 +6,33 @@ import actuals from "@/fixtures/series/gpr_daily/actuals.json"
 import latest from "@/fixtures/series/gpr_daily/latest.json"
 import replay from "@/fixtures/series/gpr_daily/replay.json"
 import { loadSeries, type Forecast } from "@/lib/api"
+import { chartLayout } from "@/lib/chart"
 import { path } from "@/lib/paths"
 
 import { PixelForecastChart } from "./PixelForecastChart"
 
-const drawn = (shown: Forecast) => (
-  <PixelForecastChart forecast={shown} path={path(shown, 0, 0)} summary="" />
+const drawn = (shown: Forecast, index = 0) => (
+  <PixelForecastChart
+    forecast={shown}
+    path={path(shown, 0, index)}
+    summary=""
+  />
 )
+
+// Each paint, as the art pixels it fills and the token each is filled with. The tokens of the
+// frame and the origin are named, the marks' left empty.
+let paints: { x: number; color: string }[][]
+const last = () => paints.at(-1)!
+const frame = () => last().filter(({ color }) => color)
+// How far right the marks reach in the last paint, in art pixels.
+const reach = () =>
+  Math.max(...last().flatMap(({ x, color }) => (color ? [] : [x])))
+// The page reads the one list jsdom's stand-in gives for the query (see test-setup.ts).
+const prefers = (reduce: boolean) =>
+  Object.assign(matchMedia("(prefers-reduced-motion: reduce)"), {
+    matches: reduce,
+  })
+const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))
 
 let resize: (width: number) => void
 let forecast: Forecast
@@ -39,10 +59,17 @@ beforeEach(async () => {
       disconnect() {}
     }
   )
+  paints = []
+  let fill = ""
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    clearRect() {},
-    fillRect() {},
+    clearRect: () => paints.push([]),
+    fillRect: (x: number) => last().push({ x, color: fill }),
+    set fillStyle(color: string) {
+      fill = color
+    },
   } as never)
+  document.head.innerHTML =
+    "<style>canvas { --border: frame; --secondary: origin }</style>"
   const published: Record<string, unknown> = {
     "api/v1/series/gpr_daily/latest.json": latest,
     "api/v1/series/gpr_daily/actuals.json": actuals,
@@ -53,8 +80,70 @@ beforeEach(async () => {
   forecast = forecasts.at(-1)!
   backtest = forecasts[0]
   older = forecasts.at(-11)!
+  // The scan steps on animation frames, timed by the frames' own clock.
+  vi.useFakeTimers({
+    toFake: ["requestAnimationFrame", "cancelAnimationFrame"],
+  })
 })
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+  prefers(false)
+})
+
+it("scans its marks in from the left, a step at a time with the hero's count-up, over a frame and labels there from the start", () => {
+  render(drawn(forecast))
+  resize(692)
+  const { left, right } = chartLayout(forecast, 692)
+
+  // The first frame reads at rest: the labels and the frame, and no mark yet.
+  expect(screen.queryByText("Next 28 days")).not.toBeNull()
+  expect(frame().length).toBeGreaterThan(0)
+  expect(reach()).toBe(-Infinity)
+  const reached = [reach()]
+  for (let ms = 0; ms < 600; ms += 40) {
+    wait(40)
+    reached.push(reach())
+  }
+  // Never back, never all at once: column by column, then slowing into the end.
+  expect(reached).toEqual(reached.toSorted((a, b) => a - b))
+  expect(new Set(reached).size).toBeGreaterThan(8)
+  expect(reached[3]).toBeGreaterThan(left)
+  expect(reached[3]).toBeLessThan(right)
+  // Done with the count-up, 640 ms in: the whole chart, and no frame asked for any more.
+  wait(80)
+  expect(reach()).toBe(right)
+  expect(vi.getTimerCount()).toBe(0)
+})
+
+it("draws its marks whole from the start under reduced motion", () => {
+  prefers(true)
+  render(drawn(forecast))
+  resize(692)
+
+  expect(paints).toHaveLength(1)
+  expect(reach()).toBe(chartLayout(forecast, 692).right)
+  expect(vi.getTimerCount()).toBe(0)
+})
+
+it("scans once a mount, never again for another path or a replay step", () => {
+  const { rerender } = render(drawn(forecast))
+  resize(692)
+  wait(200)
+  const midway = reach()
+
+  // Another path midway carries the scan on.
+  rerender(drawn(forecast, 1))
+  expect(reach()).toBe(midway)
+  wait(600)
+  expect(vi.getTimerCount()).toBe(0)
+  // After it, each change is drawn whole at once.
+  rerender(drawn(forecast, 2))
+  expect(reach()).toBe(chartLayout(forecast, 692).right)
+  rerender(drawn(older))
+  expect(reach()).toBe(chartLayout(older, 692).right)
+  expect(vi.getTimerCount()).toBe(0)
+})
 
 it("labels what happened on the last day, and on any day of a replay", () => {
   render(drawn(backtest))

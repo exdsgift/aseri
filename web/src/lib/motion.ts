@@ -7,7 +7,7 @@ import { formatValue } from "@/lib/format"
 export const easeOut = (k: number) => 1 - (1 - Math.min(Math.max(k, 0), 1)) ** 3
 
 // The count-up: 16 steps of 40 ms from 0 to the value.
-const countSteps = 16
+export const countSteps = 16
 export const countMs = 40
 
 // The share of the value the count shows `ms` after it started, step by step, so that

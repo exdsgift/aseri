@@ -24,9 +24,12 @@ import {
   type Layout,
 } from "@/lib/chart"
 import { daysAhead, formatValue, monthDay } from "@/lib/format"
+import { countMs, countSteps, counted, useSteps } from "@/lib/motion"
 
 // Lays the chart out to the width of its box, and paints it a pixel at a time in the page's tokens,
-// with `path`, one of the model's paths, on the forecast side.
+// with `path`, one of the model's paths, on the forecast side. Once a mount, never under reduced
+// motion, its marks scan in from the left, stepping with the hero's count-up and slowing into
+// the end a column at a time; the frame and the labels are there from the first frame.
 function usePixelChart<L extends Layout>(
   forecast: Forecast,
   layout: (forecast: Forecast, width: number) => L,
@@ -38,6 +41,8 @@ function usePixelChart<L extends Layout>(
     () => (width ? layout(forecast, width) : undefined),
     [forecast, width, layout]
   )
+  const step = useSteps(countSteps, countMs)
+  const scanned = step === undefined ? 1 : counted(step * countMs)
   const box = useCallback((element: HTMLElement | null) => {
     if (!element) return
     // At once too, before the first paint: a chart mounted as a new series opens would
@@ -68,9 +73,10 @@ function usePixelChart<L extends Layout>(
           css.getPropertyValue(name),
         ])
       ) as Colors,
-      path
+      path,
+      scanned
     )
-  }, [chart, forecast, path])
+  }, [chart, forecast, path, scanned])
 
   // Nothing until the box is measured: the canvas's default 300 px would widen it.
   const size = {
