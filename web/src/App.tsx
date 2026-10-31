@@ -120,7 +120,15 @@ export function App() {
         )}
       </main>
       {/* The hero's engraving is in the public domain, cropped and dithered for the page. */}
-      <footer className="mx-auto max-w-[72ch] px-4 pb-14 text-center text-[8px]/[14px] text-muted-foreground uppercase">
+      <footer className="mx-auto flex max-w-[72ch] flex-col gap-3.5 px-4 pb-14 text-center text-[8px]/[14px] text-muted-foreground uppercase">
+        <p>
+          <a
+            href="api/"
+            className="underline hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            The data, as an API, and its licences
+          </a>
+        </p>
         <p>
           Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury,
           probably 1592, National Gallery of Art, CC0.{" "}

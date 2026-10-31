@@ -14,6 +14,7 @@ import latest from "@/fixtures/series/gpr_daily/latest.json"
 import replay from "@/fixtures/series/gpr_daily/replay.json"
 import { monthDay } from "@/lib/format"
 
+import apiPage from "../api/index.html?raw"
 import page from "../index.html?raw"
 import { App } from "./App"
 
@@ -115,7 +116,7 @@ it("cautions when the site was last updated more than 2 days ago", async () => {
 
 // The words beside the numbers prevent the known misreadings: a median read as a promise,
 // a range read as false precision. Each "most likely" value comes after its range.
-it("keeps the copy honest, today and in replay, and in index.html's tags", async () => {
+it("keeps the copy honest, today and in replay, in index.html's tags and on the API's page", async () => {
   // A chart with a width draws its labels, and a tap on it opens a day's readout.
   vi.stubGlobal(
     "ResizeObserver",
@@ -183,8 +184,8 @@ it("keeps the copy honest, today and in replay, and in index.html's tags", async
   fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
   fireEvent.pointerDown(chart, { clientX: 692 })
   seen.push(copy())
-  const text = [...seen.map((s) => s.text), page].join(" ")
-  const medians = [...seen.flatMap((s) => s.medians), page]
+  const text = [...seen.map((s) => s.text), page, apiPage].join(" ")
+  const medians = [...seen.flatMap((s) => s.medians), page, apiPage]
 
   expect(text).not.toMatch(/\bwill\b/i)
   expect(text).not.toMatch(/%\s*confidence/i)
@@ -200,6 +201,29 @@ const bareMedians = (block: string) =>
     .split(/most likely:? (?=\d)/i)
     .slice(0, -1)
     .filter((before) => !/\d+ in 10\b.*?\d+(?:-| and )\d/i.test(before))
+
+// For dataset search engines: schema.org's Dataset, with what Google asks of one.
+it("describes the API's data as a schema.org Dataset, under aseri's licence", () => {
+  const block = apiPage.match(
+    /<script type="application\/ld\+json">([\s\S]*?)<\/script>/
+  )
+  const dataset = JSON.parse(block![1])
+
+  expect(dataset["@type"]).toBe("Dataset")
+  expect(dataset.name).toMatch(/^aseri/)
+  expect(dataset.description.length).toBeGreaterThanOrEqual(50)
+  expect(dataset.description.length).toBeLessThanOrEqual(5000)
+  expect(dataset.license).toBe(
+    "https://creativecommons.org/licenses/by-nc/4.0/"
+  )
+  expect(dataset.creditText).toBe(
+    "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)"
+  )
+  expect(dataset.variableMeasured).toHaveLength(9)
+  expect(dataset.distribution[0].contentUrl).toBe(
+    "https://exdsgift.github.io/aseri/api/v1/series.json"
+  )
+})
 
 it("finds a most likely value given without its range first", () => {
   expect(bareMedians("Nov 23: most likely 168 · 8 in 10: 111-251")).toEqual([
