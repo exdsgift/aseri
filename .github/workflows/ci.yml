@@ -40,3 +40,5 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      # Spec 6.8: under 150 KB gzipped of JS and CSS, under 100 KB of first-load data.
+      - run: node scripts/budget.js
