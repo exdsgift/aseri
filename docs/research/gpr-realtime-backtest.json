@@ -1,0 +1,1661 @@
+{
+  "issue": 145,
+  "series_id": "gpr_daily",
+  "model": {
+    "model_id": "aseri-timestral209m",
+    "weights_revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+    "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+  },
+  "vintages": {
+    "files": 295,
+    "used": 278,
+    "first": "2022-03-09",
+    "latest": "2026-10-26",
+    "rejected": {
+      "2022-02-24": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-02-25": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-02-28": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-03-01": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-03-02": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-03-03": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-03-04": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-03-07": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-03-08": "adapter: \"None of ['date'] are in the columns\"",
+      "2022-09-01": "adapter: GPR has missing days: expected one value for every day",
+      "2022-10-24": "adapter: GPR has missing days: expected one value for every day",
+      "2022-12-01": "adapter: GPR has missing days: expected one value for every day",
+      "2023-01-02": "archive hold: drops 118 days from 2022-09-01",
+      "2023-02-06": "adapter: GPR has missing days: expected one value for every day",
+      "2023-03-01": "adapter: GPR has missing days: expected one value for every day",
+      "2024-03-01": "adapter: GPR has missing days: expected one value for every day",
+      "2024-03-04": "adapter: GPR has missing days: expected one value for every day"
+    },
+    "last_day_not_file_date": {
+      "2022-10-03": "2022-09-30",
+      "2022-11-01": "2022-10-31",
+      "2023-11-01": "2023-10-30",
+      "2024-03-12": "2024-03-11",
+      "2024-08-01": "2024-07-31",
+      "2025-12-02": "2025-12-01"
+    },
+    "no_change": {
+      "2022-11-01": "2022-10-31",
+      "2023-11-01": "2023-10-30",
+      "2025-12-02": "2025-12-01"
+    },
+    "past_revision_window": {
+      "2022-05-09": {
+        "days": 24,
+        "oldest": "2022-01-01",
+        "largest_change": 0.7687
+      },
+      "2022-05-23": {
+        "days": 1,
+        "oldest": "2022-01-08",
+        "largest_change": 0.0403
+      },
+      "2022-05-31": {
+        "days": 1,
+        "oldest": "2022-02-22",
+        "largest_change": 0.4516
+      },
+      "2022-06-13": {
+        "days": 3,
+        "oldest": "2022-02-03",
+        "largest_change": 34.0963
+      },
+      "2022-07-05": {
+        "days": 19,
+        "oldest": "2022-01-15",
+        "largest_change": 12.999
+      },
+      "2022-07-11": {
+        "days": 14,
+        "oldest": "2022-03-06",
+        "largest_change": 3.1373
+      },
+      "2022-07-18": {
+        "days": 1,
+        "oldest": "2022-03-09",
+        "largest_change": 0.4229
+      },
+      "2022-07-25": {
+        "days": 1,
+        "oldest": "2022-03-23",
+        "largest_change": 0.4459
+      },
+      "2022-08-08": {
+        "days": 1,
+        "oldest": "2022-02-05",
+        "largest_change": 0.0488
+      },
+      "2022-08-29": {
+        "days": 74,
+        "oldest": "2022-01-01",
+        "largest_change": 6.7137
+      },
+      "2022-09-06": {
+        "days": 12,
+        "oldest": "2022-05-02",
+        "largest_change": 6.262
+      },
+      "2022-09-26": {
+        "days": 11,
+        "oldest": "2022-01-01",
+        "largest_change": 0.5353
+      },
+      "2022-10-11": {
+        "days": 21,
+        "oldest": "2022-01-09",
+        "largest_change": 0.6411
+      },
+      "2022-10-17": {
+        "days": 6,
+        "oldest": "2022-01-18",
+        "largest_change": 20.8666
+      },
+      "2022-10-31": {
+        "days": 28,
+        "oldest": "2022-03-08",
+        "largest_change": 0.6324
+      },
+      "2022-11-07": {
+        "days": 16,
+        "oldest": "2022-01-02",
+        "largest_change": 0.6098
+      },
+      "2022-11-14": {
+        "days": 3,
+        "oldest": "2022-05-28",
+        "largest_change": 0.1887
+      },
+      "2022-11-21": {
+        "days": 4,
+        "oldest": "2022-02-26",
+        "largest_change": 5.5105
+      },
+      "2022-12-05": {
+        "days": 1,
+        "oldest": "2022-05-09",
+        "largest_change": 6.9156
+      },
+      "2022-12-12": {
+        "days": 7,
+        "oldest": "2022-03-06",
+        "largest_change": 0.563
+      },
+      "2022-12-19": {
+        "days": 2,
+        "oldest": "2022-09-14",
+        "largest_change": 0.3809
+      },
+      "2023-01-23": {
+        "days": 1,
+        "oldest": "2022-05-22",
+        "largest_change": 0.1896
+      },
+      "2023-01-30": {
+        "days": 5,
+        "oldest": "2022-07-22",
+        "largest_change": 0.383
+      },
+      "2023-02-09": {
+        "days": 20,
+        "oldest": "2022-07-09",
+        "largest_change": 5.4663
+      },
+      "2023-03-06": {
+        "days": 1,
+        "oldest": "2022-11-18",
+        "largest_change": 0.1215
+      },
+      "2023-03-27": {
+        "days": 2,
+        "oldest": "2022-07-26",
+        "largest_change": 0.3072
+      },
+      "2023-04-10": {
+        "days": 1,
+        "oldest": "2022-03-30",
+        "largest_change": 0.4212
+      },
+      "2023-04-17": {
+        "days": 2,
+        "oldest": "2022-02-06",
+        "largest_change": 0.2017
+      },
+      "2023-04-24": {
+        "days": 2,
+        "oldest": "2022-07-26",
+        "largest_change": 0.3084
+      },
+      "2023-05-01": {
+        "days": 1,
+        "oldest": "2022-04-25",
+        "largest_change": 0.5613
+      },
+      "2023-05-08": {
+        "days": 39,
+        "oldest": "2022-01-14",
+        "largest_change": 3.0745
+      },
+      "2023-05-15": {
+        "days": 20,
+        "oldest": "2022-08-06",
+        "largest_change": 0.725
+      },
+      "2023-05-22": {
+        "days": 1,
+        "oldest": "2022-12-23",
+        "largest_change": 0.2488
+      },
+      "2023-05-30": {
+        "days": 1,
+        "oldest": "2022-07-21",
+        "largest_change": 0.4485
+      },
+      "2023-06-20": {
+        "days": 10,
+        "oldest": "2023-03-09",
+        "largest_change": 0.5219
+      },
+      "2023-06-26": {
+        "days": 1,
+        "oldest": "2023-02-27",
+        "largest_change": 0.3047
+      },
+      "2023-07-17": {
+        "days": 12,
+        "oldest": "2023-01-14",
+        "largest_change": 0.4513
+      },
+      "2023-07-24": {
+        "days": 1,
+        "oldest": "2023-01-05",
+        "largest_change": 0.1905
+      },
+      "2023-07-31": {
+        "days": 3,
+        "oldest": "2023-01-22",
+        "largest_change": 0.2308
+      },
+      "2023-08-01": {
+        "days": 6,
+        "oldest": "2022-12-23",
+        "largest_change": 1.1504
+      },
+      "2023-08-07": {
+        "days": 8,
+        "oldest": "2023-01-02",
+        "largest_change": 6.8441
+      },
+      "2023-08-21": {
+        "days": 11,
+        "oldest": "2023-01-06",
+        "largest_change": 0.3945
+      },
+      "2023-08-28": {
+        "days": 1,
+        "oldest": "2023-02-26",
+        "largest_change": 0.2291
+      },
+      "2023-09-05": {
+        "days": 127,
+        "oldest": "2022-09-09",
+        "largest_change": 6.1344
+      },
+      "2023-09-18": {
+        "days": 2,
+        "oldest": "2023-01-11",
+        "largest_change": 0.2633
+      },
+      "2023-09-25": {
+        "days": 47,
+        "oldest": "2023-01-09",
+        "largest_change": 0.7624
+      },
+      "2023-10-02": {
+        "days": 10,
+        "oldest": "2022-03-24",
+        "largest_change": 0.9546
+      },
+      "2023-10-10": {
+        "days": 29,
+        "oldest": "2022-01-01",
+        "largest_change": 0.7663
+      },
+      "2023-10-16": {
+        "days": 44,
+        "oldest": "2022-01-17",
+        "largest_change": 10.5664
+      },
+      "2023-10-19": {
+        "days": 1,
+        "oldest": "2023-05-27",
+        "largest_change": 0.131
+      },
+      "2023-11-06": {
+        "days": 5,
+        "oldest": "2022-03-12",
+        "largest_change": 19.9853
+      },
+      "2023-11-13": {
+        "days": 27,
+        "oldest": "2023-01-17",
+        "largest_change": 0.4182
+      },
+      "2023-11-20": {
+        "days": 7,
+        "oldest": "2022-02-06",
+        "largest_change": 7.4664
+      },
+      "2023-12-01": {
+        "days": 32,
+        "oldest": "2022-12-23",
+        "largest_change": 6.5726
+      },
+      "2023-12-05": {
+        "days": 1,
+        "oldest": "2022-07-20",
+        "largest_change": 5.8217
+      },
+      "2023-12-11": {
+        "days": 1,
+        "oldest": "2022-05-10",
+        "largest_change": 6.2619
+      },
+      "2023-12-18": {
+        "days": 65,
+        "oldest": "2023-01-12",
+        "largest_change": 7.1341
+      },
+      "2023-12-27": {
+        "days": 5,
+        "oldest": "2022-02-17",
+        "largest_change": 0.3464
+      },
+      "2024-01-08": {
+        "days": 36,
+        "oldest": "2023-06-24",
+        "largest_change": 11.9548
+      },
+      "2024-01-16": {
+        "days": 23,
+        "oldest": "2023-01-05",
+        "largest_change": 2.677
+      },
+      "2024-01-29": {
+        "days": 3,
+        "oldest": "2023-08-17",
+        "largest_change": 0.2276
+      },
+      "2024-02-05": {
+        "days": 300,
+        "oldest": "2023-01-03",
+        "largest_change": 46.0515
+      },
+      "2024-02-07": {
+        "days": 881,
+        "oldest": "2021-01-04",
+        "largest_change": 52.5805
+      },
+      "2024-02-12": {
+        "days": 298,
+        "oldest": "2023-01-13",
+        "largest_change": 52.5805
+      },
+      "2024-02-20": {
+        "days": 306,
+        "oldest": "2023-01-13",
+        "largest_change": 52.5805
+      },
+      "2024-03-25": {
+        "days": 2,
+        "oldest": "2023-01-13",
+        "largest_change": 6.0228
+      },
+      "2024-04-08": {
+        "days": 3,
+        "oldest": "2023-09-04",
+        "largest_change": 0.2737
+      },
+      "2024-04-22": {
+        "days": 2,
+        "oldest": "2023-01-13",
+        "largest_change": 6.0228
+      },
+      "2024-05-06": {
+        "days": 4,
+        "oldest": "2024-01-17",
+        "largest_change": 10.7204
+      },
+      "2024-05-13": {
+        "days": 83,
+        "oldest": "2023-01-02",
+        "largest_change": 21.0545
+      },
+      "2024-05-20": {
+        "days": 1,
+        "oldest": "2023-10-20",
+        "largest_change": 0.4994
+      },
+      "2024-05-28": {
+        "days": 28,
+        "oldest": "2023-01-20",
+        "largest_change": 0.4816
+      },
+      "2024-06-10": {
+        "days": 5,
+        "oldest": "2024-01-27",
+        "largest_change": 0.2686
+      },
+      "2024-06-24": {
+        "days": 1,
+        "oldest": "2023-12-01",
+        "largest_change": 0.1693
+      },
+      "2024-09-03": {
+        "days": 2,
+        "oldest": "2023-11-01",
+        "largest_change": 0.6835
+      },
+      "2024-09-30": {
+        "days": 12,
+        "oldest": "2024-04-19",
+        "largest_change": 0.4582
+      },
+      "2024-10-07": {
+        "days": 4,
+        "oldest": "2024-05-11",
+        "largest_change": 0.6782
+      },
+      "2024-10-15": {
+        "days": 1,
+        "oldest": "2024-06-26",
+        "largest_change": 0.2399
+      },
+      "2024-10-21": {
+        "days": 68,
+        "oldest": "2023-12-07",
+        "largest_change": 10.8672
+      },
+      "2024-10-28": {
+        "days": 2,
+        "oldest": "2023-10-20",
+        "largest_change": 0.4994
+      },
+      "2024-11-12": {
+        "days": 32,
+        "oldest": "2023-05-27",
+        "largest_change": 5.8546
+      },
+      "2024-11-18": {
+        "days": 10,
+        "oldest": "2023-03-10",
+        "largest_change": 2.7379
+      },
+      "2024-12-16": {
+        "days": 1,
+        "oldest": "2023-09-14",
+        "largest_change": 5.7113
+      },
+      "2024-12-23": {
+        "days": 28,
+        "oldest": "2023-12-20",
+        "largest_change": 34.2384
+      },
+      "2025-01-13": {
+        "days": 45,
+        "oldest": "2024-06-13",
+        "largest_change": 6.8441
+      },
+      "2025-02-10": {
+        "days": 3,
+        "oldest": "2024-01-01",
+        "largest_change": 9.8589
+      },
+      "2025-02-18": {
+        "days": 1,
+        "oldest": "2024-10-05",
+        "largest_change": 0.1134
+      },
+      "2025-02-24": {
+        "days": 1,
+        "oldest": "2024-08-15",
+        "largest_change": 6.3459
+      },
+      "2025-03-03": {
+        "days": 2,
+        "oldest": "2024-01-27",
+        "largest_change": 6.123
+      },
+      "2025-04-07": {
+        "days": 8,
+        "oldest": "2024-10-26",
+        "largest_change": 0.3562
+      },
+      "2025-05-01": {
+        "days": 35,
+        "oldest": "2024-10-20",
+        "largest_change": 8.8571
+      },
+      "2025-05-12": {
+        "days": 9,
+        "oldest": "2024-02-18",
+        "largest_change": 3.5904
+      },
+      "2025-05-27": {
+        "days": 36,
+        "oldest": "2025-01-01",
+        "largest_change": 5.3622
+      },
+      "2025-06-16": {
+        "days": 1,
+        "oldest": "2025-01-22",
+        "largest_change": 0.2777
+      },
+      "2025-06-30": {
+        "days": 3,
+        "oldest": "2024-10-30",
+        "largest_change": 0.2467
+      },
+      "2025-07-21": {
+        "days": 1,
+        "oldest": "2025-04-21",
+        "largest_change": 0.33
+      },
+      "2025-07-28": {
+        "days": 1,
+        "oldest": "2025-04-05",
+        "largest_change": 19.8357
+      },
+      "2025-08-01": {
+        "days": 1,
+        "oldest": "2025-04-26",
+        "largest_change": 36.0061
+      },
+      "2025-08-11": {
+        "days": 1,
+        "oldest": "2025-03-29",
+        "largest_change": 31.7498
+      },
+      "2025-08-18": {
+        "days": 1,
+        "oldest": "2024-10-08",
+        "largest_change": 0.1952
+      },
+      "2025-08-25": {
+        "days": 7,
+        "oldest": "2025-03-08",
+        "largest_change": 50.1904
+      },
+      "2025-09-08": {
+        "days": 3,
+        "oldest": "2025-03-08",
+        "largest_change": 50.1904
+      },
+      "2025-09-15": {
+        "days": 5,
+        "oldest": "2025-03-22",
+        "largest_change": 36.0061
+      },
+      "2025-09-22": {
+        "days": 1,
+        "oldest": "2025-05-29",
+        "largest_change": 0.2921
+      },
+      "2025-10-01": {
+        "days": 4,
+        "oldest": "2025-03-29",
+        "largest_change": 38.4066
+      },
+      "2025-10-06": {
+        "days": 1,
+        "oldest": "2025-06-14",
+        "largest_change": 38.4066
+      },
+      "2025-10-14": {
+        "days": 3,
+        "oldest": "2025-05-25",
+        "largest_change": 0.36
+      },
+      "2025-10-20": {
+        "days": 2,
+        "oldest": "2025-03-08",
+        "largest_change": 50.1904
+      },
+      "2025-11-03": {
+        "days": 10,
+        "oldest": "2024-12-19",
+        "largest_change": 47.8349
+      },
+      "2025-11-12": {
+        "days": 22,
+        "oldest": "2024-01-03",
+        "largest_change": 50.1904
+      },
+      "2025-11-17": {
+        "days": 5,
+        "oldest": "2025-04-26",
+        "largest_change": 38.4066
+      },
+      "2025-12-01": {
+        "days": 5,
+        "oldest": "2025-05-03",
+        "largest_change": 22.8453
+      },
+      "2025-12-09": {
+        "days": 1,
+        "oldest": "2025-07-05",
+        "largest_change": 5.3342
+      },
+      "2025-12-15": {
+        "days": 1,
+        "oldest": "2025-08-03",
+        "largest_change": 0.2696
+      },
+      "2026-01-12": {
+        "days": 33,
+        "oldest": "2025-01-22",
+        "largest_change": 0.4812
+      },
+      "2026-01-26": {
+        "days": 3,
+        "oldest": "2025-07-10",
+        "largest_change": 0.2572
+      },
+      "2026-02-09": {
+        "days": 10,
+        "oldest": "2025-05-25",
+        "largest_change": 5.7912
+      },
+      "2026-02-17": {
+        "days": 18,
+        "oldest": "2025-03-15",
+        "largest_change": 41.7076
+      },
+      "2026-02-23": {
+        "days": 1,
+        "oldest": "2025-10-18",
+        "largest_change": 20.4796
+      },
+      "2026-03-02": {
+        "days": 1,
+        "oldest": "2025-11-02",
+        "largest_change": 0.1424
+      },
+      "2026-03-09": {
+        "days": 14,
+        "oldest": "2025-01-26",
+        "largest_change": 12.766
+      },
+      "2026-03-16": {
+        "days": 130,
+        "oldest": "2025-01-01",
+        "largest_change": 36.5154
+      },
+      "2026-03-23": {
+        "days": 8,
+        "oldest": "2025-05-13",
+        "largest_change": 5.3688
+      },
+      "2026-03-30": {
+        "days": 86,
+        "oldest": "2025-07-23",
+        "largest_change": 40.9521
+      },
+      "2026-04-01": {
+        "days": 9,
+        "oldest": "2025-07-25",
+        "largest_change": 0.8674
+      },
+      "2026-04-13": {
+        "days": 2,
+        "oldest": "2025-03-15",
+        "largest_change": 58.0304
+      },
+      "2026-04-20": {
+        "days": 3,
+        "oldest": "2025-02-26",
+        "largest_change": 58.0304
+      },
+      "2026-04-27": {
+        "days": 4,
+        "oldest": "2025-05-10",
+        "largest_change": 14.4338
+      },
+      "2026-05-01": {
+        "days": 2,
+        "oldest": "2025-06-21",
+        "largest_change": 37.5818
+      },
+      "2026-05-18": {
+        "days": 1,
+        "oldest": "2025-03-29",
+        "largest_change": 31.9102
+      },
+      "2026-05-26": {
+        "days": 2,
+        "oldest": "2025-08-30",
+        "largest_change": 11.1722
+      },
+      "2026-06-22": {
+        "days": 1,
+        "oldest": "2025-09-13",
+        "largest_change": 19.6883
+      },
+      "2026-06-29": {
+        "days": 5,
+        "oldest": "2025-03-22",
+        "largest_change": 29.3148
+      },
+      "2026-07-01": {
+        "days": 4,
+        "oldest": "2025-12-27",
+        "largest_change": 22.047
+      },
+      "2026-07-27": {
+        "days": 3,
+        "oldest": "2025-03-15",
+        "largest_change": 56.6251
+      },
+      "2026-08-03": {
+        "days": 4,
+        "oldest": "2025-04-15",
+        "largest_change": 0.2532
+      },
+      "2026-08-10": {
+        "days": 3,
+        "oldest": "2025-11-23",
+        "largest_change": 0.7051
+      },
+      "2026-08-24": {
+        "days": 2,
+        "oldest": "2026-04-18",
+        "largest_change": 48.7143
+      },
+      "2026-08-31": {
+        "days": 9,
+        "oldest": "2025-03-15",
+        "largest_change": 41.7076
+      },
+      "2026-09-08": {
+        "days": 2,
+        "oldest": "2026-01-17",
+        "largest_change": 0.5363
+      },
+      "2026-09-14": {
+        "days": 12,
+        "oldest": "2025-05-10",
+        "largest_change": 36.8648
+      },
+      "2026-09-21": {
+        "days": 7,
+        "oldest": "2025-05-24",
+        "largest_change": 58.0304
+      },
+      "2026-09-28": {
+        "days": 3,
+        "oldest": "2025-05-31",
+        "largest_change": 0.4796
+      },
+      "2026-10-01": {
+        "days": 5,
+        "oldest": "2025-07-19",
+        "largest_change": 62.1494
+      },
+      "2026-10-05": {
+        "days": 2,
+        "oldest": "2025-10-25",
+        "largest_change": 8.1679
+      },
+      "2026-10-13": {
+        "days": 9,
+        "oldest": "2025-06-28",
+        "largest_change": 58.0304
+      },
+      "2026-10-19": {
+        "days": 2,
+        "oldest": "2026-05-23",
+        "largest_change": 21.2004
+      },
+      "2026-10-26": {
+        "days": 1,
+        "oldest": "2025-11-01",
+        "largest_change": 10.755
+      }
+    }
+  },
+  "origins": {
+    "n": 232,
+    "first": "2022-03-09",
+    "last": "2026-08-24"
+  },
+  "method": {
+    "as_of": "a vintage's as_of is the day after its file's date, the first 07:00 UTC run that could see it",
+    "origins": "the first vintage of each week (Monday to Sunday), forecast from its last day, horizons 1 to 28; only origins whose every target is settled by the latest vintage",
+    "real_time": "context: the vintage of the origin's day, through archive.view; truth: each target's value as known 35 days after it, record.settled",
+    "latest_vintage": "context and truth: the 2026-10-26 vintage",
+    "baselines": "computed by scoring.score from each version's own context",
+    "bootstrap": "scoring.bootstrap, stationary, mean block 4 weekly origins, 2000 resamples, seed 0, 95%",
+    "coverage_interval": "Clopper-Pearson, exact, 95%, over the scored days, too narrow for overlapping origins"
+  },
+  "runtime_s": {
+    "forecasts": 2054,
+    "per_forecast": 4.43
+  },
+  "revisions_pct": {
+    "real_time_vs_settled_age_0-6": {
+      "median_abs": 8.4885,
+      "median": 1.1644,
+      "mean": 2.9079,
+      "share_over_1pct": 0.8835
+    },
+    "real_time_vs_settled_age_7-27": {
+      "median_abs": 7.0563,
+      "median": 0.2095,
+      "mean": 3.3712,
+      "share_over_1pct": 0.7188
+    },
+    "real_time_vs_latest_age_0-6": {
+      "median_abs": 10.3668,
+      "median": 4.6737,
+      "mean": 5.4953,
+      "share_over_1pct": 0.9261
+    },
+    "real_time_vs_latest_age_7-27": {
+      "median_abs": 9.7745,
+      "median": 5.2589,
+      "mean": 6.057,
+      "share_over_1pct": 0.9139
+    },
+    "settled_vs_latest_all": {
+      "median_abs": 2.6898,
+      "median": 0.3846,
+      "mean": 2.7615,
+      "share_over_1pct": 0.5932
+    },
+    "settled_vs_latest_before_2024_02_05": {
+      "median_abs": 3.8278,
+      "median": 1.2754,
+      "mean": 1.9701,
+      "share_over_1pct": 0.709
+    },
+    "settled_vs_latest_from_2024_02_05": {
+      "median_abs": 1.0638,
+      "median": 0.207,
+      "mean": 3.3598,
+      "share_over_1pct": 0.5057
+    }
+  },
+  "scores": {
+    "real_time": {
+      "1-7": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 783,
+          "targets": 1624,
+          "rate": 0.4821,
+          "ci": [
+            0.4576,
+            0.5068
+          ]
+        },
+        "coverage_80": {
+          "hits": 1269,
+          "targets": 1624,
+          "rate": 0.7814,
+          "ci": [
+            0.7605,
+            0.8013
+          ]
+        },
+        "below_80": 0.1151,
+        "above_80": 0.1034,
+        "wis": {
+          "wis": 24.4547,
+          "dispersion": 9.3469,
+          "overprediction": 6.5158,
+          "underprediction": 8.592,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6424,
+            "ci": [
+              0.6036,
+              0.6884
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 35.3491,
+          "vs": {
+            "naive": {
+              "ratio": 0.6455,
+              "ci": [
+                0.605,
+                0.6942
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7458,
+              "ci": [
+                0.7165,
+                0.7762
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.7961,
+              "ci": [
+                0.7486,
+                0.843
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      },
+      "8-28": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 2470,
+          "targets": 4872,
+          "rate": 0.507,
+          "ci": [
+            0.4928,
+            0.5211
+          ]
+        },
+        "coverage_80": {
+          "hits": 3842,
+          "targets": 4872,
+          "rate": 0.7886,
+          "ci": [
+            0.7768,
+            0.8
+          ]
+        },
+        "below_80": 0.103,
+        "above_80": 0.1084,
+        "wis": {
+          "wis": 27.6071,
+          "dispersion": 10.2522,
+          "overprediction": 5.9162,
+          "underprediction": 11.4387,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6311,
+            "ci": [
+              0.5844,
+              0.6794
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 39.2026,
+          "vs": {
+            "naive": {
+              "ratio": 0.6317,
+              "ci": [
+                0.5866,
+                0.6781
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7311,
+              "ci": [
+                0.6974,
+                0.7633
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.8088,
+              "ci": [
+                0.7608,
+                0.8498
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      }
+    },
+    "latest_vintage": {
+      "1-7": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 816,
+          "targets": 1624,
+          "rate": 0.5025,
+          "ci": [
+            0.4779,
+            0.5271
+          ]
+        },
+        "coverage_80": {
+          "hits": 1302,
+          "targets": 1624,
+          "rate": 0.8017,
+          "ci": [
+            0.7815,
+            0.8209
+          ]
+        },
+        "below_80": 0.1034,
+        "above_80": 0.0948,
+        "wis": {
+          "wis": 22.1151,
+          "dispersion": 8.9114,
+          "overprediction": 5.2947,
+          "underprediction": 7.9089,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6495,
+            "ci": [
+              0.6157,
+              0.6886
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 32.2713,
+          "vs": {
+            "naive": {
+              "ratio": 0.6607,
+              "ci": [
+                0.6247,
+                0.7019
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7499,
+              "ci": [
+                0.7241,
+                0.7777
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.7617,
+              "ci": [
+                0.7181,
+                0.8081
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      },
+      "8-28": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 2507,
+          "targets": 4872,
+          "rate": 0.5146,
+          "ci": [
+            0.5004,
+            0.5287
+          ]
+        },
+        "coverage_80": {
+          "hits": 3918,
+          "targets": 4872,
+          "rate": 0.8042,
+          "ci": [
+            0.7928,
+            0.8152
+          ]
+        },
+        "below_80": 0.0915,
+        "above_80": 0.1043,
+        "wis": {
+          "wis": 25.9155,
+          "dispersion": 9.8467,
+          "overprediction": 5.2446,
+          "underprediction": 10.8242,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6433,
+            "ci": [
+              0.5929,
+              0.6925
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 37.0424,
+          "vs": {
+            "naive": {
+              "ratio": 0.6455,
+              "ci": [
+                0.5967,
+                0.6953
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7507,
+              "ci": [
+                0.708,
+                0.791
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.786,
+              "ci": [
+                0.7247,
+                0.838
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      }
+    },
+    "real_time_inputs_latest_truth": {
+      "1-7": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 800,
+          "targets": 1624,
+          "rate": 0.4926,
+          "ci": [
+            0.468,
+            0.5172
+          ]
+        },
+        "coverage_80": {
+          "hits": 1287,
+          "targets": 1624,
+          "rate": 0.7925,
+          "ci": [
+            0.7719,
+            0.812
+          ]
+        },
+        "below_80": 0.1293,
+        "above_80": 0.0782,
+        "wis": {
+          "wis": 23.2759,
+          "dispersion": 9.3469,
+          "overprediction": 6.9631,
+          "underprediction": 6.9659,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6123,
+            "ci": [
+              0.574,
+              0.6567
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 33.6856,
+          "vs": {
+            "naive": {
+              "ratio": 0.6144,
+              "ci": [
+                0.5737,
+                0.6613
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7213,
+              "ci": [
+                0.6929,
+                0.7534
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.7668,
+              "ci": [
+                0.7221,
+                0.8117
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      },
+      "8-28": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 2530,
+          "targets": 4872,
+          "rate": 0.5193,
+          "ci": [
+            0.5052,
+            0.5334
+          ]
+        },
+        "coverage_80": {
+          "hits": 3940,
+          "targets": 4872,
+          "rate": 0.8087,
+          "ci": [
+            0.7974,
+            0.8197
+          ]
+        },
+        "below_80": 0.1039,
+        "above_80": 0.0874,
+        "wis": {
+          "wis": 26.1305,
+          "dispersion": 10.2522,
+          "overprediction": 6.1923,
+          "underprediction": 9.686,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6024,
+            "ci": [
+              0.558,
+              0.6477
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 37.175,
+          "vs": {
+            "naive": {
+              "ratio": 0.6027,
+              "ci": [
+                0.5596,
+                0.6481
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7051,
+              "ci": [
+                0.672,
+                0.7375
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.7696,
+              "ci": [
+                0.7186,
+                0.8133
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      }
+    },
+    "latest_inputs_settled_truth": {
+      "1-7": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 809,
+          "targets": 1624,
+          "rate": 0.4982,
+          "ci": [
+            0.4735,
+            0.5228
+          ]
+        },
+        "coverage_80": {
+          "hits": 1261,
+          "targets": 1624,
+          "rate": 0.7765,
+          "ci": [
+            0.7554,
+            0.7965
+          ]
+        },
+        "below_80": 0.0998,
+        "above_80": 0.1238,
+        "wis": {
+          "wis": 23.6157,
+          "dispersion": 8.9114,
+          "overprediction": 4.9993,
+          "underprediction": 9.7049,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6908,
+            "ci": [
+              0.6518,
+              0.7333
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 34.2506,
+          "vs": {
+            "naive": {
+              "ratio": 0.7001,
+              "ci": [
+                0.6601,
+                0.7422
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7719,
+              "ci": [
+                0.7471,
+                0.7977
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.7939,
+              "ci": [
+                0.746,
+                0.8434
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      },
+      "8-28": {
+        "origins": 232,
+        "coverage_50": {
+          "hits": 2412,
+          "targets": 4872,
+          "rate": 0.4951,
+          "ci": [
+            0.4809,
+            0.5092
+          ]
+        },
+        "coverage_80": {
+          "hits": 3825,
+          "targets": 4872,
+          "rate": 0.7851,
+          "ci": [
+            0.7733,
+            0.7966
+          ]
+        },
+        "below_80": 0.092,
+        "above_80": 0.1229,
+        "wis": {
+          "wis": 27.5839,
+          "dispersion": 9.8467,
+          "overprediction": 5.0237,
+          "underprediction": 12.7134,
+          "vs_probabilistic_naive": {
+            "ratio": 0.6776,
+            "ci": [
+              0.6231,
+              0.7308
+            ],
+            "verdict": "beats"
+          }
+        },
+        "ae_median": {
+          "mean": 39.2623,
+          "vs": {
+            "naive": {
+              "ratio": 0.6803,
+              "ci": [
+                0.6277,
+                0.7316
+              ],
+              "verdict": "beats"
+            },
+            "snaive7": {
+              "ratio": 0.7742,
+              "ci": [
+                0.733,
+                0.8123
+              ],
+              "verdict": "beats"
+            },
+            "mean28": {
+              "ratio": 0.824,
+              "ci": [
+                0.7634,
+                0.8744
+              ],
+              "verdict": "beats"
+            }
+          }
+        }
+      }
+    }
+  },
+  "gap_real_time_minus_latest": {
+    "all": {
+      "1-7": {
+        "wis": {
+          "value": 2.3396,
+          "ci": [
+            1.6049,
+            3.1276
+          ]
+        },
+        "ae_median": {
+          "value": 3.0778,
+          "ci": [
+            2.0782,
+            4.1422
+          ]
+        },
+        "interval_coverage_50": {
+          "value": -0.0203,
+          "ci": [
+            -0.0419,
+            0.0018
+          ]
+        },
+        "interval_coverage_80": {
+          "value": -0.0203,
+          "ci": [
+            -0.0351,
+            -0.0062
+          ]
+        },
+        "wis_ratio": {
+          "value": 1.1058,
+          "ci": [
+            1.0718,
+            1.1399
+          ]
+        },
+        "ae_median_ratio": {
+          "value": 1.0954,
+          "ci": [
+            1.0636,
+            1.1285
+          ]
+        }
+      },
+      "8-28": {
+        "wis": {
+          "value": 1.6916,
+          "ci": [
+            0.9309,
+            2.4097
+          ]
+        },
+        "ae_median": {
+          "value": 2.1602,
+          "ci": [
+            1.1866,
+            3.0599
+          ]
+        },
+        "interval_coverage_50": {
+          "value": -0.0076,
+          "ci": [
+            -0.0226,
+            0.0099
+          ]
+        },
+        "interval_coverage_80": {
+          "value": -0.0156,
+          "ci": [
+            -0.0259,
+            -0.0047
+          ]
+        },
+        "wis_ratio": {
+          "value": 1.0653,
+          "ci": [
+            1.0351,
+            1.0932
+          ]
+        },
+        "ae_median_ratio": {
+          "value": 1.0583,
+          "ci": [
+            1.0307,
+            1.0842
+          ]
+        }
+      }
+    },
+    "before_2024_02_05": {
+      "1-7": {
+        "wis": {
+          "value": 2.0004,
+          "ci": [
+            1.2126,
+            3.012
+          ]
+        },
+        "ae_median": {
+          "value": 2.8492,
+          "ci": [
+            1.7698,
+            4.0592
+          ]
+        },
+        "interval_coverage_50": {
+          "value": -0.0175,
+          "ci": [
+            -0.0525,
+            0.0146
+          ]
+        },
+        "interval_coverage_80": {
+          "value": -0.0175,
+          "ci": [
+            -0.0335,
+            -0.0015
+          ]
+        },
+        "wis_ratio": {
+          "value": 1.1011,
+          "ci": [
+            1.0665,
+            1.1388
+          ]
+        },
+        "ae_median_ratio": {
+          "value": 1.0981,
+          "ci": [
+            1.0649,
+            1.1311
+          ]
+        }
+      },
+      "8-28": {
+        "wis": {
+          "value": 1.8479,
+          "ci": [
+            1.0363,
+            3.0146
+          ]
+        },
+        "ae_median": {
+          "value": 2.5428,
+          "ci": [
+            1.559,
+            3.7965
+          ]
+        },
+        "interval_coverage_50": {
+          "value": -0.0039,
+          "ci": [
+            -0.0258,
+            0.019
+          ]
+        },
+        "interval_coverage_80": {
+          "value": -0.0175,
+          "ci": [
+            -0.0272,
+            -0.0078
+          ]
+        },
+        "wis_ratio": {
+          "value": 1.0843,
+          "ci": [
+            1.0537,
+            1.1133
+          ]
+        },
+        "ae_median_ratio": {
+          "value": 1.0816,
+          "ci": [
+            1.0558,
+            1.1051
+          ]
+        }
+      }
+    },
+    "from_2024_02_05": {
+      "1-7": {
+        "wis": {
+          "value": 2.5876,
+          "ci": [
+            1.5171,
+            3.6315
+          ]
+        },
+        "ae_median": {
+          "value": 3.245,
+          "ci": [
+            1.7394,
+            4.6995
+          ]
+        },
+        "interval_coverage_50": {
+          "value": -0.0224,
+          "ci": [
+            -0.0544,
+            0.0085
+          ]
+        },
+        "interval_coverage_80": {
+          "value": -0.0224,
+          "ci": [
+            -0.0437,
+            -0.0011
+          ]
+        },
+        "wis_ratio": {
+          "value": 1.1086,
+          "ci": [
+            1.0628,
+            1.1526
+          ]
+        },
+        "ae_median_ratio": {
+          "value": 1.0937,
+          "ci": [
+            1.048,
+            1.1394
+          ]
+        }
+      },
+      "8-28": {
+        "wis": {
+          "value": 1.5772,
+          "ci": [
+            0.5452,
+            2.5505
+          ]
+        },
+        "ae_median": {
+          "value": 1.8804,
+          "ci": [
+            0.4318,
+            3.2553
+          ]
+        },
+        "interval_coverage_50": {
+          "value": -0.0103,
+          "ci": [
+            -0.0316,
+            0.0117
+          ]
+        },
+        "interval_coverage_80": {
+          "value": -0.0142,
+          "ci": [
+            -0.0306,
+            0.0028
+          ]
+        },
+        "wis_ratio": {
+          "value": 1.0547,
+          "ci": [
+            1.0174,
+            1.0949
+          ]
+        },
+        "ae_median_ratio": {
+          "value": 1.0455,
+          "ci": [
+            1.0099,
+            1.0858
+          ]
+        }
+      }
+    }
+  }
+}
