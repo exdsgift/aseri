@@ -26,6 +26,10 @@ export const monthDay = (isoDate: string) =>
 export const dayLabel = (isoDate: string) =>
   `${weekday(isoDate)} ${monthDay(isoDate)}`
 
+// What a step is, in words: "days", or Brent's "trading days"; "day" for one.
+export const dayWord = (horizonUnit: string, count = 2) =>
+  `${horizonUnit === "trading_day" ? "trading " : ""}${count === 1 ? "day" : "days"}`
+
 // Steps ahead in words: "1 day", "14 days", or Brent's "14 trading days".
 export const daysAhead = (count: number, horizonUnit: string) =>
-  `${count} ${horizonUnit === "trading_day" ? "trading " : ""}${count === 1 ? "day" : "days"}`
+  `${count} ${dayWord(horizonUnit, count)}`

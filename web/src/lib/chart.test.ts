@@ -299,6 +299,63 @@ describe("valueScale", () => {
   it("never goes below zero", () => {
     expect(valueScale([2, 100], 0, 100).lo).toBe(0)
   })
+
+  it("goes below zero as far as a negative value, such as a drone correction", () => {
+    expect(valueScale([-50, 1500], 0, 100).lo).toBe(-50)
+  })
+})
+
+describe("a day with no value", () => {
+  const forecast: Forecast = {
+    series: "",
+    unit: "",
+    attribution: "",
+    dates: Array(40).fill(""),
+    values: Array(40).fill(1500),
+    averages: Array(40).fill(1500),
+    targetDates: Array(7).fill(""),
+    quantiles: Object.fromEntries(
+      [
+        ["0.05", 1200],
+        ["0.1", 1300],
+        ["0.25", 1400],
+        ["0.5", 1500],
+        ["0.75", 1600],
+        ["0.9", 1700],
+        ["0.95", 1800],
+      ].map(([level, value]) => [level, Array(7).fill(value)])
+    ),
+    // The drones' day without a report, on the second day ahead.
+    actuals: [1600, null, 1700],
+    backtest: true,
+  }
+
+  it("is left out of the scale, which never falls to 0 for it", () => {
+    expect(chartLayout(forecast, 692).lo).toBeGreaterThan(1000)
+  })
+
+  it("draws no dot of what happened", () => {
+    const chart = chartLayout(forecast, 692)
+    const dots: number[] = []
+    paintChart(
+      (x, _y, color) => color === "real" && dots.push(x),
+      chart,
+      forecast,
+      {
+        gold: "gold",
+        pale: "pale",
+        muted: "muted",
+        frame: "frame",
+        focus: "focus",
+        label: "label",
+        real: "real",
+      },
+      Array(8).fill(1500)
+    )
+    const xs = new Set(dots)
+    expect(xs.has(chart.x(chart.origin + 2))).toBe(false)
+    expect(xs.has(chart.x(chart.origin + 1))).toBe(true)
+  })
 })
 
 describe("valueTicks", () => {

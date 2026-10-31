@@ -5,12 +5,16 @@ const within = (value: number, low: number, high: number) =>
   value >= low && value <= high
 
 // How many of the days observed so far landed inside the 8-in-10 range.
+// A day with no value (the drones' day without a report) is not counted.
 export function insideSoFar({ actuals, quantiles }: Forecast) {
+  const known = actuals.flatMap((value, k) =>
+    value === null ? [] : [{ value, k }]
+  )
   return {
-    inside: actuals.filter((value, k) =>
+    inside: known.filter(({ value, k }) =>
       within(value, quantiles["0.1"][k], quantiles["0.9"][k])
     ).length,
-    of: actuals.length,
+    of: known.length,
   }
 }
 
@@ -29,7 +33,8 @@ export function intervalScale(shown: number[]) {
   const low = Math.min(...shown)
   const high = Math.max(...shown)
   const margin = (high - low || 1) * 0.04
-  const lo = Math.max(0, low - margin)
+  // Not below 0 but for a value under it: a drone correction is negative.
+  const lo = Math.max(Math.min(0, low), low - margin)
   const hi = high + margin
   const at = (value: number) =>
     Math.max(0, Math.min(100, ((value - lo) / (hi - lo)) * 100))
@@ -43,7 +48,8 @@ export function stepRows(
 ) {
   return steps.map((step) => {
     const at = (level: string) => quantiles[level][step - 1]
-    const real = actuals[step - 1]
+    // Undefined until observed, null on a day with no value.
+    const real = actuals[step - 1] ?? undefined
     return {
       step,
       date: targetDates[step - 1],

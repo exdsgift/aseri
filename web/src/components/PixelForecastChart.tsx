@@ -199,7 +199,8 @@ function ChartLabels({
   const { left, right, bottom, x, y, first, origin, ahead } = chart
   const xo = x(origin)
   const end = (level: string) => forecast.quantiles[level][ahead - 1]
-  const real = forecast.actuals[ahead - 1]
+  // Undefined until observed, null on a day with no value.
+  const real = forecast.actuals[ahead - 1] ?? undefined
   // Top to bottom, so that each label clears the one above. No label on the path's end:
   // it would read as the forecast.
   const ends = [
@@ -324,9 +325,9 @@ function DayTip({
             8 in 10: {at("0.1")}-{at("0.9")}
           </span>
           <span className="block">Most likely {at("0.5")}</span>
-          {forecast.actuals[step] !== undefined && (
+          {forecast.actuals[step] != null && (
             <span className="block text-white">
-              What happened {formatValue(forecast.actuals[step])}
+              What happened {formatValue(forecast.actuals[step]!)}
             </span>
           )}
         </>

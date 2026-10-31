@@ -4,7 +4,7 @@ import { type Forecast } from "./api"
 import { insideSoFar, intervalScale, stepRows, yearRange } from "./replay"
 
 // Three days ahead, with the real values of the days already observed.
-const forecast = (actuals: number[]): Forecast => ({
+const forecast = (actuals: (number | null)[]): Forecast => ({
   series: "",
   unit: "",
   attribution: "",
@@ -31,6 +31,10 @@ describe("insideSoFar", () => {
   it("counts only the days observed so far", () => {
     expect(insideSoFar(forecast([79]))).toEqual({ inside: 0, of: 1 })
     expect(insideSoFar(forecast([]))).toEqual({ inside: 0, of: 0 })
+  })
+
+  it("leaves out a day with no value, such as the drones' day without a report", () => {
+    expect(insideSoFar(forecast([null, 131, 60]))).toEqual({ inside: 1, of: 2 })
   })
 })
 
@@ -60,6 +64,12 @@ describe("stepRows", () => {
     expect([second.real, second.inside]).toEqual([70, true])
     expect(third).not.toHaveProperty("real")
   })
+
+  it("gives a day with no value no real value", () => {
+    const [first, second] = stepRows(forecast([null, 70]), [1, 2])
+    expect(first).not.toHaveProperty("real")
+    expect([second.real, second.inside]).toEqual([70, true])
+  })
 })
 
 describe("yearRange", () => {
@@ -88,6 +98,12 @@ describe("intervalScale", () => {
 
   it("never goes below zero", () => {
     expect(intervalScale([1, 100]).lo).toBe(0)
+  })
+
+  it("goes below zero as far as a negative value, such as a drone correction", () => {
+    const scale = intervalScale([-50, 1500, 1900])
+    expect(scale.lo).toBe(-50)
+    expect(scale.at(-50)).toBe(0)
   })
 
   it("pins a value beyond the scale to its edge", () => {

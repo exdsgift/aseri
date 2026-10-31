@@ -9,7 +9,8 @@ export function valueScale(fitted: number[], top: number, bottom: number) {
   const low = Math.min(...fitted)
   const high = Math.max(...fitted)
   const margin = (high - low || 1) * 0.08
-  const lo = Math.max(0, low - margin)
+  // Not below 0 but for a value under it: a drone correction is negative.
+  const lo = Math.max(Math.min(0, low), low - margin)
   const hi = high + margin
   const y = (value: number) =>
     Math.max(
@@ -140,7 +141,8 @@ function layout(
       ...forecast.values.slice(first),
       ...forecast.averages.slice(first),
       ...fitted.flatMap((level) => forecast.quantiles[level]),
-      ...forecast.actuals,
+      // A day with no value has no place on the scale.
+      ...forecast.actuals.filter((value) => value !== null),
     ],
     top,
     bottom
@@ -271,13 +273,16 @@ export function paintChart(
   // What happened after the forecast was made, in white over the bands,
   // as dots 2 art pixels wide when the days are far enough apart.
   const dot = (right - left) / chart.span >= 3 ? 2 : 1
-  actuals.forEach((value, k) =>
-    square(plot, x(origin + 1 + k), y(value), dot, color.real)
+  actuals.forEach(
+    (value, k) =>
+      value !== null &&
+      square(plot, x(origin + 1 + k), y(value), dot, color.real)
   )
 
   for (let py = top; py <= bottom; py += 2) plot(xo, py, color.focus)
   for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
   square(plot, xo - 1, y(last) - 1, 3, color.gold)
-  if (actuals.length === chart.ahead)
-    square(plot, right - 1, y(actuals[chart.ahead - 1]) - 1, 3, color.real)
+  const end = actuals[chart.ahead - 1]
+  if (actuals.length === chart.ahead && end !== null)
+    square(plot, right - 1, y(end) - 1, 3, color.real)
 }

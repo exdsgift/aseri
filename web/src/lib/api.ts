@@ -71,7 +71,8 @@ export type Forecast = {
   targetDates: string[]
   quantiles: Record<string, number[]>
   // The real daily values of the days ahead observed so far: none yet for today's forecast.
-  actuals: number[]
+  // Null on a day with no value, such as the drones' day without a report.
+  actuals: (number | null)[]
   // Made after the fact, with only the data up to its day.
   backtest: boolean
   // "trading_day" for Brent, whose days ahead skip weekends and holidays; "day" when absent.
@@ -213,16 +214,37 @@ export async function loadSeries(
         .filter((_, k) => time[from + k] > time[end] - 7 * day)
     )
   })
-  // The days the steps fall on, by position: the actuals', then today's forecast's. A step is
-  // the next value after the one before it, so Brent's skip weekends and market holidays.
+  const newest = actuals.date.at(-1)!
+  const byDate = new Map(
+    actuals.date.map((date, i) => [date, actuals.observation[i]])
+  )
+  // The days a past forecast's steps fall on, and their real values so far. A calendar-day
+  // series counts calendar days, a day its actuals lack null. Brent counts its prices by
+  // position, the actuals' then today's forecast's, as a step is scored: the next price.
   const calendar = [
     ...actuals.date,
-    ...latest.target_end_date.filter((date) => date > actuals.date.at(-1)!),
+    ...latest.target_end_date.filter((date) => date > newest),
   ]
+  const ahead = (origin: number) => {
+    if (entry.horizon_unit === "trading_day")
+      return {
+        targetDates: calendar.slice(origin + 1, origin + 1 + days),
+        real: actuals.observation.slice(origin + 1, origin + 1 + days),
+      }
+    const targetDates = Array.from({ length: days }, (_, k) =>
+      daysAfter(actuals.date[origin], k + 1)
+    )
+    return {
+      targetDates,
+      real: targetDates
+        .filter((date) => date <= newest)
+        .map((date) => byDate.get(date) ?? null),
+    }
+  }
   // A forecast made on day `origin` of the actuals: the days up to it, and the real values after it.
   const madeOn = (
     origin: number,
-    targetDates: string[],
+    { targetDates, real }: ReturnType<typeof ahead>,
     quantiles: Record<string, number[]>,
     mode: string
   ): Forecast => ({
@@ -234,7 +256,7 @@ export async function loadSeries(
     averages: averages.slice(0, origin - first + 1),
     targetDates,
     quantiles,
-    actuals: actuals.observation.slice(origin + 1, origin + 1 + days),
+    actuals: real,
     backtest: mode === "retrospective",
     horizonUnit: entry.horizon_unit,
   })
@@ -256,17 +278,12 @@ export async function loadSeries(
     },
     forecasts: [
       ...past.map((f) =>
-        madeOn(
-          f.origin,
-          calendar.slice(f.origin + 1, f.origin + 1 + days),
-          f.quantiles,
-          f.forecast_mode
-        )
+        madeOn(f.origin, ahead(f.origin), f.quantiles, f.forecast_mode)
       ),
       {
         ...madeOn(
           reference,
-          latest.target_end_date,
+          { targetDates: latest.target_end_date, real: [] },
           latest.quantiles,
           latest.forecast_mode
         ),

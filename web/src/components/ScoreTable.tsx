@@ -1,4 +1,5 @@
 import { type Bucket } from "@/lib/api"
+import { dayWord } from "@/lib/format"
 
 // The baselines as the page names them, by the pipeline's keys.
 const baselines: Record<string, string> = {
@@ -36,9 +37,9 @@ export function ScoreTable({
       <thead className="text-muted-foreground">
         <tr>
           <th scope="col" className={cell}>
-            {horizonUnit === "trading_day"
-              ? "Trading days ahead"
-              : "Days ahead"}
+            {`${dayWord(horizonUnit)} ahead`.replace(/^./, (c) =>
+              c.toUpperCase()
+            )}
           </th>
           <th scope="col" className={cell}>
             Forecasts
