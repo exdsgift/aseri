@@ -109,32 +109,35 @@ describe("path", () => {
 })
 
 describe("ranked", () => {
-  // Under the AR(1) the paths are drawn from, a path's log-likelihood in normal scores.
-  // On the standard forecast a path's values are its normal scores, give or take the
-  // straight lines between published levels.
-  const logLikelihood = (values: number[], rho: number) =>
-    values
-      .slice(1)
-      .reduce(
-        (sum, value, day, days) =>
-          sum -
-          (day === 0
-            ? value * value
-            : (value - rho * days[day - 1]) ** 2 / (1 - rho * rho)) /
-            2,
-        0
-      )
+  // Each day's own log-density in normal scores. On the standard forecast a path's values are
+  // its normal scores, give or take the straight lines between published levels.
+  const logDensity = (values: number[]) =>
+    values.slice(1).reduce((sum, value) => sum - (value * value) / 2, 0)
 
-  it("gives the 20 paths, the most likely first, then each less likely than the one before", () => {
+  it("gives the 20 paths, the most likely first: the one whose days are each the likeliest", () => {
     const paths = ranked(standard, 0.45)
     expect(paths).toHaveLength(20)
     const scores = paths.map((p) => p.logLikelihood)
     expect(scores).toEqual(scores.toSorted((a, b) => b - a))
     // Within 15%: a value past q0.01 or q0.99 is held there, and the lines between levels bend.
     for (const p of paths)
-      expect(
-        Math.abs(logLikelihood(p.values, 0.45) - p.logLikelihood)
-      ).toBeLessThan(0.15 * Math.abs(p.logLikelihood))
+      expect(Math.abs(logDensity(p.values) - p.logLikelihood)).toBeLessThan(
+        0.15 * Math.abs(p.logLikelihood)
+      )
+  })
+
+  it("keeps the most likely path in the band, even under a strong day-to-day tie", () => {
+    // A tie of 0.85, as Wikipedia's views have: a smooth path may drift and stay high.
+    const inside = (values: number[]) =>
+      values
+        .slice(1)
+        .filter(
+          (value, day) =>
+            value >= gpr.quantiles["0.1"][day] &&
+            value <= gpr.quantiles["0.9"][day]
+        ).length
+    const counts = ranked(gpr, 0.85).map((p) => inside(p.values))
+    expect(counts[0]).toBe(Math.max(...counts))
   })
 
   it("is the same 20 paths, in the same order, every time", () => {
