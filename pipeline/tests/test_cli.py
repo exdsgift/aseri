@@ -1330,3 +1330,58 @@ def test_brent_and_the_drones_run_end_to_end_on_trading_days_and_with_a_fall_fla
     assert entries["ua_drones_downed_claimed"]["unit"].endswith(
         "claimed by Ukraine's General Staff, one side's figures"
     )
+
+
+def test_a_day_without_a_drone_report_is_never_archived_forecast_from_or_published_as_a_value(
+    tmp_path, monkeypatch, short_backfill
+):
+    model = StubModel()
+    monkeypatch.setattr(cli, "load_model", lambda: model)
+    # 1500 drones a day to 2026-10-30, but no report on Oct 20: the 20th and the 21st, whose
+    # difference holds two days, are missing.
+    days = pd.date_range("2025-09-01", "2026-10-30")
+    reports = [
+        {"date": f"{d:%Y-%m-%d}", "day": i + 2, "drone": 1500 * i}
+        for i, d in enumerate(days)
+        if d != pd.Timestamp("2026-10-20")
+    ]
+    monkeypatch.setattr(
+        losses, "download", lambda url: (json.dumps(reports).encode(), {})
+    )
+    gap = ["2026-10-20", "2026-10-21"]
+
+    for day in (30, 31):
+        clock = SimpleNamespace(
+            now=lambda tz, day=day: datetime(2026, 10, day, 7, 2, tzinfo=UTC)
+        )
+        monkeypatch.setattr(losses, "datetime", clock)
+        run_on(
+            monkeypatch,
+            datetime(2026, 10, day, 7, 2, tzinfo=UTC),
+            RECORDED_GPR.read_bytes(),
+            tmp_path / "api",
+            tmp_path / "archive",
+        )
+
+    deltas = pd.concat(
+        pd.read_csv(path)
+        for path in (tmp_path / "archive" / "target-data" / "deltas").glob("*.csv")
+    )
+    drones = deltas[deltas["target"] == "ua_drones_downed_claimed"]
+    # Every value once, on the first run: the missing days never, and nothing new the day after.
+    assert set(drones["as_of"]) == {"2026-10-30"}
+    assert not set(gap) & set(drones["target_end_date"])
+    issued = {
+        f["reference_date"]
+        for f in read(tmp_path / "archive" / "runs" / "2026-10-30.json")["forecasts"]
+        if f["target"] == "ua_drones_downed_claimed"
+    }
+    assert not set(gap) & issued
+    assert "2026-10-19" in issued and "2026-10-22" in issued
+    # The model read the two days as unknown.
+    assert any(np.isnan(context).sum() == 2 for context in model.contexts)
+    actuals = (
+        tmp_path / "api" / "series" / "ua_drones_downed_claimed" / "actuals.json"
+    ).read_text(encoding="utf-8")
+    assert "NaN" not in actuals
+    assert not set(gap) & set(json.loads(actuals)["date"])

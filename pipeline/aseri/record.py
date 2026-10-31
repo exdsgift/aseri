@@ -13,6 +13,8 @@ from aseri.scoring import (
     REPS,
     SEED,
     TAIL,
+    TRADING_YEAR,
+    WINDOW,
     bootstrap,
     clopper_pearson,
     known_on,
@@ -52,7 +54,7 @@ METHOD = {
     },
     "weekly": f"The forecasts from each series' record_weekday, the day its live forecasts start from; the squares are the last {SQUARES}, {SQUARE_HORIZON} days ahead.",
     "calibration_monitor": f"Basel's binomial traffic light, in both directions, on the weekly live forecasts, one day per forecast and bucket, the longest, from {MIN_N} forecasts.",
-    "trading_days": "A series whose horizon_unit is trading_day (Brent) counts its steps in prices: step h is scored against the h-th price after the reference date, and a week is 5 prices, so its seasonal naive is the price 5 trading days back, its 28-day mean the last 20 prices and its MASE scale the 5-price change.",
+    "trading_days": "A series whose horizon_unit is trading_day (Brent) counts its steps in prices: step h is scored against the h-th price after the reference date, and a week is 5 prices, so its seasonal naive is the price 5 trading days back, its 28-day mean the last 20 prices and its MASE scale the 5-price change; its year, the reach of the MASE scale and the probabilistic naive, is 252 prices.",
 }
 
 
@@ -118,6 +120,7 @@ def scored(
             [np.nan if found is None else found[0] for found in seen],
             kind=series.kind,
             week=5 if trading else 7,
+            year=TRADING_YEAR if trading else WINDOW,
         )
         rows.insert(0, "reference_date", forecast.reference_date)
         rows.insert(1, "forecast_mode", issued.provenance["forecast_mode"])

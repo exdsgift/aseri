@@ -307,16 +307,20 @@ UA_AIR_RAID_HOURS = Series(
     kind="alert_hours",
     # Off: no day since 2022 lies more than 6 IQRs outside its 28 days before; the 10 past 4 are mass attacks.
     edge_iqr=None,
-    # Mean absolute error on the backfill as of 2026-10-31, 784 settled days: the 28-day mean 11.72,
-    # naive 15.51, seasonal naive 16.84 (Timestral 11.81).
+    # Mean absolute error on the backfill as of 2026-10-31, 763 settled days: the 28-day mean 11.72,
+    # naive 15.45, seasonal naive 17.10 (Timestral 11.82).
     primary_baseline="mean28",
     # Committed every day, so every weekday has a live forecast: Sunday, as for the drones.
     record_weekday=6,
-    # An alert recorded after it ends adds to its last day or two; the longest ran 7.4 days.
-    score_lag=7,
+    # The file holds an alert only once it has ended, so one still running at a download is missing
+    # from the days before the cutoff: they read low until it lands. In four vintages the newest
+    # day or two rose by 0.5 to 1.5 hours (1 to 2%); an alert running for days can take more. Past the
+    # longest alert, 7.4 days, every target has its alerts in.
+    score_lag=10,
     note=(
         "Volunteer records of the official alerts, by oblast. Luhansk and Crimea, under one alert since 2022, "
-        "are left out. A few alerts in the west run for days, which may be an end the records missed."
+        "are left out. An alert is recorded once it ends, so the newest days can read low until it does. "
+        "A few alerts in the west run for days, which may be an end the records missed."
     ),
     source={
         "title": "Ukrainian air raid sirens dataset, volunteer data",

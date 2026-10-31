@@ -34,6 +34,8 @@ class Archived:
     model_id: str
     forecast_date: str
     provenance: dict
+    # Each step's date as the round wrote it: Brent's trading days are never recomputed.
+    target_end_dates: tuple[str, ...]
 
 
 def read(archive_dir: Path, series_id: str) -> list[Archived]:
@@ -50,9 +52,13 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
         # Split once: filtering the whole round for each forecast is quadratic in a backfill of every series.
         tables = dict(list(rows[rows["target"] == series_id].groupby("reference_date")))
         for issued in issued_here:
-            table = tables[issued["reference_date"]].pivot(
+            rows = tables[issued["reference_date"]]
+            table = rows.pivot(
                 index="horizon", columns="output_type_id", values="value"
             )
+            dates = rows.drop_duplicates("horizon").sort_values("horizon")[
+                "target_end_date"
+            ]
             archived.append(
                 Archived(
                     forecast=Forecast(
@@ -67,6 +73,7 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
                         "data": issued["data"],
                         "forecast_mode": issued["forecast_mode"],
                     },
+                    target_end_dates=tuple(dates),
                 )
             )
     # Run order is not date order: a backfill archives days older than the forecasts before it.
@@ -107,7 +114,8 @@ def check_revisions(
     """Raise RevisionHold if `observed` changes an archived value older than `series.revision_window` days before its newest."""
     known = as_of_view(archive_dir, series.id, as_of)
     # A broken file can be continuous and unchanged where it has data, yet shorter.
-    dropped = known.index.difference(observed.index)
+    # A day that has lost its value counts as dropped too: a gap the source opened in its history.
+    dropped = known.index.difference(observed.dropna().index)
     if len(dropped):
         raise RevisionHold(
             f"{series.id}: upstream dropped {len(dropped)} archived days, from "
@@ -130,7 +138,11 @@ def timestamp(moment: datetime) -> str:
 
 
 def observation_delta(observed: pd.Series, vintage: pd.Series) -> pd.Series:
-    """The observed (date, value) pairs that `vintage` lacks or holds with another value."""
+    """The observed (date, value) pairs that `vintage` lacks or holds with another value.
+
+    A day with no value (the drones' day without a report) is no observation, so never archived.
+    """
+    observed = observed.dropna()
     return observed[vintage.reindex(observed.index) != observed]
 
 

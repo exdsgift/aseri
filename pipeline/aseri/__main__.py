@@ -98,7 +98,8 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             []
             if ran_today
             else archive.new_reference_dates(
-                usable,
+                # Only from a day with a value: the drones' day without a report starts none.
+                usable.dropna(),
                 [
                     a.forecast.reference_date
                     for a in archive.read(archive_dir, series.id)

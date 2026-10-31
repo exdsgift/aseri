@@ -35,8 +35,9 @@ def fetch(url: str) -> tuple[pd.Series, date, dict]:
 def parse(raw: bytes) -> pd.Series:
     """The daily difference of the running total of drones, by report day.
 
-    A day with no report adds nothing, and the next one carries it; the series ends on the last report,
-    its freshness cutoff, so a stale file is never padded with zeros. A negative difference stays as it is.
+    A day with no report is missing, never 0, and so is the report after it, whose difference holds
+    several days: none in 1,709 reports so far. The series ends on the last report, its freshness
+    cutoff, so a stale file is never padded. A negative difference stays as it is.
     """
     reports = pd.DataFrame(json.loads(raw))
     total = reports.set_index(pd.DatetimeIndex(reports["date"]))["drone"]
@@ -47,7 +48,7 @@ def parse(raw: bytes) -> pd.Series:
             "The losses have drone totals that are not integers of at least 0"
         )
     every_day = pd.date_range(total.index[0], total.index[-1], freq="D")
-    daily = total.reindex(every_day).ffill().diff().iloc[1:]
+    daily = total.reindex(every_day).diff().iloc[1:]
     # The highest day is 2719 (2026-07-27); twice the highest before it is a typo in a total, not a claim.
     if (daily >= 2 * daily.cummax().shift(1).clip(lower=100)).any():
         raise ValueError("The losses have a day of twice the highest before it or more")

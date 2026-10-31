@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -336,14 +337,20 @@ def test_drones_are_the_daily_difference_of_the_running_total():
     assert observed.tolist() == [1500.0, 1600.0]
 
 
-def test_a_day_without_a_report_adds_0_and_the_next_report_carries_it():
+def test_a_day_without_a_report_is_missing_and_so_is_the_report_after_it():
+    # No report on 2026-10-28: its drones are unknown, and the 29th's difference holds two days.
     reports = json.loads(losses_file(1000, 3000, 4500, 6000, 7600))
     del reports[3]
 
     observed = losses.parse(json.dumps(reports).encode())
 
-    assert observed.tolist() == [2000.0, 1500.0, 0.0, 3100.0]
-    assert observed.index[-1] == pd.Timestamp("2026-10-29")
+    assert observed.index.strftime("%m-%d").tolist() == [
+        "10-26",
+        "10-27",
+        "10-28",
+        "10-29",
+    ]
+    np.testing.assert_array_equal(observed, [2000.0, 1500.0, np.nan, np.nan])
 
 
 def test_a_fall_in_the_total_is_kept_as_a_negative_day_and_flagged_as_a_revision(serve):

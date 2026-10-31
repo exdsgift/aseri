@@ -64,13 +64,15 @@ def publish(
         # Written by publish_scores.
         "scores": f"series/{series.id}/scores.json",
     }
+    # A day with no value (the drones' day without a report) is left out, as the archive leaves it.
+    observed = observed.dropna()
     for forecast in archived:
         _write(
             api_dir / "series" / series.id / _dated(forecast),
-            _forecast(series, forecast, observed),
+            _forecast(series, forecast),
         )
     newest = archived[-1]
-    latest = _forecast(series, newest, observed)
+    latest = _forecast(series, newest)
     _write(
         api_dir / links["latest"],
         latest
@@ -85,7 +87,11 @@ def publish(
     _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
     _write(api_dir / links["replay"], _replay(series, archived, latest["attribution"]))
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
-    tie = day_to_day_tie([a.forecast for a in archived], first_seen)
+    tie = day_to_day_tie(
+        [a.forecast for a in archived],
+        first_seen,
+        trading=series.horizon_unit == "trading_day",
+    )
     return _entry(series, observed, newest, links, stale_since, note, tie)
 
 
@@ -150,13 +156,9 @@ def _dated(archived: Archived) -> str:
     return f"forecasts/{archived.forecast.reference_date:%Y-%m-%d}.json"
 
 
-def _forecast(series, archived, observed) -> dict:
+def _forecast(series, archived) -> dict:
     forecast = archived.forecast
     steps = len(forecast.quantiles)
-    # As the archive dated them: from the days up to the reference date, which a revision never drops.
-    target_end_dates = series.target_dates(
-        observed.loc[: forecast.reference_date].index, steps
-    )
     return {
         "schema_version": SCHEMA_VERSION,
         "series_id": series.id,
@@ -167,7 +169,8 @@ def _forecast(series, archived, observed) -> dict:
         "unit": series.unit,
         "horizon_unit": series.horizon_unit,
         "horizon": list(range(1, steps + 1)),
-        "target_end_date": target_end_dates.strftime("%Y-%m-%d").tolist(),
+        # As the round has them, so the file never drifts from the archive.
+        "target_end_date": list(archived.target_end_dates),
         "output_type": "quantile",
         # Already rounded to four decimals by the archive.
         "quantiles": {

@@ -66,10 +66,12 @@ FORECAST_LICENSE = {
 }
 
 
-def archived(reference_date, forecast_mode, forecast_date="2026-10-29"):
+def archived(reference_date, forecast_mode, forecast_date="2026-10-29", dates=None):
+    """A forecast as the archive reads it back: dated, unless `dates`, by the two days after its reference date."""
+    reference_date = pd.Timestamp(reference_date)
     return Archived(
         forecast=Forecast(
-            reference_date=pd.Timestamp(reference_date),
+            reference_date=reference_date,
             levels=LEVELS,
             # As the archive reads them back: already rounded, in float64.
             quantiles=np.array([QUANTILES[str(level)] for level in LEVELS]).T,
@@ -77,6 +79,8 @@ def archived(reference_date, forecast_mode, forecast_date="2026-10-29"):
         model_id="aseri-timestral209m",
         forecast_date=forecast_date,
         provenance=PROVENANCE | {"forecast_mode": forecast_mode},
+        target_end_dates=dates
+        or tuple(f"{reference_date + pd.Timedelta(days=h):%Y-%m-%d}" for h in (1, 2)),
     )
 
 
@@ -138,6 +142,29 @@ def test_a_forecast_counts_its_horizon_from_the_reference_date(api_dir):
     assert forecast["forecast_date"] == "2026-10-29"
     assert forecast["horizon"] == [1, 2]
     assert forecast["target_end_date"] == ["2026-10-27", "2026-10-28"]
+
+
+def test_a_dated_file_keeps_the_dates_the_archive_wrote_whatever_the_history_says_now(
+    tmp_path,
+):
+    # Archived when Monday Oct 26 looked like a holiday; today's history would date it otherwise.
+    prints = pd.bdate_range(end="2026-10-23", periods=40)
+    observed = pd.Series(100.0, index=prints)
+
+    publish(
+        tmp_path,
+        BRENT_SPOT,
+        [archived("2026-10-23", "live", dates=("2026-10-27", "2026-10-28"))],
+        observed=observed,
+        first_seen=observed,
+        as_of=date(2026, 10, 30),
+        generated_at=GENERATED_AT,
+    )
+
+    dated_file = read(
+        tmp_path / "series" / "brent_spot" / "forecasts" / "2026-10-23.json"
+    )
+    assert dated_file["target_end_date"] == ["2026-10-27", "2026-10-28"]
 
 
 def test_a_forecast_keys_each_quantile_level_without_float_noise(api_dir):
@@ -419,7 +446,8 @@ def test_brent_counts_trading_days_and_averages_365_days_not_365_prints(tmp_path
     entry = publish(
         tmp_path,
         BRENT_SPOT,
-        [archived("2026-10-23", "live")],
+        # As the archive dated them: today's history voting Monday a holiday would not move them.
+        [archived("2026-10-23", "live", dates=("2026-10-26", "2026-10-27"))],
         observed=observed,
         first_seen=observed,
         as_of=date(2026, 10, 30),
@@ -428,7 +456,6 @@ def test_brent_counts_trading_days_and_averages_365_days_not_365_prints(tmp_path
 
     latest = read(tmp_path / "series" / "brent_spot" / "latest.json")
     assert latest["horizon_unit"] == "trading_day"
-    # Its 2 steps after a Friday: Monday and Tuesday, never the weekend.
     assert latest["target_end_date"] == ["2026-10-26", "2026-10-27"]
     assert (entry["horizon_unit"], entry["weekly"]) == ("trading_day", False)
     assert entry["baseline"] == 120.0

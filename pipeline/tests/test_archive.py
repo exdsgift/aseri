@@ -119,6 +119,11 @@ def test_brent_s_steps_are_dated_by_trading_days_from_its_prints(tmp_path):
         ["2026-10-23", 1, "2026-10-26"],
         ["2026-10-23", 2, "2026-10-27"],
     ]
+    # Read back as written, for publish to use as they are.
+    assert [a.target_end_dates for a in archive.read(tmp_path, "brent_spot")] == [
+        ("2026-10-23", "2026-10-26"),
+        ("2026-10-26", "2026-10-27"),
+    ]
 
 
 def test_an_empty_archive_backfills_the_newest_date_and_the_120_days_before_it():

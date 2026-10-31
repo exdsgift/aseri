@@ -48,6 +48,9 @@ def make_context(
     scale or detector belongs here, computed on this slice, never on the whole vintage.
     """
     context = vintage.loc[:reference_date]
+    # A calendar-day series has every day, a missing one blank, as an archived view lacks it.
+    if series.horizon_unit == "day":
+        context = context.asfreq("D")
     return context.mask(context.index.isin(measurement_errors(series)))
 
 

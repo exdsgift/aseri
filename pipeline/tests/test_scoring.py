@@ -24,6 +24,7 @@ from aseri.series import (
     GPR_DAILY,
     SUEZ_TRANSITS,
     TAIWAN_STRAIT_TRANSITS,
+    UA_AIR_RAID_HOURS,
     Series,
 )
 
@@ -159,6 +160,27 @@ def test_a_series_of_trading_days_counts_its_week_in_prints():
     assert rows["ase_median"].tolist() == [1 / 5] * 6
 
 
+def test_a_series_of_trading_days_reads_a_year_of_prices_not_365():
+    # 400 prices: up 2 a day, then up 1 a day for the last 252, a trading year.
+    history = np.r_[np.arange(148) * 2.0, 296 + np.arange(1, 253)]
+    stub = Forecast(
+        reference_date=pd.Timestamp("2026-10-23"),
+        levels=LEVELS,
+        quantiles=np.full((1, 21), history[-1]),
+    )
+
+    rows = score(stub, history, [history[-1] + 5], week=5, year=252)
+    spread = probabilistic_naive(history, LEVELS, horizon=1, year=252)
+
+    # The 5-price change of the last year is 5: the error of 5 is one scale.
+    assert rows["ase_median"].tolist() == [1.0]
+    # Every 1-price change of the last year is 1.
+    assert (
+        spread[0].tolist()
+        == [history[-1] - 1] * 10 + [history[-1]] + [history[-1] + 1] * 10
+    )
+
+
 def test_the_probabilistic_naive_spreads_the_past_changes_both_ways_around_the_last_value():
     # Every h-day change of a steady climb is h, so the spread is h either side.
     quantiles = probabilistic_naive(np.arange(1.0, 36.0), LEVELS, horizon=3)
@@ -292,8 +314,10 @@ def test_a_flat_history_has_no_mase_rather_than_an_infinite_one():
         (GPR_DAILY.score_lag, "2026-11-23"),
         (SUEZ_TRANSITS.score_lag, "2026-11-02"),
         (TAIWAN_STRAIT_TRANSITS.score_lag, "2026-11-02"),
-        # Brent waits past FRED's weekly batches; the views and the war series take the default.
+        # Brent waits past FRED's weekly batches, the alert hours past the longest alerts (7.4 days);
+        # the views and the drones take the default.
         (BRENT_SPOT.score_lag, "2026-11-02"),
+        (UA_AIR_RAID_HOURS.score_lag, "2026-10-29"),
         (Series.__dataclass_fields__["score_lag"].default, "2026-10-26"),
     ],
 )

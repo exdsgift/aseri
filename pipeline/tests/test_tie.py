@@ -80,6 +80,21 @@ def test_is_zero_below_100_pairs():
     assert tie == {"rho": 0.0, "n": 81}
 
 
+def test_a_daily_series_pairs_by_date_so_a_day_missing_from_the_vintages_is_only_unknown():
+    # The drones' day without a report is absent from first_seen: it must count as unknown,
+    # not pull the next day into its step.
+    missing = START + pd.Timedelta(days=140)
+    resolved = zeros()
+
+    absent = day_to_day_tie(falling_at(ar1(0.5)), resolved.drop(missing))
+    blank = day_to_day_tie(
+        falling_at(ar1(0.5)), resolved.mask(resolved.index == missing)
+    )
+
+    assert absent == blank
+    assert absent["n"] < 121 * 27
+
+
 def test_a_trading_day_series_pairs_each_step_with_the_next_print():
     # Brent prints on weekdays only, and its steps are trading days: by date, every pair
     # that touched a weekend would be lost; by position, none is.
@@ -93,7 +108,7 @@ def test_a_trading_day_series_pairs_each_step_with_the_next_print():
         for r, z in enumerate(ar1(0.5, forecasts=85, horizon=14))
     ]
 
-    tie = day_to_day_tie(forecasts, pd.Series(0.0, index=prints))
+    tie = day_to_day_tie(forecasts, pd.Series(0.0, index=prints), trading=True)
 
     assert tie["n"] == 85 * 13
     assert tie["rho"] == pytest.approx(0.5, abs=0.1)

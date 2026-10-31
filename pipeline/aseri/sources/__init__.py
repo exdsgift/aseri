@@ -1,4 +1,9 @@
-"""One adapter per upstream source: each downloads its data and checks its contract."""
+"""One adapter per upstream source: each downloads its data and checks its contract.
+
+shortcut: gpr, fred, wikimedia, sirens and losses each repeat fetch's skeleton (the as_of, the
+download, the parse, the guard against a day after the fetch day, the hash); fold it into one helper
+here when a sixth source needs it, or when one of the five changes it.
+"""
 
 import time
 import urllib.request

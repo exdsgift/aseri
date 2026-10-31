@@ -10,6 +10,8 @@ BUCKETS = {"1-7": range(1, 8), "8-28": range(8, 29)}
 # How long a target waits for its observation to settle is each series' `score_lag`, in the registry.
 # The window, in days of each origin's own context, of the MASE scale and the probabilistic naive's changes.
 WINDOW = 365
+# The same year in trading days, for a series of prices (Brent): about 252 a year.
+TRADING_YEAR = 252
 # Every interval is 95%.
 TAIL = 0.025
 REPS = 2000
@@ -62,14 +64,14 @@ def clopper_pearson(hits: int, n: int) -> tuple[float, float]:
 
 
 def probabilistic_naive(
-    history, levels, horizon: int, kind: str = "index"
+    history, levels, horizon: int, kind: str = "index", year: int = WINDOW
 ) -> np.ndarray:
     """The hubs' baseline (Cramer et al. 2022): the last value plus the quantiles of past h-day changes, one row per h.
 
     The changes come in both signs, as the COVID-19 Forecast Hub's baseline took them, so its median is
     the naive forecast itself. Its spread stops a model scoring well merely for having one.
     """
-    x = pd.Series(history, dtype=float).ffill().to_numpy()[-WINDOW:]
+    x = pd.Series(history, dtype=float).ffill().to_numpy()[-year:]
     rows = []
     for h in range(1, horizon + 1):
         changes = x[h:] - x[:-h]
@@ -81,7 +83,12 @@ def probabilistic_naive(
 
 
 def score(
-    forecast: Forecast, history, observed, kind: str = "index", week: int = 7
+    forecast: Forecast,
+    history,
+    observed,
+    kind: str = "index",
+    week: int = 7,
+    year: int = WINDOW,
 ) -> pd.DataFrame:
     """One row per observed horizon of `forecast`: its scores, and the absolute errors and WIS of the baselines.
 
@@ -89,7 +96,9 @@ def score(
     baselines; `observed` holds one value per horizon, NaN where a target is not scored. A gap in the
     history is carried forward, as Timestral does with a masked day. `week` is how many values a
     week holds: 7, or Brent's 5 trading days, so its seasonal naive is still the same weekday a week
-    back, its MASE scale the week-on-week change, and its 28-day mean 4 weeks of prices.
+    back, its MASE scale the week-on-week change, and its 28-day mean 4 weeks of prices. `year` is
+    how many a year holds, WINDOW or Brent's TRADING_YEAR, the reach of the MASE scale and the
+    probabilistic naive.
     """
     observed = np.asarray(observed, dtype=float)
     scored = np.isfinite(observed)
@@ -98,10 +107,12 @@ def score(
     quantiles = np.asarray(forecast.quantiles, dtype=float)[scored]
     x = pd.Series(history, dtype=float).ffill().to_numpy()
     error = np.abs(y - quantiles[:, np.isclose(forecast.levels, 0.5)][:, 0])
-    recent = x[-WINDOW:]
+    recent = x[-year:]
     # Hyndman and Koehler's scale, on a fixed window: the in-sample error of the seasonal naive.
     scale = np.nanmean(np.abs(recent[week:] - recent[:-week]))
-    spread = probabilistic_naive(history, forecast.levels, len(observed), kind)[scored]
+    spread = probabilistic_naive(history, forecast.levels, len(observed), kind, year)[
+        scored
+    ]
     return pd.DataFrame(
         {
             "horizon": horizon,
