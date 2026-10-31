@@ -15,13 +15,14 @@ const bundles = [
   { at: [207, 662], wide: 52, narrow: 142 },
 ]
 
-// The angle between neighbouring rays, in degrees: 15 rays over the baseline's 40.
-const slot = 40 / 14
+// The angle between neighbouring rays, in degrees: 19 rays over the baseline's 40, denser than
+// the study's 300 (27 over 66), as the owner asked for a richer fan.
+const slot = 40 / 18
 
 export type Ray = { slot: number; angle: number }
 
 // Each fan opens with GPR's 7-day average against its baseline. At the baseline and under it,
-// already full: 15 rays over 40 degrees, as the study's fans at 181. Each further baseline
+// already full: 19 rays over 40 degrees, more than the study's fans at 181. Each further baseline
 // opens it 13 degrees, so 300 opens as wide as the study's 300, up to 4 times the baseline.
 // The rays keep fixed slots a slot's angle apart, so the fan gains rays only at its edges as
 // it opens, and none ever moves. The two dashed rays stay at the full fan's edges. Angles are

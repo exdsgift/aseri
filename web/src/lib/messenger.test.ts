@@ -7,15 +7,15 @@ describe("fan", () => {
   const spread = (value: number) => angles(value).at(-1)! - angles(value)[0]
   const count = (value: number) => angles(value).length
 
-  it("opens a full fan at the baseline, as the study's did at 181: 15 rays over 40 degrees", () => {
-    expect(count(100)).toBe(15)
+  it("opens a full fan at the baseline, fuller than the study's at 181: 19 rays over 40 degrees", () => {
+    expect(count(100)).toBe(19)
     expect(spread(100)).toBeCloseTo(40)
   })
 
   it("opens further above it and adds rays at its edges, to the study's 300 opening at 300", () => {
-    expect([count(181), spread(181)]).toEqual([17, expect.closeTo(45.71)])
-    // The opening, 66 degrees, holds 23 rays a slot apart.
-    expect([count(300), spread(300)]).toEqual([23, expect.closeTo(62.86)])
+    expect([count(181), spread(181)]).toEqual([23, expect.closeTo(48.89)])
+    // The opening, 66 degrees, holds 29 rays a slot apart: denser than the study's 27.
+    expect([count(300), spread(300)]).toEqual([29, expect.closeTo(62.22)])
   })
 
   it("never closes or thins as the value grows", () => {
@@ -39,14 +39,14 @@ describe("fan", () => {
 
   it("stops opening at 4 times the baseline", () => {
     expect(fan(1000, 100)).toEqual(fan(400, 100))
-    expect([count(400), spread(400)]).toEqual([27, expect.closeTo(74.29)])
+    expect([count(400), spread(400)]).toEqual([35, expect.closeTo(75.56)])
   })
 
   it("spaces the rays evenly about the fan's axis", () => {
     const rays = angles(181)
     expect(rays[0]).toBeCloseTo(-rays.at(-1)!)
     const gaps = rays.slice(1).map((ray, i) => ray - rays[i])
-    for (const gap of gaps) expect(gap).toBeCloseTo(40 / 14)
+    for (const gap of gaps) expect(gap).toBeCloseTo(40 / 18)
   })
 
   it("marks the baseline with two rays at the full fan's edges, whatever the value", () => {
@@ -99,7 +99,7 @@ describe("fanRays", () => {
     for (const [i, { slot, to }] of still.entries()) {
       const angle =
         (Math.atan2(to[1] - point.y, to[0] - point.x) * 180) / Math.PI
-      expect(angle).toBeCloseTo(-25 + (slot * 40) / 14)
+      expect(angle).toBeCloseTo(-25 + (slot * 40) / 18)
       const swayed = [...drawn(181).values()][i].to
       const moved =
         (Math.atan2(swayed[1] - point.y, swayed[0] - point.x) * 180) / Math.PI -
