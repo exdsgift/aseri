@@ -1,0 +1,4540 @@
+{
+  "forecast_date": "2026-11-01",
+  "model_id": "aseri-timestral209m",
+  "forecasts": [
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "e6d7eb33b7f3010e22415f1b96db8aed5d2c2a853682a09df786444013fbbcee"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "fea293c5b34fd30441c64cd5743ae7eeaa2c23a9e29580676d4c020fb4afe406"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "48c4b4493690a80700c30426a89796c245f85068ea075870b6bf0f19839fd0cb"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "4e1bd4e3c8979a156835828f88431008931e6f87054d9879ee42c75912fcf90b"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "8d1fd161e59f9e0ba8588db2ae683c2fa6b53cfda554813c319b8e2362167f6b"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "104e5db99833202e4b2a1d3f9c9062e8cf548b64d9668fa3f2faf93723d31208"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "f79826991b4f4304fa8612b4b590b220f8c764f5c797e7cdbd07b7de8743dbac"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "cbfffaf54cadc55fa93e0a5ab2b0fb69117bee5634537cd3275ab4a7c3b058f4"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "ff984d192ba3efb2295db03b64979f04458ad74828098fc39e402a3771def524"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "c46c0e61f20c1ddfa79c670c6971cd4a5c865dc215455de82dc69fbff027942d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "c1cd98b0f1e02a16302ad7698c178a1ada72d54f212e170e867b1dae3a7712dc"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "4d32eb7961c8f589ec630f13dab00f05f448aa2b41fda8bb7c3085841279d5a7"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "1b75b085479dc1feda22535328740495cfbb8a2471d8c61643598041b0cea2a2"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "6cec21108036e5579588e34f2fd9301052ca41d4954c18543e7f412d81fb80c8"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "84b52b6ad8fc9b8dc729bbb5008ad1083f4c9b4e201db92afacc1406d0bb2abe"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "67d232c2df0804037934da82f62ca312c89f14f50e6b1e098e26ba84c7a0e817"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "cafc49d18c68d12a248909ddf0bca890bbd0d903aca3b65da87cc8aa502f3195"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "832503632f8b7240313ef43020e4249dae3720bdf35ea4c5ad021ca14783d802"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "c9e2fd112c3716271ee05a3c0656094e1643cb06fec232e727fda0c511e6f913"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "75cca47a0865b18936721c2b819fa9479cabaadfdf30e831776775c06f40a7ae"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "630c521f488dc6ce6e1347f58479aacb98fad70227799f8a515ec0b9b12ba2f5"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "da245e01f1f42fdd160070f64b93a9f004cddae284c8eb772cf80ac5381b1a42"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "0601659e19ed4ff6b23376accc6d8e8164a122a09feff09ebc5e77545c2004b1"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b0cefd0d8ca0494afa1ffd0008962cdfaf23796bd83455e0edf7d421f3c5c01d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "cfa4ba26bacd487830c98114a94aa50ffc7a3be8da3904e7fe873a21aea02cd5"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "e105d82f4aa930f768fbdd186db1dec2eab050d1720824518b73a725be18f98f"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "98cf4f569ee51785a2acd66c4e8eea8e642a9a46cc6486ed30a263ac45682d32"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "0ce7c889d8134f3ede0e450a10a11b4b0f8554bb41cd84a619b5c3fadc564bde"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-07-31",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "0081719e36f9eb8dd5b2211f986da672af76109eeae287b44f84f0f71fa1d26f"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b0f5f655744a5d2497dd24dfb765fdd8aeb9a61476d650991f90585acf361960"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "92563183d63c67d8688fd1f15eaf40b1c8f6ca20902ceacbd2f2d812649c78d4"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b223ab020c20ebaa4db1afa7e6a0f0a3b0cf2dd568335d42ad9278edbf986dcd"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "bdba5b00937345ad326d9040bae6b22e05e5f27872eaf56992494e966215857c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "05924046b6b67fc9366750b6be62efa5381628300ff92b8e5b885bfc883142cd"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "461e50b3e7326eda5a2df0810b7b99aaf360f2ebd0297b7800a0a413bfd6aa97"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "98c2e93fa31d4a31aba16395a378b027a995e4f6aa9a0f260053e18390814897"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "615d7f7a34213210d036528415c7629687c5d07b0463e5d82f0645461b98cdb4"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b0d87b150bd70674d6f29b1b964e45919759c3bc37ab8ee75b916d52c72e5428"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "bffada6de18affe5c5b9d76ec958219550422cea632764ac24842c8079fec3db"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "eaf4260aa585eb8640a7ae59f2b2b7d9863b80d23b3fb2db6b4616076871331f"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "f90a3fcd0a8c03f33028f8ea11b36928b3050ca19edc255020da3fefcba30a6e"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "a9765f493303eb874031bafee9861998394029ece44312e4c47dccb07d1b89bf"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "5c51466f9038f45c402913454596c4036305cc628446b12be9c7bc1b78a40789"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "fc907d8163c82311724b975cf4dc8fc564d61a45dd41ca2c33be9fa2852e6e7a"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "4d629a41dd112bb658cc23d6023343c7989576ba2d01b5a41f3c7e968c447809"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "162d553fbf80a0dd41b2aa26740afe97e80246505cf71de53127978c13089d9c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "47f01d8e2d79a0325a4feb17bb9433394ff97992f548421ab5b4bc9e57e36986"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "3a24f23613a671d7bea152cb982716058bc822778ed062f2f695dd0770e3d8c8"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "ea6e99fad291d7a1a14ce74ea9b97690a14f9eea003873e2c675e2dcb2992797"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "620dc9828b09c923b8b45511e0a757e2ecc4a71954ccd8ea0458833515ec7506"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b8dfae5437d1a5201c0a625d8e9f647cab9fc3c0253333cfafce5417b9dcce2a"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "c47514b8a8991dbc9e68c6e0a9d6a4432099c76c05232a0055cfa96eb4407e38"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "6d1be36f98312569787657d23214c07ecaf73a17b927f3630e976530d8d01556"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "0de106e31948ab2bf7e765a12b78b72bba7f385ff773221a45b019b825d95d8c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "908a9bdafa04379402c50f26741ae35b69b38893db7f601b80cb707aec7aa2be"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "ea017ea1435b9d00b2514dfad24d943fdfadc04bba0fa8ac5638dbd62a679668"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b6a17ad820fc1a45aa6ff90485e194798b078eee507ae7de2571770c41451e3e"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "94c95662ca9669d3e1528cb6fbadcdf401f2e0a70252769c9010e9f14bece058"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "a0a03dc1ae90a0bf57330ae6c65f24889d5dca9142f369fb02e9920926fe13f0"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-08-31",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "e4456763e85201dca70235d392ce06147e7e2af20313ef47e8483270b32a1720"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "4c7c1668d8b12523a589d4ae584684ac3a9544966c420919b5b88c8261e95df7"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "4c515a9aeeeda110a5aa603e765e4ffb8a5fc2164eb2a52b1ca1d3e78066679a"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "edf2aca0ce70e6da97863416b2b0b7b44d86e77fd86075c284b22049acf3580d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "c3cd2c90315c6198a5b864d2bef834b829951c6e913929e3aa5802eb5772a140"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "720392e91347725c6fcf04db073d76b903170f16968b1feed04561cf5395793e"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "a9920bd3ecd72862b6acf157adc8ea48247774ac3a38fb11bf3d5e0c2c5fa414"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "a6d9ed874230e034c130733c9f05dc0b308338519f6f81ef8b09b95a6b445f0c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "00d61c3569c3f79b21d2419d063167ee412636f079e6d53db56e7b71643a528d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "0f30b0b4cf2f06f33d279d7d5648f02f1d7a97e8941eb2c9c6bfca314cbdf2d9"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "04ca6bf52160053b768b66cd8c20726ddedf7d171bde6350f9ca1a67ac487188"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "6189603566f63067f3bf51be7d0d805e17687df1389905a9958f8d71fe502e2c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "d17704239cdc78a9324cd5645120e54fb8f2ee6660c5308d20560156e3bacf4b"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "f1414c2b405fb459ee9f38ff9ec498988cd54699d98e4673ba33cc9d3d08bb48"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "ddc52d51f442e60a032fe67735d1c1c6bdc5c46abae90884ae90ac9182bed3c6"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "01df6814d35a4df88f6007432afbe6df1bd276d8ae6b7c6737fec1ea2d4591b2"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "720b6cc39d136dfad4c823a6976671aa8a3eb0f5a96aeb75194defb29f00b484"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "8c1ade953fa637b7a34ff4c647e26d8f5ec9794088b9aa08d6876e0c7a3a740f"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "671105c72b021a5fd10987dc793e377280590063b3d95d855a0f444ba91a77f3"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "277fc89758cbf57b15102eae81f5fee2e6f67c10a815b285a7397bd31d010b04"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b9e8bd74d9697b06b11d4dad87795eae01aa2bb88810d10a47cf38ed67a664c2"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "36e17372498e4ed8c57341fc8c8ec8072b4f8399d8954c570f17ca0868d7f03f"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "32dce9844f5fbf2b93b8b983595a88f3f95bb1514fa683dd124d11e539fadcb6"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "01724014cce3d2c2ca2d149b74ee1d2371f37a577301ddcf25de086cdf6f480d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "4e05b2d9ebb18ac1f9666fc1c2f5658a7d976bd8a8c9064abfd69acb6144569b"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "1bc0e4048c86934ba4e9efd584d401a0c5b2c081e8376552c056eeb7e464e8b0"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "1f86a157ebdfa7ee8262b75f19122e0428fda53c5ea45c1a26d90d7e3989cf85"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "36e501f59e31708075c22f982cd358b9e26590f497935d3274b8355bf82d954e"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "d867147531722bdb895f492b7af9e1c902f1e07190a3f2ee5fc38d464e3d319c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "6f77ba5c7e052b87c51f07ff7c2f7d3fc50ba9751254ebf4757a0dc8a1bb24f1"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-09-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "c7c5d607e2c70e6ab66575010eb21c8f701078376fa55d14bf2163529c6d4335"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "fc797f36ddd93cf3f949758ab9163c0baa8c924ccba96ac310498f1e945de2c7"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "98adbd055ed8310d1e230e21981e931d2770d384df0b91449bd9e547e77c1fc9"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "c58a0dffced122ac9599253c5428e214ace5480f8a4c371c37122b007a96b3d0"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "035a7e41bde732475761f3b3e71b36cbf2f520e006bbd7f8b81639484b43527b"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "9a99575abc19dcac255ccaeeb417dd975b710e7cd5eefffea9a4f3c67f16ca79"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "16b7ce3b1772d5a7d40f7ce278910fcaadd4db101731c317e7c443dbdad2c939"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "a0a52efd4dea36ceef8cfe458fcc01b767634b140ddc0889b1bfdcf927e2d01c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "5cf4f1ebf469da0af15150f77c0e24286362f9e66d441e2892a28b3118691d5b"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "46fbe6b3e06c0c9abe35d94250479ea612d9a260224aa657a7b9840e03c273b1"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "006bb5874823db08dd72b2d27ec1961c9f870aa28e79971d397113408a003b58"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "f806384f6f71e744e4fbeacdc33d3b4c1352e18f2d76a98b20140333dd30c3aa"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "ef8f8323157e2b9f60e90546fbd92ddf93fadef3676f07b740a1a97bd4c7f221"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "5bba56384a69b096ac05bb4acee1cc65d11ccb4b28b6fad989c9070d3a34d63c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "1d47309ceea6b4244fd7e4753cc9565cf9f90acaf00881edbb017f45f225b6ca"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "239d3d4a9dd001ecac11212c8b6158aef23234265e0aefa5bd14a183d35a6e39"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "aaa9253530c7def2870b7265dbc6552ea4dc82dfffc5b5c67a06baba09765b1d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "97c59b358cbf000d00f9e4407943c79d3eeea8c70bbf736edd09f763bf2f408d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "f287ed6b6331267c5f92afdd6b94d7bc93e4ee32094c9229567c7e5ac046652d"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "5a4658bacece56bc77a22deb5968391f7a28dc7e83625bf9cbd9fd29cf24e97e"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "54057b8db0aa834f19b691d9d0204800e2b624a5a24b2184702284b2095d5932"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "87ecb247b8f2fd82615ebce8b2bcd3a6761e3ab1d0bacd7482ab2eca3ba728fc"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "15127d7a240f44f9f1fc94a60373bcd5109faff7078cd61cb790bfa2d2c4a293"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "0296aa0ded31b33a2fba8a679b01383cb8b9f102242f0b37e593fd2f5f20451c"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "1775e1d0a02acb2ed4a52931ad2f7aa496f851a1f9e0503442f92ad6f2fc0e83"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "0fcfbb054963cce9779d3f7897c8448ab60738c236e3c3dbc31bf7be4013e03f"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "508b6510e260dddf19f9bdb0b3b8af9172e443f985ec26f412aebd2429c691c3"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "9567764813fdfb1114993c23ba29bbb76e24699a86964fd8f6cea7fba7eb3a47"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "258130b84432b84dd505706da17932c804ca366c18e69a0cffd2369461bb8e69"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "b8ff44350b007241db3f26987b851aaabde2dee48795df085c39e744691a6434"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "8d0da06cec59b39306073a78a300e110e3c2dd3efb7ab488d0c2853538e420ad"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-10-31",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-01",
+        "input_sha256": "00cbce305875bf62261b9c28283be181529061bc97248bc3736477e76c589a51"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-06-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "3499813fcb8ed42b5cf65b4a6e6074895579686fa3d49cd82bdd83192259b161"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-06-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "2d50e5b5a131ea6cd8bdf48613d7d07553c5c4e1de2caee66e2807b5030f70ac"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "1df5321cc9a334d7e8f4941d22cb6ce744cf91e487ea401401c9b25fe20c6e86"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "af1c05f36a50bfbe2e27d73d89184821bdedaa2d8204932724bcd857042d56c7"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "4a6cd643de649b0abb91645fd617fb9029750a4e1f6639eb1644a74ecdd78d72"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "4627439863f98ce46f7dc16ca7a0016a423058479aee6d7aa49939b234f8dadb"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "7a1f9273bc89cd9fd3ba16e9e1df1dba82913beb4a45a43f65a0134e144c4058"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "88fd7ab16f83a301494adc7e9c4d410cdaeb5816dc3c88ec944c89c9d558a1cb"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "fdf50c39ee2248fbf3d52974ffcc730da4eb0d017c87cf172f0b6b411c34d1d8"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "65cf36d95c2c51be4381aa00459fe54e3fc77371601c0eb5ba2f9088a3c7b33c"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "dc92acd6b0bc6dc9b19b3d716e59fb36f16285c9147541e16d3be232de73193a"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "fe4832e2d8653c7a8715359505d616959ec12988fff8a216c436f93bf6c6f07c"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "2e892e69b607d49ae355b7bedae1b3d2f55cfaee4c02083b84916851fd947518"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "0dc79961b40c2ad2dc3f1e9de0c07f88e1557ab3bf2092f21b4069683abb77e5"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "d6a5d9edd2be4be36e0e1e17ea06bd89c93db86db689f30e24f2990af30e49d3"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "60003524400042e4f462545e6cebb857f1402645a3ac089c5cb440a1f6309c93"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "8fb4f6a07f7afca8593acb8c8ed2f1be5f0c002a7610cbaa58e83a8ea90ee417"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "0baa7f951e267b73322b99444fc3b3802af07d43fce479f07b4a2ca2b6661df4"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "ee1dba2ee5f154006cec96d4bea0e8aea81e6dbc5472be64964f303890c43022"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "bdd91caddf710057f2bb056098b4e52637ac88a601a765488769ad185f6435d7"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "eaabeba18a776fa6674a28fdd47e7a49ae21937f8938c6b7a417cd12afcc8b43"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "16f03d64ce80950fd927490739b8ae36b7335a035bd87f0c5ac6e212bdc73eaa"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "281aac3e1ecbb300b81e5b541dfa2c3889e3096faaeb87241611da2575177597"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "5249f1c21bb1fc6fa60e7f54f423e8b83371027f1669840ec6f630e58ca8b2cf"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-07-31",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "59b34103d61e359f5b214fddde4ea0befbe44d9416a9632b69fd06574b8e38c3"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "c383e8949b265dffbfd27f6f60d0c63cbc9bcfe152fa67c508c73c0c6cae6d6d"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "bc689adf83cce5440cb2adf06f3da72eba4f28b87ec8b24eb4fcfb26a4e26caf"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "69cf3ecba1aef9db2a0837427631cb1e0f5cc5cea19a832ca539a05f9cc5c326"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "2ea1331203287ffed8e231fe4c5bbcd17c564214bc902f89cbe4b92fd3d8cbc4"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "3668711bc12a589b71387f71a80ac62fb56bbe8bdef84526bbd8baf251a0d707"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "fdcf74f50a815ec2df20aa5f4c014d5411624a44d01768452ca70526de243112"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "e520a1eb118a689e5b994ffdf2b8fa7c9e9eca459337512c5fc15a0984cfb2d6"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "116360ae45df0a9c3cec582309c9c95ea3f5c0e58d504d005ec727aa1ba5e12c"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "369b0f1c08440379c152ac3cefd3075b9e396a4d79d60fcb839ccccd2446bc4f"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "1282f0e0d8404cf9fffa6fc1d1c7e863498023f7addf8fe4c83464af52943aec"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "be83df7081d694db256ea9698228e0c95b0429acb9a24a20d938240c09ac6a47"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "9267b0b9c4c58a18bb02f2b48ab16467a33066af2993fcc1bd6ff0f0b1a9355d"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "86815862331873da8c6ec96c1f70a793f9315587e2320753111c76d5882ba7bf"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "cf99b2a31ea0acf1e0b3949c3e2025c9b2cf9032606857d2ba13607ae8ea55e1"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "39987629c1886fe146d3782dfbc92b03548e27a6a6d9bd243192f031dc66f88a"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "b7b00a70de292cf84e1e614cbc621810499a7eb61f037215ba566790ba6f50bb"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "816ef78eb88090965976e6140993b4a6c95e78a53726c3699b48a06364b0320e"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "a6b3ff22339cfb1a7bdbe55adb7a1115d9131b734b93d23cda0aed0dfde5821d"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "d3f8a0e2c76c91bd8fb2bc2dccb73a707344c11828a9ae4a3b4cbcd3cb655e14"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-08-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "90e931f1bd45bdf30dfe13f7bb832d9b96704f7877a8b6f57f3828dd2cb3bd40"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "97b70b4c0df0e7fcc460ac922e984acb2ca3505d7b68d7a0d45c56494ac78626"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "3c3bc237a1486dd59f85c0b51c0ac05f5f18249a4fb92ef660fce9ddd71eb89c"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "0153906712733831592f92f37c3ff5d2109194d43b7897d45094ec11b0aaac0d"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "f56bd30eef94e5c99a48ba6a1e539c9188c4ad687050cc5b54d23c82f74fa170"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "cd1954a7991dcaf98098437ec3bc233bed121f8a96a8fe4a0fa1705816ac9329"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "864a905bcbc25c73d4b4445158c9dec78876b683c53014c2b88b4542088c1c02"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "b0aba385c01ce77a0d57c142a90ee119580183e4779497d2ae47b045cb5660a9"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "0f4f0ef5fcc4307b5b1e601711ffdff78341124d2a31ef10406747e40770200a"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "875b893be775b21daf468d4bdf2cf05c71b2227b2c633afc2c4e3f85edcdfce7"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "8655c2d117cfd42b791576564a6dce0883a8c01f75a36b9fa762d92741d123ec"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "3140fc25d5d6ce673c15b00432ac700ac9136e3852f047ef92b15c1501db3111"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "6617032e046776e2e39d45a5643319a47461b21f1bd7d40e6913dd37e183c2ce"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "a9c39f144afb48a236426896df1ccf9bf6b6f8963c4c0db80abb35d8fb68cd2b"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "459e7d593ea0e492c22f502f3bd8c8f6d6dfc9968caf7092755103f3b06df8c3"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "aed764aa90448fccb812a0c3dc1ff9d5907e062124f2cbcd5a2d7b365058f7e1"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "ed515f6aabb688bd8093d07d08e1cbc08b1f07c540963d1e7353f75623c67621"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "5d6654679864a2a2bfcc5c3eec708a01bc1ab3a0820094a0986fecdd1db24784"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "8759c9e1e0dd6c0bceaa4ddbb7f3e45db9f3c82bc29c5a26d03380f0aa10dd05"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "226455a2168feb727c60b95d828eaabe55eb360a6903e57e918d18f8f48ee4f1"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "7eef74be7031b56a961f0c85aecec8416cf86a4bd2b1c3e4b774ffb365fc4bf0"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "7e0c8b31481c77f0e060a059dcbac8047881e1c359da78cd48ab59e34cfd771a"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-09-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "f874e4e80eba87e5c2634cfb1ab47d259c872bc0ec47375367342ac90e0a2a28"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "43714164ea7685185cfb3cee98ca0b29325fe750b00103637179be76a2280aac"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "dcbb7a48f6d2289f0f429da3fba2ff05a1f63683cbb09d6794bc4d48f038a539"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "ec273fe7032f16b04f45bc1b79553098184860e573fc65e165fdea334f7e9baa"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "b2f22b3c3a49b3c75f7a1b16d25485a650ab4d9ac6382d24e32ba5154670884f"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "cdbd526e3eddfdf94fa84d0296dae002c6585ac0073de95fa0d132a99419e385"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "a448ea32d0287117d4f936f6a295349f9390902b3cf5769aea36a2f5f0b96ad2"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "1fc22a6b39247e7365a06527e56db756fcf0c74a8e0ac8d0deb0305bd9c09052"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "12be3b5fdf2f155dedfaf54ffb2e8dc49715df17dd4671ca3717b5d0b86c4f59"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "f89a57b273dea8d3062a2a769849c1de2d495a0fc233aa751db36717b65d15d7"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "bcc0bda598789250fd05bf880e5c0288f40938de0872efbc620d8b5b22870348"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "f8dc75536c3f55f0aefab5a4af38afb4e04e2a9331ae95da9a71f0d8210c6edd"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "91e553136563f7078e41221789724df0af43cc68511bd72997de02fdac598ab9"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "9cc587101e6f5421b8de91f7627f54332d816f0742b3770c37b6c9e6ffcf691d"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "a3b9dd2778363e62c6d0feeb84d212aee58235e520100d23bced60adc6bdcc49"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "2537db9e94bc903c7b24d63b71de7bba3d9492ae6dfce996f4fb280f97827d51"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "68ff987c13f44afe84b484281801cd25eccf33e656fd8dd16d4956127d24dfa7"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "45544515c5f2604e751d6504c9092cf526740a2a67947f9aacf1e844aeea7ca8"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "57a35978b2ec33cb39b9e4194721ad316eef03c12435ff7604d7056b0debc505"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-27",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-01",
+        "input_sha256": "b0a0361e7d99173e717cdea43590e4bcc7366884b028c7ca5f3a09064cfdafd3"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "21fcf3359f585993a5b400c3a36fb8d9865208d7963a7609c5596868dd9a3585"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "37d3e038eda890a751b9f25e7c35195ff6c552de8c0f2e5a0372618f85c54622"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "46dc825b21f390d8dba7d24483fd38a9d8613b5784a6e89c09a3c6fc33ce6e2a"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "554e2c26e15d459a730a7035c9ebe24d90ce7195386dbf91ee99390268755206"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "e33c7feb18436c95f635a5a87be224e62bd23dc01fcbec3a22e3ea2e0a8ab7c5"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "1884cbfce40cf431ae6feec1e19965ffc91ef237ac56d21915bfb5c3199d1e87"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "53ec7f0a6bc0cc8ca9e7d82441c3415fb5db9be6047532b41571d2055aebfdc6"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "e17818523a8fda5bc2be63a0935be83302b35cae1403dc2177d15da0c7064b79"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "5e800df4a0802e8ac740cf1af769a8257a27efdf2ad8c75f916111f4faff1a05"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "ed05cf5b6f414cbe5b45a62fa4d9e1a844da89fffce16f15b140c55d0b0019d9"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "35521200703ca815d156503100afd712d769359ad4eed556d6d5ff3fb9d13878"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "fee7247d8fefce5fb79ec8005f7cc4428567788ce789ab06926e547bfa5abcff"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "539f49f5f44b42e7655c193d099ba0f13a2c585e04ad5d411b795e4f56901871"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "e25d4976cceabc8d201a2f235f4a5396d19477a39dcb94769c8f84f5053ddd06"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "d70bd35b7ba50b69dd6593d9bc32b404ab6963936efe65ef72eb949eeb778dfa"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "df74f1ce455c77cd8062dc860f90ba60d6e5cb3f833d00992f40426700f47d34"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "460493d6b70264c27762476a1af2b730be5eaa193669734d806fc91f701bef5e"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "6f0a1d7676223732369b0f1efc3ca7646c7d3d888786641cd0001796f5d6e8c7"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "44eae240d8d0a020570da54d0358d3e4a6648599578152d115f0132401c73a6c"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "911c6b74a8de282ace129d1ae0b0f4920959721a4b1f7f0f15f38f92e5b7d6ec"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "5469026ab3bc45398df82644dd301a42d43356333d3bb027bfe160d08a24d6a8"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "3cd139acae06fde2d8892f338e71845da0f2fea811bbc117916cdd44bb5b8120"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "c8f32070b68b19a9c85cd4b50f9ecf57686a13e443002d7874294f7020dfa799"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "45b54d005798054147d822d716630c73cb79c043068e91fec760d6554d661689"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "d0891d3491a3573ed0aa1e4d3d703cf825a90dec411637727a373a75080fd09a"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a109dd9ef1dcbf790c88d613ce4a72160b6e83ec26e8b30a40df04247d3167fb"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "221da8e8f836b09923c2aa899192c8c4ee8f51e3152f6cf6eb9a404bcce61ba0"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "fea00e6f07e1bd3676109dc30c4de0ad2f34395d1db84462e2615150341be743"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-07-31",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "4346c7b11804edd0d63c3755cfb3dcebe855999e728ba27220605af0356cd04c"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "20fa94cb96acad82a57c1f1d68ba60d7c0a27b41807cf025da548bfe75a23950"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "871988bf24ad9e6dbe7d2c75202799970814eeb477222dcb025dbb7719109234"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "96dff6facd1bb4a778c26ed0a1d8194be8e65ac048c1e8427940ec74246aee88"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "70466451d1a38a20985d6ad45b40eb84df1cdaf3184e55c4a5e633802d102272"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "7a9cd1808fc139ad6f2d79ac2b8534e7959fe80c46ab3d934364f5cf2160a970"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "5932ec4d49f7803293a731a0666a63beb125e3a287c3bbaf921bf95df9951f03"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "42f845997ac98d75709aa84450da96757c58575da513036449c5a58fa8e7cb6b"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "16de78a1323e20ae1668a63a109be99239600bd70bcc2b6c237015c275d91de7"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "5efa0edd7a6f8cf547559d7727d527c102325d0fb9d58b048b95d6bf91b0063c"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "4748d7fa76aa85f4d6027d45f3f95354500cd76e1bba2f5c0aea0de28bda75b3"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "5d06f07339371698cc5d6b7543df5f8200e21b8693c72859e7892ba5d208520a"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "8c2af1ca5276f833c6373df9408e8a070d970298b8a45972635ead29aac77959"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "0a0ded89184a16bbf3f57d7aadbd19ddfdb28bad0729f3404e0bd0418ea6771d"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "794ac02200e81e7d4fdd2939568f2c66a823e76cc49404249aa798856c234963"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "11dbfee588f79ea7dcbfec20595ad03e5e6241f7dac54b40a524373e0cfcb7f4"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a642dfa3c5a5f3432bbe94a5b49045cb65c6e9a14e29100701ffa0f9785dca9e"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "194db3781bd97d029242ae5a30a82f63422c9341f74dcc4cb315c51cad93dc35"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "01a5b6d96b4d6f0f316fc9b26ba9d896203299143de151060d266a683485858f"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "ab7461d4df00a937c6cf928803ba0e533a2cd3b624f797ca788a6e765d38c1ca"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "cab7d62ee37677c74a8b8abbc6ac60dc357771af14b34276d53bcadcf421cb77"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "17e3ea82153c72e95d9e7f172322008166fd5abbb7fd876d4ba97f6c8e62d5c3"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "b17388fe6cdf67c4e3e2e62eb8de12cea64cf736ffb3d05331edc1487024c62c"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "e156408bc2955961e17377fcd40ca6e6e7c431d6648486cd518217431ce60bb0"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "953d0fbd2b79865f6268d10489f5c769a334af3a66ef9d399c3818854bf33637"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "7df3e179f97619e6c876c3767d45ca6860a22b49c44dfe599b96353ad4e3edf5"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "73cb077ce5b9f9f45d4e44479c308b348fa46400ed43e30f080e19d6a84c8da7"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "317976fbafc3a3432321b1c74352dd171fc4299dde6ad2029426294910f7e3a3"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "29fe2a921dc048cf3d9f83b43946c6fa36f8b968b3abaccdf5ea0d5f6a3f4af9"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "f454f80852386c054e35df758cc570563457d7ffd0b430a5d8529f1da2579542"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "d2177412c604371067ba27d1c2759c1c0c03ca58b0905cce2c9bf1c91411e0ef"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-08-31",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "20ebce52688b8cbbfa513bb8ac407ed0d3a5fbb1e6bba12b26df5ec5cc68f797"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "0b2df7362ee69ef385c13653494e9811a4b3bcdfaf6e325b9c2c6d0cd9cd0c08"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "682e2c8338a12268d43d51545d22b5320d94e51396cdb9d67dc6afe3c762672c"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "368492d953edd49d623e0914114820624fae9ede0999776b7946599e4e9758ac"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "1b4c2178d896f1d259735318373f2ebcdfe3769ffa35d6763ffa840266df7bfc"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "4ee557a59e02e7a71ba8a8bee4783fec703f461b39b1d90ae08de773c6b8f687"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "350fd65942eb8a1f7d69b31ba80badafecbc6c634ba0939b6b4783d10e2f7653"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "b7b35c5fcced0145401ab19f432aa45648c926f9687ef201973178ad4b662a7d"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "f480d79ce8f26c2e754a543e493ba8a8f36c0015f3100b1fd3a868211224b5ee"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "2b3b93a5896a282501362d3a605095e16d2d770be41b490efb9db204475c61b2"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "7167fb095687b3a7f928857806ba38edd5bfbbdb0f03523dbc1a0040c7a85e62"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "bc575775b8b79fb993a49f1b7fade293e79d5949187b25c606105eb609b0f1de"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "f439b014b6d676d48331aaa18446894045c0e5b4956ce2b6ab1ed5c010631d23"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "cc85872c90a63eefa11349e11528d5f0409018928d65c679e4c83ce697e11e32"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "9c6c9ef6206318a4fae9237c5cd3812865be282010d0b00b2951dc7a94bb4694"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a057939ab2568d6ef647e7d6a4373e896b943328a92f292241c5910e72881c4a"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "d2e81636791bafec1ddf3e18eee48a26be9743c09931d20ae1fe65706da1d60a"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "1914a1170b760416f2b08ce6f5f971f12bf165f8ef1d78984f05b2ba861ee4c4"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a873937aca17177816a4c5360bc86c5d506dd2ea4787d9f6021a8801f6f00714"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a17649ba6d9a3a068d63b6a5bb56c157478f6e75970fd756d5946f6ac852b099"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "fc24342627469037532f8e15bd857beddab2665c12491a47da45150d927f81b2"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "ba5e07436a28a3108ec1acb48af25bafc2c6f0214fe6b02f3c7f61127d137578"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "94aca9dfad0e76ede54b9f0a26ab856c0902e89f9e0b3097a0ee62559ae26f0b"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "65f7ebf2e2f47ca98dfd50855527baf529811dc5f5f80049beec0b5959cfc3f3"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "ed47e0495944a70a43827b5b1add2b836176f40a99b566809f1827cf1f60cea0"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a04f0010fe4cacd64c438e913ee078b0d6dd04c072b6c1bf796cf1999a839e91"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "ae452a7d18934ce73b1e0e6988c59704d4be8d4c470a0e96448598eb81d84c62"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "5bb0d5f4b3c11e5492628806a75458a03b15c99b703b9520d5fa44ec331f6fd0"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "07c214d4a7a395c8767e5112fe0d560b8eae282ffb2640057e4330cbd4695d17"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "afc3e714a304c865f390eeaa332e542c4b62aad226dce8e307b116a245670a0f"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-09-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "53e95fba0f7df150939ea0a17ed498d499405eaddfb25006a16e80d8bed83d48"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "2a98e8b350de9fa599bccb6fc9a8914c28e8717f09ed0fa3be1914b31498cfd9"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "0e6c61d5abd9b37335c35ea321b1f5fcda39985db05d1ff6084e36b0205ae9d7"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "bd93734cf18cfbcaef60ab3fb40c4a12e1feba19edf9f8ad1481b21c3a978039"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "4eb091060a00f1391fb9e61faadba7fa9e4b0724ef84347a33f022bcd0e8e1cc"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a931fd51a4a10fab9ae22b9d2937de27c35487350f2130d356b640e00ca63312"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "1131e529ce4d1d86a6850a86c1bbe97e539a0cd71e0125362bb99b7e6e7c06b4"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "413370e1debc99881c1c4ed430df59104b985ffa202a9f216519d1b2141dd39d"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "067744d55ddeffff35afcf8b4403128a3ba5f5ef9419a42be0c4f64c26f9ac9e"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "45ccb4e52f5e9f809754465eb356c71febcbde4c80617cae7d35bd10db37c1f1"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "f12503fc1b725175da82e1b6c4d691edb7839315dec92ac2c2e77aa529547de9"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "2014484dae49847dd5dafc184592a8edb7e92d41f2999e824faf162f18c5d7a4"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "c0c346a5a55f72ef373b9f2f9d7d50c745f6152303a1f15eed798a3b9fe932d7"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "79a93ce769c15ff620b460d73d709022360b6b4d64e770b85c7ec272ed2348fd"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "81a76d3972ade229f96d0412f58d95b7ac5d1fa87b5d62d44e4cd8b61a221002"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "668eec6f7835fc6aa2cbfc7db23d2b2f919197c133a0b675718eb9ba012dd792"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "f56f2117c50a03102a8c8c687b9089d6859cb1794566df66dc72bee566677f82"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "edbbf605794d82612efadccee67c84034de921f6a9b30fff8d32207d4ecbbb69"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "9ef3cc1fe8ff7eaa27f2c998a431013a3d9ba6b4ff12057b545e2e981f56c9d2"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "06393844b50f5a982a8928c95e2b0cb4661cabb2d5fffee35bfcb12e1f95bb0f"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "a014572922581f49f0d08cdc904a1b8e5aae1c5fe5130a926e29f1ae880de3bc"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "1a5131203f10245f32b9bf644a26fc50029897bd9888d3e6e5b870b0cc51410b"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "f86f04364d533184d028cf7839216be9cb0e05283f4f14d6f8bffd4e6d9d75fe"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "6dea3e33a89e0e7b5ce11b16c6013d49c6c290f82a548301f94638e847ba405f"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "0b83609f90c3243aa8487a3113420beb8244687f8974678ac46b4759acb2b3b3"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "1aa0b32be7dca4d85a7f9bd1fb7118ef8f3eadd538ee9127b1389105310c7041"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "e997eaaf38e27188bef35135634fb6eefe808f62bc2328a0bce9e0fa3d27fb47"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "e5c6ef9e883d92f92d0c8f1029fad3759b0a03a9c1d36d85572e1e59cf849e50"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "f8a031b4ceb607066887d49fce572a2b0693821ef37dd50532f3040287dd0514"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "ade88bee9d01cadc32c89d0c09303c4c1ea38021ed88de336b025bb58a0d7ddf"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "18739e15f1165fe745d72214d4671ab331f7e315283ad79ace37a6d0adfac445"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-10-31",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-01",
+        "input_sha256": "43048821d43ab281c237b93b9f2adae2e75e0eb603322c743ffd17ec81fdeebf"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "d17a1666b69b801e14c8518883766230b34cd263de976115d1b9ed52a53fbd5c"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "8a37d5366233c70cfe9425474bb161a12c316ecf421276f845dd033af9d8a92f"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "137d69c7610efbb65987a0fa7b5b5e398b43cbb96886af7329016913c507c19b"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "2c08146e8c637ea9930c508f0a20933cb450b6579c8b787c8720d2517cb45de7"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "806398e5526fd2065bee1d30382c9a15063a59f930089bbfedc4fbe538382712"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "5953e7634cd2f374cba4b2d2d5c518f1d04ae6b1f8d40eb856202246a30f8296"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "e53fa33d21cfb058f33403a439218197453b1cb1b5ca0a40b49c1dcac66f1a3d"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1175e4ec45374e8267d62d6d8e428b064f1976dfe607d7877ebaf6b3e1b0e79c"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "fe9d8168cc5441c02d08d9f06b4d7460bf82a44a101e96c3ecff377ec5d0587d"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "bc35a1b056cfe6b1d73ee115d76baa451635604ca7027f237306cbae6c505f15"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "8dce7254614e73d9824d58680c8beae05212eccd576cf97a1da2f28367445a50"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "d283eb24e394f57a15f7fcc1a6c10cd76c8cb7d4577fac47f711ecaa8dd5c659"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "579afbbb671d0ffa631ec4fd96a4dcdb59a9d0f3a56cfeccf180956b446983fb"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "ff2a7125f01c9a95c5e26f5d708f8ff29dc6123494ae37d1495c76b0d56e2d74"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "929c4248ff8a1f369615a5995687a37bca9b0414f191161f42db567a4e91fee0"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "afedbeab4021131f07a05681bd8f23572881ef42780749d957a7ed1aa1220532"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "9be8365a1abfb1e33cd4176680db405a0e96f7ecf56cda6f5a5d229d348c6bb0"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "7fc93daedaf611af8fd73da61a2aa535065e67cc28f1a2449fdc717efb1e2bfe"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "955b6ad00475c06d84b8c9c8401a0ef0e84d3ba1b2b1b1ce6efced2a425f8827"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "cd6d453da6ed3418e9922d1f60fe102c10427a9fa0887de909968d5d1660b499"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "084c0f59641f42f3ae0adb8b7c7c0493c4d22098c1fd3c1216a2b1fd4ffa0e4a"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "db3ea4900d3f8a8b308d54be67ebcf79e8b2ce75a55ae5f9ca808c65ce7ab325"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "f8cca108872b62032982e10c966e14ec86140d6dc5240897cf88f4bfe2df23af"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "19fa7c139e563a75151512f5bbb9f7e75b812051110a126bec1e643c6dd26e55"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "320e59090146cc53376119081a57fbcfeaca757c1dd83683491f2d7dd2e60f66"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "79963848cefb6b6526c8b1f0cb4e994e9c0e13fce2e4a04077827bfc244f9247"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "07ce941b3606a05a7f3ef7b42125ed78db22f1263c6c2701f6391b7aec23f574"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "bfe271061f2bdb4a415cf91a5ef51c665ed965b533b38c44cffbbade25e3b752"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-07-31",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "d674c0027a3451878cc99b702b1f79dc62a8f3fc1058ba832dc9875c2bc63bb1"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "0f0191e439652ff402ba9397c547270b711184d48909ee5c4634d93e82e83872"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "6dd775703f27334115457d5ede6ac03cdfd26a447bfb6b61a2dbb37b6bc2eed2"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "25b3c629570d67a5553d110464ec85de6ec88e667113dd66013f6d79c9618471"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "b44b6111ead888c8c959ea95531808a7d90e7f26af412c270529fe86a2effebb"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "53412ea204a62b7861050b423b5f100f6a286e942b9c9a6638db37f309c45082"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "6d7c79d22cc5f3a121e8dc5157b54d585e1f5011d5deb1aa2e1686aeaac0b934"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "bcfe2534a33f581c12576c39fac89f33add085a275237346d2910dfdb7e4deac"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "dbb1e476da2f827f2cd1df52f69e73769b269452db844d8eeef7e4cf24e16900"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "ba6f4ed5175a5d6efc6d5b483c46f741ab80c49f9d4f631bc069775b55fbd938"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1d077a06f13540edf2aba825752a2ef7dc3241dd91f84323d38b965575110085"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1bb14fb6337dacc792c9001cd308963cf4eefe51c24cf65932f255a75b28cf2e"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "0fb7f1dc0cd4508bed177849d5b0f2ee7387bc7582aea121e7fe60b966931a84"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "de078d6462cacfa363d67d71679f1beae7a901121175fca18d7bd87b9dee625f"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "46c1adca17454687d1c9c09bb4c6f303ba6b3bc681ff11cdb6735c726f1d64c1"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "5c802ed129b5d23ab9ab5cabf00bd28fd2ec419cdd43b12c501627cbb1372495"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "73f8e6ddb3e3cdc91823ab7d25b966b6fea19ffcf8206892eb4ecfc16f4cf6ac"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "3c6aa1a9d9fd18c20cff18dbbd64ca6ecdc362a4d193f3a9931f4f5bafd27467"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "a9a3d8dde2329ecc092a01221c10bc4fac6be40131727bfa752dc603da6f131f"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1b7ece6431540c2002944f21a80d2b70c9fb5cc95a8234269e3baf2884ee75a8"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "7874a78eebd657ab1a3102ffb6f73c292158a8b9719a08b013f75227394041d2"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "efdcaa5667d7c1224378e79a70ba8f7f5337947dc58a64c4c13e677baadb4cf7"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "bbf4831d8cd1baecd244ce6b37e8ad61669efd1992747c8baa0236d46bcde0be"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "687da0f17ebf349ec672a6795159741e7e84e8f7c6834d305ea4518cde78f2e0"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "7633f1fab502371c90403546a3d3e6df0e5866ccbe918725e9aa3b58321ff78e"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "a8ff205c8377ece0d6dad1c7b6ee787d54b62f1257d43d5a6c390e1d99981fc0"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "e01edd76ac8a492a1dfa089142cb38417258358aea4d8352bee9aac73d02cde2"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "aef9095ade2d341bba335fce9c6ea64362c367c6c6cc34ea35c4e3ca5f12c379"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "44ded03d2dc70020099fec7ae94f510863a7e857cb774430cfe508489ec87200"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "422e70b4f7f34370007daef98313887effe9952d194eb90c4244ed280ec381ae"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "fb65ad06992bc2cf2b19204fd65fef4c5edf5891cd6be2445088e8c29f31e32a"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-08-31",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1856e79e82bd3bc3c2a03ee73a3e9f43316934dc82d76cb87f8b07e2db93b563"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "6be38f99ca6a054aafc3c0fc279d26ab59d0fe7ce74eee5fcea208acb988f146"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1f9e9ec58b247e6c06bfd3e5a289b2739225900f363dee7eb5655c53f57a77a0"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "6121b06512dece75a8a31ded9ef00443b3ba30a9b26df8fef0d18fcd48cedd4f"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "12629d9aff25b026297907cdd55b7faddd6bccf9541c5aca2fa2f0784453f5ca"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "c165bd0b5db8ed4da3fed66b606c75296d1084457349bcd51679743426c5bb4b"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "5b2f3fe86c5656bb31e7d68d1d6f9b44b0448cec71d3c1f0a7be265ce1ba06a7"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "016554a7937f369490b4dc28246f4e105d8d334253d98a406e6ef501756951ac"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "4ff92840273872f6d2c3ab0cd96f1f5512a27525e4a97e418e09788489c78622"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "d0d6826c613220be2205604114f22a3c843df582c6b0e501b26dc02d888d78e6"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "a3224a1775b0e2efeac0742905e14b089bf112963eaef090482b1cc99f6f0fb4"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "5b4d3044c25a385d2cd11b707d46c3250de832bd6076dde0584b34d3a87ddfef"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "c3ad4e42a20c6a80bd229cdee5bc5444840295ea7e36d9697a13587b261b270e"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "60c658b504b3137c1382a7c9121cbda11c839f4b939a4044b32638517309db96"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "e6f2953bc15f86eb99deececa467c996555dbb34995fcd1f5ae5e4a8e104187b"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "0210ec3c683d182862ff3093d196ec88d77c3a4e0633f9b5a416e6c1d5edf63d"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "ad5a8ce91be20a164999a3934d4715cad85219f6d25f4b2c1037e2ff48e00d64"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "3532bb74a12d6da58869f05fc9e14c06a5746102f70a0b38391f8008c4e934c5"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "091b2b1d9c396c9122957464f7425a4e3d6e95d457a079fd4f4e64bb8a33fa69"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "127504dc8660c80363b478d90aa2a5deb7223058c1f9294f45894181f284ae4e"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "8489f7c372ae75a5b8113b38ff506c1dc64fddf345f71fbb1b1818bbf435d8c1"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "fb4d8ebd4a3e4d2d43725ced0e931bf61c8c8a8be932e1f988adb96183e2f2c4"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "ff7630bb4756c917bd9bec5e525117e90a4964281181bf4091bb8197ddf79dc2"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "8d7c8af7d337ea39b740c86a5b60225d947b4bea66ed8ed22e9e7d59791b469c"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "8f5bed5ddf383d3423a7eae55db9eecc9983bbf71c61fb94174e951cfb49b627"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "b71942a4254f51bcb2ebb23cbff82dbea6bc69d69f2032d3bca1a0b560410565"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "2141a1a1328bbc5aaaf50318e50a65c57e168d41ee43d6bdf00db640359ce50d"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1894899d869c82ef9cf62d4cbfca45df13f8786e190a6e529f939f20a43e8c1f"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "83d0ae9ece31fb3685bab39a58af3bbcde7b7c39978bfed8dc9339b531d0ddd9"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "561a2f057ddfcad9cdf0ec03133741035325e4bed22a110a363760fcc3ce2e93"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-09-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "943ffb8cf9290a7b0643ba0fcb2bcd579d606ce67d9c8bf5e26d7be25ab0d5e6"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-01",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "c20a32766f9bdecac067a9241f00a8fd996a2f1666398a18592e555f1a6ced06"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "dcb653d56675aee7f16669567ff737614b4eb0d32de7b8bb1a15052360ce7cfd"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "07b3261b9cf24c7de495dd29c83164bb0810e65c167e2492406691de33ca4c4e"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "60dd3c10f34d27b1b9b1e37ac931400bfe4d0f14b3b2b6de8214ee76e56be28e"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "34e72e0187aab4a91834bd369f17eb9687257ba2c7a230f3dd12efe51bc87c83"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "d0c8870766b83b5b968fff7fe74030b2bf33da6ada4e450ea6acd41232d16ad2"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "a133c6a80fee5f9e5674cd0d88669f21fb9feadb577ddb735c3dc7b9a4066ed2"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "1fa5b73be4bede8f72b92bdda271513a33e1122b36104823bc176c0bf0fd6061"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "ee973ec8eefcb79478d26eeba9d3f8deb335d64b0b357f5c5e4261eeaff41aa1"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "d1e247058a4c48059a735898af8e4b448071c22dc6ac3721950695c97168f4ba"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "68e2f955e787e7c69638c7492775956899278052ddd7711d242eeb1bfe20f6c7"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "03b267e2acf67384e7fe55d662294869c99c6e4e230e922dc4b984580501dbd8"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "8f3d19fca0af31cb246b6f8d5d72a04c2bb5ab91aec6c7ff138e54294e8af121"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "de445b2539d92ddc2a5a761515658fed3f7b8c70d6b4dce2745e6ead515ce8e7"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "fda4f399d4bfb28fa57f8dcc13cbba39c6854863cdc4ce43edfe699268d63506"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "5a72b9b6da2d1524dfa85aa2ca04208fe266bea28bcdb6723a89cf3124913e69"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-17",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "637c1b4a66ecedd076099f492d1aac71cf7f45bd191d4245d697de9fd17f31ea"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-18",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "77fbf912eeed04c35db244b092cba89502fe4225521f1e39de9175a2c3c97f0d"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-19",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "358d0dd8fe0673a2add1fce57067abc8c8459eef134c793ae7c68f7e2a707c32"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-20",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "49c4a39c294523cb3c14f084302c488546ab7539721b68aa8749c68dbd0471bd"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-21",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "4bc695ce3839ecd77cc4ca12f639b47bdae5eaea9bf36fa1090dbf5bdc5e8d90"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-22",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "84b4a0b46f26b0b2b4822f03c96ffff455f42bab9cfc7ff92b642be32b9cba28"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-23",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "2aace5be1684b43ad39393b3a6bfb97ccce2ccf75e5b8be57df8f74bd2dda512"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-24",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "55199ce4d3d918d6ef7d469c044ff839bc0cee8c3bb5118d1593b8cf9f524395"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-25",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "e2d5d89a8bd9c2dc71262a34f9d930b1ec61b1b68503e76c431ab6c4767928dc"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-26",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "010b440fd4eb744a1fced40d5fcfe84bd5e8883228ce0a3b16996651ab6f6e8f"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-27",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "3ce14800b0593b1d3d49b4dc8940dce255aef5abfac576b6376043e3abaea0cc"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "c479b7e44e33bad1f1b0c0af20cebe5d62ef70dd684ab0b2aec5092340b8542f"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "fdc1e3a1e767e1e029ea52e559869ae185ca7d269e86b80a642b639c0091c545"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "d6de2bfe89305bc86862fbb82c9ac78c0a32d1e46269aedeed9b91bfc6a96abd"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-10-31",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-01",
+        "input_sha256": "12eccee69421f31abaedb28bd60a54de6683323c52bde6b26a0d8a5304e2e369"
+      }
+    }
+  ],
+  "upstream": {
+    "wiki_ww3_views": {
+      "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+      "sha256": "8360b98a3b8a9a655cbc8ac18f7d1b17a05e4dd3fca5035af3b1e0c4dfd69d70"
+    },
+    "brent_spot": {
+      "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+      "sha256": "f3ad22ec3aa8800fc5edfa638d364ae388a5612ed895d233f0b2af67c807a393",
+      "last_modified": "Wed, 28 Oct 2026 17:18:14 GMT"
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "9c24656ddda6a2fb0f2ce0bdd93394bed0a3d938be350475e50879222bfc83f1",
+      "etag": "\"9ff63bc72cd7ce6839a15b647be84915d549cf7c877a55c58607a126dd404f08\"",
+      "freshness_cutoff": "2026-11-01T04:58:40Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "e8f09aa4efabf08770a4edf0109573534b3c4113a55b03728e14702c1a52995b",
+      "etag": "\"5df93ac0e0601cdf7985280a457eb910f9197d4c8c4699946f690f894f217702\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "06be20c6fd25b0e609509ca86e1bb7ea0895b8d0",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/41314899619"
+    },
+    "generated_at": "2026-11-01T14:13:49Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m/2026-11-01-aseri-timestral209m.csv": "44a9696e75c0d221bae3c2144df58c1ff9c7c67fb6204e8cfa0d7b6c3a6f6d0c",
+    "target-data/deltas/2026-11-01.csv": "5ef51d6542f35ccd2083eb516cebab271ac0341aa46a0e5ab9f815aab6a8f519"
+  }
+}
