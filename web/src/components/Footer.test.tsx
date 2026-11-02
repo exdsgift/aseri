@@ -32,6 +32,9 @@ it("signs the page, with its licences, its source and each hero's engraving", ()
       .getAllByRole("link")
       .map((link) => link.getAttribute("href"))
   ).toEqual([
+    "https://github.com/exdsgift",
+    "https://www.linkedin.com/in/gabrieledurante/",
+    "https://buymeacoffee.com/exdsgift",
     "https://github.com/exdsgift/aseri/blob/master/LICENSE",
     "https://creativecommons.org/licenses/by-nc/4.0/",
     "api/",
@@ -40,6 +43,27 @@ it("signs the page, with its licences, its source and each hero's engraving", ()
     "https://commons.wikimedia.org/wiki/File:Farnese_Hercules_MET_DP102198.jpg",
     "https://commons.wikimedia.org/wiki/File:Apollo_Belvedere_Apollo_Pythius_(titel_op_object),_RP-P-OB-102.457.jpg",
   ])
+})
+
+it("links the author elsewhere by three marks, each named, a 44 px target, in a new tab", () => {
+  render(<Footer choice="rotate" onChoose={() => {}} />)
+
+  const marks = ["GitHub", "LinkedIn", "Buy me a coffee"].map((name) =>
+    screen.getByRole("link", { name })
+  )
+  for (const mark of marks) {
+    expect(mark.getAttribute("target")).toBe("_blank")
+    expect(mark.getAttribute("rel")).toBe("noopener")
+    // A 32 px mark and 6 px round it; gold under the pointer or the focus, with a ring.
+    expect(mark.querySelector("svg")!.getAttribute("width")).toBe("32")
+    expect(mark.className).toContain("p-1.5")
+    expect(mark.className).toContain("hover:text-forecast")
+    expect(mark.className).toContain("focus-visible:outline-2")
+  }
+  // Right under the copyright line.
+  expect(marks[0].parentElement!.previousElementSibling!.textContent).toBe(
+    "© 2026 Gabriele Durante"
+  )
 })
 
 it("offers each hero or the turns, the reader's choice pressed, each a button with a focus ring", () => {

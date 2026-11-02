@@ -1,4 +1,5 @@
 import { arts } from "@/components/Hero"
+import { Mark } from "@/components/Pictogram"
 import { heroes, type Choice } from "@/lib/heroes"
 
 const repository = "https://github.com/exdsgift/aseri"
@@ -6,7 +7,13 @@ const choices: Choice[] = [...heroes, "rotate"]
 const named = (choice: Choice) => choice[0].toUpperCase() + choice.slice(1)
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-const link = `underline hover:text-primary ${focusRing}`
+const link = `hit underline hover:text-primary ${focusRing}`
+// The author elsewhere: the owner's profiles, not the repository, which "Source" links.
+const elsewhere = [
+  ["GitHub", "github", "https://github.com/exdsgift"],
+  ["LinkedIn", "linkedin", "https://www.linkedin.com/in/gabrieledurante/"],
+  ["Buy me a coffee", "coffee", "https://buymeacoffee.com/exdsgift"],
+] as const
 
 // The foot of the page: who made it, under which licences, the reader's choice of hero,
 // and the engravings behind them.
@@ -22,6 +29,22 @@ export function Footer({
       <div className="mx-auto flex max-w-[72ch] flex-col items-center gap-3 border-t-2 border-border pt-6">
         <p className="text-secondary">aseri</p>
         <p>© 2026 Gabriele Durante</p>
+        {/* White marks, gold under the pointer or the focus: the one accent, as a mark. Each a
+            44 px target, its 32 px mark and 6 px round it. */}
+        <div className="flex justify-center gap-2">
+          {elsewhere.map(([name, mark, href]) => (
+            <a
+              key={mark}
+              href={href}
+              target="_blank"
+              rel="noopener"
+              aria-label={name}
+              className={`p-1.5 text-primary hover:text-forecast focus-visible:text-forecast motion-safe:transition-colors motion-safe:duration-160 ${focusRing}`}
+            >
+              <Mark name={mark} />
+            </a>
+          ))}
+        </div>
         <p>
           Code:{" "}
           <a href={`${repository}/blob/master/LICENSE`} className={link}>
@@ -61,7 +84,7 @@ export function Footer({
               type="button"
               aria-pressed={choice === value}
               onClick={() => onChoose(value)}
-              className={`cursor-pointer px-1.5 py-1 uppercase hover:bg-white hover:text-background aria-pressed:bg-secondary aria-pressed:text-background motion-safe:transition-colors motion-safe:duration-160 ${focusRing}`}
+              className={`hit cursor-pointer px-1.5 py-1 uppercase hover:bg-white hover:text-background aria-pressed:bg-secondary aria-pressed:text-background motion-safe:transition-colors motion-safe:duration-160 ${focusRing}`}
             >
               {named(value)}
             </button>

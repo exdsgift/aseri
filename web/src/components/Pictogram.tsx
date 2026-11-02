@@ -175,6 +175,78 @@ export function Glyph({
   )
 }
 
+// The footer's links elsewhere, 16x16 from the prototype-link-icons branch: GitHub's cat
+// (simplified), LinkedIn's "in" cut out of a square, and a steaming cup for Buy Me a Coffee.
+const marks = {
+  github: `
+.....######.....
+...##########...
+..############..
+.###.######.###.
+.###..####..###.
+####........####
+###..........###
+###..........###
+###..........###
+####........####
+#####......#####
+##.###....######
+.##.......#####.
+..####....####..
+...###....###...
+.....#....#.....`,
+  linkedin: `
+.##############.
+################
+################
+###..###########
+###..###########
+################
+###..#......####
+###..#.......###
+###..#..###..###
+###..#..###..###
+###..#..###..###
+###..#..###..###
+###..#..###..###
+################
+################
+.##############.`,
+  coffee: `
+................
+....#...#.......
+...#...#........
+....#...#.......
+...#...#........
+................
+.##########.....
+.#############..
+.##########..##.
+.##########..##.
+.##########..##.
+.#############..
+.##########.....
+..########......
+...######.......
+#############...`,
+}
+
+// A link's mark at 2 px a pixel, casting the text's shadow.
+export function Mark({ name }: { name: keyof typeof marks }) {
+  return (
+    <svg
+      aria-hidden
+      width={32}
+      height={32}
+      viewBox="0 0 16 16"
+      shapeRendering="crispEdges"
+      className="block drop-shadow-[var(--drop)]"
+    >
+      <path fill="currentColor" d={runs(marks[name])} />
+    </svg>
+  )
+}
+
 // The picture knocked out of a solid block, drawn at 2 px a pixel.
 export function Pictogram({ name }: { name: PictogramName }) {
   return (
