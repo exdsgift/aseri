@@ -41,11 +41,12 @@ export function Hero({
 }) {
   const text = useRef<HTMLDivElement>(null)
   return (
-    // From 224 px down: on a narrow screen, the art stands in the band above the wordmark.
+    // From 224 px down: on a narrow screen, the art stands in the band above the wordmark. The
+    // top inset (a notch) inside its height, so it fills exactly the first screen.
     <section
       id="today"
       data-hero={hero}
-      className="relative isolate flex min-h-svh flex-col items-center px-4 pt-56 pb-20 text-center text-primary uppercase md:pb-32"
+      className="relative isolate flex min-h-svh flex-col items-center px-4 pt-[calc(224px+env(safe-area-inset-top))] pb-20 text-center text-primary uppercase md:pb-32"
     >
       {/* Another hero arrives afresh, and loads only its own engraving. */}
       <HeroArt

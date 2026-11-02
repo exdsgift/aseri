@@ -264,9 +264,11 @@
     font-size: 12px;
     line-height: 18px;
     /* The ground runs under a phone's notch and home indicator (viewport-fit=cover in
-       index.html); the page keeps clear of them. */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right)
-      env(safe-area-inset-bottom) env(safe-area-inset-left);
+       index.html); the page keeps clear of them at its sides here, and at its top and foot
+       in the hero and the footer, so the hero still fills exactly the first screen. */
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+    /* The page the op-art margins lie in, down its whole length. */
+    position: relative;
   }
   html {
     @apply font-sans;

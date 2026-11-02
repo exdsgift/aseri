@@ -1,18 +1,21 @@
 import { describe, expect, it } from "vitest"
 
-import { type Box } from "@/lib/art"
 import { pixel } from "@/lib/chart"
 
-import { clearance, inked, scene, widest, type Scene } from "./margins"
+import { scene, stripes, type Scene } from "./margins"
 
+// The widest column, 1008 px, and the 24 px calm gap beside it (spec 6.9).
+const [widest, clearance] = [1008, 24]
 // A page whose hero lies far above the rows a test reads.
-const open = (width: number, nav?: Box, drift = 0) =>
-  scene(width, -Infinity, nav, drift)
+const open = (width: number, drift = 0) => scene(width, -Infinity, drift)
+const inked = (x: number, y: number, s: Scene) => stripes(y, s)(x)
 // The inked art pixels of `s` in page rows `from` to `to`, as [column, row].
 const inks = (s: Scene, from: number, to: number) => {
   const found: number[][] = []
-  for (let y = from; y < to; y++)
-    for (let x = 0; x < s.columns; x++) if (inked(x, y, s)) found.push([x, y])
+  for (let y = from; y < to; y++) {
+    const row = stripes(y, s)
+    for (let x = 0; x < s.columns; x++) if (row(x)) found.push([x, y])
+  }
   return found
 }
 // Where each run of ink starts in row `y`, from column `from` to column `to`.
@@ -58,7 +61,7 @@ describe("the op-art margins", () => {
       [1560, 1640],
       [3720, 3800],
     ]
-    const s = scene(390, 900, undefined, 0, gaps)
+    const s = scene(390, 900, 0, gaps)
     const found = inks(s, 0, 4000 / pixel)
     const within = (x: number) => (x + 1) * pixel <= 16 || x * pixel >= 374
     const reached = found.filter(([x]) => !within(x))
@@ -77,7 +80,7 @@ describe("the op-art margins", () => {
     expect(reached.some(([, y]) => y * pixel > 3720)).toBe(true)
     // A desktop keeps its margins: the gaps beside the column stay calm.
     expect(inks(open(1440), 780, 820)).toEqual(
-      inks(scene(1440, -Infinity, undefined, 0, gaps), 780, 820)
+      inks(scene(1440, -Infinity, 0, gaps), 780, 820)
     )
   })
 
@@ -108,10 +111,10 @@ describe("the op-art margins", () => {
   it("bend the stripes more the nearer the page edge", () => {
     // Where the wave crosses 0, a stripe is straight: it starts on a multiple of 10 columns.
     const row = 400
-    const flat = open(1920, undefined, -row / 36)
+    const flat = open(1920, -row / 36)
     for (const x of starts(flat, row, 1, flat.left)) expect(mod(x, 10)).toBe(0)
     // On a crest, it is pushed toward the page edge, by up to 8 art pixels at the edge.
-    const crest = open(1920, undefined, Math.PI / 2 - row / 36)
+    const crest = open(1920, Math.PI / 2 - row / 36)
     const shift = (x: number) => mod(-x, 10)
     const runs = starts(crest, row, 1, crest.left)
     const outer = runs.filter((x) => x < 40)
@@ -123,9 +126,18 @@ describe("the op-art margins", () => {
   })
 
   it("drift: the bends travel as time goes on", () => {
-    const at = (drift: number) => inks(open(1440, undefined, drift), 0, 60)
+    const at = (drift: number) => inks(open(1440, drift), 0, 60)
     expect(at(0)).toEqual(at(0))
     expect(at(0.5)).not.toEqual(at(0))
+  })
+
+  // What lets a frame move the picture it has instead of working it all out again.
+  it("drift: each 36th of a radian moves the stripes up one whole row", () => {
+    for (const width of [390, 1440]) {
+      const still = inks(open(width), 3, 3 + wave)
+      const moved = inks(open(width, 3 / 36), 0, wave)
+      expect(moved).toEqual(still.map(([x, y]) => [x, y - 3]))
+    }
   })
 
   it("start below the hero, from nothing", () => {
@@ -136,21 +148,13 @@ describe("the op-art margins", () => {
     const lit = (from: number) =>
       found.filter(([, y]) => y >= from && y < from + 10).length
     expect(lit(1000 / pixel)).toBeLessThan(lit(1000 / pixel + s.margin))
-  })
-
-  it("keep 24 px clear of the side navigation", () => {
-    // The navigation at 1440 px, its right edge 24 px in from the page's.
-    const nav = { left: 1306, top: 352, right: 1416, bottom: 548 }
-    const found = inks(open(1440, nav), 0, 450)
-    for (const [x, y] of found) {
-      const dx = Math.max(nav.left - (x + 1) * pixel, 0, x * pixel - nav.right)
-      const dy = Math.max(nav.top - (y + 1) * pixel, 0, y * pixel - nav.bottom)
-      expect(Math.hypot(dx, dy)).toBeGreaterThanOrEqual(clearance)
-    }
-    // Still drawn above and below it, at the page edge.
-    const beside = (row: (y: number) => boolean) =>
-      found.some(([x, y]) => x * pixel > nav.left && row(y * pixel))
-    expect(beside((y) => y < 150)).toBe(true)
-    expect(beside((y) => y > 750)).toBe(true)
+    // However wide the screen, they are whole 192 px under the foot.
+    const below = 1000 / pixel + 96
+    expect(inks(scene(2560, 1000), below, below + wave)).toEqual(
+      inks(open(2560), below, below + wave)
+    )
+    expect(inks(scene(2560, 1000), below - 4, below)).not.toEqual(
+      inks(open(2560), below - 4, below)
+    )
   })
 })

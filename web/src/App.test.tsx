@@ -946,8 +946,11 @@ it("rings every control on keyboard focus, and gives every chart a text equivale
 
   // The margins, a decoration behind the page that says nothing, then the hero's art, the
   // panel's chart and the 9 cards' charts.
-  const [margins, ...canvases] = [...document.querySelectorAll("canvas")]
-  expect(margins.closest("[aria-hidden]")!.className).toContain("fixed")
+  const [left, right, ...canvases] = [...document.querySelectorAll("canvas")]
+  for (const margin of [left, right])
+    expect(margin.closest("[aria-hidden]")!.className).toContain(
+      "absolute inset-0"
+    )
   expect(canvases).toHaveLength(11)
   const words = (canvas: HTMLCanvasElement) =>
     canvas.closest("[aria-hidden]")
