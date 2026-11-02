@@ -59,6 +59,21 @@
     0 0 / 4px 4px;
 }
 
+/* A touch target of at least 44 x 44 px round a smaller control, which is drawn as it was:
+   the hit area grows, not the drawing. */
+@utility hit {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+}
+
 /* A caution reads without colour: white, after a marker, beside words that say it too. The
    empty alternative after the slash keeps the marker unspoken. */
 @utility caution {
@@ -77,7 +92,10 @@
   &[data-count] {
     position: relative;
     color: transparent;
+    /* The hidden number would still cast its shadow: only the count does. */
+    text-shadow: none;
     &::after {
+      text-shadow: var(--drop);
       content: attr(data-count);
       content: attr(data-count) / "";
       position: absolute;
@@ -105,6 +123,11 @@
   appearance: none;
   background: transparent;
   cursor: pointer;
+  --thumb: var(--foreground);
+  &:hover,
+  &:active {
+    --thumb: var(--white);
+  }
   &::-webkit-slider-runnable-track {
     height: 4px;
     background: transparent;
@@ -113,31 +136,28 @@
     height: 4px;
     background: transparent;
   }
+  /* The handle, 20 px, drawn in the middle of a 44 px touch target. */
   &::-webkit-slider-thumb {
     appearance: none;
-    width: 20px;
-    height: 20px;
-    margin-top: -8px;
+    width: 44px;
+    height: 44px;
+    margin-top: -20px;
     border: 0;
     border-radius: 0;
-    background: linear-gradient(var(--background), var(--background)) center /
-      2px 10px no-repeat var(--foreground);
+    background:
+      linear-gradient(var(--background), var(--background)) center / 2px 10px
+        no-repeat,
+      linear-gradient(var(--thumb), var(--thumb)) center / 20px 20px no-repeat;
   }
   &::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 44px;
+    height: 44px;
     border: 0;
     border-radius: 0;
-    background: linear-gradient(var(--background), var(--background)) center /
-      2px 10px no-repeat var(--foreground);
-  }
-  &:hover::-webkit-slider-thumb,
-  &:active::-webkit-slider-thumb {
-    background-color: var(--white);
-  }
-  &:hover::-moz-range-thumb,
-  &:active::-moz-range-thumb {
-    background-color: var(--white);
+    background:
+      linear-gradient(var(--background), var(--background)) center / 2px 10px
+        no-repeat,
+      linear-gradient(var(--thumb), var(--thumb)) center / 20px 20px no-repeat;
   }
 }
 
@@ -232,16 +252,26 @@
   --dim: #adadfa; /* the chart's dim marks: the 7-day average and the bands */
   --white: #ffffff; /* what happened, a hovered control */
   --forecast: #ffc94a; /* the one accent: the model's path and its marks */
+  /* The shadow every word casts, a retro game's: black, 1 px down and right, never blurred. */
+  --drop: 1px 1px 0 #000000;
 }
 
 @layer base {
+  /* The shadow on every element, not by inheritance: browsers clear it on buttons. */
   * {
     @apply border-border outline-ring/50;
+    text-shadow: var(--drop);
   }
   body {
     @apply bg-background text-foreground;
     font-size: 12px;
     line-height: 18px;
+    /* The ground runs under a phone's notch and home indicator (viewport-fit=cover in
+       index.html); the page keeps clear of them at its sides here, and at its top and foot
+       in the hero and the footer, so the hero still fills exactly the first screen. */
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+    /* The page the op-art margins lie in, down its whole length. */
+    position: relative;
   }
   html {
     @apply font-sans;
