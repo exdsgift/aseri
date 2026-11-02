@@ -21,7 +21,7 @@ The live record started on 2026-10-30. Once it holds 30 resolved forecasts per s
 ## The backtest
 
 - **Origins.** Weekly, on each series' `record_weekday`: the last 104 whose every step is observed (two years, which hold the 120-day backfill window). GPR has the 232 real-time origins of #145 (2022-03-09 to 2026-08-24): each context is the vintage known on its day and each target is scored against its value known 35 days later (`record.settled`), never the latest vintage.
-- **Data.** GPR from the authors' archived vintages (`prototypes/gpr-realtime-backtest/`). The four PortWatch lanes from aseri's archive, its 2026-10-31 vintage. The other four through the production adapters on 2026-10-31.
+- **Data.** GPR from the authors' archived vintages ([`gpr-realtime-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/gpr-realtime-backtest) on the `prototypes` branch). The four PortWatch lanes from aseri's archive, its 2026-10-31 vintage. The other four through the production adapters on 2026-10-31.
 - **Production model.** Timestral-209M through `aseri.forecast` (`load_model`, `make_context`, `forecast`), `aseri-timestral209m`, 4 torch threads.
 - **Scores.** `aseri.scoring.score` per (origin, step): WIS on the 21 levels, 50% and 80% coverage, the absolute errors of the median and of the baselines. Buckets 1-7 and 8-28 (8-14 for the 14-step series; the 7-step series have only 1-7). A ratio is the mean over identical cells of one score over the other, from per-origin bucket means, with `scoring.bootstrap` (stationary block bootstrap, mean block 4 weekly origins, 2,000 resamples, seed 0, 95%) and `scoring.verdict`: "beats" when the whole interval is below 1, "loses" when above, "ties" otherwise.
 

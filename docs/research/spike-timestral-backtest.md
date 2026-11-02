@@ -4,7 +4,7 @@
 >
 > **Measured, 2026-10-31: the GPR scores below are an upper bound.** Rebuilt in real time from the authors' 295 archived vintages, on 232 weekly origins, the production model's WIS is 10.6% higher at 1-7 days [7.2%, 14.0%] and 6.5% higher at 8-28 days [3.5%, 9.3%] than on the latest vintage, and its 80% band holds about 2 points fewer days. Timestral still beats every baseline in real time. See [gpr-realtime-backtest.md](gpr-realtime-backtest.md).
 
-Run on 2026-10-29. Prototype and rerun commands: `prototypes/timestral-backtest/` (see its README). Model background: [timestral-model.md](timestral-model.md). Data sources: [data-sources.md](data-sources.md).
+Run on 2026-10-29. Prototype and rerun commands: [`timestral-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-backtest) on the `prototypes` branch (see its README). Model background: [timestral-model.md](timestral-model.md). Data sources: [data-sources.md](data-sources.md).
 
 ## TL;DR
 
