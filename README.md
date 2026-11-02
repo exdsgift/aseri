@@ -115,7 +115,7 @@ At 07:00 UTC, [`daily.yml`](.github/workflows/daily.yml) runs the tests, then ch
 | **Model ID** | `aseri-timestral209m_c1`, the calibrated model merged in [#151](https://github.com/exdsgift/aseri/issues/151). Every forecast file names the model that made it in `model_id`; earlier forecasts keep `aseri-timestral209m` |
 | **Baselines** | Naive (the last value), seasonal naive (the same weekday a week back) and the 28-day mean; each series is judged against the one with the lowest error on its backtest |
 | **Horizons** | 28 days for GPR, Suez and Taiwan; 14 for Hormuz, Bab el-Mandeb, "World War III" and Brent (trading days); 7 for the air-raid alerts and the drones |
-| **Limits** | Mistral has not published the training cutoff, so backtests may be optimistic. Covariates were tested and none helped, so the daily forecasts use none |
+| **Limits** | Mistral has not published the training cutoff, so backtests may be optimistic. Covariates were tested and none helped, so the daily forecasts use none; a monthly scout ([`scout.yml`](.github/workflows/scout.yml)) re-tests them and proposes any that pass, for a human to decide |
 
 ## Quick Start
 
