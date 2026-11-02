@@ -29,7 +29,7 @@ export function SignalCard({
     [forecast, series.rho]
   )
   // Spans only, with spaces between them: a button holds phrasing content, and its text is its name.
-  // Picked reads by shape too, an inner frame 2 px inside the border, where a hover only greys it.
+  // Picked reads by shape too, an inner frame 2 px inside the border, where a hover only lightens it.
   return (
     <button
       type="button"

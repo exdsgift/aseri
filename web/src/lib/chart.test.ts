@@ -82,25 +82,77 @@ describe("paintChart", () => {
       })
   })
 
-  it("draws the possible path through every day ahead, in a grey apart from the daily values' white", () => {
+  it("draws the possible path through every day ahead, in the gold apart from the daily values' white", () => {
     for (let day = 1; day <= 28; day++)
       expect(calls).toContainEqual({
         x: chart.x(chart.origin + day),
         y: chart.y(185),
         color: "path",
       })
-    // No most likely line and no mark at its end: past the first day, only the path is in its grey.
+    // No most likely line and no mark at its end: past the first day, only the path is in its gold.
     const ahead = calls.filter(
       ({ x, color }) => color === "path" && x > chart.x(chart.origin + 1)
     )
     expect(new Set(ahead.map(({ y }) => y))).toEqual(new Set([chart.y(185)]))
   })
 
-  it("draws the same bands whatever path it draws", () => {
-    const bands = (drawn: typeof calls) =>
-      drawn.filter(({ color }) => color === "band")
-    const low = [values[chart.origin], ...Array(28).fill(125)]
-    expect(bands(calls)).toEqual(bands(paint(low)))
+  it("draws the same bands whatever path it draws, but for the gap round the path", () => {
+    const low = paint([values[chart.origin], ...Array(28).fill(125)])
+    // The bands' pixels away from both paths.
+    const paths = new Set(
+      [...calls, ...low]
+        .filter(({ color }) => color === "path")
+        .map(({ x, y }) => `${x},${y}`)
+    )
+    const clear = (drawn: typeof calls) =>
+      drawn.filter(
+        ({ x, y, color }) =>
+          color === "band" &&
+          [-1, 0, 1].every((dx) =>
+            [-1, 0, 1].every((dy) => !paths.has(`${x + dx},${y + dy}`))
+          )
+      )
+    expect(clear(calls).length).toBeGreaterThan(100)
+    expect(clear(calls)).toEqual(clear(low))
+  })
+
+  it("keeps an art pixel of the ground between the bands and every line, so the gold path keeps its contrast over them", () => {
+    const happened = { ...forecast, actuals: Array(28).fill(150) }
+    const seen = new Map<string, string>()
+    paintChart(
+      (x, y, color) => seen.set(`${x},${y}`, color),
+      chart,
+      happened,
+      colors,
+      path
+    )
+    const lines = [...seen].filter(([, color]) =>
+      ["path", "daily", "real"].includes(color)
+    )
+    expect(lines.length).toBeGreaterThan(100)
+    for (const [at] of lines) {
+      const [x, y] = at.split(",").map(Number)
+      for (let dx = -1; dx <= 1; dx++)
+        for (let dy = -1; dy <= 1; dy++)
+          expect(seen.get(`${x + dx},${y + dy}`), at).not.toBe("band")
+    }
+  })
+
+  it("draws the daily values 2 art pixels heavy, twice the path's weight", () => {
+    const daily = new Set(
+      calls
+        .filter(({ color }) => color === "daily")
+        .map(({ x, y }) => `${x},${y}`)
+    )
+    for (let day = chart.first; day <= chart.origin; day++) {
+      const [x, y] = [chart.x(day), chart.y(values[day])]
+      for (const [dx, dy] of [
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ])
+        expect(daily.has(`${x + dx},${y + dy}`)).toBe(true)
+    }
   })
 
   it("starts the bands on the first day ahead, never pinched to the last value", () => {
@@ -161,7 +213,35 @@ describe("paintChart", () => {
     }
   )
 
-  it("keeps the ring hollow where the band and the path run through it", () => {
+  it("keeps its heavy lines inside the plot, off the frame's row, however low or late the values", () => {
+    // A day of 0 sits the scale's floor on the frame, and what happened runs to the last day.
+    const low = {
+      ...forecast,
+      values: values.map((value, day) =>
+        day === chart.origin - 3 ? 0 : value
+      ),
+      actuals: Array(28).fill(0),
+    }
+    const floored = chartLayout(low, 692)
+    expect(floored.y(0)).toBe(floored.bottom)
+    const calls: { x: number; y: number; color: string }[] = []
+    paintChart(
+      (x, y, color) => calls.push({ x, y, color }),
+      floored,
+      low,
+      colors,
+      path
+    )
+    const lines = calls.filter(({ color }) => color === "daily")
+    expect(Math.max(...lines.map(({ y }) => y))).toBe(floored.bottom)
+    expect(Math.max(...lines.map(({ x }) => x))).toBeLessThanOrEqual(
+      floored.right
+    )
+    // The ring alone stays whole, in the margin kept for it, so that it still reads as a ring.
+    expect(calls.filter(({ color }) => color === "real")).toHaveLength(8)
+  })
+
+  it("keeps the ring hollow where the path runs through it, and the band clear round it", () => {
     // The path's value, well inside the 8-in-10 band, on the 10th day.
     const happened = { ...forecast, actuals: Array(10).fill(185) }
     const end = { x: chart.x(chart.origin + 10), y: chart.y(185) }
@@ -180,7 +260,9 @@ describe("paintChart", () => {
           Math.abs(p.x - end.x) <= 2 &&
           Math.abs(p.y - end.y) <= 2
       )
-    expect(around("band") && around("path")).toBe(true)
+    expect(around("path")).toBe(true)
+    // The band keeps an art pixel of the ground round the ring, as round every mark.
+    expect(around("band")).toBe(false)
     expect(lit.filter(({ x, y }) => x === end.x && y === end.y)).toEqual([])
   })
 
@@ -475,7 +557,8 @@ describe("a day with no value", () => {
         color: "daily",
       })
     // Nothing bridges a gap, up to the ring on the last known day.
-    expect(line.filter(({ x }) => x > at(1) && x < at(3))).toEqual([])
+    // The line is 2 art pixels heavy, so its last column on day 1 is one past it.
+    expect(line.filter(({ x }) => x > at(1) + 1 && x < at(3))).toEqual([])
     expect(line.filter(({ x }) => x > at(3) + 1 && x < at(5) - 1)).toEqual([])
     expect(lit).toContainEqual({
       x: at(5) - 1,

@@ -80,17 +80,33 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
   ])
 })
 
-it("credits the engraving behind the hero, with its source", () => {
+it("shows the hero the reader picks at the foot of the page, and remembers it", () => {
   serve(published)
-  render(<App />)
+  localStorage.clear()
+  const shown = () => document.getElementById("today")!.dataset.hero
+  const pick = (name: string) =>
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Hero" })).getByRole("button", {
+        name,
+      })
+    )
+  const pressed = () =>
+    screen.getAllByRole("button", { pressed: true }).map((b) => b.textContent)
 
-  const commons =
-    "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg"
-  const credit = screen.getByText(/^Engraving:/)
-  expect(credit.textContent).toBe(
-    `Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art, CC0. ${commons.slice(8)}`
-  )
-  expect(within(credit).getByRole("link").getAttribute("href")).toBe(commons)
+  render(<App />)
+  // On rotation by default: this load's turn.
+  expect(pressed()).toEqual(["Rotate"])
+  const turn = shown()
+  pick("Vortex")
+  expect(shown()).toBe("vortex")
+  cleanup()
+
+  render(<App />)
+  expect(pressed()).toEqual(["Vortex"])
+  expect(shown()).toBe("vortex")
+  pick("Rotate")
+  expect(shown()).toBe(turn)
+  expect(localStorage.getItem("aseri.hero")).toBe("rotate")
 })
 
 // GitHub pauses an idle repository's schedule, and nothing else would say the files stopped.

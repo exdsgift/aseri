@@ -1,4 +1,4 @@
-import { bayer } from "@/lib/chart"
+import { besideText, calmAround, hash, type Box } from "@/lib/art"
 
 // The engraving in src/assets/mercury.png, in its own pixels, and the points on it the art
 // hangs on, from study A: his chest, the centre of the disc, then a fan from each of the
@@ -43,12 +43,6 @@ export function fan(value: number, baseline: number) {
   }
 }
 
-// A fixed number from 0 to 1 for each `n`.
-const hash = (n: number) => {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
-  return x - Math.floor(x)
-}
-
 // One fan's rays in a frame, from the point that holds it, the `bundle`th: each from `held`
 // behind the point out to its own length, from 3/4 to all of `reach`, both grown by `grow`
 // (0 to 1). Over `sway` ms each sways by up to 0.3 degrees, out of step with the others;
@@ -77,20 +71,12 @@ export function fanRays(
   })
 }
 
-export type Box = { left: number; top: number; right: number; bottom: number }
-
 // Where the art goes in a hero `width` by `height`, around the `text` box, in CSS pixels.
 export function messengerLayout(width: number, height: number, text: Box) {
-  // The text and a margin round it, which the art keeps calm.
-  const calm = {
-    left: text.left - 20,
-    top: text.top - 14,
-    right: text.right + 20,
-    bottom: text.bottom + 14,
-  }
+  const calm = calmAround(text)
   // Beside the text when its margin has room for him, else in the band above it. Never
   // past the engraving's own size, whose dither would blur.
-  const wide = calm.left >= 230
+  const wide = besideText(calm)
   const shown = Math.max(
     1,
     wide
@@ -121,7 +107,3 @@ export function messengerLayout(width: number, height: number, text: Box) {
 }
 
 export type MessengerLayout = ReturnType<typeof messengerLayout>
-
-// The ordered dither: whether pixel (x, y) is lit at `level`, from 0 (none) to 1 (all).
-export const lit = (x: number, y: number, level: number) =>
-  (bayer[(y & 3) * 4 + (x & 3)] + 0.5) / 16 < level
