@@ -42,7 +42,7 @@
       "items": {"$ref": "#/$defs/entry"}
     },
     "links": {
-      "description": "Additive to v1: the API's other files, relative to series.json.",
+      "description": "Additive to v1: the API's other files, relative to series.json. Left out on a day the bulk files could not be written.",
       "type": "object",
       "required": ["bulk"],
       "properties": {

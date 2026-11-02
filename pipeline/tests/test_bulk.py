@@ -3,6 +3,7 @@
 import gzip
 import json
 import shutil
+from dataclasses import replace
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -16,9 +17,9 @@ import pytest
 
 from aseri import archive, bulk, gate, record
 from aseri.__main__ import SOURCES
-from aseri.forecast import MODEL_ID, Forecast
-from aseri.publish import FORECAST_LICENSE
-from aseri.series import GPR_DAILY, SUEZ_TRANSITS
+from aseri.forecast import MODEL_ID, WEIGHTS, Forecast
+from aseri.publish import FORECAST_LICENSE, credit
+from aseri.series import BRENT_SPOT, GPR_DAILY, SUEZ_TRANSITS
 
 BEFORE = "aseri-timestral209m"
 HUBVERSE = [
@@ -104,8 +105,24 @@ def scores(archive_dir, today):
 
 
 def write(bulk_dir, archive_dir, today="2027-01-01"):
-    bulk.write(bulk_dir, archive_dir, SOURCES, scores(archive_dir, today), GENERATED_AT)
+    """The bulk files of a run on `today` at 07:02."""
+    generated_at = datetime.fromisoformat(today).replace(hour=7, minute=2, tzinfo=UTC)
+    bulk.write(bulk_dir, archive_dir, SOURCES, scores(archive_dir, today), generated_at)
     return bulk_dir
+
+
+def resources(bulk_dir):
+    package = json.loads((bulk_dir / "datapackage.json").read_text(encoding="utf-8"))
+    return {resource["path"]: resource for resource in package["resources"]}
+
+
+def aseri(model):
+    """aseri's licence as the data package gives it, with the credit of `model`."""
+    return {
+        "title": "CC BY-NC 4.0",
+        "path": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "attribution": credit(model, WEIGHTS),
+    }
 
 
 def table(path, fields):
@@ -207,9 +224,13 @@ def test_the_observations_are_a_hubverse_time_series_with_a_csv_per_source(
         )
 
 
-def test_the_oracle_output_is_the_value_each_target_was_scored_against(hub, tmp_path):
+def test_the_oracle_output_is_every_due_day_s_value_from_the_vintages_even_with_no_scores(
+    hub, tmp_path
+):
     run(hub, date(2027, 1, 20), [])
-    files = write(tmp_path / "bulk", hub, today="2027-01-20")
+    files = tmp_path / "bulk"
+    # A scoring failure costs the scores, never the values known.
+    bulk.write(files, hub, SOURCES, [], datetime(2027, 1, 20, 7, tzinfo=UTC))
 
     oracle = pd.read_csv(files / "oracle-output.csv", dtype=str)
     assert oracle.columns.tolist() == [
@@ -218,20 +239,101 @@ def test_the_oracle_output_is_the_value_each_target_was_scored_against(hub, tmp_
         "oracle_value",
         "as_of",
     ]
-    # Dec 30 to Jan 2, the days the forecasts reach; due after Suez's 14 days, and the same for every model.
-    assert oracle["target_end_date"].tolist() == [
-        "2026-12-30",
-        "2026-12-31",
-        "2027-01-01",
-        "2027-01-02",
-    ]
-    vintages = archive.vintages(hub, SUEZ_TRANSITS.id)
-    for _, row in oracle.iterrows():
-        settled = record.settled(vintages, pd.Timestamp(row["target_end_date"]), 14)
-        assert (float(row["oracle_value"]), row["as_of"]) == (
-            settled[0],
-            f"{settled[1]:%Y-%m-%d}",
-        )
+    for series in (SUEZ_TRANSITS, GPR_DAILY):
+        vintages = archive.vintages(hub, series.id)
+        # Every day seen, once its series' score lag has passed: 14 days for Suez, 35 for GPR.
+        due = [
+            day
+            for day in vintages["target_end_date"].drop_duplicates().sort_values()
+            if day + pd.Timedelta(days=series.score_lag) <= pd.Timestamp("2027-01-20")
+        ]
+        rows = oracle[oracle["target"] == series.id]
+        assert rows["target_end_date"].tolist() == [f"{day:%Y-%m-%d}" for day in due]
+        for _, row in rows.iterrows():
+            value, as_of = record.settled(
+                vintages, pd.Timestamp(row["target_end_date"]), series.score_lag
+            )
+            assert (float(row["oracle_value"]), row["as_of"]) == (
+                value,
+                f"{as_of:%Y-%m-%d}",
+            )
+
+
+def test_each_score_is_against_its_day_s_oracle_value(hub, tmp_path):
+    run(hub, date(2027, 1, 20), [])
+    files = write(tmp_path / "bulk", hub, today="2027-01-20")
+
+    oracle = pd.read_csv(files / "oracle-output.csv", parse_dates=["target_end_date"])
+    scored = pd.read_parquet(files / "scores.parquet")
+    scored["observation_date"] = pd.to_datetime(scored["observation_date"])
+    joined = scored.merge(
+        oracle,
+        left_on=["target", "observation_date"],
+        right_on=["target", "target_end_date"],
+    )
+    assert len(joined) == len(scored) > 0
+    assert (joined["observation"] == joined["oracle_value"]).all()
+
+
+def brent_run(archive_dir, day, forecasts, observed):
+    archive.write(
+        archive_dir,
+        [archive.SeriesRun(BRENT_SPOT, forecasts, observed, day, {})],
+        code_commit="0" * 40,
+        run_url=None,
+        generated_at=datetime(day.year, day.month, day.day, 7, tzinfo=UTC),
+    )
+
+
+def test_brent_s_scores_join_its_forecasts_on_their_dates_after_a_holiday_the_calendar_did_not_foresee(
+    tmp_path,
+):
+    # Weekday prints but none on Monday Oct 12, a holiday four months of history cannot foresee:
+    # the forecast from Friday Oct 9 dates its step 1 Oct 12, and the record scores it on Tuesday's print.
+    prints = pd.bdate_range(end="2026-11-13", periods=90).drop(
+        pd.Timestamp("2026-10-12")
+    )
+    observed = pd.Series(70.0 + np.arange(len(prints)) / 4, index=prints)
+    from_friday = Forecast(
+        reference_date=pd.Timestamp("2026-10-09"),
+        levels=(0.1, 0.25, 0.5, 0.75, 0.9),
+        quantiles=np.full((14, 1), 75.0) + [-4.0, -2.0, 0.0, 2.0, 4.0],
+    )
+    archive_dir = tmp_path / "archive"
+    brent_run(archive_dir, date(2026, 10, 10), [from_friday], observed[:"2026-10-09"])
+    brent_run(archive_dir, date(2026, 11, 14), [], observed)
+    today = pd.Timestamp("2026-11-30")
+    scored = record.scored(
+        BRENT_SPOT,
+        archive.read(archive_dir, BRENT_SPOT.id),
+        archive.vintages(archive_dir, BRENT_SPOT.id),
+        today,
+    )
+    files = tmp_path / "bulk"
+    bulk.write(
+        files,
+        archive_dir,
+        SOURCES,
+        [scored.assign(model_id=MODEL_ID, target=BRENT_SPOT.id)],
+        datetime(2026, 11, 30, 7, tzinfo=UTC),
+    )
+
+    forecasts = pd.read_parquet(files / "forecasts-2026.parquet")
+    scores = pd.read_parquet(files / "scores.parquet")
+    keys = ["model_id", "target", "reference_date", "horizon", "target_end_date"]
+    # Every step scored joins its forecast on Hubverse's keys, the round's dates included.
+    assert len(scores.merge(forecasts[keys].drop_duplicates(), on=keys)) == 14
+    first = scores.iloc[0]
+    assert (first["target_end_date"], first["observation_date"]) == (
+        date(2026, 10, 12),
+        date(2026, 10, 13),
+    )
+    assert first["observation"] == observed["2026-10-13"]
+    # The oracle has a value for each day with a price, none for the holiday.
+    oracle = pd.read_csv(files / "oracle-output.csv", dtype=str)
+    brent = oracle[oracle["target"] == BRENT_SPOT.id].set_index("target_end_date")
+    assert "2026-10-12" not in brent.index
+    assert float(brent.loc["2026-10-13", "oracle_value"]) == observed["2026-10-13"]
 
 
 def test_the_scores_hold_every_scored_target_of_every_model_with_its_vintage(
@@ -253,16 +355,71 @@ def test_the_scores_hold_every_scored_target_of_every_model_with_its_vintage(
     assert frame["wis"].tolist() == pd.concat(given)["wis"].tolist()
 
 
-def test_a_day_with_nothing_scored_yet_still_writes_typed_empty_files(hub, tmp_path):
+def test_a_day_with_nothing_scored_yet_still_writes_a_typed_empty_scores_file(
+    hub, tmp_path
+):
     files = tmp_path / "bulk"
     bulk.write(files, hub, SOURCES, [], GENERATED_AT)
 
     empty = pq.read_table(files / "scores.parquet")
     assert empty.num_rows == 0
     assert empty.schema.field("reference_date").type == pa.date32()
-    assert (files / "oracle-output.csv").read_text(encoding="utf-8") == (
-        "target,target_end_date,oracle_value,as_of\n"
+    # With no model in its rows, the credit is the model in the code's.
+    assert resources(files)["scores.parquet"]["licenses"] == [aseri(MODEL_ID)]
+
+
+def test_a_closed_year_keeps_its_data_package_entry_through_a_model_change(
+    hub, tmp_path, monkeypatch
+):
+    before = resources(write(tmp_path / "jan1", hub))
+    # A later model: a new MODEL_ID, and so a new credit in the code, and its first run.
+    later = "aseri-timestral209m_c2"
+    monkeypatch.setattr(
+        bulk,
+        "FORECAST_LICENSE",
+        FORECAST_LICENSE | {"attribution": credit(later, WEIGHTS)},
     )
+    monkeypatch.setattr(archive, "MODEL_ID", later)
+    monkeypatch.setattr(archive, "ROUNDS", Path("model-output", later))
+    run(hub, date(2027, 1, 2), [two_steps("2027-01-01", 3)])
+    after = resources(write(tmp_path / "jan2", hub, today="2027-01-02"))
+
+    for name in ("forecasts-2026.parquet", "forecasts-2026.csv.gz"):
+        assert after[name] == before[name]
+        # Each model of its rows is credited, the one before too.
+        assert after[name]["licenses"] == [aseri(BEFORE), aseri(MODEL_ID)]
+    assert after["forecasts-2027.parquet"]["licenses"] == [
+        aseri(MODEL_ID),
+        aseri(later),
+    ]
+
+
+def test_the_time_series_holds_only_the_series_of_the_package_as_its_csvs_do(
+    hub, tmp_path
+):
+    # A series no longer in SOURCES left its values in the archive; its licence is no longer known.
+    archive.write(
+        hub,
+        [
+            archive.SeriesRun(
+                replace(SUEZ_TRANSITS, id="retired_lane"),
+                [],
+                ships("2027-01-01"),
+                date(2027, 1, 2),
+                {},
+            )
+        ],
+        code_commit="0" * 40,
+        run_url=None,
+        generated_at=datetime(2027, 1, 2, 7, tzinfo=UTC),
+    )
+    files = write(tmp_path / "bulk", hub, today="2027-01-02")
+
+    targets = set(pq.read_table(files / "time-series.parquet")["target"].to_pylist())
+    in_csvs = set().union(
+        *(set(pd.read_csv(p)["target"]) for p in files.glob("time-series-*.csv"))
+    )
+    assert targets == in_csvs == {"gpr_daily", "suez_transits"}
 
 
 def test_the_data_package_is_valid_frictionless_and_gives_each_file_its_columns_licences_and_sources(
@@ -289,14 +446,14 @@ def test_the_data_package_is_valid_frictionless_and_gives_each_file_its_columns_
             ):
                 assert file.readline().rstrip("\n").split(",") == names
         assert set(resource["schema"]["primaryKey"]) <= set(names)
-    # aseri's forecasts and scores are under its own licence; each source's values under its own terms alone.
-    aseri = {
-        "title": "CC BY-NC 4.0",
-        "path": "https://creativecommons.org/licenses/by-nc/4.0/",
-        "attribution": FORECAST_LICENSE["attribution"],
-    }
-    assert resources["forecasts-2026.parquet"]["licenses"] == [aseri]
-    assert resources["scores.parquet"]["licenses"] == [aseri]
+    # aseri's forecasts and scores are under its own licence, credited to each model of their rows;
+    # each source's values under its own terms alone.
+    assert resources["forecasts-2026.parquet"]["licenses"] == [
+        aseri(BEFORE),
+        aseri(MODEL_ID),
+    ]
+    assert resources["forecasts-2027.csv.gz"]["licenses"] == [aseri(MODEL_ID)]
+    assert resources["scores.parquet"]["licenses"] == [aseri(MODEL_ID)]
     assert resources["time-series-gpr.csv"]["licenses"] == [
         {
             "title": "CC BY 4.0",

@@ -8,9 +8,12 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from aseri.archive import DELTAS, timestamp
-from aseri.publish import FORECAST_LICENSE
-from aseri.record import SCORED
+from aseri import archive
+from aseri.archive import DELTAS, RUNS, timestamp
+from aseri.forecast import measurement_errors
+from aseri.publish import FORECAST_LICENSE, credit
+from aseri.record import SCORED, settled
+from aseri.scoring import scoreable_on
 
 # The Arrow type of each Table Schema type the files use.
 ARROW = {
@@ -73,11 +76,22 @@ def write(
     """
     bulk_dir.mkdir(parents=True, exist_ok=True)
     every = [series for series, _ in sources]
+    today = pd.Timestamp(generated_at.date())
     resources = []
+    # Each model's weights, as its runs' manifests name them, for its credit.
+    weights = {
+        run["model_id"]: run["provenance"]["model"]["id"]
+        for run in (
+            json.loads(path.read_text(encoding="utf-8"))
+            for path in sorted((archive_dir / RUNS).glob("*.json"))
+        )
+    }
     # A year's rounds never change once it is out, so neither do its files, rebuilt byte for byte each run as
     # the dated forecast files are. Strings throughout, so the CSV keeps the archive's text exactly.
     # shortcut: every year is rebuilt from the archive each run, and a pyarrow or zlib upgrade can change a closed
     # year's bytes, never its rows; carry closed years over from the last deploy if runs get slow or bytes must hold.
+    # shortcut: every round and delta CSV is read again each run, the deltas once more per series for the
+    # oracle; read the deltas once and pass them in when the bulk step passes about 60 s.
     rounds = sorted((archive_dir / "model-output").glob("*/*.csv"))
     for year in sorted({path.name[:4] for path in rounds}):
         forecasts = pd.concat(
@@ -99,7 +113,8 @@ def write(
                         "output_type_id",
                     ],
                     f"Every forecast of the runs of {year}, one row per model, series, reference date, step and quantile level. A closed year never changes.",
-                    [_licence(FORECAST_LICENSE)],
+                    # The models of its rows: a closed year's credit never follows a later MODEL_ID.
+                    _credits(forecasts["model_id"], weights),
                     _sources(every),
                 )
             )
@@ -107,6 +122,8 @@ def write(
         pd.read_csv(path, dtype=str)
         for path in sorted((archive_dir / DELTAS).glob("*.csv"))
     )
+    # The series of the package alone, whose licences it gives: a series no longer fetched has none.
+    observations = observations[observations["target"].isin([s.id for s in every])]
     key = ["target", "target_end_date", "as_of"]
     resources.append(
         _table(
@@ -114,7 +131,7 @@ def write(
             observations,
             TIME_SERIES,
             key,
-            "Every value of every series as first seen, a change-log: a day's value as known on a date is its row with the latest as_of up to it. Each series is under its source's terms.",
+            "Every value of every series as first seen, a change-log: a day's value as known on a date is its row with the latest as_of up to that date, counting only rows whose target_end_date is at or before their as_of. Each series is under its source's terms.",
             _licences(every),
             _sources(every),
         )
@@ -143,15 +160,10 @@ def write(
     resources.append(
         _table(
             bulk_dir / "oracle-output.csv",
-            # A target's value is its series' alone, so every model's scores of it agree.
-            scored.drop_duplicates(["target", "target_end_date"])
-            .rename(
-                columns={"observation": "oracle_value", "observation_as_of": "as_of"}
-            )
-            .sort_values(["target", "target_end_date"], kind="stable"),
+            _oracle(archive_dir, every, today),
             ORACLE,
             ["target", "target_end_date"],
-            "The value each scored target was scored against, as known its series' score lag after its day, with the as_of of that vintage.",
+            "Each day's value as the record scores a target on it: as known its series' score lag after the day, or as first seen after, with the as_of of that vintage. A scored step's day is its observation_date in scores.parquet.",
             _licences(every),
             _sources(every),
         )
@@ -162,8 +174,8 @@ def write(
             scored,
             SCORES,
             ["model_id", "target", "reference_date", "horizon"],
-            "Every scored target of every model, one row per model, series, reference date and step. The record in scores.json counts the model in use alone.",
-            [_licence(FORECAST_LICENSE)],
+            "Every scored target of every model, one row per model, series, reference date and step, on the step's target_end_date as the forecast dates it. observation_date is the day observed, which for Brent is the next price after a holiday the calendar did not foresee. The record in scores.json counts the model in use alone.",
+            _credits(scored["model_id"], weights),
             _sources(every),
         )
     )
@@ -216,6 +228,31 @@ def _table(path, frame, fields, key, description, licenses, sources) -> dict:
         "licenses": licenses,
         "sources": sources,
     }
+
+
+def _oracle(archive_dir: Path, series, today: pd.Timestamp) -> pd.DataFrame:
+    """Every day of each of `series` due by `today`, with the value the record scores it against and that value's as_of.
+
+    From the vintages, as `record.scored` reads them, so a failure of the scores costs none of it.
+    """
+    rows = []
+    for one in series:
+        vintages = archive.vintages(archive_dir, one.id)
+        vintages = vintages[vintages["as_of"] <= today]
+        # A registered measurement error is no observation to score against.
+        errors = set(measurement_errors(one))
+        for day in vintages["target_end_date"].drop_duplicates().sort_values():
+            if scoreable_on(day, one.score_lag) <= today and day not in errors:
+                rows.append((one.id, day, *settled(vintages, day, one.score_lag)))
+    return pd.DataFrame(rows, columns=list(ORACLE))
+
+
+def _credits(models: pd.Series, weights: dict) -> list[dict]:
+    """aseri's licence, once for each of `models` with its own credit: the model in the code's when there is none."""
+    return [
+        _licence(FORECAST_LICENSE | {"attribution": credit(model, weights[model])})
+        for model in sorted(set(models))
+    ] or [_licence(FORECAST_LICENSE)]
 
 
 def _licence(license: dict) -> dict:

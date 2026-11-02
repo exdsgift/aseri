@@ -88,12 +88,13 @@ def test_a_target_is_scored_from_its_score_lag_after_its_date_and_not_before(
     # Two weeks on, every day observed is due: Oct 25 is the last, 24 days ahead. The live
     # forecast's days are not observed yet.
     assert two_weeks_on["horizon"].tolist() == list(range(1, 25))
-    # Each row names its target's day, for the bulk scores and the oracle output.
+    # Each row names its target's day, as the round dates it, and the observation's: the same, day by day.
     assert (
         two_weeks_on["target_end_date"]
         == two_weeks_on["reference_date"]
         + pd.to_timedelta(two_weeks_on["horizon"], unit="D")
     ).all()
+    assert (two_weeks_on["observation_date"] == two_weeks_on["target_end_date"]).all()
     # The archive began on Oct 26, after most of these were due: they wait for the first value seen.
     assert (two_weeks_on["observation_as_of"] == pd.Timestamp("2026-10-26")).all()
     assert (
@@ -407,8 +408,12 @@ def test_brent_s_steps_are_scored_against_the_prints_after_its_day_in_order(tmp_
         rows["observation"].tolist()
         == observed[observed.index > "2026-10-09"].iloc[:14].tolist()
     )
+    # Each step keeps the round's date, the bulk forecasts' join key; the price it was scored
+    # against is dated apart. Four months of history cannot foresee the holiday: step 1 is Oct 12.
+    weekdays = pd.bdate_range("2026-10-12", periods=14)
+    assert rows["target_end_date"].tolist() == weekdays.tolist()
     assert (
-        rows["target_end_date"].tolist() == prints[prints > "2026-10-09"][:14].tolist()
+        rows["observation_date"].tolist() == prints[prints > "2026-10-09"][:14].tolist()
     )
 
 

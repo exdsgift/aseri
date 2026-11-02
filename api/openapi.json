@@ -190,7 +190,7 @@
     "/bulk/oracle-output.csv": {
       "get": {
         "operationId": "getOracleOutput",
-        "summary": "The value each scored target was scored against, with the as_of of its vintage.",
+        "summary": "Each observed day's value as the record scores a target on it, once its series' score lag has passed, with the as_of of its vintage. Built from the vintages, not from the scores.",
         "responses": {
           "200": {"description": "CSV.", "content": {"text/csv": {}}}
         }
@@ -199,7 +199,7 @@
     "/bulk/scores.parquet": {
       "get": {
         "operationId": "getScores",
-        "summary": "Every scored target of every model, one row per model, series, reference date and step, with the observation's as_of.",
+        "summary": "Every scored target of every model, one row per model, series, reference date and step: target_end_date as the forecast dates the step, which joins it to the bulk forecasts, and the day observed, observation_date, with its as_of. They differ only for Brent, after a market holiday its calendar did not foresee.",
         "responses": {
           "200": {"description": "Parquet, zstd.", "content": {"application/vnd.apache.parquet": {}}}
         }

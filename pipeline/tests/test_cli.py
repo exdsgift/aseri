@@ -19,7 +19,7 @@ import torch
 
 import aseri.__main__ as cli
 import aseri.forecast as forecast_module
-from aseri import archive, gate, publish, record
+from aseri import archive, bulk, gate, publish, record
 from aseri.forecast import MODEL_ID
 from aseri.publish import shown
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
@@ -648,8 +648,8 @@ def test_a_new_model_forecasts_the_replay_window_again_without_changing_a_dated_
     assert expected[-1]["0.9"] != [shown(v) for v in latest["quantiles"]["0.9"]]
     assert read(tmp_path / "day2" / "scores.json")["model_id"] == MODEL_ID
     # The bulk forecasts keep both models', told apart (#136).
-    bulk = pd.read_csv(tmp_path / "day2" / "bulk" / "forecasts-2026.csv.gz")
-    assert sorted(bulk["model_id"].unique()) == ["aseri-timestral209m", MODEL_ID]
+    forecasts = pd.read_csv(tmp_path / "day2" / "bulk" / "forecasts-2026.csv.gz")
+    assert sorted(forecasts["model_id"].unique()) == ["aseri-timestral209m", MODEL_ID]
     assert gate.contract(tmp_path / "day2") == []
 
     # Day 3, after GPR's weekly update: the new days are the new model's, the newest live.
@@ -1678,15 +1678,16 @@ def test_the_record_scores_each_series_from_the_archive_and_names_a_red_band_for
         encoding="utf-8"
     )
     # The bulk scores hold the record's rows, one per day scored (#136).
-    bulk = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
-    live = bulk[
-        (bulk["target"] == "taiwan_strait_transits") & (bulk["forecast_mode"] == "live")
+    scored = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
+    live = scored[
+        (scored["target"] == "taiwan_strait_transits")
+        & (scored["forecast_mode"] == "live")
     ]
     assert live["target_end_date"].tolist() == [
         date(2026, 10, 26) + timedelta(days=h) for h in range(8)
     ]
     assert live["interval_coverage_80"].tolist()[6] is False
-    assert set(bulk["model_id"]) == {MODEL_ID}
+    assert set(scored["model_id"]) == {MODEL_ID}
 
 
 def test_the_bulk_scores_keep_the_model_before_which_the_record_leaves_out(
@@ -1714,13 +1715,46 @@ def test_the_bulk_scores_keep_the_model_before_which_the_record_leaves_out(
     )
 
     api = tmp_path / "day2"
-    bulk = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
-    before = bulk[bulk["model_id"] == "aseri-timestral209m"]
+    scored = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
+    before = scored[scored["model_id"] == "aseri-timestral209m"]
     # Due by Nov 16 with a 14-day wait: the sea lanes' days to Nov 2, from the forecasts to Oct 25.
     assert set(before["target"]) == set(PORTS)
     assert before["reference_date"].max() == date(2026, 10, 25)
     assert read(api / "series" / "suez_transits" / "scores.json")["live"]["n"] == 0
     assert gate.contract(api) == []
+
+
+def test_a_failing_bulk_step_still_archives_and_publishes_without_the_bulk_files(
+    tmp_path, monkeypatch, stub_model, summary
+):
+    def breaks(bulk_dir, *args):
+        # Half written when it fails.
+        bulk_dir.mkdir(parents=True)
+        (bulk_dir / "forecasts-2026.parquet").write_bytes(b"half")
+        raise OSError("disk full")
+
+    monkeypatch.setattr(bulk, "write", breaks)
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 29, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+
+    api = tmp_path / "api"
+    # The day's forecasts are archived, for the archive job to append, and the API is published.
+    assert (tmp_path / "archive" / "runs" / "2026-10-29.json").exists()
+    latest = read(api / "series" / "gpr_daily" / "latest.json")
+    assert latest["forecast_date"] == "2026-10-29"
+    # Without the half-written bulk files, and without the catalog's link to them.
+    assert not (api / "bulk").exists()
+    assert "links" not in read(api / "series.json")
+    assert gate.contract(api) == []
+    assert (
+        "| bulk files | failed | - | OSError: disk full; published without them |"
+        in summary()
+    )
 
 
 def test_a_scoring_error_in_one_series_costs_only_its_scores(
@@ -1759,8 +1793,8 @@ def test_a_scoring_error_in_one_series_costs_only_its_scores(
         "taiwan_strait_transits",
     ]
     assert (api / "series" / "taiwan_strait_transits" / "scores.json").exists()
-    bulk = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
-    assert "suez_transits" not in set(bulk["target"])
+    rows = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
+    assert "suez_transits" not in set(rows["target"])
     row = [line for line in summary().splitlines() if "suez" in line][-1]
     assert row.startswith("| suez_transits | ok | 2026-10-25 |")
     assert "scores failed: ValueError: a broken vintage" in row

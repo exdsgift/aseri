@@ -2,6 +2,7 @@
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -274,16 +275,36 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             del entries[-1]["links"]["scores"]
             detail = f"{detail}; scores failed: {type(error).__name__}: {error}"
         rows.append((series.id, status, f"{observed.index[-1]:%Y-%m-%d}", detail))
+    # Under api/v1, so the page job's copy of the last deploy's api/v1 carries them too; before the
+    # report, so that a failure is in the run summary.
+    written = False
+    if entries:
+        started = time.monotonic()
+        try:
+            bulk.write(api_dir / "bulk", archive_dir, SOURCES, scores, generated_at)
+            written = True
+            print(
+                f"Bulk files written in {time.monotonic() - started:.1f} s", flush=True
+            )
+        # Whatever breaks them costs the API its bulk files alone: the day is still archived and published,
+        # where a failed run would never archive it, and fail again every day.
+        except Exception as error:  # noqa: BLE001
+            # A half-written file would pass for a whole one; the run's API directory starts empty.
+            shutil.rmtree(api_dir / "bulk", ignore_errors=True)
+            rows.append(
+                (
+                    "bulk files",
+                    "failed",
+                    None,
+                    f"{type(error).__name__}: {error}; published without them",
+                )
+            )
     report(rows)
     if not entries:
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")
-    publish_catalog(api_dir, entries, levels, generated_at)
+    publish_catalog(api_dir, entries, levels, generated_at, bulk=written)
     publish_scores(api_dir, records, generated_at)
     publish_contract(api_dir)
-    # Under api/v1, so the page job's copy of the last deploy's api/v1 carries them too.
-    started = time.monotonic()
-    bulk.write(api_dir / "bulk", archive_dir, SOURCES, scores, generated_at)
-    print(f"Bulk files written in {time.monotonic() - started:.1f} s", flush=True)
     # The series the page now shows as late, read from what it reads, the held ones, and those whose live
     # ranges the monitor finds far off, for daily.yml's issues.
     if "GITHUB_OUTPUT" in os.environ:

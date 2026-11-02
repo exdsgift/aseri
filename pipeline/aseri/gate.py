@@ -172,12 +172,14 @@ def contract(api_dir: Path, *, subset: bool = False) -> list[str]:
             check(path, routes[DATED][1])
     if errors:
         return errors
-    # A file at a fixed path is always written; one at a templated path, where a file links to it.
+    # A file at a fixed path is always written, but the bulk files only when the catalog links them (a
+    # day their step failed leaves them out); one at a templated path, where a file links to it.
     if not subset:
+        bulk = "links" in documents.get("series.json", {})
         errors = [
             f"openapi.json: no file for {t}"
             for t in routes
-            if "{" not in t and t not in served
+            if "{" not in t and t not in served and (bulk or not t.startswith("/bulk/"))
         ]
     return errors + _agreement(documents, dated, api_dir, subset)
 

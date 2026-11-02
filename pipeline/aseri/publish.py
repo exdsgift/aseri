@@ -118,9 +118,13 @@ def publish(
 
 
 def publish_catalog(
-    api_dir: Path, entries: list[dict], levels: tuple, generated_at: datetime
+    api_dir: Path,
+    entries: list[dict],
+    levels: tuple,
+    generated_at: datetime,
+    bulk: bool = True,
 ) -> None:
-    """Write the catalog, `series.json`: the model, its quantile `levels`, and the entry `publish` returned for each series."""
+    """Write the catalog, `series.json`: the model, its quantile `levels`, the entry `publish` returned for each series, and, if `bulk`, the link to the bulk files."""
     _write(
         api_dir / "series.json",
         {
@@ -135,9 +139,9 @@ def publish_catalog(
             "license": FORECAST_LICENSE,
             "errata": ERRATA,
             "series": entries,
-            # Additive to v1 (#136): written by bulk.write.
-            "links": {"bulk": "bulk/datapackage.json"},
-        },
+        }
+        # Additive to v1 (#136): written by bulk.write, and left out on a day it failed.
+        | ({"links": {"bulk": "bulk/datapackage.json"}} if bulk else {}),
     )
 
 
