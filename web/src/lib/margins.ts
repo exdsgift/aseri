@@ -63,28 +63,35 @@ export type Scene = ReturnType<typeof scene>
 // as a current, 10 art pixels apart, bending by up to 8 art pixels the nearer the page edge,
 // and thinning out to nothing at the calm gap beside the column, from the hero's foot down
 // and round the side navigation, each over the margin's width. The prototype's op-art.
-export function inked(x: number, y: number, s: Scene) {
-  // In a gap between sections, the margins swell in and back, in an arc. The pixel spans
-  // [x, x + 1) and [y, y + 1).
+export const inked = (x: number, y: number, s: Scene) => stripes(y, s)(x)
+
+// The same along page row y, column by column: what the whole row shares is worked out
+// once, as a frame asks it of every pixel of the margins. The pixel spans [x, x + 1) and
+// [y, y + 1).
+export function stripes(y: number, s: Scene) {
+  // In a gap between sections, the margins swell in and back, in an arc.
   let swell = 0
-  for (const [from, to] of s.gaps)
-    if (y >= from && y + 1 <= to)
-      swell = s.reach * Math.sin((Math.PI * (y + 0.5 - from)) / (to - from))
-  const [left, right, margin] = [
-    s.left + swell,
-    s.right - swell,
-    s.margin + swell,
-  ]
-  const out = x < left ? left - x : x >= right ? x - right + 1 : 0
-  if (!out) return false
-  const depth = out / margin
+  for (const gap of s.gaps)
+    if (y >= gap[0] && y + 1 <= gap[1])
+      swell =
+        s.reach * Math.sin((Math.PI * (y + 0.5 - gap[0])) / (gap[1] - gap[0]))
+  const left = s.left + swell
+  const right = s.right - swell
+  const margin = s.margin + swell
+  const below = (y - s.top) / s.margin
+  const wave = s.swing * Math.sin(y / 36 + s.drift)
   const nav = s.nav
-    ? Math.hypot(
-        Math.max(s.nav.left - x - 1, 0, x - s.nav.right),
-        Math.max(s.nav.top - y - 1, 0, y - s.nav.bottom)
-      )
-    : margin
-  const thick = 0.55 * Math.min(depth, (y - s.top) / s.margin, nav / margin)
-  const phase = (x + s.swing * depth * Math.sin(y / 36 + s.drift)) / s.pitch
-  return phase - Math.floor(phase) < thick
+  const dy = nav ? Math.max(nav.top - y - 1, 0, y - nav.bottom) : 0
+  return (x: number) => {
+    const out = x < left ? left - x : x >= right ? x - right + 1 : 0
+    if (!out || below <= 0) return false
+    const depth = out / margin
+    let thick = Math.min(depth, below)
+    if (nav) {
+      const dx = Math.max(nav.left - x - 1, 0, x - nav.right)
+      thick = Math.min(thick, Math.sqrt(dx * dx + dy * dy) / margin)
+    }
+    const phase = (x + wave * depth) / s.pitch
+    return phase - Math.floor(phase) < 0.55 * thick
+  }
 }

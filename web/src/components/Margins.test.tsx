@@ -41,8 +41,10 @@ beforeEach(() => {
       height,
       data: new Uint8ClampedArray(4 * width * height),
     }),
-    putImageData: (pixels: ImageData) =>
-      frames.push(new Uint32Array(pixels.data.buffer).slice()),
+    // A frame puts the left margin, then the right: kept once both are in.
+    putImageData: (pixels: ImageData, _x: number, _y: number, from: number) => {
+      if (from) frames.push(new Uint32Array(pixels.data.buffer).slice())
+    },
     fillRect() {},
     getImageData: () => ({ data: Uint8ClampedArray.of(84, 84, 245, 255) }),
   } as never)

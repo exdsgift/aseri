@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 
 import { channels, word } from "@/components/HeroArt"
 import { pixel } from "@/lib/chart"
-import { inked, scene } from "@/lib/margins"
+import { scene, stripes } from "@/lib/margins"
 import { tickWhileShown, useReducedMotion } from "@/lib/motion"
 
 // The current travels a radian in 5 s: a bend crosses its wave in about 30 s.
@@ -75,16 +75,18 @@ export function Margins() {
         reduced ? 0 : performance.now() * drift,
         gaps()
       )
+      // Only the margins are ever inked: each frame writes them whole and puts them alone.
       const words = new Uint32Array(pixels.data.buffer)
-      words.fill(0)
-      for (let j = Math.max(0, Math.floor(s.top) - top); j < rows; j++) {
-        const [y, row] = [top + j, j * columns]
-        for (let x = 0; x < s.left + s.reach; x++)
-          if (inked(x, y, s)) words[row + x] = ink
-        for (let x = s.right - s.reach; x < columns; x++)
-          if (inked(x, y, s)) words[row + x] = ink
+      const [left, right] = [s.left + s.reach, s.right - s.reach]
+      for (let j = 0; j < rows; j++) {
+        const inked = stripes(top + j, s)
+        const row = j * columns
+        for (let x = 0; x < left; x++) words[row + x] = inked(x) ? ink : 0
+        for (let x = right; x < columns; x++)
+          words[row + x] = inked(x) ? ink : 0
       }
-      context!.putImageData(pixels, 0, 0)
+      context!.putImageData(pixels, 0, 0, 0, 0, left, rows)
+      context!.putImageData(pixels, 0, 0, right, 0, columns - right, rows)
     }
 
     let queued = 0
