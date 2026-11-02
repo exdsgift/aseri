@@ -1,0 +1,5191 @@
+{
+ "issue": 146,
+ "series": {
+  "gpr_daily": {
+   "origins": {
+    "n": 232,
+    "first": "2022-03-09",
+    "last": "2026-08-24"
+   },
+   "baselines": {
+    "registry": "mean28",
+    "pick": "ets",
+    "mae": {
+     "naive": 60.2332,
+     "snaive7": 52.0674,
+     "mean28": 47.4537,
+     "ets": 43.2867,
+     "timestral": 38.2392
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.7187,
+      "ci": [
+       0.6799,
+       0.7608
+      ],
+      "verdict": "beats"
+     },
+     "snaive7": {
+      "ratio": 0.8314,
+      "ci": [
+       0.8083,
+       0.8552
+      ],
+      "verdict": "beats"
+     },
+     "mean28": {
+      "ratio": 0.9122,
+      "ci": [
+       0.8677,
+       0.9573
+      ],
+      "verdict": "beats"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 54.7658,
+       "snaive7": 47.3973,
+       "mean28": 44.4008,
+       "ets": 37.737,
+       "timestral": 35.3491
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9367,
+       "ci": [
+        0.9132,
+        0.9597
+       ],
+       "verdict": "beats"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.7961,
+       "ci": [
+        0.7486,
+        0.843
+       ],
+       "verdict": "beats"
+      },
+      "wis": {
+       "timestral": 24.4547,
+       "probabilistic_naive": 38.0653,
+       "ets": 26.0674
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.6424,
+       "ci": [
+        0.6036,
+        0.6884
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.6848,
+       "ci": [
+        0.6428,
+        0.7332
+       ],
+       "verdict": "beats"
+      }
+     },
+     "8-28": {
+      "mae": {
+       "naive": 62.0557,
+       "snaive7": 53.6241,
+       "mean28": 48.4714,
+       "ets": 45.1366,
+       "timestral": 39.2026
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.8685,
+       "ci": [
+        0.8282,
+        0.9045
+       ],
+       "verdict": "beats"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.8088,
+       "ci": [
+        0.7608,
+        0.8498
+       ],
+       "verdict": "beats"
+      },
+      "wis": {
+       "timestral": 27.6071,
+       "probabilistic_naive": 43.7431,
+       "ets": 32.0213
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.6311,
+       "ci": [
+        0.5844,
+        0.6794
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.732,
+       "ci": [
+        0.6918,
+        0.7758
+       ],
+       "verdict": "beats"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "mean28",
+     "vs_registry": {
+      "ratio": 1.0,
+      "ci": [
+       1.0,
+       1.0
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 1.0963,
+      "ci": [
+       1.0446,
+       1.1524
+      ],
+      "verdict": "loses"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.4821,
+      "coverage_80": 0.7814,
+      "below_80": 0.1151,
+      "above_80": 0.1034,
+      "wis": 24.4547
+     },
+     "below": {
+      "offset_folds": [
+       -0.0268,
+       0.1643
+      ],
+      "offset_all": 0.0431,
+      "held_out": {
+       "coverage_50": 0.4895,
+       "coverage_80": 0.7919,
+       "below_80": 0.1047,
+       "above_80": 0.1034,
+       "wis": 24.5282
+      },
+      "wis_ratio": {
+       "ratio": 1.003,
+       "ci": [
+        1.0009,
+        1.0052
+       ],
+       "verdict": "loses"
+      },
+      "keep": false
+     },
+     "above": {
+      "offset_folds": [
+       0.0229,
+       0.0302
+      ],
+      "offset_all": 0.0229,
+      "held_out": {
+       "coverage_50": 0.4871,
+       "coverage_80": 0.7863,
+       "below_80": 0.1151,
+       "above_80": 0.0985,
+       "wis": 24.4623
+      },
+      "wis_ratio": {
+       "ratio": 1.0003,
+       "ci": [
+        0.9996,
+        1.001
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "8-28": {
+     "raw": {
+      "coverage_50": 0.507,
+      "coverage_80": 0.7886,
+      "below_80": 0.103,
+      "above_80": 0.1084,
+      "wis": 27.6071
+     },
+     "below": {
+      "offset_folds": [
+       -0.0681,
+       0.1051
+      ],
+      "offset_all": 0.0154,
+      "held_out": {
+       "coverage_50": 0.5113,
+       "coverage_80": 0.7908,
+       "below_80": 0.1008,
+       "above_80": 0.1084,
+       "wis": 27.6959
+      },
+      "wis_ratio": {
+       "ratio": 1.0032,
+       "ci": [
+        1.0011,
+        1.0055
+       ],
+       "verdict": "loses"
+      },
+      "keep": false
+     },
+     "above": {
+      "offset_folds": [
+       -0.0309,
+       0.1546
+      ],
+      "offset_all": 0.0444,
+      "held_out": {
+       "coverage_50": 0.5181,
+       "coverage_80": 0.7982,
+       "below_80": 0.103,
+       "above_80": 0.0987,
+       "wis": 27.6699
+      },
+      "wis_ratio": {
+       "ratio": 1.0023,
+       "ci": [
+        0.9981,
+        1.0062
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "kept_together": {
+     "1-7": {
+      "coverage_50": 0.4871,
+      "coverage_80": 0.7863,
+      "below_80": 0.1151,
+      "above_80": 0.0985,
+      "wis": 24.4623,
+      "wis_ratio": {
+       "ratio": 1.0003,
+       "ci": [
+        0.9996,
+        1.001
+       ],
+       "verdict": "ties"
+      }
+     },
+     "8-28": {
+      "coverage_50": 0.5181,
+      "coverage_80": 0.7982,
+      "below_80": 0.103,
+      "above_80": 0.0987,
+      "wis": 27.6699,
+      "wis_ratio": {
+       "ratio": 1.0023,
+       "ci": [
+        0.9981,
+        1.0062
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.01,
+       "ci": [
+        0.9916,
+        1.0286
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7765
+      },
+      "8-28": {
+       "ratio": 1.0299,
+       "ci": [
+        1.005,
+        1.0538
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7964
+      }
+     },
+     "wis_all": 1.0253,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0004,
+       "ci": [
+        0.988,
+        1.0117
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7851
+      },
+      "8-28": {
+       "ratio": 1.0245,
+       "ci": [
+        1.0023,
+        1.0513
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7991
+      }
+     },
+     "wis_all": 1.019,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0028,
+       "ci": [
+        0.9964,
+        1.0088
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7833
+      },
+      "8-28": {
+       "ratio": 1.0129,
+       "ci": [
+        1.0053,
+        1.0212
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7921
+      }
+     },
+     "wis_all": 1.0106,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0079,
+       "ci": [
+        0.9839,
+        1.0296
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7765
+      },
+      "8-28": {
+       "ratio": 1.0176,
+       "ci": [
+        0.9905,
+        1.0397
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7857
+      }
+     },
+     "wis_all": 1.0153,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.991,
+       "ci": [
+        0.9715,
+        1.0098
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7691
+      },
+      "8-28": {
+       "ratio": 1.0036,
+       "ci": [
+        0.9791,
+        1.0248
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7855
+      }
+     },
+     "wis_all": 1.0007,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0659,
+       "ci": [
+        1.0439,
+        1.088
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7771
+      },
+      "8-28": {
+       "ratio": 1.1599,
+       "ci": [
+        1.1195,
+        1.2101
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8395
+      }
+     },
+     "wis_all": 1.1385,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9961,
+       "ci": [
+        0.9843,
+        1.0071
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7851
+      },
+      "8-28": {
+       "ratio": 1.0111,
+       "ci": [
+        1.0001,
+        1.0216
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.82
+      }
+     },
+     "wis_all": 1.0077,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.56,
+     0.36
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.383,
+      "coverage_80": 0.6502,
+      "below_80": 0.2241,
+      "above_80": 0.1256,
+      "wis": 12.1935
+     },
+     "rho_1": {
+      "coverage_50": 0.5086,
+      "coverage_80": 0.7783,
+      "below_80": 0.141,
+      "above_80": 0.0807,
+      "wis": 12.2041
+     },
+     "rho_0": {
+      "coverage_50": 0.2906,
+      "coverage_80": 0.5185,
+      "below_80": 0.3048,
+      "above_80": 0.1767,
+      "wis": 12.6643
+     },
+     "direct": {
+      "coverage_50": 0.3504,
+      "coverage_80": 0.6293,
+      "below_80": 0.2014,
+      "above_80": 0.1693,
+      "wis": 11.809
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.3602,
+      "coverage_80": 0.6324,
+      "below_80": 0.2217,
+      "above_80": 0.1459,
+      "wis": 14.1102
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.9991,
+      "ci": [
+       0.9764,
+       1.0201
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9628,
+      "ci": [
+       0.953,
+       0.9733
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 1.0326,
+      "ci": [
+       0.9882,
+       1.0779
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.8642,
+      "ci": [
+       0.7942,
+       0.9427
+      ],
+      "verdict": "beats"
+     }
+    },
+    "8-28": {
+     "paths": {
+      "coverage_50": 0.477,
+      "coverage_80": 0.7599,
+      "below_80": 0.1295,
+      "above_80": 0.1106,
+      "wis": 19.4048
+     },
+     "rho_1": {
+      "coverage_50": 0.7001,
+      "coverage_80": 0.9247,
+      "below_80": 0.0291,
+      "above_80": 0.0462,
+      "wis": 19.9276
+     },
+     "rho_0": {
+      "coverage_50": 0.3303,
+      "coverage_80": 0.5928,
+      "below_80": 0.2295,
+      "above_80": 0.1778,
+      "wis": 20.0341
+     },
+     "direct": {
+      "coverage_50": 0.5037,
+      "coverage_80": 0.8091,
+      "below_80": 0.0858,
+      "above_80": 0.1051,
+      "wis": 19.0647
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.4518,
+      "coverage_80": 0.7412,
+      "below_80": 0.1619,
+      "above_80": 0.0969,
+      "wis": 24.1746
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.9738,
+      "ci": [
+       0.934,
+       1.0085
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9686,
+      "ci": [
+       0.9563,
+       0.9842
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 1.0178,
+      "ci": [
+       0.9779,
+       1.0579
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.8027,
+      "ci": [
+       0.7431,
+       0.8558
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  },
+  "suez_transits": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-06",
+    "last": "2026-09-27"
+   },
+   "baselines": {
+    "registry": "mean28",
+    "pick": "mean28",
+    "mae": {
+     "naive": 7.1961,
+     "snaive7": 7.102,
+     "mean28": 5.1114,
+     "ets": 5.1965,
+     "timestral": 5.1096
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.7103,
+      "ci": [
+       0.6618,
+       0.7617
+      ],
+      "verdict": "beats"
+     },
+     "snaive7": {
+      "ratio": 0.7197,
+      "ci": [
+       0.6983,
+       0.7416
+      ],
+      "verdict": "beats"
+     },
+     "ets": {
+      "ratio": 0.9836,
+      "ci": [
+       0.9729,
+       0.9944
+      ],
+      "verdict": "beats"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 7.2157,
+       "snaive7": 7.1525,
+       "mean28": 5.0892,
+       "ets": 5.1227,
+       "timestral": 5.0947
+      },
+      "timestral_vs_pick": {
+       "ratio": 1.0011,
+       "ci": [
+        0.9943,
+        1.008
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 1.0011,
+       "ci": [
+        0.9943,
+        1.008
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 3.4763,
+       "probabilistic_naive": 4.9117,
+       "ets": 3.5438
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.7078,
+       "ci": [
+        0.6547,
+        0.7617
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.7215,
+       "ci": [
+        0.6672,
+        0.7784
+       ],
+       "verdict": "beats"
+      }
+     },
+     "8-28": {
+      "mae": {
+       "naive": 7.1896,
+       "snaive7": 7.0852,
+       "mean28": 5.1189,
+       "ets": 5.2211,
+       "timestral": 5.1146
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9992,
+       "ci": [
+        0.9932,
+        1.0051
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.9992,
+       "ci": [
+        0.9932,
+        1.0051
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 3.4952,
+       "probabilistic_naive": 4.8806,
+       "ets": 3.6228
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.7161,
+       "ci": [
+        0.6666,
+        0.768
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.7423,
+       "ci": [
+        0.6917,
+        0.7951
+       ],
+       "verdict": "beats"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "mean28",
+     "vs_registry": {
+      "ratio": 1.0,
+      "ci": [
+       1.0,
+       1.0
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 0.9836,
+      "ci": [
+       0.9729,
+       0.9944
+      ],
+      "verdict": "beats"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.5124,
+      "coverage_80": 0.8036,
+      "below_80": 0.1016,
+      "above_80": 0.0948,
+      "wis": 3.4763
+     },
+     "below": {
+      "offset_folds": [
+       -0.0856,
+       0.0497
+      ],
+      "offset_all": 0.0075,
+      "held_out": {
+       "coverage_50": 0.511,
+       "coverage_80": 0.8036,
+       "below_80": 0.1016,
+       "above_80": 0.0948,
+       "wis": 3.4802
+      },
+      "wis_ratio": {
+       "ratio": 1.0011,
+       "ci": [
+        0.9995,
+        1.0027
+       ],
+       "verdict": "ties"
+      },
+      "keep": false
+     },
+     "above": {
+      "offset_folds": [
+       0.0523,
+       -0.0014
+      ],
+      "offset_all": -0.0031,
+      "held_out": {
+       "coverage_50": 0.5165,
+       "coverage_80": 0.8077,
+       "below_80": 0.1016,
+       "above_80": 0.0907,
+       "wis": 3.4778
+      },
+      "wis_ratio": {
+       "ratio": 1.0004,
+       "ci": [
+        0.9998,
+        1.0011
+       ],
+       "verdict": "ties"
+      },
+      "keep": false
+     }
+    },
+    "8-28": {
+     "raw": {
+      "coverage_50": 0.527,
+      "coverage_80": 0.8191,
+      "below_80": 0.087,
+      "above_80": 0.0939,
+      "wis": 3.4952
+     },
+     "below": {
+      "offset_folds": [
+       -0.1484,
+       0.0126
+      ],
+      "offset_all": -0.06,
+      "held_out": {
+       "coverage_50": 0.5041,
+       "coverage_80": 0.8082,
+       "below_80": 0.098,
+       "above_80": 0.0939,
+       "wis": 3.4986
+      },
+      "wis_ratio": {
+       "ratio": 1.001,
+       "ci": [
+        0.9981,
+        1.0039
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       0.0038,
+       -0.0545
+      ],
+      "offset_all": -0.0192,
+      "held_out": {
+       "coverage_50": 0.5211,
+       "coverage_80": 0.8141,
+       "below_80": 0.087,
+       "above_80": 0.0989,
+       "wis": 3.4952
+      },
+      "wis_ratio": {
+       "ratio": 1.0,
+       "ci": [
+        0.999,
+        1.0012
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "kept_together": {
+     "8-28": {
+      "coverage_50": 0.4982,
+      "coverage_80": 0.8031,
+      "below_80": 0.098,
+      "above_80": 0.0989,
+      "wis": 3.4987,
+      "wis_ratio": {
+       "ratio": 1.001,
+       "ci": [
+        0.9978,
+        1.0041
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0024,
+       "ci": [
+        0.9988,
+        1.007
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.783
+      },
+      "8-28": {
+       "ratio": 1.0033,
+       "ci": [
+        0.9986,
+        1.0104
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.804
+      }
+     },
+     "wis_all": 1.0031,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0021,
+       "ci": [
+        0.9988,
+        1.0056
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8049
+      },
+      "8-28": {
+       "ratio": 1.0024,
+       "ci": [
+        0.9981,
+        1.0065
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8187
+      }
+     },
+     "wis_all": 1.0024,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0005,
+       "ci": [
+        0.9995,
+        1.0013
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8036
+      },
+      "8-28": {
+       "ratio": 1.0001,
+       "ci": [
+        0.9989,
+        1.0012
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8219
+      }
+     },
+     "wis_all": 1.0002,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9998,
+       "ci": [
+        0.9945,
+        1.0047
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7775
+      },
+      "8-28": {
+       "ratio": 0.9996,
+       "ci": [
+        0.9935,
+        1.0053
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7917
+      }
+     },
+     "wis_all": 0.9996,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9952,
+       "ci": [
+        0.9889,
+        1.0016
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7857
+      },
+      "8-28": {
+       "ratio": 0.9928,
+       "ci": [
+        0.9867,
+        0.9984
+       ],
+       "verdict": "beats",
+       "coverage_80": 0.8008
+      }
+     },
+     "wis_all": 0.9934,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0194,
+       "ci": [
+        1.0088,
+        1.0296
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8819
+      },
+      "8-28": {
+       "ratio": 1.0365,
+       "ci": [
+        1.0231,
+        1.0498
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8901
+      }
+     },
+     "wis_all": 1.0323,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9982,
+       "ci": [
+        0.9939,
+        1.0022
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8118
+      },
+      "8-28": {
+       "ratio": 0.9989,
+       "ci": [
+        0.994,
+        1.0032
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8292
+      }
+     },
+     "wis_all": 0.9987,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     -0.2,
+     -0.01
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.522,
+      "coverage_80": 0.8077,
+      "below_80": 0.0824,
+      "above_80": 0.1099,
+      "wis": 0.8988
+     },
+     "rho_1": {
+      "coverage_50": 0.7816,
+      "coverage_80": 0.9739,
+      "below_80": 0.011,
+      "above_80": 0.0151,
+      "wis": 1.1308
+     },
+     "rho_0": {
+      "coverage_50": 0.5398,
+      "coverage_80": 0.8352,
+      "below_80": 0.0701,
+      "above_80": 0.0948,
+      "wis": 0.8993
+     },
+     "direct": {
+      "coverage_50": 0.5371,
+      "coverage_80": 0.8379,
+      "below_80": 0.0701,
+      "above_80": 0.092,
+      "wis": 0.9894
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5288,
+      "coverage_80": 0.8118,
+      "below_80": 0.0769,
+      "above_80": 0.1113,
+      "wis": 1.2645
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.7948,
+      "ci": [
+       0.7467,
+       0.8439
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9994,
+      "ci": [
+       0.9924,
+       1.0064
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9084,
+      "ci": [
+       0.8748,
+       0.9397
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.7108,
+      "ci": [
+       0.6681,
+       0.757
+      ],
+      "verdict": "beats"
+     }
+    },
+    "8-28": {
+     "paths": {
+      "coverage_50": 0.5124,
+      "coverage_80": 0.799,
+      "below_80": 0.0989,
+      "above_80": 0.1021,
+      "wis": 1.299
+     },
+     "rho_1": {
+      "coverage_50": 0.9354,
+      "coverage_80": 0.9991,
+      "below_80": 0.0009,
+      "above_80": 0.0,
+      "wis": 1.8408
+     },
+     "rho_0": {
+      "coverage_50": 0.5559,
+      "coverage_80": 0.8388,
+      "below_80": 0.0884,
+      "above_80": 0.0728,
+      "wis": 1.3014
+     },
+     "direct": {
+      "coverage_50": 0.5737,
+      "coverage_80": 0.8617,
+      "below_80": 0.0769,
+      "above_80": 0.0614,
+      "wis": 1.3156
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5508,
+      "coverage_80": 0.842,
+      "below_80": 0.0778,
+      "above_80": 0.0801,
+      "wis": 1.5848
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.7057,
+      "ci": [
+       0.6589,
+       0.7575
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9982,
+      "ci": [
+       0.9921,
+       1.0044
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9874,
+      "ci": [
+       0.9648,
+       1.0132
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.8197,
+      "ci": [
+       0.7645,
+       0.8821
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  },
+  "hormuz_transits": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-20",
+    "last": "2026-10-11"
+   },
+   "baselines": {
+    "registry": "naive",
+    "pick": "ets",
+    "mae": {
+     "naive": 13.8125,
+     "snaive7": 14.5474,
+     "mean28": 13.3497,
+     "ets": 12.0835,
+     "timestral": 11.1019
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.8748,
+      "ci": [
+       0.8088,
+       0.95
+      ],
+      "verdict": "beats"
+     },
+     "snaive7": {
+      "ratio": 0.8306,
+      "ci": [
+       0.7995,
+       0.8606
+      ],
+      "verdict": "beats"
+     },
+     "mean28": {
+      "ratio": 0.9051,
+      "ci": [
+       0.753,
+       1.0432
+      ],
+      "verdict": "ties"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 12.3022,
+       "snaive7": 13.7418,
+       "mean28": 12.8104,
+       "ets": 11.049,
+       "timestral": 10.491
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9495,
+       "ci": [
+        0.9074,
+        1.0004
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.8528,
+       "ci": [
+        0.7779,
+        0.9485
+       ],
+       "verdict": "beats"
+      },
+      "wis": {
+       "timestral": 7.2506,
+       "probabilistic_naive": 8.5522,
+       "ets": 8.0684
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.8478,
+       "ci": [
+        0.7651,
+        0.9598
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.9434,
+       "ci": [
+        0.867,
+        1.0333
+       ],
+       "verdict": "ties"
+      }
+     },
+     "8-14": {
+      "mae": {
+       "naive": 15.3228,
+       "snaive7": 15.353,
+       "mean28": 13.8891,
+       "ets": 13.118,
+       "timestral": 11.7129
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.8929,
+       "ci": [
+        0.8351,
+        0.9548
+       ],
+       "verdict": "beats"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.7644,
+       "ci": [
+        0.678,
+        0.8774
+       ],
+       "verdict": "beats"
+      },
+      "wis": {
+       "timestral": 8.3695,
+       "probabilistic_naive": 11.0182,
+       "ets": 9.7074
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.7596,
+       "ci": [
+        0.6582,
+        0.885
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.881,
+       "ci": [
+        0.8096,
+        0.9659
+       ],
+       "verdict": "beats"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "mean28",
+     "vs_registry": {
+      "ratio": 0.9665,
+      "ci": [
+       0.8014,
+       1.234
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 1.1048,
+      "ci": [
+       0.9586,
+       1.3281
+      ],
+      "verdict": "ties"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.4382,
+      "coverage_80": 0.7486,
+      "below_80": 0.1429,
+      "above_80": 0.1085,
+      "wis": 7.2506
+     },
+     "below": {
+      "offset_folds": [
+       0.2026,
+       0.2106
+      ],
+      "offset_all": 0.2026,
+      "held_out": {
+       "coverage_50": 0.4876,
+       "coverage_80": 0.7981,
+       "below_80": 0.0934,
+       "above_80": 0.1085,
+       "wis": 7.1868
+      },
+      "wis_ratio": {
+       "ratio": 0.9912,
+       "ci": [
+        0.9831,
+        1.0
+       ],
+       "verdict": "beats"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       0.061,
+       0.0941
+      ],
+      "offset_all": 0.061,
+      "held_out": {
+       "coverage_50": 0.4505,
+       "coverage_80": 0.7665,
+       "below_80": 0.1429,
+       "above_80": 0.0907,
+       "wis": 7.2588
+      },
+      "wis_ratio": {
+       "ratio": 1.0011,
+       "ci": [
+        0.9989,
+        1.0037
+       ],
+       "verdict": "ties"
+      },
+      "keep": false
+     }
+    },
+    "8-14": {
+     "raw": {
+      "coverage_50": 0.4643,
+      "coverage_80": 0.7459,
+      "below_80": 0.1607,
+      "above_80": 0.0934,
+      "wis": 8.3695
+     },
+     "below": {
+      "offset_folds": [
+       0.1845,
+       0.3335
+      ],
+      "offset_all": 0.2342,
+      "held_out": {
+       "coverage_50": 0.5165,
+       "coverage_80": 0.8159,
+       "below_80": 0.0907,
+       "above_80": 0.0934,
+       "wis": 8.2749
+      },
+      "wis_ratio": {
+       "ratio": 0.9887,
+       "ci": [
+        0.9786,
+        1.0012
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       -0.0193,
+       -0.0075
+      ],
+      "offset_all": -0.0193,
+      "held_out": {
+       "coverage_50": 0.4629,
+       "coverage_80": 0.7431,
+       "below_80": 0.1607,
+       "above_80": 0.0962,
+       "wis": 8.3656
+      },
+      "wis_ratio": {
+       "ratio": 0.9995,
+       "ci": [
+        0.9988,
+        1.0002
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "kept_together": {
+     "1-7": {
+      "coverage_50": 0.4876,
+      "coverage_80": 0.7981,
+      "below_80": 0.0934,
+      "above_80": 0.1085,
+      "wis": 7.1868,
+      "wis_ratio": {
+       "ratio": 0.9912,
+       "ci": [
+        0.9831,
+        1.0
+       ],
+       "verdict": "beats"
+      }
+     },
+     "8-14": {
+      "coverage_50": 0.5151,
+      "coverage_80": 0.8132,
+      "below_80": 0.0907,
+      "above_80": 0.0962,
+      "wis": 8.271,
+      "wis_ratio": {
+       "ratio": 0.9882,
+       "ci": [
+        0.9778,
+        1.0006
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0209,
+       "ci": [
+        0.9984,
+        1.0501
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7802
+      },
+      "8-14": {
+       "ratio": 1.0529,
+       "ci": [
+        1.0193,
+        1.1002
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7788
+      }
+     },
+     "wis_all": 1.038,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0157,
+       "ci": [
+        0.9983,
+        1.0404
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7459
+      },
+      "8-14": {
+       "ratio": 1.0378,
+       "ci": [
+        1.0125,
+        1.0675
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7473
+      }
+     },
+     "wis_all": 1.0275,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0034,
+       "ci": [
+        0.998,
+        1.0099
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7527
+      },
+      "8-14": {
+       "ratio": 1.0126,
+       "ci": [
+        1.0018,
+        1.0256
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7486
+      }
+     },
+     "wis_all": 1.0084,
+     "keep": false
+    },
+    "timestral_log1p": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0146,
+       "ci": [
+        0.9983,
+        1.0431
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7541
+      },
+      "8-14": {
+       "ratio": 1.0314,
+       "ci": [
+        1.0034,
+        1.077
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7514
+      }
+     },
+     "wis_all": 1.0236,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0055,
+       "ci": [
+        0.985,
+        1.029
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.6731
+      },
+      "8-14": {
+       "ratio": 1.0257,
+       "ci": [
+        1.0061,
+        1.0553
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.6484
+      }
+     },
+     "wis_all": 1.0163,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.001,
+       "ci": [
+        0.973,
+        1.0275
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7527
+      },
+      "8-14": {
+       "ratio": 1.0063,
+       "ci": [
+        0.9896,
+        1.0281
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7115
+      }
+     },
+     "wis_all": 1.0038,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.1128,
+       "ci": [
+        1.0465,
+        1.1878
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8077
+      },
+      "8-14": {
+       "ratio": 1.1599,
+       "ci": [
+        1.0719,
+        1.2696
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8063
+      }
+     },
+     "wis_all": 1.138,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0088,
+       "ci": [
+        0.9833,
+        1.0341
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7747
+      },
+      "8-14": {
+       "ratio": 1.0237,
+       "ci": [
+        0.9989,
+        1.053
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7486
+      }
+     },
+     "wis_all": 1.0168,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.41,
+     0.4
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.4588,
+      "coverage_80": 0.7473,
+      "below_80": 0.1429,
+      "above_80": 0.1099,
+      "wis": 2.8992
+     },
+     "rho_1": {
+      "coverage_50": 0.5962,
+      "coverage_80": 0.8846,
+      "below_80": 0.0577,
+      "above_80": 0.0577,
+      "wis": 2.9117
+     },
+     "rho_0": {
+      "coverage_50": 0.386,
+      "coverage_80": 0.6442,
+      "below_80": 0.2074,
+      "above_80": 0.1484,
+      "wis": 3.0095
+     },
+     "direct": {
+      "coverage_50": 0.4698,
+      "coverage_80": 0.7706,
+      "below_80": 0.1346,
+      "above_80": 0.0948,
+      "wis": 3.1559
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5769,
+      "coverage_80": 0.8269,
+      "below_80": 0.081,
+      "above_80": 0.092,
+      "wis": 4.0661
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.9957,
+      "ci": [
+       0.957,
+       1.0326
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9634,
+      "ci": [
+       0.9524,
+       0.9782
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9187,
+      "ci": [
+       0.8635,
+       0.971
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.713,
+      "ci": [
+       0.6549,
+       0.7817
+      ],
+      "verdict": "beats"
+     }
+    },
+    "8-14": {
+     "paths": {
+      "coverage_50": 0.4684,
+      "coverage_80": 0.706,
+      "below_80": 0.2088,
+      "above_80": 0.0852,
+      "wis": 5.7621
+     },
+     "rho_1": {
+      "coverage_50": 0.6937,
+      "coverage_80": 0.9107,
+      "below_80": 0.0481,
+      "above_80": 0.0412,
+      "wis": 5.6411
+     },
+     "rho_0": {
+      "coverage_50": 0.3338,
+      "coverage_80": 0.5522,
+      "below_80": 0.3159,
+      "above_80": 0.1319,
+      "wis": 6.081
+     },
+     "direct": {
+      "coverage_50": 0.4643,
+      "coverage_80": 0.7459,
+      "below_80": 0.1593,
+      "above_80": 0.0948,
+      "wis": 5.9829
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5412,
+      "coverage_80": 0.7885,
+      "below_80": 0.103,
+      "above_80": 0.1085,
+      "wis": 7.2766
+     },
+     "paths_vs_rho_1": {
+      "ratio": 1.0214,
+      "ci": [
+       0.9466,
+       1.0844
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9475,
+      "ci": [
+       0.9362,
+       0.9617
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9631,
+      "ci": [
+       0.928,
+       0.9954
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.7919,
+      "ci": [
+       0.6774,
+       0.905
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  },
+  "bab_el_mandeb_transits": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-20",
+    "last": "2026-10-11"
+   },
+   "baselines": {
+    "registry": "mean28",
+    "pick": "mean28",
+    "mae": {
+     "naive": 6.9128,
+     "snaive7": 7.1147,
+     "mean28": 5.1708,
+     "ets": 5.316,
+     "timestral": 5.1611
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.748,
+      "ci": [
+       0.7038,
+       0.7927
+      ],
+      "verdict": "beats"
+     },
+     "snaive7": {
+      "ratio": 0.7268,
+      "ci": [
+       0.7005,
+       0.7564
+      ],
+      "verdict": "beats"
+     },
+     "ets": {
+      "ratio": 0.9727,
+      "ci": [
+       0.9541,
+       0.9896
+      ],
+      "verdict": "beats"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 7.0453,
+       "snaive7": 7.2253,
+       "mean28": 5.1345,
+       "ets": 5.2746,
+       "timestral": 5.1185
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9969,
+       "ci": [
+        0.9876,
+        1.0061
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.9969,
+       "ci": [
+        0.9876,
+        1.0061
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 3.4548,
+       "probabilistic_naive": 4.7225,
+       "ets": 3.5745
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.7316,
+       "ci": [
+        0.6765,
+        0.7875
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.7569,
+       "ci": [
+        0.7032,
+        0.8099
+       ],
+       "verdict": "beats"
+      }
+     },
+     "8-14": {
+      "mae": {
+       "naive": 6.7802,
+       "snaive7": 7.0041,
+       "mean28": 5.207,
+       "ets": 5.3573,
+       "timestral": 5.2037
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9994,
+       "ci": [
+        0.9866,
+        1.0137
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.9994,
+       "ci": [
+        0.9866,
+        1.0137
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 3.4989,
+       "probabilistic_naive": 4.6078,
+       "ets": 3.6203
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.7594,
+       "ci": [
+        0.7123,
+        0.8084
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.7857,
+       "ci": [
+        0.7407,
+        0.8342
+       ],
+       "verdict": "beats"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "mean28",
+     "vs_registry": {
+      "ratio": 1.0,
+      "ci": [
+       1.0,
+       1.0
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 0.9727,
+      "ci": [
+       0.9541,
+       0.9896
+      ],
+      "verdict": "beats"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.4849,
+      "coverage_80": 0.7967,
+      "below_80": 0.103,
+      "above_80": 0.1003,
+      "wis": 3.4548
+     },
+     "below": {
+      "offset_folds": [
+       0.0067,
+       0.0767
+      ],
+      "offset_all": 0.0319,
+      "held_out": {
+       "coverage_50": 0.4945,
+       "coverage_80": 0.8049,
+       "below_80": 0.0948,
+       "above_80": 0.1003,
+       "wis": 3.4571
+      },
+      "wis_ratio": {
+       "ratio": 1.0007,
+       "ci": [
+        0.9995,
+        1.002
+       ],
+       "verdict": "ties"
+      },
+      "keep": false
+     },
+     "above": {
+      "offset_folds": [
+       0.0831,
+       -0.0302
+      ],
+      "offset_all": 0.0168,
+      "held_out": {
+       "coverage_50": 0.489,
+       "coverage_80": 0.8077,
+       "below_80": 0.103,
+       "above_80": 0.0893,
+       "wis": 3.4607
+      },
+      "wis_ratio": {
+       "ratio": 1.0017,
+       "ci": [
+        0.9999,
+        1.0036
+       ],
+       "verdict": "ties"
+      },
+      "keep": false
+     }
+    },
+    "8-14": {
+     "raw": {
+      "coverage_50": 0.4821,
+      "coverage_80": 0.7995,
+      "below_80": 0.1003,
+      "above_80": 0.1003,
+      "wis": 3.4989
+     },
+     "below": {
+      "offset_folds": [
+       -0.0228,
+       0.0709
+      ],
+      "offset_all": 0.0093,
+      "held_out": {
+       "coverage_50": 0.4904,
+       "coverage_80": 0.8022,
+       "below_80": 0.0975,
+       "above_80": 0.1003,
+       "wis": 3.503
+      },
+      "wis_ratio": {
+       "ratio": 1.0012,
+       "ci": [
+        0.9998,
+        1.0025
+       ],
+       "verdict": "ties"
+      },
+      "keep": false
+     },
+     "above": {
+      "offset_folds": [
+       0.0535,
+       -0.0367
+      ],
+      "offset_all": 0.0113,
+      "held_out": {
+       "coverage_50": 0.4849,
+       "coverage_80": 0.8022,
+       "below_80": 0.1003,
+       "above_80": 0.0975,
+       "wis": 3.5046
+      },
+      "wis_ratio": {
+       "ratio": 1.0016,
+       "ci": [
+        1.0003,
+        1.003
+       ],
+       "verdict": "loses"
+      },
+      "keep": false
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0083,
+       "ci": [
+        1.004,
+        1.0131
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7967
+      },
+      "8-14": {
+       "ratio": 1.008,
+       "ci": [
+        1.0017,
+        1.0155
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.794
+      }
+     },
+     "wis_all": 1.0081,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0022,
+       "ci": [
+        0.9983,
+        1.0057
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7967
+      },
+      "8-14": {
+       "ratio": 1.0031,
+       "ci": [
+        0.998,
+        1.008
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.794
+      }
+     },
+     "wis_all": 1.0026,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9987,
+       "ci": [
+        0.9965,
+        1.0009
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8022
+      },
+      "8-14": {
+       "ratio": 0.9982,
+       "ci": [
+        0.9936,
+        1.0019
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8049
+      }
+     },
+     "wis_all": 0.9984,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0131,
+       "ci": [
+        1.0009,
+        1.0272
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7665
+      },
+      "8-14": {
+       "ratio": 1.0133,
+       "ci": [
+        0.9978,
+        1.0322
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7624
+      }
+     },
+     "wis_all": 1.0132,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0046,
+       "ci": [
+        0.9993,
+        1.0097
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7898
+      },
+      "8-14": {
+       "ratio": 1.0023,
+       "ci": [
+        0.9955,
+        1.01
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7953
+      }
+     },
+     "wis_all": 1.0034,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0346,
+       "ci": [
+        1.0177,
+        1.0521
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8462
+      },
+      "8-14": {
+       "ratio": 1.0347,
+       "ci": [
+        1.0039,
+        1.0657
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8544
+      }
+     },
+     "wis_all": 1.0346,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0051,
+       "ci": [
+        0.9996,
+        1.0108
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8008
+      },
+      "8-14": {
+       "ratio": 1.0008,
+       "ci": [
+        0.9936,
+        1.0082
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8159
+      }
+     },
+     "wis_all": 1.003,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.26,
+     0.16
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.5412,
+      "coverage_80": 0.8187,
+      "below_80": 0.0907,
+      "above_80": 0.0907,
+      "wis": 1.0756
+     },
+     "rho_1": {
+      "coverage_50": 0.7129,
+      "coverage_80": 0.9437,
+      "below_80": 0.0343,
+      "above_80": 0.022,
+      "wis": 1.2294
+     },
+     "rho_0": {
+      "coverage_50": 0.4835,
+      "coverage_80": 0.7637,
+      "below_80": 0.1113,
+      "above_80": 0.125,
+      "wis": 1.0722
+     },
+     "direct": {
+      "coverage_50": 0.467,
+      "coverage_80": 0.761,
+      "below_80": 0.1085,
+      "above_80": 0.1305,
+      "wis": 1.1825
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.4505,
+      "coverage_80": 0.7486,
+      "below_80": 0.1305,
+      "above_80": 0.1209,
+      "wis": 1.5317
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.8749,
+      "ci": [
+       0.824,
+       0.9207
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 1.0032,
+      "ci": [
+       0.9933,
+       1.0161
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9096,
+      "ci": [
+       0.8807,
+       0.9407
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.7023,
+      "ci": [
+       0.6523,
+       0.7558
+      ],
+      "verdict": "beats"
+     }
+    },
+    "8-14": {
+     "paths": {
+      "coverage_50": 0.5701,
+      "coverage_80": 0.8228,
+      "below_80": 0.1016,
+      "above_80": 0.0755,
+      "wis": 1.5723
+     },
+     "rho_1": {
+      "coverage_50": 0.8626,
+      "coverage_80": 0.989,
+      "below_80": 0.0096,
+      "above_80": 0.0014,
+      "wis": 1.936
+     },
+     "rho_0": {
+      "coverage_50": 0.4945,
+      "coverage_80": 0.7541,
+      "below_80": 0.1223,
+      "above_80": 0.1236,
+      "wis": 1.572
+     },
+     "direct": {
+      "coverage_50": 0.5082,
+      "coverage_80": 0.7761,
+      "below_80": 0.1099,
+      "above_80": 0.114,
+      "wis": 1.6092
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.4904,
+      "coverage_80": 0.7788,
+      "below_80": 0.1071,
+      "above_80": 0.114,
+      "wis": 2.0067
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.8121,
+      "ci": [
+       0.7364,
+       0.8816
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 1.0002,
+      "ci": [
+       0.9878,
+       1.018
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9771,
+      "ci": [
+       0.9455,
+       1.0112
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.7835,
+      "ci": [
+       0.7045,
+       0.8758
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  },
+  "taiwan_strait_transits": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-06",
+    "last": "2026-09-27"
+   },
+   "baselines": {
+    "registry": "mean28",
+    "pick": "mean28",
+    "mae": {
+     "naive": 36.7799,
+     "snaive7": 37.1034,
+     "mean28": 25.6549,
+     "ets": 25.7098,
+     "timestral": 25.2029
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.6975,
+      "ci": [
+       0.6059,
+       0.7929
+      ],
+      "verdict": "beats"
+     },
+     "snaive7": {
+      "ratio": 0.6914,
+      "ci": [
+       0.643,
+       0.7396
+      ],
+      "verdict": "beats"
+     },
+     "ets": {
+      "ratio": 0.9979,
+      "ci": [
+       0.9854,
+       1.0102
+      ],
+      "verdict": "ties"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 35.5522,
+       "snaive7": 37.3585,
+       "mean28": 25.1237,
+       "ets": 25.4644,
+       "timestral": 25.0359
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9965,
+       "ci": [
+        0.9704,
+        1.0213
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.9965,
+       "ci": [
+        0.9704,
+        1.0213
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 18.0795,
+       "probabilistic_naive": 25.9912,
+       "ets": 19.2583
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.6956,
+       "ci": [
+        0.5913,
+        0.8123
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.741,
+       "ci": [
+        0.6244,
+        0.8707
+       ],
+       "verdict": "beats"
+      }
+     },
+     "8-28": {
+      "mae": {
+       "naive": 37.1891,
+       "snaive7": 37.0183,
+       "mean28": 25.832,
+       "ets": 25.7916,
+       "timestral": 25.2586
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9778,
+       "ci": [
+        0.9476,
+        1.004
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.9778,
+       "ci": [
+        0.9476,
+        1.004
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 18.4241,
+       "probabilistic_naive": 27.1226,
+       "ets": 19.5104
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.6793,
+       "ci": [
+        0.5833,
+        0.7822
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.7193,
+       "ci": [
+        0.6212,
+        0.8264
+       ],
+       "verdict": "beats"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "mean28",
+     "vs_registry": {
+      "ratio": 1.0,
+      "ci": [
+       1.0,
+       1.0
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 0.9979,
+      "ci": [
+       0.9854,
+       1.0102
+      ],
+      "verdict": "ties"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.5247,
+      "coverage_80": 0.7885,
+      "below_80": 0.1113,
+      "above_80": 0.1003,
+      "wis": 18.0795
+     },
+     "below": {
+      "offset_folds": [
+       0.0196,
+       0.1275
+      ],
+      "offset_all": 0.0567,
+      "held_out": {
+       "coverage_50": 0.5371,
+       "coverage_80": 0.8036,
+       "below_80": 0.0962,
+       "above_80": 0.1003,
+       "wis": 18.0959
+      },
+      "wis_ratio": {
+       "ratio": 1.0009,
+       "ci": [
+        0.9988,
+        1.0036
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       0.0748,
+       -0.0936
+      ],
+      "offset_all": 0.0074,
+      "held_out": {
+       "coverage_50": 0.5192,
+       "coverage_80": 0.7885,
+       "below_80": 0.1113,
+       "above_80": 0.1003,
+       "wis": 18.1068
+      },
+      "wis_ratio": {
+       "ratio": 1.0015,
+       "ci": [
+        0.9998,
+        1.0032
+       ],
+       "verdict": "ties"
+      },
+      "keep": false
+     }
+    },
+    "8-28": {
+     "raw": {
+      "coverage_50": 0.5293,
+      "coverage_80": 0.8223,
+      "below_80": 0.092,
+      "above_80": 0.0856,
+      "wis": 18.4241
+     },
+     "below": {
+      "offset_folds": [
+       -0.0767,
+       0.0519
+      ],
+      "offset_all": -0.0333,
+      "held_out": {
+       "coverage_50": 0.5229,
+       "coverage_80": 0.8178,
+       "below_80": 0.0966,
+       "above_80": 0.0856,
+       "wis": 18.4584
+      },
+      "wis_ratio": {
+       "ratio": 1.0019,
+       "ci": [
+        0.9996,
+        1.0039
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       -0.0181,
+       -0.1
+      ],
+      "offset_all": -0.0521,
+      "held_out": {
+       "coverage_50": 0.5128,
+       "coverage_80": 0.8063,
+       "below_80": 0.092,
+       "above_80": 0.1016,
+       "wis": 18.4268
+      },
+      "wis_ratio": {
+       "ratio": 1.0001,
+       "ci": [
+        0.9984,
+        1.0018
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "kept_together": {
+     "1-7": {
+      "coverage_50": 0.5371,
+      "coverage_80": 0.8036,
+      "below_80": 0.0962,
+      "above_80": 0.1003,
+      "wis": 18.0959,
+      "wis_ratio": {
+       "ratio": 1.0009,
+       "ci": [
+        0.9988,
+        1.0036
+       ],
+       "verdict": "ties"
+      }
+     },
+     "8-28": {
+      "coverage_50": 0.5064,
+      "coverage_80": 0.8017,
+      "below_80": 0.0966,
+      "above_80": 0.1016,
+      "wis": 18.4611,
+      "wis_ratio": {
+       "ratio": 1.002,
+       "ci": [
+        0.9992,
+        1.0044
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0166,
+       "ci": [
+        1.0033,
+        1.033
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8104
+      },
+      "8-28": {
+       "ratio": 1.0167,
+       "ci": [
+        1.0024,
+        1.037
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8342
+      }
+     },
+     "wis_all": 1.0167,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0053,
+       "ci": [
+        0.9971,
+        1.0146
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8008
+      },
+      "8-28": {
+       "ratio": 1.0005,
+       "ci": [
+        0.9904,
+        1.0121
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8292
+      }
+     },
+     "wis_all": 1.0017,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0006,
+       "ci": [
+        0.9967,
+        1.0047
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7885
+      },
+      "8-28": {
+       "ratio": 1.0004,
+       "ci": [
+        0.9983,
+        1.0028
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.821
+      }
+     },
+     "wis_all": 1.0005,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0009,
+       "ci": [
+        0.9923,
+        1.0094
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7871
+      },
+      "8-28": {
+       "ratio": 0.9997,
+       "ci": [
+        0.9912,
+        1.0061
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8036
+      }
+     },
+     "wis_all": 0.9999,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0226,
+       "ci": [
+        1.0112,
+        1.0348
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7953
+      },
+      "8-28": {
+       "ratio": 1.0138,
+       "ci": [
+        1.0033,
+        1.0222
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8352
+      }
+     },
+     "wis_all": 1.016,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0652,
+       "ci": [
+        1.0387,
+        1.0946
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8929
+      },
+      "8-28": {
+       "ratio": 1.059,
+       "ci": [
+        1.0314,
+        1.0954
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8915
+      }
+     },
+     "wis_all": 1.0605,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.006,
+       "ci": [
+        0.9981,
+        1.0133
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.842
+      },
+      "8-28": {
+       "ratio": 1.0043,
+       "ci": [
+        0.997,
+        1.0117
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8553
+      }
+     },
+     "wis_all": 1.0047,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.21,
+     0.25
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.5632,
+      "coverage_80": 0.8214,
+      "below_80": 0.0975,
+      "above_80": 0.081,
+      "wis": 5.9893
+     },
+     "rho_1": {
+      "coverage_50": 0.6909,
+      "coverage_80": 0.9025,
+      "below_80": 0.0632,
+      "above_80": 0.0343,
+      "wis": 6.451
+     },
+     "rho_0": {
+      "coverage_50": 0.4986,
+      "coverage_80": 0.7871,
+      "below_80": 0.1168,
+      "above_80": 0.0962,
+      "wis": 5.9936
+     },
+     "direct": {
+      "coverage_50": 0.5371,
+      "coverage_80": 0.8352,
+      "below_80": 0.0975,
+      "above_80": 0.0673,
+      "wis": 6.3982
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5137,
+      "coverage_80": 0.7871,
+      "below_80": 0.0975,
+      "above_80": 0.1154,
+      "wis": 9.0114
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.9284,
+      "ci": [
+       0.8893,
+       0.9612
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9993,
+      "ci": [
+       0.9905,
+       1.0104
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9361,
+      "ci": [
+       0.907,
+       0.9688
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.6646,
+      "ci": [
+       0.6015,
+       0.741
+      ],
+      "verdict": "beats"
+     }
+    },
+    "8-28": {
+     "paths": {
+      "coverage_50": 0.5513,
+      "coverage_80": 0.8031,
+      "below_80": 0.1172,
+      "above_80": 0.0797,
+      "wis": 8.9842
+     },
+     "rho_1": {
+      "coverage_50": 0.7564,
+      "coverage_80": 0.9597,
+      "below_80": 0.0348,
+      "above_80": 0.0055,
+      "wis": 10.1185
+     },
+     "rho_0": {
+      "coverage_50": 0.4844,
+      "coverage_80": 0.7358,
+      "below_80": 0.1529,
+      "above_80": 0.1113,
+      "wis": 8.9961
+     },
+     "direct": {
+      "coverage_50": 0.5504,
+      "coverage_80": 0.8082,
+      "below_80": 0.125,
+      "above_80": 0.0668,
+      "wis": 9.1503
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.4876,
+      "coverage_80": 0.8045,
+      "below_80": 0.092,
+      "above_80": 0.1035,
+      "wis": 11.8354
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.8879,
+      "ci": [
+       0.8457,
+       0.9249
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9987,
+      "ci": [
+       0.9896,
+       1.0106
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9818,
+      "ci": [
+       0.9587,
+       1.0097
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.7591,
+      "ci": [
+       0.6912,
+       0.831
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  },
+  "wiki_ww3_views": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-20",
+    "last": "2026-10-11"
+   },
+   "baselines": {
+    "registry": "naive",
+    "pick": "ets",
+    "mae": {
+     "naive": 4445.272,
+     "snaive7": 4204.7212,
+     "mean28": 4211.4988,
+     "ets": 4097.9483,
+     "timestral": 2313.743
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.9219,
+      "ci": [
+       0.8111,
+       1.0803
+      ],
+      "verdict": "ties"
+     },
+     "snaive7": {
+      "ratio": 0.9746,
+      "ci": [
+       0.7159,
+       1.1525
+      ],
+      "verdict": "ties"
+     },
+     "mean28": {
+      "ratio": 0.973,
+      "ci": [
+       0.4892,
+       1.3582
+      ],
+      "verdict": "ties"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 3446.7775,
+       "snaive7": 3756.7473,
+       "mean28": 3944.0418,
+       "ets": 3105.4416,
+       "timestral": 1998.9908
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.6437,
+       "ci": [
+        0.4149,
+        0.9135
+       ],
+       "verdict": "beats"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.58,
+       "ci": [
+        0.4086,
+        0.9545
+       ],
+       "verdict": "beats"
+      },
+      "wis": {
+       "timestral": 1661.1462,
+       "probabilistic_naive": 3259.3837,
+       "ets": 3762.6062
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.5097,
+       "ci": [
+        0.3652,
+        0.8782
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 1.1544,
+       "ci": [
+        0.9166,
+        2.8395
+       ],
+       "verdict": "ties"
+      }
+     },
+     "8-14": {
+      "mae": {
+       "naive": 5443.7665,
+       "snaive7": 4652.6951,
+       "mean28": 4478.9557,
+       "ets": 5090.4551,
+       "timestral": 2628.4952
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.5164,
+       "ci": [
+        0.3211,
+        0.8645
+       ],
+       "verdict": "beats"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.4828,
+       "ci": [
+        0.2982,
+        0.8862
+       ],
+       "verdict": "beats"
+      },
+      "wis": {
+       "timestral": 2370.49,
+       "probabilistic_naive": 5109.7056,
+       "ets": 5806.0128
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.4639,
+       "ci": [
+        0.2734,
+        0.8632
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 1.1363,
+       "ci": [
+        0.9422,
+        2.4513
+       ],
+       "verdict": "ties"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "snaive7",
+     "vs_registry": {
+      "ratio": 0.9459,
+      "ci": [
+       0.717,
+       1.4697
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 1.0261,
+      "ci": [
+       0.8677,
+       1.3968
+      ],
+      "verdict": "ties"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.4808,
+      "coverage_80": 0.772,
+      "below_80": 0.1387,
+      "above_80": 0.0893,
+      "wis": 1661.1462
+     },
+     "below": {
+      "offset_folds": [
+       0.0852,
+       0.109
+      ],
+      "offset_all": 0.0991,
+      "held_out": {
+       "coverage_50": 0.4945,
+       "coverage_80": 0.8159,
+       "below_80": 0.0948,
+       "above_80": 0.0893,
+       "wis": 1652.1627
+      },
+      "wis_ratio": {
+       "ratio": 0.9946,
+       "ci": [
+        0.9832,
+        1.0046
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       0.0604,
+       -0.1619
+      ],
+      "offset_all": -0.0485,
+      "held_out": {
+       "coverage_50": 0.4753,
+       "coverage_80": 0.7651,
+       "below_80": 0.1387,
+       "above_80": 0.0962,
+       "wis": 1653.4598
+      },
+      "wis_ratio": {
+       "ratio": 0.9954,
+       "ci": [
+        0.9774,
+        1.0112
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "8-14": {
+     "raw": {
+      "coverage_50": 0.4025,
+      "coverage_80": 0.7074,
+      "below_80": 0.1841,
+      "above_80": 0.1085,
+      "wis": 2370.49
+     },
+     "below": {
+      "offset_folds": [
+       0.2186,
+       0.2081
+      ],
+      "offset_all": 0.197,
+      "held_out": {
+       "coverage_50": 0.467,
+       "coverage_80": 0.7967,
+       "below_80": 0.0948,
+       "above_80": 0.1085,
+       "wis": 2361.974
+      },
+      "wis_ratio": {
+       "ratio": 0.9964,
+       "ci": [
+        0.9861,
+        1.0014
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       0.9449,
+       -0.026
+      ],
+      "offset_all": 0.3711,
+      "held_out": {
+       "coverage_50": 0.4588,
+       "coverage_80": 0.7225,
+       "below_80": 0.1841,
+       "above_80": 0.0934,
+       "wis": 2400.9579
+      },
+      "wis_ratio": {
+       "ratio": 1.0129,
+       "ci": [
+        0.9969,
+        1.0651
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "kept_together": {
+     "1-7": {
+      "coverage_50": 0.489,
+      "coverage_80": 0.8091,
+      "below_80": 0.0948,
+      "above_80": 0.0962,
+      "wis": 1644.4762,
+      "wis_ratio": {
+       "ratio": 0.99,
+       "ci": [
+        0.9611,
+        1.0132
+       ],
+       "verdict": "ties"
+      }
+     },
+     "8-14": {
+      "coverage_50": 0.5234,
+      "coverage_80": 0.8118,
+      "below_80": 0.0948,
+      "above_80": 0.0934,
+      "wis": 2392.4419,
+      "wis_ratio": {
+       "ratio": 1.0093,
+       "ci": [
+        0.9926,
+        1.0585
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9717,
+       "ci": [
+        0.8491,
+        1.0981
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8022
+      },
+      "8-14": {
+       "ratio": 1.0049,
+       "ci": [
+        0.9575,
+        1.0895
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.75
+      }
+     },
+     "wis_all": 0.9912,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9635,
+       "ci": [
+        0.8414,
+        1.0837
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7912
+      },
+      "8-14": {
+       "ratio": 1.0001,
+       "ci": [
+        0.9707,
+        1.0533
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7527
+      }
+     },
+     "wis_all": 0.9851,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0464,
+       "ci": [
+        1.0059,
+        1.0727
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.783
+      },
+      "8-14": {
+       "ratio": 1.0144,
+       "ci": [
+        1.0019,
+        1.0362
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7349
+      }
+     },
+     "wis_all": 1.0276,
+     "keep": false
+    },
+    "timestral_log1p": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.1231,
+       "ci": [
+        1.001,
+        1.244
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.772
+      },
+      "8-14": {
+       "ratio": 1.0249,
+       "ci": [
+        0.9944,
+        1.0672
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7019
+      }
+     },
+     "wis_all": 1.0654,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0101,
+       "ci": [
+        0.8627,
+        1.215
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7157
+      },
+      "8-14": {
+       "ratio": 1.0126,
+       "ci": [
+        0.9453,
+        1.0873
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.6456
+      }
+     },
+     "wis_all": 1.0116,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.006,
+       "ci": [
+        0.906,
+        1.1242
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7706
+      },
+      "8-14": {
+       "ratio": 0.9954,
+       "ci": [
+        0.943,
+        1.0245
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.794
+      }
+     },
+     "wis_all": 0.9998,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 2.2651,
+       "ci": [
+        1.7238,
+        4.2571
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.9588
+      },
+      "8-14": {
+       "ratio": 2.4493,
+       "ci": [
+        1.7105,
+        4.8488
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.9451
+      }
+     },
+     "wis_all": 2.3734,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.1576,
+       "ci": [
+        1.0673,
+        1.5962
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.9478
+      },
+      "8-14": {
+       "ratio": 1.2537,
+       "ci": [
+        1.1138,
+        1.7129
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.919
+      }
+     },
+     "wis_all": 1.2141,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.87,
+     0.84
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.5275,
+      "coverage_80": 0.8173,
+      "below_80": 0.1071,
+      "above_80": 0.0755,
+      "wis": 698.3427
+     },
+     "rho_1": {
+      "coverage_50": 0.5398,
+      "coverage_80": 0.8242,
+      "below_80": 0.0907,
+      "above_80": 0.0852,
+      "wis": 675.0325
+     },
+     "rho_0": {
+      "coverage_50": 0.3462,
+      "coverage_80": 0.6525,
+      "below_80": 0.2747,
+      "above_80": 0.0728,
+      "wis": 801.1825
+     },
+     "direct": {
+      "coverage_50": 0.4409,
+      "coverage_80": 0.7926,
+      "below_80": 0.1154,
+      "above_80": 0.092,
+      "wis": 684.8591
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5398,
+      "coverage_80": 0.8352,
+      "below_80": 0.0838,
+      "above_80": 0.081,
+      "wis": 1504.1302
+     },
+     "paths_vs_rho_1": {
+      "ratio": 1.0345,
+      "ci": [
+       0.9858,
+       1.0749
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.8716,
+      "ci": [
+       0.7675,
+       1.0665
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 1.0197,
+      "ci": [
+       0.77,
+       1.2561
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.4643,
+      "ci": [
+       0.2256,
+       0.8765
+      ],
+      "verdict": "beats"
+     }
+    },
+    "8-14": {
+     "paths": {
+      "coverage_50": 0.4272,
+      "coverage_80": 0.7349,
+      "below_80": 0.1607,
+      "above_80": 0.1044,
+      "wis": 2188.3701
+     },
+     "rho_1": {
+      "coverage_50": 0.478,
+      "coverage_80": 0.7582,
+      "below_80": 0.1195,
+      "above_80": 0.1223,
+      "wis": 2131.2464
+     },
+     "rho_0": {
+      "coverage_50": 0.2651,
+      "coverage_80": 0.456,
+      "below_80": 0.4396,
+      "above_80": 0.1044,
+      "wis": 2436.1202
+     },
+     "direct": {
+      "coverage_50": 0.419,
+      "coverage_80": 0.6758,
+      "below_80": 0.1923,
+      "above_80": 0.1319,
+      "wis": 2119.2525
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5536,
+      "coverage_80": 0.8242,
+      "below_80": 0.0865,
+      "above_80": 0.0893,
+      "wis": 3366.3638
+     },
+     "paths_vs_rho_1": {
+      "ratio": 1.0268,
+      "ci": [
+       1.0027,
+       1.0787
+      ],
+      "verdict": "loses"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.8983,
+      "ci": [
+       0.7834,
+       0.9661
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 1.0326,
+      "ci": [
+       0.9521,
+       1.1347
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.6501,
+      "ci": [
+       0.4082,
+       0.8422
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  },
+  "brent_spot": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-15",
+    "last": "2026-10-06"
+   },
+   "baselines": {
+    "registry": "naive",
+    "pick": "naive",
+    "mae": {
+     "naive": 4.9928,
+     "snaive7": 5.6065,
+     "mean28": 6.6489,
+     "ets": 5.1738,
+     "timestral": 5.0341
+    },
+    "pick_vs": {
+     "snaive7": {
+      "ratio": 0.8905,
+      "ci": [
+       0.8255,
+       0.9664
+      ],
+      "verdict": "beats"
+     },
+     "mean28": {
+      "ratio": 0.7509,
+      "ci": [
+       0.6593,
+       0.8871
+      ],
+      "verdict": "beats"
+     },
+     "ets": {
+      "ratio": 0.965,
+      "ci": [
+       0.9149,
+       1.0013
+      ],
+      "verdict": "ties"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 3.6542,
+       "snaive7": 4.6757,
+       "mean28": 5.6648,
+       "ets": 3.7477,
+       "timestral": 3.6847
+      },
+      "timestral_vs_pick": {
+       "ratio": 1.0084,
+       "ci": [
+        0.9925,
+        1.0286
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 1.0084,
+       "ci": [
+        0.9925,
+        1.0286
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 2.5535,
+       "probabilistic_naive": 2.6973,
+       "ets": 2.8595
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.9467,
+       "ci": [
+        0.8961,
+        1.0037
+       ],
+       "verdict": "ties"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 1.0601,
+       "ci": [
+        1.0203,
+        1.1035
+       ],
+       "verdict": "loses"
+      }
+     },
+     "8-14": {
+      "mae": {
+       "naive": 6.3314,
+       "snaive7": 6.5373,
+       "mean28": 7.6329,
+       "ets": 6.5999,
+       "timestral": 6.3835
+      },
+      "timestral_vs_pick": {
+       "ratio": 1.0082,
+       "ci": [
+        0.9852,
+        1.0326
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 1.0082,
+       "ci": [
+        0.9852,
+        1.0326
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 4.523,
+       "probabilistic_naive": 4.7319,
+       "ets": 5.0792
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.9559,
+       "ci": [
+        0.9135,
+        1.0111
+       ],
+       "verdict": "ties"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 1.0734,
+       "ci": [
+        1.0068,
+        1.164
+       ],
+       "verdict": "loses"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "naive",
+     "vs_registry": {
+      "ratio": 1.0,
+      "ci": [
+       1.0,
+       1.0
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 0.965,
+      "ci": [
+       0.9149,
+       1.0013
+      ],
+      "verdict": "ties"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.5,
+      "coverage_80": 0.8022,
+      "below_80": 0.0783,
+      "above_80": 0.1195,
+      "wis": 2.5535
+     },
+     "below": {
+      "offset_folds": [
+       -0.0211,
+       -0.1237
+      ],
+      "offset_all": -0.0798,
+      "held_out": {
+       "coverage_50": 0.4821,
+       "coverage_80": 0.7802,
+       "below_80": 0.1003,
+       "above_80": 0.1195,
+       "wis": 2.5554
+      },
+      "wis_ratio": {
+       "ratio": 1.0007,
+       "ci": [
+        0.9981,
+        1.0036
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       -0.0293,
+       0.2999
+      ],
+      "offset_all": 0.107,
+      "held_out": {
+       "coverage_50": 0.522,
+       "coverage_80": 0.8283,
+       "below_80": 0.0783,
+       "above_80": 0.0934,
+       "wis": 2.5686
+      },
+      "wis_ratio": {
+       "ratio": 1.0059,
+       "ci": [
+        1.0006,
+        1.0137
+       ],
+       "verdict": "loses"
+      },
+      "keep": false
+     }
+    },
+    "8-14": {
+     "raw": {
+      "coverage_50": 0.5426,
+      "coverage_80": 0.7747,
+      "below_80": 0.0879,
+      "above_80": 0.1374,
+      "wis": 4.523
+     },
+     "below": {
+      "offset_folds": [
+       0.085,
+       -0.2051
+      ],
+      "offset_all": -0.0545,
+      "held_out": {
+       "coverage_50": 0.522,
+       "coverage_80": 0.7541,
+       "below_80": 0.1085,
+       "above_80": 0.1374,
+       "wis": 4.5418
+      },
+      "wis_ratio": {
+       "ratio": 1.0042,
+       "ci": [
+        0.9966,
+        1.0134
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       -0.1231,
+       0.8364
+      ],
+      "offset_all": 0.3584,
+      "held_out": {
+       "coverage_50": 0.5646,
+       "coverage_80": 0.7871,
+       "below_80": 0.0879,
+       "above_80": 0.125,
+       "wis": 4.6706
+      },
+      "wis_ratio": {
+       "ratio": 1.0327,
+       "ci": [
+        1.0117,
+        1.0646
+       ],
+       "verdict": "loses"
+      },
+      "keep": false
+     }
+    },
+    "kept_together": {
+     "1-7": {
+      "coverage_50": 0.4821,
+      "coverage_80": 0.7802,
+      "below_80": 0.1003,
+      "above_80": 0.1195,
+      "wis": 2.5554,
+      "wis_ratio": {
+       "ratio": 1.0007,
+       "ci": [
+        0.9981,
+        1.0036
+       ],
+       "verdict": "ties"
+      }
+     },
+     "8-14": {
+      "coverage_50": 0.522,
+      "coverage_80": 0.7541,
+      "below_80": 0.1085,
+      "above_80": 0.1374,
+      "wis": 4.5418,
+      "wis_ratio": {
+       "ratio": 1.0042,
+       "ci": [
+        0.9966,
+        1.0134
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9974,
+       "ci": [
+        0.9849,
+        1.0076
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8269
+      },
+      "8-14": {
+       "ratio": 1.0118,
+       "ci": [
+        0.9958,
+        1.0266
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7802
+      }
+     },
+     "wis_all": 1.0066,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9939,
+       "ci": [
+        0.9794,
+        1.0073
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8214
+      },
+      "8-14": {
+       "ratio": 1.0089,
+       "ci": [
+        0.9891,
+        1.0293
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7788
+      }
+     },
+     "wis_all": 1.0035,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9974,
+       "ci": [
+        0.9893,
+        1.0044
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8159
+      },
+      "8-14": {
+       "ratio": 1.0011,
+       "ci": [
+        0.9908,
+        1.0102
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7734
+      }
+     },
+     "wis_all": 0.9998,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.05,
+       "ci": [
+        1.0134,
+        1.0822
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7074
+      },
+      "8-14": {
+       "ratio": 1.0558,
+       "ci": [
+        1.0203,
+        1.0927
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.717
+      }
+     },
+     "wis_all": 1.0537,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.007,
+       "ci": [
+        0.9863,
+        1.0295
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.831
+      },
+      "8-14": {
+       "ratio": 0.9937,
+       "ci": [
+        0.9652,
+        1.0194
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.772
+      }
+     },
+     "wis_all": 0.9985,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.1198,
+       "ci": [
+        1.0259,
+        1.2236
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7857
+      },
+      "8-14": {
+       "ratio": 1.123,
+       "ci": [
+        1.0154,
+        1.2593
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7486
+      }
+     },
+     "wis_all": 1.1218,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0209,
+       "ci": [
+        1.0017,
+        1.0403
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7926
+      },
+      "8-14": {
+       "ratio": 1.0228,
+       "ci": [
+        1.0001,
+        1.0486
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7679
+      }
+     },
+     "wis_all": 1.0221,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.91,
+     0.9
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.4863,
+      "coverage_80": 0.8297,
+      "below_80": 0.0646,
+      "above_80": 0.1058,
+      "wis": 1.4657
+     },
+     "rho_1": {
+      "coverage_50": 0.5082,
+      "coverage_80": 0.8379,
+      "below_80": 0.0591,
+      "above_80": 0.103,
+      "wis": 1.4674
+     },
+     "rho_0": {
+      "coverage_50": 0.3393,
+      "coverage_80": 0.581,
+      "below_80": 0.2225,
+      "above_80": 0.1964,
+      "wis": 1.5658
+     },
+     "direct": {
+      "coverage_50": 0.4931,
+      "coverage_80": 0.8187,
+      "below_80": 0.0632,
+      "above_80": 0.1181,
+      "wis": 1.5083
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.4272,
+      "coverage_80": 0.7047,
+      "below_80": 0.1291,
+      "above_80": 0.1662,
+      "wis": 2.0407
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.9988,
+      "ci": [
+       0.9937,
+       1.0029
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9361,
+      "ci": [
+       0.915,
+       0.9682
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9718,
+      "ci": [
+       0.9092,
+       1.0418
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.7182,
+      "ci": [
+       0.6282,
+       0.8315
+      ],
+      "verdict": "beats"
+     }
+    },
+    "8-14": {
+     "paths": {
+      "coverage_50": 0.5151,
+      "coverage_80": 0.7637,
+      "below_80": 0.0907,
+      "above_80": 0.1456,
+      "wis": 3.9277
+     },
+     "rho_1": {
+      "coverage_50": 0.5302,
+      "coverage_80": 0.7871,
+      "below_80": 0.0769,
+      "above_80": 0.136,
+      "wis": 3.93
+     },
+     "rho_0": {
+      "coverage_50": 0.2981,
+      "coverage_80": 0.5014,
+      "below_80": 0.2184,
+      "above_80": 0.2802,
+      "wis": 4.2895
+     },
+     "direct": {
+      "coverage_50": 0.5563,
+      "coverage_80": 0.7816,
+      "below_80": 0.0755,
+      "above_80": 0.1429,
+      "wis": 3.9284
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.4368,
+      "coverage_80": 0.7143,
+      "below_80": 0.1319,
+      "above_80": 0.1538,
+      "wis": 4.1337
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.9994,
+      "ci": [
+       0.9922,
+       1.0044
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.9157,
+      "ci": [
+       0.89,
+       0.955
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9998,
+      "ci": [
+       0.9589,
+       1.0508
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.9502,
+      "ci": [
+       0.8709,
+       1.065
+      ],
+      "verdict": "ties"
+     }
+    },
+    "keep": false
+   }
+  },
+  "ua_air_raid_hours": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-27",
+    "last": "2026-10-18"
+   },
+   "baselines": {
+    "registry": "mean28",
+    "pick": "ets",
+    "mae": {
+     "naive": 18.8913,
+     "snaive7": 18.7363,
+     "mean28": 13.8704,
+     "ets": 13.7566,
+     "timestral": 13.3431
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.7282,
+      "ci": [
+       0.6713,
+       0.7906
+      ],
+      "verdict": "beats"
+     },
+     "snaive7": {
+      "ratio": 0.7342,
+      "ci": [
+       0.6967,
+       0.776
+      ],
+      "verdict": "beats"
+     },
+     "mean28": {
+      "ratio": 0.9918,
+      "ci": [
+       0.9785,
+       1.0051
+      ],
+      "verdict": "ties"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 18.8913,
+       "snaive7": 18.7363,
+       "mean28": 13.8704,
+       "ets": 13.7566,
+       "timestral": 13.3431
+      },
+      "timestral_vs_pick": {
+       "ratio": 0.9699,
+       "ci": [
+        0.9395,
+        0.9974
+       ],
+       "verdict": "beats"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.962,
+       "ci": [
+        0.9271,
+        0.9946
+       ],
+       "verdict": "beats"
+      },
+      "wis": {
+       "timestral": 9.1462,
+       "probabilistic_naive": 13.1429,
+       "ets": 9.7627
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.6959,
+       "ci": [
+        0.6486,
+        0.748
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.7428,
+       "ci": [
+        0.6928,
+        0.7961
+       ],
+       "verdict": "beats"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "mean28",
+     "vs_registry": {
+      "ratio": 1.0,
+      "ci": [
+       1.0,
+       1.0
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 1.0083,
+      "ci": [
+       0.9949,
+       1.022
+      ],
+      "verdict": "ties"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.544,
+      "coverage_80": 0.8407,
+      "below_80": 0.0673,
+      "above_80": 0.092,
+      "wis": 9.1462
+     },
+     "below": {
+      "offset_folds": [
+       -0.0947,
+       -0.1941
+      ],
+      "offset_all": -0.1372,
+      "held_out": {
+       "coverage_50": 0.4835,
+       "coverage_80": 0.7967,
+       "below_80": 0.1113,
+       "above_80": 0.092,
+       "wis": 9.1569
+      },
+      "wis_ratio": {
+       "ratio": 1.0012,
+       "ci": [
+        0.9964,
+        1.0061
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       -0.0229,
+       0.0534
+      ],
+      "offset_all": -0.0186,
+      "held_out": {
+       "coverage_50": 0.5508,
+       "coverage_80": 0.8462,
+       "below_80": 0.0673,
+       "above_80": 0.0865,
+       "wis": 9.1601
+      },
+      "wis_ratio": {
+       "ratio": 1.0015,
+       "ci": [
+        1.0005,
+        1.0026
+       ],
+       "verdict": "loses"
+      },
+      "keep": false
+     }
+    },
+    "kept_together": {
+     "1-7": {
+      "coverage_50": 0.4835,
+      "coverage_80": 0.7967,
+      "below_80": 0.1113,
+      "above_80": 0.092,
+      "wis": 9.1569,
+      "wis_ratio": {
+       "ratio": 1.0012,
+       "ci": [
+        0.9964,
+        1.0061
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0034,
+       "ci": [
+        0.9962,
+        1.01
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8407
+      }
+     },
+     "wis_all": 1.0034,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0005,
+       "ci": [
+        0.9966,
+        1.0036
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8379
+      }
+     },
+     "wis_all": 1.0005,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0,
+       "ci": [
+        1.0,
+        1.0
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8407
+      }
+     },
+     "wis_all": 1.0,
+     "keep": false
+    },
+    "timestral_log1p": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.002,
+       "ci": [
+        0.9986,
+        1.0052
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8365
+      }
+     },
+     "wis_all": 1.002,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0054,
+       "ci": [
+        0.9946,
+        1.016
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.8338
+      }
+     },
+     "wis_all": 1.0054,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0049,
+       "ci": [
+        0.9968,
+        1.0137
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.842
+      }
+     },
+     "wis_all": 1.0049,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0674,
+       "ci": [
+        1.0381,
+        1.1
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.9217
+      }
+     },
+     "wis_all": 1.0674,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.007,
+       "ci": [
+        1.0,
+        1.0143
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.8668
+      }
+     },
+     "wis_all": 1.007,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.27,
+     0.05
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.5412,
+      "coverage_80": 0.8599,
+      "below_80": 0.0701,
+      "above_80": 0.0701,
+      "wis": 2.8351
+     },
+     "rho_1": {
+      "coverage_50": 0.7843,
+      "coverage_80": 0.9615,
+      "below_80": 0.0165,
+      "above_80": 0.022,
+      "wis": 3.2848
+     },
+     "rho_0": {
+      "coverage_50": 0.5,
+      "coverage_80": 0.8297,
+      "below_80": 0.0879,
+      "above_80": 0.0824,
+      "wis": 2.8253
+     },
+     "direct": {
+      "coverage_50": 0.5192,
+      "coverage_80": 0.8819,
+      "below_80": 0.0563,
+      "above_80": 0.0618,
+      "wis": 3.1327
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.5632,
+      "coverage_80": 0.8228,
+      "below_80": 0.0893,
+      "above_80": 0.0879,
+      "wis": 3.954
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.8631,
+      "ci": [
+       0.8256,
+       0.8995
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 1.0035,
+      "ci": [
+       0.9945,
+       1.0137
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.905,
+      "ci": [
+       0.8679,
+       0.9449
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.717,
+      "ci": [
+       0.6172,
+       0.8317
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  },
+  "ua_drones_downed_claimed": {
+   "origins": {
+    "n": 104,
+    "first": "2024-10-27",
+    "last": "2026-10-18"
+   },
+   "baselines": {
+    "registry": "mean28",
+    "pick": "ets",
+    "mae": {
+     "naive": 179.1873,
+     "snaive7": 192.1364,
+     "mean28": 157.3985,
+     "ets": 152.1551,
+     "timestral": 152.468
+    },
+    "pick_vs": {
+     "naive": {
+      "ratio": 0.8495,
+      "ci": [
+       0.766,
+       0.9473
+      ],
+      "verdict": "beats"
+     },
+     "snaive7": {
+      "ratio": 0.7918,
+      "ci": [
+       0.7237,
+       0.8625
+      ],
+      "verdict": "beats"
+     },
+     "mean28": {
+      "ratio": 0.9663,
+      "ci": [
+       0.8961,
+       1.0337
+      ],
+      "verdict": "ties"
+     }
+    },
+    "buckets": {
+     "1-7": {
+      "mae": {
+       "naive": 179.1873,
+       "snaive7": 192.1364,
+       "mean28": 157.3985,
+       "ets": 152.1551,
+       "timestral": 152.468
+      },
+      "timestral_vs_pick": {
+       "ratio": 1.0022,
+       "ci": [
+        0.9616,
+        1.0433
+       ],
+       "verdict": "ties"
+      },
+      "timestral_vs_registry": {
+       "ratio": 0.9684,
+       "ci": [
+        0.9087,
+        1.0324
+       ],
+       "verdict": "ties"
+      },
+      "wis": {
+       "timestral": 101.6173,
+       "probabilistic_naive": 133.368,
+       "ets": 119.5772
+      },
+      "wis_timestral_vs_probabilistic_naive": {
+       "ratio": 0.7624,
+       "ci": [
+        0.6983,
+        0.8325
+       ],
+       "verdict": "beats"
+      },
+      "wis_ets_vs_probabilistic_naive": {
+       "ratio": 0.8967,
+       "ci": [
+        0.7932,
+        1.0135
+       ],
+       "verdict": "ties"
+      }
+     }
+    },
+    "fallback": {
+     "pick": "mean28",
+     "vs_registry": {
+      "ratio": 1.0,
+      "ci": [
+       1.0,
+       1.0
+      ],
+      "verdict": "ties"
+     },
+     "vs_ets": {
+      "ratio": 1.0349,
+      "ci": [
+       0.9674,
+       1.1159
+      ],
+      "verdict": "ties"
+     }
+    }
+   },
+   "calibration": {
+    "1-7": {
+     "raw": {
+      "coverage_50": 0.4242,
+      "coverage_80": 0.7686,
+      "below_80": 0.1074,
+      "above_80": 0.124,
+      "wis": 101.6173
+     },
+     "below": {
+      "offset_folds": [
+       0.0491,
+       0.0578
+      ],
+      "offset_all": 0.0441,
+      "held_out": {
+       "coverage_50": 0.4353,
+       "coverage_80": 0.7824,
+       "below_80": 0.0937,
+       "above_80": 0.124,
+       "wis": 101.7263
+      },
+      "wis_ratio": {
+       "ratio": 1.0011,
+       "ci": [
+        0.9989,
+        1.0031
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     },
+     "above": {
+      "offset_folds": [
+       0.3076,
+       0.0262
+      ],
+      "offset_all": 0.1427,
+      "held_out": {
+       "coverage_50": 0.4656,
+       "coverage_80": 0.7934,
+       "below_80": 0.1074,
+       "above_80": 0.0992,
+       "wis": 101.774
+      },
+      "wis_ratio": {
+       "ratio": 1.0017,
+       "ci": [
+        0.9842,
+        1.0189
+       ],
+       "verdict": "ties"
+      },
+      "keep": true
+     }
+    },
+    "kept_together": {
+     "1-7": {
+      "coverage_50": 0.4766,
+      "coverage_80": 0.8072,
+      "below_80": 0.0937,
+      "above_80": 0.0992,
+      "wis": 101.883,
+      "wis_ratio": {
+       "ratio": 1.0028,
+       "ci": [
+        0.9864,
+        1.0194
+       ],
+       "verdict": "ties"
+      }
+     }
+    }
+   },
+   "candidates": {
+    "timestral_ctx512": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.9988,
+       "ci": [
+        0.989,
+        1.0089
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7713
+      }
+     },
+     "wis_all": 0.999,
+     "keep": false
+    },
+    "timestral_ctx1024": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0001,
+       "ci": [
+        0.9929,
+        1.0072
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7658
+      }
+     },
+     "wis_all": 1.0001,
+     "keep": false
+    },
+    "timestral_ctx2048": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0,
+       "ci": [
+        1.0,
+        1.0
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7686
+      }
+     },
+     "wis_all": 1.0,
+     "keep": false
+    },
+    "timestral_log1p": {
+     "buckets": {
+      "1-7": {
+       "ratio": 0.995,
+       "ci": [
+        0.9741,
+        1.015
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7934
+      }
+     },
+     "wis_all": 0.995,
+     "keep": false
+    },
+    "chronos2": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0099,
+       "ci": [
+        0.9837,
+        1.0347
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.7493
+      }
+     },
+     "wis_all": 1.0101,
+     "keep": null
+    },
+    "timesfm25": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0554,
+       "ci": [
+        1.0134,
+        1.0953
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.7479
+      }
+     },
+     "wis_all": 1.0556,
+     "keep": null
+    },
+    "ets": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.1761,
+       "ci": [
+        1.0642,
+        1.2753
+       ],
+       "verdict": "loses",
+       "coverage_80": 0.3953
+      }
+     },
+     "wis_all": 1.1767,
+     "keep": null
+    },
+    "ensemble": {
+     "buckets": {
+      "1-7": {
+       "ratio": 1.0183,
+       "ci": [
+        0.9904,
+        1.045
+       ],
+       "verdict": "ties",
+       "coverage_80": 0.6777
+      }
+     },
+     "wis_all": 1.0184,
+     "keep": false
+    },
+    "context_pick": null
+   },
+   "seven_day": {
+    "rho_folds": [
+     0.57,
+     0.34
+    ],
+    "1-7": {
+     "paths": {
+      "coverage_50": 0.4444,
+      "coverage_80": 0.7472,
+      "below_80": 0.0972,
+      "above_80": 0.1556,
+      "wis": 39.4286
+     },
+     "rho_1": {
+      "coverage_50": 0.5806,
+      "coverage_80": 0.8681,
+      "below_80": 0.0583,
+      "above_80": 0.0736,
+      "wis": 41.374
+     },
+     "rho_0": {
+      "coverage_50": 0.3514,
+      "coverage_80": 0.6264,
+      "below_80": 0.1417,
+      "above_80": 0.2319,
+      "wis": 40.4827
+     },
+     "direct": {
+      "coverage_50": 0.4236,
+      "coverage_80": 0.7458,
+      "below_80": 0.0958,
+      "above_80": 0.1583,
+      "wis": 40.7651
+     },
+     "probabilistic_naive": {
+      "coverage_50": 0.2667,
+      "coverage_80": 0.5236,
+      "below_80": 0.1958,
+      "above_80": 0.2806,
+      "wis": 46.9139
+     },
+     "paths_vs_rho_1": {
+      "ratio": 0.9528,
+      "ci": [
+       0.9116,
+       0.9923
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_rho_0": {
+      "ratio": 0.974,
+      "ci": [
+       0.9603,
+       0.9906
+      ],
+      "verdict": "beats"
+     },
+     "paths_vs_direct": {
+      "ratio": 0.9673,
+      "ci": [
+       0.8843,
+       1.0579
+      ],
+      "verdict": "ties"
+     },
+     "paths_vs_probabilistic_naive": {
+      "ratio": 0.8407,
+      "ci": [
+       0.7348,
+       0.9749
+      ],
+      "verdict": "beats"
+     }
+    },
+    "keep": true
+   }
+  }
+ },
+ "runtime_s": {
+  "gpr_daily": {
+   "timestral": 1027,
+   "timestral_ctx512": 209,
+   "timestral_ctx1024": 220,
+   "timestral_ctx2048": 675,
+   "timestral_smooth": 1790,
+   "chronos2": 301,
+   "timesfm25": 305,
+   "ets": 428
+  },
+  "suez_transits": {
+   "timestral": 217,
+   "timestral_ctx512": 89,
+   "timestral_ctx1024": 115,
+   "timestral_ctx2048": 156,
+   "timestral_smooth": 101,
+   "chronos2": 42,
+   "timesfm25": 144,
+   "ets": 235
+  },
+  "hormuz_transits": {
+   "timestral": 124,
+   "timestral_ctx512": 26,
+   "timestral_ctx1024": 42,
+   "timestral_ctx2048": 94,
+   "timestral_log1p": 119,
+   "timestral_smooth": 99,
+   "chronos2": 41,
+   "timesfm25": 141,
+   "ets": 273
+  },
+  "bab_el_mandeb_transits": {
+   "timestral": 109,
+   "timestral_ctx512": 50,
+   "timestral_ctx1024": 58,
+   "timestral_ctx2048": 89,
+   "timestral_smooth": 97,
+   "chronos2": 41,
+   "timesfm25": 171,
+   "ets": 304
+  },
+  "taiwan_strait_transits": {
+   "timestral": 101,
+   "timestral_ctx512": 40,
+   "timestral_ctx1024": 60,
+   "timestral_ctx2048": 100,
+   "timestral_smooth": 97,
+   "chronos2": 41,
+   "timesfm25": 150,
+   "ets": 130
+  },
+  "wiki_ww3_views": {
+   "timestral": 142,
+   "timestral_ctx512": 44,
+   "timestral_ctx1024": 56,
+   "timestral_ctx2048": 89,
+   "timestral_log1p": 190,
+   "timestral_smooth": 134,
+   "chronos2": 62,
+   "timesfm25": 143,
+   "ets": 45
+  },
+  "brent_spot": {
+   "timestral": 303,
+   "timestral_ctx512": 37,
+   "timestral_ctx1024": 50,
+   "timestral_ctx2048": 83,
+   "timestral_smooth": 251,
+   "chronos2": 92,
+   "timesfm25": 100,
+   "ets": 126
+  },
+  "ua_air_raid_hours": {
+   "timestral": 62,
+   "timestral_ctx512": 31,
+   "timestral_ctx1024": 45,
+   "timestral_ctx2048": 0,
+   "timestral_log1p": 60,
+   "timestral_smooth": 43,
+   "chronos2": 17,
+   "timesfm25": 101,
+   "ets": 189
+  },
+  "ua_drones_downed_claimed": {
+   "timestral": 59,
+   "timestral_ctx512": 32,
+   "timestral_ctx1024": 43,
+   "timestral_ctx2048": 0,
+   "timestral_log1p": 59,
+   "timestral_smooth": 42,
+   "chronos2": 17,
+   "timesfm25": 101,
+   "ets": 42
+  },
+  "total_model": 11541,
+  "evaluate": 62
+ }
+}
