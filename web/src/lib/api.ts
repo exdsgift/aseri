@@ -1,4 +1,4 @@
-import { chanceAbove } from "@/lib/paths"
+import { chances } from "@/lib/paths"
 
 // Only the fields the page reads from the published API.
 export type CatalogEntry = {
@@ -55,11 +55,12 @@ export type Today = {
   // The day the data was read from its source, which may revise it later.
   asOf: string
   targetDate: string
-  // The target day's range, its middle half, and the chance it lands above `referenceValue`.
+  // The target day's range, its middle half, and the chances it lands strictly above and
+  // below `referenceValue`.
   low: number
   high: number
   middleHalf: [number, number]
-  chanceAbove: number
+  chances: { above: number; below: number }
 }
 
 export type Forecast = {
@@ -282,11 +283,7 @@ export async function loadSeries(
         latest.quantiles["0.25"][step],
         latest.quantiles["0.75"][step],
       ],
-      chanceAbove: chanceAbove(
-        latest.quantiles,
-        step,
-        actuals.observation[reference]
-      ),
+      chances: chances(latest.quantiles, step, actuals.observation[reference]),
     },
     forecasts: [
       ...past.map((f) =>

@@ -84,12 +84,12 @@ export function Hero({
                 </span>
               </p>
               {/* One day against the same weekday, never against the average above: the direction
-                  reads off the chance that day lands above the last one. The range carries its
-                  "8 in 10" here, the one headline that defines it in words. */}
+                  reads off the chances that day lands above or below the last one. The range
+                  carries its "8 in 10" here, the one headline that defines it in words. */}
               <p>
                 {monthDay(today.targetDate)}:{" "}
                 {likely(...outward(today.low, today.high))} (8 in 10),{" "}
-                {direction(today.chanceAbove)}
+                {direction(today.chances)}
               </p>
               <RangeBar today={today} />
               <Disclosure label="About this data">
@@ -148,17 +148,19 @@ function RangeBar({ today }: { today: Today }) {
           : "-50%",
   })
   const said = `Last ${weekday(today.referenceDate)} ${formatValue(referenceValue)}`
+  // The band at the model's values, its ends labelled as the sentence above says them.
+  const rounded = outward(low, high)
   // The ends' labels, each 4 px inside its edge, need their widths and a gap between them on the
   // bar's 320 px. shortcut: reads the bar at its full 320 px; measure it if a phone under 352 px
   // ever shows the two labels touching.
-  const ends = [formatValue(low), formatValue(high)]
+  const ends = rounded.map(formatValue)
   const apart =
     ((scale.at(high) - scale.at(low)) / 100) * 320 >=
     textWidth(ends[0]) + textWidth(ends[1]) + 16
   return (
     <div
       role="img"
-      aria-label={`${monthDay(today.targetDate)}: ${likely(low, high)}, normal ${formatValue(baseline)}, ${said}`}
+      aria-label={`${monthDay(today.targetDate)}: ${likely(...rounded)}, normal ${formatValue(baseline)}, ${said}`}
       className="relative h-[68px] w-full max-w-[320px] text-[8px]/[12px] whitespace-nowrap"
     >
       <span className="absolute top-0 text-primary" style={on(referenceValue)}>
@@ -197,7 +199,7 @@ function RangeBar({ today }: { today: Today }) {
       ) : (
         // Too narrow for two: once, centred under the range.
         <span className="absolute top-[42px]" style={on((low + high) / 2)}>
-          {valueRange(low, high)}
+          {valueRange(...rounded)}
         </span>
       )}
       <span className="absolute top-14 text-secondary" style={on(baseline)}>

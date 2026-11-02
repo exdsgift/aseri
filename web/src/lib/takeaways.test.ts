@@ -9,12 +9,26 @@ import {
 } from "./takeaways"
 
 describe("direction", () => {
-  it("calls a day likely higher or lower only past 65 in 100 either way", () => {
-    expect(direction(0.66)).toBe("likely higher than now")
-    expect(direction(0.65)).toBe("about where it is now")
-    expect(direction(0.5)).toBe("about where it is now")
-    expect(direction(0.35)).toBe("about where it is now")
-    expect(direction(0.34)).toBe("likely lower than now")
+  it("calls a day likely higher or lower from 65 in 100 that way", () => {
+    expect(direction({ above: 0.65, below: 0.35 })).toBe(
+      "likely higher than now"
+    )
+    expect(direction({ above: 0.64, below: 0.36 })).toBe(
+      "about where it is now"
+    )
+    expect(direction({ above: 0.5, below: 0.5 })).toBe("about where it is now")
+    expect(direction({ above: 0.36, below: 0.64 })).toBe(
+      "about where it is now"
+    )
+    expect(direction({ above: 0.35, below: 0.65 })).toBe(
+      "likely lower than now"
+    )
+  })
+
+  // Half the days the same as now and half higher is no lean, though it is never lower.
+  it("leans no way while a tie with now holds the rest", () => {
+    expect(direction({ above: 0.5, below: 0 })).toBe("about where it is now")
+    expect(direction({ above: 0, below: 0 })).toBe("about where it is now")
   })
 })
 

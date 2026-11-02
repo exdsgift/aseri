@@ -79,10 +79,11 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
   ])
   // The range bar: the range, a tick for normal and a marker on last Monday.
   const bar = hero.getByRole("img", { name: /^Nov 23:/ })
+  // Its ends as the sentence rounds them.
   expect(bar.getAttribute("aria-label")).toBe(
-    "Nov 23: likely 111-251, normal 100, Last Monday 165"
+    "Nov 23: likely 110-260, normal 100, Last Monday 165"
   )
-  expect(bar.textContent).toBe("Last Monday 165111251normal 100")
+  expect(bar.textContent).toBe("Last Monday 165110260normal 100")
   // The rest of the data's story, one tap away.
   const about = hero.getByRole("button", { name: "About this data" })
   expect(about.getAttribute("aria-expanded")).toBe("false")

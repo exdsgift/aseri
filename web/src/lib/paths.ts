@@ -50,10 +50,10 @@ function quantileAt(
 const sortedLevels = (quantiles: Record<string, number[]>) =>
   Object.keys(quantiles).sort((a, b) => Number(a) - Number(b))
 
-// The chance that day `day` lands above `value`, read off the same straight lines between
-// the published levels. A count's forecast puts whole levels on one value: a tie counts half
-// above and half below, as the PIT does, so 1 - (P(X < v) + P(X <= v)) / 2.
-export function chanceAbove(
+// The chances that day `day` lands strictly above and strictly below `value`, read off the same
+// straight lines between the published levels. A count's forecast puts whole levels on one
+// value: a tie with `value` is neither, so the two add up to 1 only where there is none.
+export function chances(
   quantiles: Record<string, number[]>,
   day: number,
   value: number
@@ -69,7 +69,10 @@ export function chanceAbove(
     }
     return (low + high) / 2
   }
-  return 1 - (share((q) => q < value) + share((q) => q <= value)) / 2
+  return {
+    above: 1 - share((q) => q <= value),
+    below: share((q) => q < value),
+  }
 }
 
 // One possible path of the days ahead, after the last daily value it starts from. Day h is

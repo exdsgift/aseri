@@ -3,13 +3,20 @@ import { awayFromNormal } from "@/lib/format"
 // The words each block leads with, computed from the data every day: its takeaway first,
 // so a reader who reads only the first words still gets it (the study's change 3).
 
-// Which way the target day leans against today's like-for-like value, from the chance that it
-// lands above it. Past 65 in 100 either way is a lean; the thresholds are the study's design
-// choice, not a sourced rule.
-export const direction = (chanceAbove: number) =>
-  chanceAbove > 0.65
+// Which way the target day leans against today's like-for-like value, from the chances that it
+// lands strictly above or below it. From 65 in 100 that way is a lean; a tie with now leans
+// neither way, so half the days the same and half higher is no lean. The threshold is the
+// study's design choice, not a sourced rule.
+export const direction = ({
+  above,
+  below,
+}: {
+  above: number
+  below: number
+}) =>
+  above >= 0.65
     ? "likely higher than now"
-    : chanceAbove < 0.35
+    : below >= 0.65
       ? "likely lower than now"
       : "about where it is now"
 

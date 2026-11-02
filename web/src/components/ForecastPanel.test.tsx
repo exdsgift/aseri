@@ -110,7 +110,7 @@ it("titles today's forecast with its takeaway, the series and its unit under it"
 
 // The hero's chance, worked out once as the series loads.
 it("leans today's title the way the series' chance above the last value says", () => {
-  gpr.today.chanceAbove = 0.9
+  gpr.today.chances = { above: 0.9, below: 0.1 }
   render(<ForecastPanel series={gpr} />)
   expect(title()).toBe("Likely 110-260 by Nov 23, likely higher than now")
 })

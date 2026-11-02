@@ -19,7 +19,7 @@ const today: Today = {
   low: 111,
   high: 251,
   middleHalf: [136, 207],
-  chanceAbove: 0.55,
+  chances: { above: 0.55, below: 0.45 },
 }
 
 // The page reads the one list jsdom's stand-in gives for the query (see test-setup.ts).
@@ -440,11 +440,13 @@ describe("signal, at 4 times the baseline on a phone", () => {
 describe("the range bar", () => {
   const bar = () => screen.getByRole("img", { name: /^Nov 23:/ })
 
-  it("labels each end of the range under it, and puts the marker's arrow on its value", () => {
+  it("labels each end of the range under it as the sentence above rounds it, and puts the marker's arrow on its value", () => {
     render(<Hero hero="messenger" today={today} failed={false} />)
 
-    expect(within(bar()).getByText("111")).toBeTruthy()
-    expect(within(bar()).getByText("251")).toBeTruthy()
+    // The model's 111-251, said "likely 110-260" just above.
+    expect(within(bar()).getByText("110")).toBeTruthy()
+    expect(within(bar()).getByText("260")).toBeTruthy()
+    expect(bar().getAttribute("aria-label")).toMatch(/^Nov 23: likely 110-260,/)
     // Centred on the value, with no room kept after it for words.
     const arrow = bar().querySelector("svg")!
     expect(arrow.getAttribute("class")).not.toMatch(/\bm[rl]-/)

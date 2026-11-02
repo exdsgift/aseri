@@ -80,7 +80,7 @@ export function ForecastPanel({
             day, worked out as the series loaded; in a replay, what that forecast said. */}
         <h2 id={title} className="text-[12px]/[18px] text-primary">
           {live
-            ? `Likely ${range} by ${target}, ${direction(today.chanceAbove)}`
+            ? `Likely ${range} by ${target}, ${direction(today.chances)}`
             : `${forecast.backtest ? "Backtest" : "Forecast"} made ${made}: likely ${range} by ${target}`}
         </h2>
         <p className="text-secondary">
