@@ -23,6 +23,9 @@ PACKAGE_COMMIT = _installed.get("vcs_info", {}).get("commit_id", "unknown")
 # Known measurement errors, by series and day: blank in the model's context, never in the actuals or the scores.
 # Version-controlled, so a run's code commit pins the register its contexts were built with.
 ANOMALIES = pd.read_csv(Path(__file__).with_name("anomalies.csv"), parse_dates=["date"])
+# The calibration layer, by series, bucket of steps and side of the median: the sides ADR 0001's rule 2 keeps,
+# fitted on its two-year backtest and refitted on all origins. Version-controlled like the anomalies; a change is a new MODEL_ID.
+OFFSETS = pd.read_csv(Path(__file__).with_name("offsets.csv"))
 # The range each kind of series keeps its quantiles in; 600 alert hours is 25 regions times 24 h.
 BOUNDS = {
     "index": (-math.inf, math.inf),
@@ -75,8 +78,14 @@ def under_review(series: Series, vintage: pd.Series) -> bool:
     return bool(reach > 0 and (last < q1 - reach or last > q3 + reach))
 
 
-def forecast(model, observed: pd.Series, horizon: int, kind: str = "index") -> Forecast:
-    """Quantile forecast of the `horizon` days after the last observation, from the whole history, inside the range of its `kind`."""
+def forecast(
+    model,
+    observed: pd.Series,
+    horizon: int,
+    kind: str = "index",
+    series_id: str | None = None,
+) -> Forecast:
+    """Quantile forecast of the `horizon` days after the last observation, from the whole history, calibrated by the offsets of `series_id`, inside the range of its `kind`."""
     result = model.forecast(observed.to_numpy(), prediction_length=horizon)
     quantiles = result.quantiles[0, 0].numpy()
     if not np.isfinite(quantiles).all():
@@ -86,8 +95,30 @@ def forecast(model, observed: pd.Series, horizon: int, kind: str = "index") -> F
         levels=tuple(result.quantile_levels),
         # The API promises non-decreasing quantiles: sorted after any offset, then clipped, which keeps
         # the order. Both are no-ops unless the model ever crosses them or leaves the range.
-        quantiles=np.clip(np.sort(quantiles, axis=1), *BOUNDS[kind]),
+        quantiles=np.clip(
+            np.sort(calibrate(quantiles, result.quantile_levels, series_id), axis=1),
+            *BOUNDS[kind],
+        ),
     )
+
+
+def calibrate(quantiles: np.ndarray, levels, series_id: str | None) -> np.ndarray:
+    """`quantiles` with each side's offset d of `series_id` applied to its bucket of steps (ADR 0001, rule 2).
+
+    d scales every quantile's distance to the median on its side by 1 + d: q + d(q - m) is
+    m - (1 + d)(m - q) below and m + (1 + d)(q - m) above. The median stays, and so does the order.
+    """
+    levels = np.asarray(levels)
+    offset = np.zeros(quantiles.shape)
+    for _, bucket, side, d in OFFSETS[OFFSETS["series_id"] == series_id].itertuples(
+        index=False
+    ):
+        first, last = map(int, bucket.split("-"))
+        offset[first - 1 : last, levels < 0.5 if side == "below" else levels > 0.5] = d
+    if not offset.any():
+        return quantiles
+    median = quantiles[:, np.isclose(levels, 0.5)]
+    return quantiles + offset * (quantiles - median)
 
 
 def load_model() -> TimestralForecaster:
