@@ -178,19 +178,45 @@ def shown(
 ) -> tuple[str, pd.DataFrame]:
     """The model whose record `series` shows on `today`, and its rows as `scored` gives them.
 
-    The model in the code's, from its first scored target on. Until then, after a MODEL_ID change,
-    the newest model before it with a scored target, so a rerun on the day of the change, which
-    archives nothing, never blanks the record. One model's alone either way.
+    The model in the code's, once its record has something the page can show. Until then, after a
+    MODEL_ID change, the newest model before it, by its last run, with such a forecast due. For GPR,
+    whose days are scored 35 days late, that lasts weeks. Each record is one model's alone, and only
+    the model in the code and the one chosen are scored.
     """
+    today = pd.Timestamp(today)
     rows = scored(series, archived, vintages, today)
-    if rows.empty:
-        newest_first = sorted(archived, key=lambda a: a.forecast_date, reverse=True)
-        before = (a.model_id for a in newest_first if a.model_id != archive.MODEL_ID)
-        for model_id in dict.fromkeys(before):
-            earlier = scored(series, archived, vintages, today, model_id=model_id)
-            if not earlier.empty:
-                return model_id, earlier
+    if _shows(rows):
+        return archive.MODEL_ID, rows
+    runs = sorted(archived, key=lambda a: a.provenance["generated_at"], reverse=True)
+    before = dict.fromkeys(a.model_id for a in runs if a.model_id != archive.MODEL_ID)
+    chosen = next(
+        (m for m in before if _due(series, archive.this_model(archived, m), today)),
+        None,
+    )
+    if chosen:
+        earlier = scored(series, archived, vintages, today, model_id=chosen)
+        if _shows(earlier):
+            return chosen, earlier
     return archive.MODEL_ID, rows
+
+
+def _shows(rows: pd.DataFrame) -> bool:
+    """Whether a record of `rows` has something the page shows: a forecast scored 7 steps ahead.
+
+    That step completes its 1-7 bucket and is the step of the record's squares; every horizon is 7 or more.
+    """
+    return bool((rows["horizon"] == SQUARE_HORIZON).any())
+
+
+def _due(series: Series, archived: list[Archived], today: pd.Timestamp) -> bool:
+    """Whether a forecast of `archived` has its 7th step due by `today`, without scoring it."""
+    return any(
+        scoreable_on(
+            pd.Timestamp(a.target_end_dates[SQUARE_HORIZON - 1]), series.score_lag
+        )
+        <= today
+        for a in archived
+    )
 
 
 def summary(
@@ -207,8 +233,8 @@ def summary(
     live = _mode(series, rows, "live")
     return {
         "series_id": series.id,
-        # Additive to v1: the model whose forecasts this record scores, which is the files' own model_id
-        # but on the day of a model change, before the new one has a scored target (`shown`).
+        # Additive to v1: the model whose forecasts this record scores. It is the file's own model_id,
+        # except after a model change, until the new model has a record the page can show (`shown`).
         "scored_model_id": model_id or archive.MODEL_ID,
         # The live forecasts resolved 7 days ahead: the page shows the live scores from MIN_N.
         "n": live["n"],

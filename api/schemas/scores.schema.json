@@ -42,7 +42,7 @@
   },
   "$defs": {
     "scored_model_id": {
-      "description": "Additive to v1: the model whose forecasts this record scores, one model only. It is the file's own model_id, but after a model change, until the new model has a scored target, when the record is the newest earlier model's.",
+      "description": "Additive to v1: the model whose forecasts this record scores, one model only. It is the file's own model_id, except after a model change: until the new model has a forecast scored 7 steps ahead, which takes weeks for a series scored late such as GPR, the record is the newest earlier model's.",
       "$ref": "defs.schema.json#/$defs/model_id"
     },
     "n": {"description": "The live forecasts resolved 7 steps ahead: the page shows the live scores from min_n_to_display.", "type": "integer", "minimum": 0},

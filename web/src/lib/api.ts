@@ -147,8 +147,8 @@ type Scored = {
   weekly: { reference_date: string; inside_80: boolean }[]
 }
 // One series' track record: `n` live forecasts resolved 7 days ahead, shown from
-// `min_n_to_display`; its errors compare with `primary_baseline`. `earlier` when it scores a
-// model before the current one, as on the day of a model change, until the new one has its own.
+// `min_n_to_display`; its errors compare with `primary_baseline`. `scored_model_id` is the model
+// it scores, absent in a file from before the label, which scores the file's own.
 export type ScoreRecord = {
   series_id: string
   scored_model_id?: string
@@ -157,22 +157,11 @@ export type ScoreRecord = {
   primary_baseline: string
   live: Scored
   retrospective: Scored
-  earlier?: boolean
 }
 
-export async function loadScores() {
-  const { model_id, series } = await read<{
-    model_id: string
-    series: ScoreRecord[]
-  }>("scores.json")
-  // A file from before the label scores its own model.
-  return {
-    series: series.map((record) => ({
-      ...record,
-      earlier: (record.scored_model_id ?? model_id) !== model_id,
-    })),
-  }
-}
+// `model_id` is the model in the code: a record whose `scored_model_id` differs scores the one before.
+export const loadScores = () =>
+  read<{ model_id: string; series: ScoreRecord[] }>("scores.json")
 
 // A series' forecast and daily values, and the replay's past forecasts when asked for:
 // a card needs only today's.

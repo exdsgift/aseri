@@ -16,12 +16,16 @@ const replayFrom = (entry: CatalogEntry) =>
 
 // How past forecasts did, its verdict first: the squares of every series, counted in the title,
 // and how they are scored one tap away. Backtest and live never add up in one figure: the title
-// counts the live series once any has its record, the backtests while none has.
+// counts the live series once any has its record, the backtests while none has. Nor do two models:
+// `model` is the one in the code, and a record of the model before it is counted only when every
+// series shows one.
 export function TrackRecord({
+  model,
   records,
   entries,
   onOpen,
 }: {
+  model: string
   records: ScoreRecord[]
   entries: CatalogEntry[]
   onOpen: (seriesId: string, referenceDate: string) => void
@@ -32,12 +36,18 @@ export function TrackRecord({
     const entry = entries.find((e) => e.series_id === record.series_id)
     return entry ? [{ record, entry }] : []
   })
-  const live = shown.filter(({ record }) => isLive(record))
-  const collecting = shown.filter(({ record }) => !isLive(record))
-  // The day of a model change, before the new one has a scored forecast.
-  const earlier = shown.filter(({ record }) => record.earlier)
-  const counted = live.length ? live : shown
-  const squares = counted.flatMap(({ record }) =>
+  // After a model change, until the new model has a record to show: a file from before the label
+  // scores its own model.
+  const isEarlier = (record: ScoreRecord) =>
+    (record.scored_model_id ?? model) !== model
+  const earlier = shown.filter(({ record }) => isEarlier(record))
+  const counted =
+    earlier.length === shown.length
+      ? shown
+      : shown.filter(({ record }) => !isEarlier(record))
+  const live = counted.filter(({ record }) => isLive(record))
+  const collecting = counted.filter(({ record }) => !isLive(record))
+  const squares = (live.length ? live : counted).flatMap(({ record }) =>
     scoredOf(record).weekly.map((week) => week.inside_80)
   )
 
@@ -70,7 +80,9 @@ export function TrackRecord({
       )}
       {earlier.length > 0 && (
         <p className="text-secondary">
-          Scores of the previous model until the new one has its own.
+          {earlier.length === shown.length
+            ? "Scores of the previous model until the new one has its own."
+            : "Counts the new model only. Cards marked previous model show the old one's scores."}
         </p>
       )}
       {/* The key, once, with how many should miss: 8 of 8 is no triumph, 6 of 8 no failure. */}
@@ -96,15 +108,20 @@ export function TrackRecord({
               {/* A backtest beside live records says so, and the previous model's beside the new one's. */}
               {live.length > 0 && !isLive(record) && ", backtest"}
               {earlier.length < shown.length &&
-                record.earlier &&
+                isEarlier(record) &&
                 ", previous model"}
             </h3>
+            {/* The replay shows the model in the code: a square of the model before opens nothing. */}
             <RecordSquares
               name={entry.title}
               weekly={scoredOf(record).weekly}
               horizonUnit={entry.horizon_unit}
               replayFrom={replayFrom(entry)}
-              onOpen={(date) => onOpen(record.series_id, date)}
+              onOpen={
+                isEarlier(record)
+                  ? undefined
+                  : (date) => onOpen(record.series_id, date)
+              }
             />
             {/* While it collects, the live forecasts already resolved, after the backtest's. */}
             {!isLive(record) && (
@@ -114,7 +131,11 @@ export function TrackRecord({
                 weekly={record.live.weekly}
                 horizonUnit={entry.horizon_unit}
                 replayFrom={replayFrom(entry)}
-                onOpen={(date) => onOpen(record.series_id, date)}
+                onOpen={
+                  isEarlier(record)
+                    ? undefined
+                    : (date) => onOpen(record.series_id, date)
+                }
               />
             )}
           </li>

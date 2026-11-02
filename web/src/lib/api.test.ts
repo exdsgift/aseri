@@ -5,7 +5,7 @@ import actuals from "@/fixtures/series/ua_drones_downed_claimed/actuals.json"
 import latest from "@/fixtures/series/ua_drones_downed_claimed/latest.json"
 import replay from "@/fixtures/series/ua_drones_downed_claimed/replay.json"
 
-import { daysAfter, loadScores, loadSeries, type CatalogEntry } from "./api"
+import { daysAfter, loadSeries, type CatalogEntry } from "./api"
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -79,25 +79,4 @@ it("shows one forecast a day: where the replay's newest day disagrees with lates
     latest.quantiles["0.1"].at(-1),
     latest.quantiles["0.9"].at(-1),
   ])
-})
-
-it("marks a record that scores an earlier model than the scores' own, and only that one", async () => {
-  const [suez, hormuz, drones] = ["suez", "hormuz", "drones"].map((id) => ({
-    series_id: id,
-  }))
-  vi.stubGlobal("fetch", async () =>
-    Response.json({
-      model_id: "aseri-timestral209m_c1",
-      series: [
-        { ...suez, scored_model_id: "aseri-timestral209m" },
-        { ...hormuz, scored_model_id: "aseri-timestral209m_c1" },
-        // A file from before the label: its own model's.
-        drones,
-      ],
-    })
-  )
-
-  const { series } = await loadScores()
-
-  expect(series.map((record) => record.earlier)).toEqual([true, false, false])
 })

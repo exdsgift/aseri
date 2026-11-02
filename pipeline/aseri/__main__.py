@@ -258,7 +258,12 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 ),
                 model_id,
             )
-            zones = record.calibration(series, scored)
+            # The monitor watches the model in the code: a retired model's record raises no alert.
+            zones = (
+                record.calibration(series, scored)
+                if model_id == archive.MODEL_ID
+                else {}
+            )
             # Kept only once all of it worked, so a series has its whole record or none.
             records.append(summary)
             if "red" in zones.values():

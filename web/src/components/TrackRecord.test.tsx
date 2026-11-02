@@ -15,6 +15,8 @@ import { TrackRecord } from "./TrackRecord"
 
 afterEach(cleanup)
 
+// The scoreboard's own model, the one in the code.
+const CURRENT = "aseri-timestral209m_c1"
 const entries = catalog.series as CatalogEntry[]
 type Verdict = "beats" | "ties" | "loses"
 const against = (ratio: number, ci: number[], verdict: Verdict) => ({
@@ -58,7 +60,14 @@ const suez: ScoreRecord = {
   },
 }
 const titled = (records: ScoreRecord[]) =>
-  render(<TrackRecord records={records} entries={entries} onOpen={vi.fn()} />)
+  render(
+    <TrackRecord
+      model={CURRENT}
+      records={records}
+      entries={entries}
+      onOpen={vi.fn()}
+    />
+  )
 // Read open or shut: "How we score" starts shut.
 const cells = (table: HTMLElement) =>
   within(table)
@@ -92,7 +101,14 @@ it("leads with the verdict on every square, and says once that the backtest stan
 
 it("draws the last 8 weekly forecasts 7 days ahead as squares, filled in range and hollow when missed", () => {
   const onOpen = vi.fn()
-  render(<TrackRecord records={[suez]} entries={entries} onOpen={onOpen} />)
+  render(
+    <TrackRecord
+      model={CURRENT}
+      records={[suez]}
+      entries={entries}
+      onOpen={onOpen}
+    />
+  )
 
   const squares = within(
     card("Suez Canal").getByRole("list", {
@@ -274,7 +290,12 @@ it("shows the live forecasts already resolved after the backtest's, labelled liv
     },
   }
   render(
-    <TrackRecord records={[collecting]} entries={entries} onOpen={onOpen} />
+    <TrackRecord
+      model={CURRENT}
+      records={[collecting]}
+      entries={entries}
+      onOpen={onOpen}
+    />
   )
 
   const row = card("Suez Canal")
@@ -312,7 +333,14 @@ it("draws a square whose forecast has left the replay without a link, and says s
       ? { ...entry, latest_reference_date: "2026-12-20" }
       : entry
   )
-  render(<TrackRecord records={[suez]} entries={later} onOpen={vi.fn()} />)
+  render(
+    <TrackRecord
+      model={CURRENT}
+      records={[suez]}
+      entries={later}
+      onOpen={vi.fn()}
+    />
+  )
 
   const squares = within(
     card("Suez Canal").getByRole("list", { name: /^Suez Canal:/ })
@@ -388,36 +416,67 @@ it("counts Brent's days ahead in trading days, from its real backtest", () => {
   )
 })
 
-it("says in one line when the records are the previous model's, and names them when only some are", () => {
-  const lines = () =>
-    screen.queryAllByText(
+// A record of the model before the scoreboard's, as after a model change.
+const previous = (record: ScoreRecord): ScoreRecord => ({
+  ...record,
+  scored_model_id: "aseri-timestral209m",
+})
+const hormuz: ScoreRecord = { ...suez, series_id: "hormuz_transits" }
+const opening = (name: string) =>
+  card(name).queryAllByRole("button", { name: /Open it in the replay/ })
+
+it("says in one line when every record is the previous model's, and counts those alone", () => {
+  titled([suez, hormuz])
+  expect(screen.queryByText(/previous model/)).toBeNull()
+  cleanup()
+
+  titled([previous(suez), previous(hormuz)])
+
+  expect(
+    screen.getByText(
       "Scores of the previous model until the new one has its own."
     )
-  const hormuz = { ...suez, series_id: "hormuz_transits" }
-
-  titled([suez, hormuz])
-  expect(lines()).toHaveLength(0)
-  cleanup()
-
-  // The day of a model change: every record is the previous model's, said once.
-  titled([
-    { ...suez, earlier: true },
-    { ...hormuz, earlier: true },
-  ])
-  expect(lines()).toHaveLength(1)
+  ).toBeTruthy()
+  expect(title()).toBe(
+    "Backtest: 12 of 16 forecasts landed in range, close to the 8 in 10 promised"
+  )
   expect(screen.queryByRole("heading", { name: /previous model/ })).toBeNull()
-  cleanup()
+  // A square opens the replay, which shows the new model's forecasts: these open nothing.
+  expect(opening("Suez Canal")).toHaveLength(0)
+  expect(
+    card("Suez Canal").getAllByRole("img", { name: /landed in range|missed/ })
+  ).toHaveLength(8)
+})
 
-  // A series the new model could not score yet beside one it could: the card says which.
-  titled([{ ...suez, earlier: true }, hormuz])
-  expect(lines()).toHaveLength(1)
-  card("Suez Canal, previous model")
-  card("Strait of Hormuz")
+it("counts the new model's records alone beside the previous model's, and says so", () => {
+  titled([
+    { ...previous(suez), n: 0 },
+    {
+      ...hormuz,
+      n: 3,
+      retrospective: {
+        ...hormuz.retrospective,
+        weekly: weekly(Array(8).fill(true)),
+      },
+    },
+  ])
+
+  // Hormuz's 8 squares only, and its 3 live forecasts, never Suez's.
+  expect(title()).toMatch(/^Backtest: 8 of 8 forecasts landed in range/)
+  expect(screen.getByText(/\(3 so far\)/)).toBeTruthy()
+  expect(
+    screen.getByText(
+      "Counts the new model only. Cards marked previous model show the old one's scores."
+    )
+  ).toBeTruthy()
+  expect(opening("Suez Canal, previous model")).toHaveLength(0)
+  expect(opening("Strait of Hormuz")).toHaveLength(8)
 })
 
 it("leaves out a series the page has not loaded", () => {
   render(
     <TrackRecord
+      model={CURRENT}
       records={[suez]}
       entries={entries.slice(0, 1)}
       onOpen={vi.fn()}

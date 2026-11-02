@@ -705,8 +705,16 @@ def run_under_the_model_before(monkeypatch, moment, gpr_file, api_dir, archive_d
 def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_and_record_of_the_model_before(
     tmp_path, monkeypatch, stub_model
 ):
-    # The whole backfill, 60 days: GPR waits 35 days to score a target, so only its oldest are due.
+    # The smallest backfill with a record to show: GPR scores a day 35 days on, so a forecast's
+    # 7th day is due on the run of Oct 27 from Sep 15 back, 41 days before the newest.
+    monkeypatch.setattr(archive, "REPLAY_DAYS", 41)
     archive_dir = tmp_path / "archive"
+    # A monitor that finds every band far off, and the issue output it names them in.
+    monkeypatch.setattr(
+        record, "calibration", lambda series, rows: {("1-7", 0.8): "red"}
+    )
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
     # The morning's run, under the model before; then the new MODEL_ID lands the same day.
     run_under_the_model_before(
         monkeypatch,
@@ -725,6 +733,13 @@ def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_and_record_of_the_mo
         tmp_path / "afternoon",
         archive_dir,
     )
+
+    # The monitor watched the model in the code that morning; on a record of a retired model, it is silent.
+    morning_output, afternoon_output = output.read_text(encoding="utf-8").split(
+        "stale="
+    )[1:]
+    assert "calibration_red=gpr_daily\n" in morning_output
+    assert "calibration_red=\n" in afternoon_output
 
     # Nothing is archived under the new model today, so the replay is the morning's, day for day and
     # value for value, still credited to the model before.
