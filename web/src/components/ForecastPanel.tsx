@@ -78,7 +78,12 @@ export function ForecastPanel({
       <div className="flex flex-col gap-1">
         {/* The takeaway first: today's range and which way it leans against the like-for-like
             day, worked out as the series loaded; in a replay, what that forecast said. */}
-        <h2 id={title} className="text-[12px]/[18px] text-primary">
+        {/* Focused when a card or a square brings the panel into view: no ring of its own. */}
+        <h2
+          id={title}
+          tabIndex={-1}
+          className="text-[12px]/[18px] text-primary outline-none"
+        >
           {live
             ? `Likely ${range} by ${target}, ${direction(today.chances)}`
             : `${forecast.backtest ? "Backtest" : "Forecast"} made ${made}: likely ${range} by ${target}`}

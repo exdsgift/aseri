@@ -46,7 +46,7 @@ export function TrackRecord({
       id="record"
       tabIndex={-1}
       aria-labelledby={title}
-      className="mx-auto flex max-w-[1040px] scroll-mt-4 flex-col gap-6 px-4 pb-14 text-[8px]/[14px] uppercase outline-none"
+      className="mx-auto flex max-w-[1040px] scroll-mt-[calc(16px+env(safe-area-inset-top))] flex-col gap-6 px-4 pb-20 text-[8px]/[14px] uppercase outline-none md:pb-32"
     >
       <div className="flex flex-col items-center gap-4 text-center">
         <h2

@@ -45,7 +45,7 @@ export function Hero({
     <section
       id="today"
       data-hero={hero}
-      className="relative isolate flex min-h-svh flex-col items-center px-4 pt-56 pb-14 text-center text-primary uppercase"
+      className="relative isolate flex min-h-svh flex-col items-center px-4 pt-56 pb-20 text-center text-primary uppercase md:pb-32"
     >
       {/* Another hero arrives afresh, and loads only its own engraving. */}
       <HeroArt

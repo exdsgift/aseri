@@ -606,12 +606,51 @@ it("opens a picked card's series in the panel and brings it into view, then load
     /\baria-pressed:shadow-\[inset_/
   )
   expect(card(/^Suez Canal/).className).not.toMatch(/\bhover:shadow-/)
-  const panel = screen.getByRole("region", { name: /^Suez Canal Likely/ })
-  expect(scrollIntoView.mock.contexts.at(-1)).toContain(panel)
+  await waitFor(() =>
+    expect(scrollIntoView.mock.contexts.at(-1)).toContain(
+      screen.getByRole("region", { name: /^Suez Canal Likely/ })
+    )
+  )
   expect(fetch).toHaveBeenCalledWith("api/v1/series/suez_transits/replay.json")
   // The replay's 120 past forecasts, then today's.
   expect((await screen.findByRole("slider")).getAttribute("max")).toBe("120")
   expect(screen.getByText("181", { selector: "p" })).toBeTruthy()
+})
+
+// A smooth scroll asked from the click began while the panel still showed GPR, and the panel
+// changing height above the card cut it short on a phone.
+it("scrolls to the panel once it shows the picked series, focuses its heading, and stays put when the replay arrives", async () => {
+  let release!: () => void
+  const held = new Promise<void>((resolve) => (release = resolve))
+  vi.stubGlobal("fetch", async (url: string) => {
+    if (url === "api/v1/series/suez_transits/replay.json") await held
+    return Response.json(published[url])
+  })
+  const focus = vi.spyOn(HTMLElement.prototype, "focus")
+  // What the panel showed when it was scrolled to.
+  const shown: string[] = []
+  scrollIntoView.mockImplementation(() => shown.push(panelTitle()))
+  render(<App />)
+  await signals(9)
+
+  fireEvent.click(card(/^Suez Canal/))
+
+  expect(scrollIntoView).not.toHaveBeenCalled()
+  await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1))
+  expect(scrollIntoView.mock.contexts[0]).toBe(
+    document.getElementById("forecast")
+  )
+  expect(shown).toEqual([expect.stringMatching(/^Suez Canal · Likely/)])
+  expect(document.activeElement).toBe(document.querySelector("#forecast h2"))
+  expect(focus).toHaveBeenLastCalledWith({ preventScroll: true })
+
+  // The replay draws the panel anew: no second scroll, and the focus back on its heading.
+  release()
+  await screen.findByRole("slider")
+  await waitFor(() =>
+    expect(document.activeElement).toBe(document.querySelector("#forecast h2"))
+  )
+  expect(scrollIntoView).toHaveBeenCalledTimes(1)
 })
 
 it("asks for a series' replay once, however often its card is picked, even when the replay is missing", async () => {
@@ -742,7 +781,7 @@ it("opens a series with its card's key, unless a field has the focus", async () 
 
   press("5")
   expect(panelTitle()).toMatch(/^Strait of Hormuz · Likely/)
-  expect(scrollIntoView).toHaveBeenCalled()
+  await waitFor(() => expect(scrollIntoView).toHaveBeenCalled())
 
   // The slider takes its own keys.
   const slider = await screen.findByRole("slider")
@@ -905,8 +944,10 @@ it("rings every control on keyboard focus, and gives every chart a text equivale
     unringed.map((c) => c.getAttribute("aria-label") ?? c.textContent)
   ).toEqual([])
 
-  const canvases = [...document.querySelectorAll("canvas")]
-  // The hero's art, the panel's chart and the 9 cards' charts.
+  // The margins, a decoration behind the page that says nothing, then the hero's art, the
+  // panel's chart and the 9 cards' charts.
+  const [margins, ...canvases] = [...document.querySelectorAll("canvas")]
+  expect(margins.closest("[aria-hidden]")!.className).toContain("fixed")
   expect(canvases).toHaveLength(11)
   const words = (canvas: HTMLCanvasElement) =>
     canvas.closest("[aria-hidden]")

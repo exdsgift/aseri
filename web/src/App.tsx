@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Footer } from "@/components/Footer"
 import { ForecastPanel } from "@/components/ForecastPanel"
 import { Hero } from "@/components/Hero"
+import { Margins } from "@/components/Margins"
 import { SideNav, type Section } from "@/components/SideNav"
 import { Signals } from "@/components/Signals"
 import { TrackRecord } from "@/components/TrackRecord"
@@ -91,11 +92,31 @@ export function App() {
     loadScores().then(({ series }) => setRecords(series), console.error)
   }, [])
 
+  // Each pick brings the panel into view once its new series is drawn. Asked from the click,
+  // the scroll began before the panel changed height above the card, and the browser's scroll
+  // anchoring, keeping the card still, cut it short. Not again when the replay arrives.
+  const [asked, setAsked] = useState(0)
+  useEffect(() => {
+    if (!asked) return
+    const frame = requestAnimationFrame(() => {
+      // Smooth unless the reader asks for less motion: see index.css.
+      panelBox.current!.scrollIntoView({ block: "start" })
+      // Screen readers land on the panel too, with no second jump.
+      panelBox.current!.querySelector("h2")!.focus({ preventScroll: true })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [asked])
+  // The replay arriving draws the panel anew, which drops the focus: back on its heading.
+  const length = panel?.forecasts.length
+  useEffect(() => {
+    if (asked && document.activeElement === document.body)
+      panelBox.current!.querySelector("h2")!.focus({ preventScroll: true })
+  }, [asked, length])
+
   const pick = (id: string) => {
     setPicked(id)
     setOpened(undefined)
-    // Smooth unless the reader asks for less motion: see index.css.
-    panelBox.current!.scrollIntoView({ block: "start" })
+    setAsked((count) => count + 1)
     const { entry } = find(id)!
     // Only today's forecast so far: the replay loads the first time the series is picked, whatever comes back.
     if (!replayed.current.has(id)) {
@@ -112,6 +133,7 @@ export function App() {
 
   return (
     <>
+      <Margins />
       <SideNav sections={sections} />
       <main>
         <Hero
@@ -125,7 +147,7 @@ export function App() {
             <div
               id="forecast"
               ref={panelBox}
-              className="scroll-mt-4 px-4 pb-14"
+              className="scroll-mt-[calc(16px+env(safe-area-inset-top))] px-4 pb-20 md:pb-32"
             >
               {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
                 or on the past forecast a square of the record opened. */}
