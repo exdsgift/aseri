@@ -94,17 +94,25 @@ const layer = (name: string) =>
 it("titles today's forecast with its takeaway, the series and its unit under it", () => {
   render(<ForecastPanel series={gpr} />)
 
-  expect(title()).toBe("Likely 110-250 by Nov 23, about where it is now")
+  // Rounded outward, so it holds the model's 111-251.
+  expect(title()).toBe("Likely 110-260 by Nov 23, about where it is now")
   expect(subtitle()).toBe("Geopolitical risk · index (1985-2019 average = 100)")
   // The landmark says which series it is, then what it says.
   expect(
     screen.getByRole("region", {
-      name: "Geopolitical risk Likely 110-250 by Nov 23, about where it is now",
+      name: "Geopolitical risk Likely 110-260 by Nov 23, about where it is now",
     })
   ).toBeTruthy()
   expect(screen.getByRole("img").getAttribute("aria-label")).toBe(
     "Geopolitical risk: daily values to Oct 26, the last 165 (7-day average 181), then the forecast: likely 111-251 by Nov 23, where 8 in 10 days land. The gold line is path 1 of 20 drawn from the forecast, the most likely first."
   )
+})
+
+// The hero's chance, worked out once as the series loads.
+it("leans today's title the way the series' chance above the last value says", () => {
+  gpr.today.chanceAbove = 0.9
+  render(<ForecastPanel series={gpr} />)
+  expect(title()).toBe("Likely 110-260 by Nov 23, likely higher than now")
 })
 
 it("keeps how to read it, its numbers and its sources one tap away each, all shut at first", () => {
@@ -122,6 +130,7 @@ it("keeps how to read it, its numbers and its sources one tap away each, all shu
   expect(screen.queryByRole("list")).toBeNull()
   expect(layer("How to read this")).toEqual([
     "The shaded range is where 8 in 10 days should land; 2 in 10 land outside. It is not a high and a low.",
+    "The darker core: half the days land there.",
     "The gold line is one of 20 possible paths drawn from the forecast, the most likely first. Play shows the others, one at a time. No one knows which days turn out high.",
     "Values follow the week: compare a Monday with a Monday.",
     "Normal: its 1985-2019 average, 100. In a replay, the white line carries on with what happened.",
@@ -136,20 +145,20 @@ it("replays the forecast of the day before with ←, then today's with → or T"
   render(<ForecastPanel series={gpr} />)
 
   press("ArrowLeft")
-  expect(title()).toBe("Backtest made Oct 25: likely 56-160 by Nov 22")
+  expect(title()).toBe("Backtest made Oct 25: likely 50-170 by Nov 22")
   expect(slider().getAttribute("aria-valuetext")).toBe("Oct 25, backtest")
   // The replay says which data what happened is, as read that day.
   expect(subtitle()).toBe(
     `Geopolitical risk · index (1985-2019 average = 100) · what happened as of ${monthDay(actuals.as_of)}`
   )
   press("ArrowRight")
-  expect(title()).toBe("Likely 110-250 by Nov 23, about where it is now")
+  expect(title()).toBe("Likely 110-260 by Nov 23, about where it is now")
   expect(slider().getAttribute("aria-valuetext")).toBe("Today")
 
   press("ArrowLeft")
   press("ArrowLeft")
   press("t")
-  expect(title()).toBe("Likely 110-250 by Nov 23, about where it is now")
+  expect(title()).toBe("Likely 110-260 by Nov 23, about where it is now")
 })
 
 it("starts on the past forecast the record opened, or on today's when the replay lacks it", () => {
@@ -278,15 +287,16 @@ it("shows a sea lane with its own horizon, steps and baseline", async () => {
   const hormuz = await loadSeries(entry("hormuz_transits"), { replay: true })
   render(<ForecastPanel series={hormuz} />)
 
-  expect(title()).toMatch(/^Likely 0-6 by Nov 08, /)
+  // Rounded outward: the model's 0.x to 6.x ships.
+  expect(title()).toMatch(/^Likely 0-7 by Nov 08, /)
   expect(subtitle()).toBe("Strait of Hormuz · ships a day")
   // Only GPR's source revises its last month.
   expect(layer("Sources")[1]).toBe(
     `Data as of ${monthDay(hormuzActuals.as_of)}.`
   )
   // No weekday line: the sea lanes have no weekly cycle.
-  expect(layer("How to read this")).toHaveLength(3)
-  expect(layer("How to read this")[2]).toMatch(
+  expect(layer("How to read this")).toHaveLength(4)
+  expect(layer("How to read this")[3]).toMatch(
     /^Normal: its 365-day mean, 27\./
   )
   expect(layer("Show the numbers").slice(1, 4)).toEqual([
@@ -342,7 +352,7 @@ it("tells to compare a weekday with the same weekday where the catalog says the 
   const day = new Date(
     `${viewsLatest.reference_date}T00:00:00Z`
   ).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" })
-  expect(layer("How to read this")[2]).toBe(
+  expect(layer("How to read this")[3]).toBe(
     `Values follow the week: compare a ${day} with a ${day}.`
   )
   expect(screen.getByText(/^Note:/).textContent).toBe(

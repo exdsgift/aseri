@@ -8,12 +8,14 @@ import { signal } from "@/components/Signal"
 import { vortex } from "@/components/Vortex"
 import { Wordmark } from "@/components/Wordmark"
 import { type Today } from "@/lib/api"
+import { textWidth } from "@/lib/chart"
 import {
   dayLabel,
   formatValue,
   likely,
   monthDay,
-  roughly,
+  outward,
+  valueRange,
   versusBaseline,
   weekday,
 } from "@/lib/format"
@@ -86,7 +88,7 @@ export function Hero({
                   "8 in 10" here, the one headline that defines it in words. */}
               <p>
                 {monthDay(today.targetDate)}:{" "}
-                {likely(roughly(today.low), roughly(today.high))} (8 in 10),{" "}
+                {likely(...outward(today.low, today.high))} (8 in 10),{" "}
                 {direction(today.chanceAbove)}
               </p>
               <RangeBar today={today} />
@@ -146,6 +148,13 @@ function RangeBar({ today }: { today: Today }) {
           : "-50%",
   })
   const said = `Last ${weekday(today.referenceDate)} ${formatValue(referenceValue)}`
+  // The ends' labels, each 4 px inside its edge, need their widths and a gap between them on the
+  // bar's 320 px. shortcut: reads the bar at its full 320 px; measure it if a phone under 352 px
+  // ever shows the two labels touching.
+  const ends = [formatValue(low), formatValue(high)]
+  const apart =
+    ((scale.at(high) - scale.at(low)) / 100) * 320 >=
+    textWidth(ends[0]) + textWidth(ends[1]) + 16
   return (
     <div
       role="img"
@@ -156,10 +165,10 @@ function RangeBar({ today }: { today: Today }) {
         {said}
       </span>
       <span
-        className="absolute top-3.5 -translate-x-1/2 text-primary"
+        className="absolute top-3.5 flex -translate-x-1/2 text-primary"
         style={{ left: at(referenceValue) }}
       >
-        <Glyph name="down" />
+        <Glyph name="down" spaced={false} />
       </span>
       <i
         className="absolute top-[22px] h-4 border-x-2 border-dim dither-25"
@@ -173,15 +182,24 @@ function RangeBar({ today }: { today: Today }) {
         className="absolute top-[18px] -ml-px h-[38px] w-0.5 bg-secondary"
         style={{ left: at(baseline) }}
       />
-      <span className="absolute top-[42px] ml-1" style={{ left: at(low) }}>
-        {formatValue(low)}
-      </span>
-      <span
-        className="absolute top-[42px] -ml-1 -translate-x-full"
-        style={{ left: at(high) }}
-      >
-        {formatValue(high)}
-      </span>
+      {apart ? (
+        <>
+          <span className="absolute top-[42px] ml-1" style={{ left: at(low) }}>
+            {ends[0]}
+          </span>
+          <span
+            className="absolute top-[42px] -ml-1 -translate-x-full"
+            style={{ left: at(high) }}
+          >
+            {ends[1]}
+          </span>
+        </>
+      ) : (
+        // Too narrow for two: once, centred under the range.
+        <span className="absolute top-[42px]" style={on((low + high) / 2)}>
+          {valueRange(low, high)}
+        </span>
+      )}
       <span className="absolute top-14 text-secondary" style={on(baseline)}>
         normal {formatValue(baseline)}
       </span>

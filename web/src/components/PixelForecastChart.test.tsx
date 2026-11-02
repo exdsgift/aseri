@@ -320,6 +320,42 @@ it.each([692, 440, 280])(
   }
 )
 
+// 330 px: the chart on a 390 px phone.
+it.each([692, 440, 330])(
+  "keeps a %i px replay's what happened label clear of the white line it names",
+  (width) => {
+    render(drawn(backtest))
+    resize(width)
+
+    const label = labels().find(({ text }) => /^what\s+happened$/.test(text))!
+    const { x, y, origin } = chartLayout(backtest, width)
+    // The line from the origin through every known day, a point every CSS pixel.
+    const days = [
+      [origin, backtest.values[origin]],
+      ...backtest.actuals.flatMap((v, k) =>
+        v === null ? [] : [[origin + 1 + k, v]]
+      ),
+    ].map(([day, v]) => [x(day) * 2, y(v) * 2])
+    const line = days.slice(1).flatMap(([x1, y1], i) => {
+      const [x0, y0] = days[i]
+      const steps = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0)))
+      return Array.from({ length: steps + 1 }, (_, j) => [
+        x0 + ((x1 - x0) * j) / steps,
+        y0 + ((y1 - y0) * j) / steps,
+      ])
+    })
+    expect(
+      line.filter(
+        ([px, py]) =>
+          px >= label.left &&
+          px <= label.right &&
+          py >= label.top &&
+          py <= label.bottom
+      )
+    ).toEqual([])
+  }
+)
+
 it("breaks the band's words over lines where the forecast side is narrow", () => {
   render(drawn(forecast))
   resize(280)

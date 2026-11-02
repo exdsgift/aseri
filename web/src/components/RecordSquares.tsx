@@ -3,15 +3,19 @@ import { daysAhead, monthDay } from "@/lib/format"
 
 // The last weekly forecasts at 7 days ahead, oldest first: a square each, filled when what
 // happened landed in its range, hollow when it missed. A tap opens it in the replay, which holds
-// the forecasts from `replayFrom` on: an older square is drawn without a link.
+// the forecasts from `replayFrom` on: an older square is drawn without a link. A `tag` ("live")
+// sets a second group apart, before its squares, and gives it no count: one figure never adds
+// the two up.
 export function RecordSquares({
   name,
+  tag,
   weekly,
   horizonUnit,
   replayFrom,
   onOpen,
 }: {
   name: string
+  tag?: string
   weekly: ScoreRecord["live"]["weekly"]
   // Brent's steps are trading days: its squares are 7 trading days ahead.
   horizonUnit: string
@@ -23,6 +27,7 @@ export function RecordSquares({
   const ahead = `${daysAhead(7, horizonUnit)} ahead`
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      {tag && <span className="text-secondary">{tag}</span>}
       <ul
         aria-label={`${name}: the last ${weekly.length} weekly forecasts, ${ahead}`}
         className="flex flex-wrap gap-1"
@@ -52,9 +57,11 @@ export function RecordSquares({
         })}
       </ul>
       {/* In words too, so the record never rests on the squares alone. */}
-      <p>
-        {inside} of {weekly.length} in range
-      </p>
+      {!tag && (
+        <p>
+          {inside} of {weekly.length} in range
+        </p>
+      )}
     </div>
   )
 }

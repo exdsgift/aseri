@@ -4,6 +4,7 @@ import latest from "@/fixtures/series/gpr_daily/latest.json"
 
 import { type Forecast } from "./api"
 import { chanceAbove, path, ranked } from "./paths"
+import { direction } from "./takeaways"
 
 // Today's GPR forecast, at its 21 published levels, made from a last daily value of 165.
 const gpr: Forecast = {
@@ -165,6 +166,43 @@ describe("chanceAbove", () => {
   it("is certain either way past the outermost levels", () => {
     expect(chanceAbove(standard.quantiles, 0, 10)).toBeCloseTo(0, 6)
     expect(chanceAbove(standard.quantiles, 0, -10)).toBeCloseTo(1, 6)
+  })
+
+  // A count's forecast puts whole levels on one value: a tie counts half above and half below,
+  // as the PIT does (public-api.md).
+  const counts = (at: Record<string, number>) =>
+    Object.fromEntries(Object.entries(at).map(([level, v]) => [level, [v]]))
+
+  it("counts a tie at the value half above and half below", () => {
+    // Hormuz on a closed day: every level at 0 ships, the last value 0.
+    const closed = counts({
+      "0.01": 0,
+      "0.1": 0,
+      "0.5": 0,
+      "0.9": 0,
+      "0.99": 0,
+    })
+    expect(chanceAbove(closed, 0, 0)).toBeCloseTo(0.5, 3)
+    expect(direction(chanceAbove(closed, 0, 0))).toBe("about where it is now")
+    // Ties from the 25% to the 75% level: as likely above as below.
+    const middle = counts({
+      "0.01": 0,
+      "0.25": 3,
+      "0.5": 3,
+      "0.75": 3,
+      "0.99": 6,
+    })
+    expect(chanceAbove(middle, 0, 3)).toBeCloseTo(0.5, 3)
+    // Ties from the lowest level to the median: never below, above half the time, so with the
+    // tie halved 0.25 + 0.5.
+    const floor = counts({
+      "0.01": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 1,
+      "0.99": 4,
+    })
+    expect(chanceAbove(floor, 0, 0)).toBeCloseTo(0.75, 3)
   })
 
   it("puts GPR's Nov 23 about evenly either side of last Monday's 165", () => {

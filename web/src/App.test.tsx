@@ -75,7 +75,7 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
     "Geopolitical risk",
     "181",
     "81% above normal · 7-day average to Oct 26",
-    "Nov 23: likely 110-250 (8 in 10), about where it is now",
+    "Nov 23: likely 110-260 (8 in 10), about where it is now",
   ])
   // The range bar: the range, a tick for normal and a marker on last Monday.
   const bar = hero.getByRole("img", { name: /^Nov 23:/ })
@@ -437,7 +437,7 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
 
   const panel = within(
     await screen.findByRole("region", {
-      name: "Geopolitical risk Likely 110-250 by Nov 23, about where it is now",
+      name: "Geopolitical risk Likely 110-260 by Nov 23, about where it is now",
     })
   )
   // The takeaway, the series and its unit, then the chart: nothing between them to read.
@@ -494,16 +494,17 @@ it("groups a card for each series in the catalog, with its 7-day average against
   expect(
     cards.getAllByRole("button").map((b) => b.textContent!.replace(/\s+/g, " "))
   ).toEqual([
-    "Geopolitical risk [1] 181 index · 7-day avg 81% above normal Nov 23: likely 110-250",
-    '"World War III" [2] 2,053 Wikipedia views a day · 7-day avg 57% below normal Nov 13: likely 1,450-5,420 a day',
+    // Each range rounded outward from the model's: GPR's 110.8-251.0, Brent's 102.3-145.1.
+    "Geopolitical risk [1] 181 index · 7-day avg 81% above normal Nov 23: likely 110-260",
+    '"World War III" [2] 2,053 Wikipedia views a day · 7-day avg 57% below normal Nov 13: likely 1,400-5,600 a day',
     // Brent's week has 5 prices, and its 14 steps are trading days: Nov 16 is 20 days on.
-    "Brent oil [3] 124 $ a barrel · 7-day avg 38% above normal Nov 16: likely 100-150 a barrel",
+    "Brent oil [3] 124 $ a barrel · 7-day avg 38% above normal Nov 16: likely 102-146 a barrel",
     "Suez Canal [4] 41 ships a day · 7-day avg 1% above normal Nov 22: likely 33-51 a day",
-    "Strait of Hormuz [5] 3 ships a day · 7-day avg 88% below normal Nov 08: likely 0-6 a day",
+    "Strait of Hormuz [5] 3 ships a day · 7-day avg 88% below normal Nov 08: likely 0-7 a day",
     "Bab el-Mandeb [6] 29 ships a day · 7-day avg 14% below normal Nov 08: likely 20-36 a day",
     "Taiwan Strait [7] 190 ships a day · 7-day avg 18% below normal Nov 22: likely 180-270 a day",
-    "Air-raid alerts [8] 62 alert hours a day, all regions · 7-day avg 1% below normal Nov 06: likely 50-88 a day",
-    "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures · 7-day avg 20% above normal Nov 06: likely 1,160-1,970 a day",
+    "Air-raid alerts [8] 62 alert hours a day, all regions · 7-day avg 1% below normal Nov 06: likely 48-88 a day",
+    "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures · 7-day avg 20% above normal Nov 06: likely 1,150-2,000 a day",
   ])
   // The key hint is for the eye, and only on hover or focus: the button says it as a shortcut.
   const suez = cards.getByRole("button", { name: /^Suez Canal 41 ships/ })

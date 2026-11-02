@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from "@testing-library/react"
+import { act, cleanup, render, screen, within } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { type Today } from "@/lib/api"
@@ -434,5 +434,33 @@ describe("signal, at 4 times the baseline on a phone", () => {
       expect(x).toBeGreaterThanOrEqual(0)
       expect(y).toBeGreaterThanOrEqual(0)
     }
+  })
+})
+
+describe("the range bar", () => {
+  const bar = () => screen.getByRole("img", { name: /^Nov 23:/ })
+
+  it("labels each end of the range under it, and puts the marker's arrow on its value", () => {
+    render(<Hero hero="messenger" today={today} failed={false} />)
+
+    expect(within(bar()).getByText("111")).toBeTruthy()
+    expect(within(bar()).getByText("251")).toBeTruthy()
+    // Centred on the value, with no room kept after it for words.
+    const arrow = bar().querySelector("svg")!
+    expect(arrow.getAttribute("class")).not.toMatch(/\bm[rl]-/)
+  })
+
+  it("says a range too narrow for two labels once, centred under it", () => {
+    render(
+      <Hero
+        hero="messenger"
+        today={{ ...today, low: 150, high: 160, middleHalf: [153, 157] }}
+        failed={false}
+      />
+    )
+
+    expect(within(bar()).getByText("150-160")).toBeTruthy()
+    expect(within(bar()).queryByText("150")).toBeNull()
+    expect(within(bar()).queryByText("160")).toBeNull()
   })
 })

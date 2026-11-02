@@ -61,11 +61,11 @@ const overlap = (a: Box, b: Box) =>
 
 // Direct labels, in CSS pixels, each a line of text or two on a pixel of ground each side: each
 // takes the first of its spots that stays in `bounds` and clear of the labels placed before it,
-// and covers as few `points` of the lines as it can.
+// and covers as little of the lines' `points` as it can, each point weighing 1 unless it says.
 export function placeLabels(
   labels: { text: string; at: Spot[] }[],
   bounds: { left: number; top: number; right: number; bottom: number },
-  points: Point[]
+  points: [x: number, y: number, weight?: number][]
 ) {
   const placed: Box[] = []
   for (const { text, at } of labels) {
@@ -78,22 +78,24 @@ export function placeLabels(
         ? 1e4
         : 0) +
       1e3 * placed.filter((other) => overlap(box, other)).length +
-      points.filter(
-        ([x, y]) =>
+      points.reduce(
+        (sum, [x, y, weight = 1]) =>
           x >= box.left &&
           x <= box.left + width &&
           y >= box.top &&
           y <= box.top + height
-      ).length
+            ? sum + weight
+            : sum,
+        0
+      )
     const boxes = at.map(({ x, y, align }) => ({
       left: Math.round(align === "right" ? x - width : x),
       top: Math.round(y),
       width,
       height,
     }))
-    placed.push(
-      boxes.reduce((best, box) => (cost(box) < cost(best) ? box : best))
-    )
+    const costs = boxes.map(cost)
+    placed.push(boxes[costs.indexOf(Math.min(...costs))])
   }
   return placed
 }

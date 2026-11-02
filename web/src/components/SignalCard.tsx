@@ -8,7 +8,7 @@ import {
   likely,
   monthDay,
   percentFrom,
-  roughly,
+  outward,
   versusBaseline,
 } from "@/lib/format"
 import { ranked } from "@/lib/paths"
@@ -38,6 +38,7 @@ export function SignalCard({
   )
   // The panel gives the unit in full: "index (1985-2019 average = 100)" is "index" here.
   const unit = forecast.unit.replace(/ \(.*\)$/, "")
+  const percent = percentFrom(today.sevenDayAverage, today.baseline)
   // "a day", "a barrel": the forecast line's unit, short.
   const per = forecast.unit.match(/ a \w+/)?.[0] ?? ""
   // Spans only, with spaces between them: a button holds phrasing content, and its text is its name.
@@ -82,13 +83,8 @@ export function SignalCard({
       )}
       {/* The way from normal by shape as well as words, never by colour alone. */}
       <span>
-        <Glyph
-          name={
-            percentFrom(today.sevenDayAverage, today.baseline) < 0
-              ? "down"
-              : "up"
-          }
-        />
+        {/* At normal it goes neither way: no arrow. */}
+        {percent !== 0 && <Glyph name={percent < 0 ? "down" : "up"} />}
         {versusBaseline(today.sevenDayAverage, today.baseline)}
       </span>{" "}
       {/* The panel's opening line: the most likely of the model's paths. */}
@@ -96,7 +92,7 @@ export function SignalCard({
       {/* The forecast is of the daily value: a range for one day, not for the days up to it. */}
       <span className="text-primary">
         {monthDay(today.targetDate)}:{" "}
-        {likely(roughly(today.low), roughly(today.high))}
+        {likely(...outward(today.low, today.high))}
         {per}
       </span>
     </button>

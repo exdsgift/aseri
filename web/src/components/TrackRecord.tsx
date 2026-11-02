@@ -10,6 +10,9 @@ import { recordTitle } from "@/lib/takeaways"
 const isLive = (record: ScoreRecord) => record.n >= record.min_n_to_display
 const scoredOf = (record: ScoreRecord) =>
   isLive(record) ? record.live : record.retrospective
+// The replay's oldest forecast: the pipeline keeps 120 days before the newest one.
+const replayFrom = (entry: CatalogEntry) =>
+  daysAfter(entry.latest_reference_date, -120)
 
 // How past forecasts did, its verdict first: the squares of every series, counted in the title,
 // and how they are scored one tap away. Backtest and live never add up in one figure: the title
@@ -90,10 +93,20 @@ export function TrackRecord({
               name={entry.title}
               weekly={scoredOf(record).weekly}
               horizonUnit={entry.horizon_unit}
-              // The replay's oldest forecast: the pipeline keeps 120 days before the newest one.
-              replayFrom={daysAfter(entry.latest_reference_date, -120)}
+              replayFrom={replayFrom(entry)}
               onOpen={(date) => onOpen(record.series_id, date)}
             />
+            {/* While it collects, the live forecasts already resolved, after the backtest's. */}
+            {!isLive(record) && (
+              <RecordSquares
+                name={`${entry.title}, live`}
+                tag="live"
+                weekly={record.live.weekly}
+                horizonUnit={entry.horizon_unit}
+                replayFrom={replayFrom(entry)}
+                onOpen={(date) => onOpen(record.series_id, date)}
+              />
+            )}
           </li>
         ))}
       </ul>

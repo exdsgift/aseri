@@ -9,11 +9,12 @@ import {
   formatValue,
   likely,
   monthDay,
-  roughly,
+  outward,
+  valueRange,
   weekday,
 } from "@/lib/format"
 import { tickWhileShown, useReducedMotion } from "@/lib/motion"
-import { chanceAbove, PATHS, ranked } from "@/lib/paths"
+import { PATHS, ranked } from "@/lib/paths"
 import { insideSoFar, stepRows, yearRange } from "@/lib/replay"
 import { direction } from "@/lib/takeaways"
 
@@ -46,7 +47,7 @@ export function ForecastPanel({
   const target = monthDay(forecast.targetDates[end])
   const made = monthDay(forecast.dates.at(-1)!)
   const lastValue = forecast.values.at(-1)!
-  const range = likely(roughly(low), roughly(high))
+  const range = valueRange(...outward(low, high))
   const sofar = insideSoFar(forecast)
   // The chart draws only the model's own paths, never an average: the most likely of the
   // 20 first and, played, the others in order, the next every 1.2 s. None turns under
@@ -76,11 +77,11 @@ export function ForecastPanel({
     >
       <div className="flex flex-col gap-1">
         {/* The takeaway first: today's range and which way it leans against the like-for-like
-            day; in a replay, what that forecast said. */}
+            day, worked out as the series loaded; in a replay, what that forecast said. */}
         <h2 id={title} className="text-[12px]/[18px] text-primary">
           {live
-            ? `L${range.slice(1)} by ${target}, ${direction(chanceAbove(forecast.quantiles, end, lastValue))}`
-            : `${forecast.backtest ? "Backtest" : "Forecast"} made ${made}: ${range} by ${target}`}
+            ? `Likely ${range} by ${target}, ${direction(today.chanceAbove)}`
+            : `${forecast.backtest ? "Backtest" : "Forecast"} made ${made}: likely ${range} by ${target}`}
         </h2>
         <p className="text-secondary">
           <span id={name}>{forecast.series}</span> · {forecast.unit}
@@ -129,6 +130,7 @@ export function ForecastPanel({
             The shaded range is where 8 in 10 days should land; 2 in 10 land
             outside. It is not a high and a low.
           </p>
+          <p>The darker core: half the days land there.</p>
           <p>
             The gold line is one of {PATHS} possible paths drawn from the
             forecast, the most likely first. Play shows the others, one at a

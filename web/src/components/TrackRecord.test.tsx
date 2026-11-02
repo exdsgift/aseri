@@ -258,6 +258,53 @@ it("gives no verdict and no number where the simple rule had no miss to compare 
   ])
 })
 
+it("shows the live forecasts already resolved after the backtest's, labelled live and openable, while it collects", () => {
+  const onOpen = vi.fn()
+  const collecting = {
+    ...suez,
+    n: 2,
+    live: {
+      ...none,
+      n: 2,
+      since: "2026-10-31",
+      weekly: [
+        { reference_date: "2026-10-03", inside_80: true },
+        { reference_date: "2026-10-10", inside_80: false },
+      ],
+    },
+  }
+  render(
+    <TrackRecord records={[collecting]} entries={entries} onOpen={onOpen} />
+  )
+
+  const row = card("Suez Canal")
+  const live = row.getByRole("list", {
+    name: "Suez Canal, live: the last 2 weekly forecasts, 7 days ahead",
+  })
+  expect(
+    within(live)
+      .getAllByRole("button")
+      .map((square) => square.getAttribute("aria-label"))
+  ).toEqual([
+    "Oct 03: landed in range 7 days ahead. Open it in the replay",
+    "Oct 10: missed 7 days ahead. Open it in the replay",
+  ])
+  // After the backtest's 8, with one word to tell them apart, and no sum of the two.
+  expect(row.getAllByRole("button")).toHaveLength(10)
+  expect(row.getByText("live")).toBeTruthy()
+  expect(
+    row.getAllByText(/ of \d+ in range$/).map((p) => p.textContent)
+  ).toEqual(["6 of 8 in range"])
+  // The backtest still makes the title, and the banner counts the live ones.
+  expect(title()).toMatch(/^Backtest: 6 of 8 /)
+  expect(screen.getByText(/^Live record starts/).textContent).toMatch(
+    /\(2 so far\)/
+  )
+
+  fireEvent.click(within(live).getAllByRole("button")[1])
+  expect(onOpen).toHaveBeenCalledWith("suez_transits", "2026-10-10")
+})
+
 it("draws a square whose forecast has left the replay without a link, and says so", () => {
   // The replay holds the 120 days to Dec 20: from Aug 22 on.
   const later = entries.map((entry) =>

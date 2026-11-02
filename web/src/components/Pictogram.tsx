@@ -152,7 +152,14 @@ const glyphs = {
 .#.`,
 }
 
-export function Glyph({ name }: { name: keyof typeof glyphs }) {
+// `spaced`, before words: a gap after it. Alone, as a marker, it sits on its point.
+export function Glyph({
+  name,
+  spaced = true,
+}: {
+  name: keyof typeof glyphs
+  spaced?: boolean
+}) {
   const rows = glyphs[name].trim().split("\n")
   return (
     <svg
@@ -161,7 +168,7 @@ export function Glyph({ name }: { name: keyof typeof glyphs }) {
       height={rows.length * 2}
       viewBox={`0 0 ${rows[0].length} ${rows.length}`}
       shapeRendering="crispEdges"
-      className="mr-1.5 inline-block shrink-0 align-baseline"
+      className={`inline-block shrink-0 align-baseline ${spaced ? "mr-1.5" : ""}`}
     >
       <path fill="currentColor" d={runs(glyphs[name])} />
     </svg>

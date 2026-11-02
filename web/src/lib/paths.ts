@@ -51,20 +51,25 @@ const sortedLevels = (quantiles: Record<string, number[]>) =>
   Object.keys(quantiles).sort((a, b) => Number(a) - Number(b))
 
 // The chance that day `day` lands above `value`, read off the same straight lines between
-// the published levels: the level whose quantile is `value`, found by halving.
+// the published levels. A count's forecast puts whole levels on one value: a tie counts half
+// above and half below, as the PIT does, so 1 - (P(X < v) + P(X <= v)) / 2.
 export function chanceAbove(
   quantiles: Record<string, number[]>,
   day: number,
   value: number
 ) {
   const levels = sortedLevels(quantiles)
-  let [low, high] = [0, 1]
-  for (let i = 0; i < 40; i++) {
-    const middle = (low + high) / 2
-    if (quantileAt(quantiles, levels, day, middle) < value) low = middle
-    else high = middle
+  // The highest level whose quantile is still under `value`, or at most `value`, by halving.
+  const share = (under: (quantile: number) => boolean) => {
+    let [low, high] = [0, 1]
+    for (let i = 0; i < 40; i++) {
+      const middle = (low + high) / 2
+      if (under(quantileAt(quantiles, levels, day, middle))) low = middle
+      else high = middle
+    }
+    return (low + high) / 2
   }
-  return 1 - (low + high) / 2
+  return 1 - (share((q) => q < value) + share((q) => q <= value)) / 2
 }
 
 // One possible path of the days ahead, after the last daily value it starts from. Day h is

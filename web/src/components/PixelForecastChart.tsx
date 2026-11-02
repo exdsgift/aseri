@@ -1,4 +1,5 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -294,8 +295,9 @@ const fitting = (room: number, ...wordings: string[]) =>
 
 // Real text over the canvas: the value ticks, the first and last days and the forecast's end
 // values, then the direct labels that stand in for a legend, each on its own mark and clear of
-// the lines. The band says once, on itself, what it counts.
-function ChartLabels({
+// the lines. The band says once, on itself, what it counts. Laid out again only for another
+// chart, forecast or first path: never for a pointer's move or a path played.
+const ChartLabels = memo(function ChartLabels({
   chart,
   forecast,
   likeliest,
@@ -330,11 +332,14 @@ function ChartLabels({
     ...along(values.slice(first).map((v, i): Point => [X(first + i), Y(v)])),
     ...along(averages.slice(first).map((v, i): Point => [X(first + i), Y(v)])),
     ...along(likeliest.map((v, k): Point => [X(origin + k), Y(v)])),
-    ...along(
-      actuals.flatMap((v, k): Point[] =>
+    // What happened, the daily values' line carried on from the origin: the replay's main
+    // mark, which a label covers last.
+    ...along([
+      [xo, Y(values[origin])],
+      ...actuals.flatMap((v, k): Point[] =>
         v === null ? [] : [[X(origin + 1 + k), Y(v)]]
-      )
-    ),
+      ),
+    ]).map(([px, py]): [number, number, number] => [px, py, 10]),
     ...(chart.normal === "inside"
       ? along([
           [left * pixel, Y(normal)],
@@ -364,6 +369,23 @@ function ChartLabels({
   // Two characters' room for the glyph before it.
   const outside = fitting(room, "  2 in 10 outside", "  2 in 10\noutside")
   const happened = fitting(room, "what happened", "what\nhappened")
+  // Every spot on the forecast side, 4 px apart down it, at its left, middle and right, the
+  // nearest to (x, y) first: the label finds the closest one clear of the lines, wherever the
+  // white line runs.
+  const nearest = (text: string, x: number, y: number) => {
+    const { width, height } = labelSize(text)
+    const spots = []
+    for (let top = future.top; top + height <= future.bottom; top += 4)
+      for (const left of [
+        future.left + 2,
+        (future.left + future.right - width) / 2,
+        future.right - 2 - width,
+      ])
+        spots.push({ x: left, y: top })
+    const away = ({ x: l, y: t }: { x: number; y: number }) =>
+      Math.hypot(l + width / 2 - x, t + height / 2 - y)
+    return spots.toSorted((a, b) => away(a) - away(b))
+  }
   const [bandBox, outsideBox, happenedBox] = placeLabels(
     [
       {
@@ -386,13 +408,7 @@ function ChartLabels({
         : [
             {
               text: happened,
-              at: [-30, 6, -54, 30].flatMap((dy) => {
-                const [ex, ey] = [X(origin + 1 + known), Y(actuals[known]!)]
-                return [
-                  { x: ex - 6, y: ey + dy, align: "right" as const },
-                  { x: ex + 6, y: ey + dy },
-                ]
-              }),
+              at: nearest(happened, X(origin + 1 + known), Y(actuals[known]!)),
             },
           ]),
     ],
@@ -510,7 +526,7 @@ function ChartLabels({
       )}
     </div>
   )
-}
+})
 
 // The hover or tap readout for one day: its daily value and 7-day average, or the forecast, in
 // the page's words: the range first, then the middle estimate.
