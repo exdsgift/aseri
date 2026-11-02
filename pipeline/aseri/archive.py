@@ -369,8 +369,8 @@ def first_seen(archive_dir: Path, series_id: str) -> pd.Series:
     return _by_date(rows.drop_duplicates("target_end_date", keep="first"))
 
 
-def vintages(archive_dir: Path, series_id: str) -> pd.DataFrame:
-    """Every value the archive has seen of `series_id`, oldest vintage first: its `target_end_date`, `observation` and `as_of`, the day first seen."""
+def vintages(archive_dir: Path, series_id: str | None = None) -> pd.DataFrame:
+    """Every value the archive has seen of `series_id`, or of every series, oldest vintage first: its `target_end_date`, `observation` and `as_of`, the day first seen."""
     deltas = sorted((archive_dir / DELTAS).glob("*.csv"))
     if not deltas:
         empty = pd.DatetimeIndex([])
@@ -380,7 +380,9 @@ def vintages(archive_dir: Path, series_id: str) -> pd.DataFrame:
     rows = pd.concat(
         pd.read_csv(path, parse_dates=["target_end_date", "as_of"]) for path in deltas
     )
-    return rows[rows["target"] == series_id].sort_values("as_of", kind="stable")
+    if series_id is not None:
+        rows = rows[rows["target"] == series_id]
+    return rows.sort_values("as_of", kind="stable")
 
 
 def _by_date(rows: pd.DataFrame) -> pd.Series:
