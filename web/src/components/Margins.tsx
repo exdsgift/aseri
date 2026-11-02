@@ -12,9 +12,9 @@ const drift = 1 / 5000
 const every = 200
 
 // The op-art margins: one canvas fixed behind the page, a screen's worth at 2 CSS px per art
-// pixel, inked only in the margins beside the column (`inked`), from the hero's foot down and
-// clear of the side navigation, and drawn again as the page scrolls, so they scroll with it.
-// Decorative.
+// pixel, inked only in the margins beside the column and, on a phone, the gaps between the
+// sections (`inked`), from the hero's foot down and clear of the side navigation, and drawn
+// again as the page scrolls, so they scroll with it. Decorative.
 export function Margins() {
   const canvas = useRef<HTMLCanvasElement>(null)
   const reduced = useReducedMotion()
