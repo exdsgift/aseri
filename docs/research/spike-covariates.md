@@ -2,7 +2,7 @@
 
 > **Correction, 2026-10-30.** The confidence intervals below treat overlapping 28-day origins as independent, so they are about 1.7 times too narrow. Every "drop" verdict stands, but the "significantly worse" labels and the Lunar New Year significance do not. Lunar New Year can be retested now on PortWatch's 8 holidays since 2019. See [Covariate per le previsioni aseri](reports/Covariate%20per%20le%20previsioni%20aseri.md).
 
-Run on 2026-10-29. Prototype and rerun commands: `prototypes/timestral-covariates/` (see its README). It extends the baseline spike [spike-timestral-backtest.md](spike-timestral-backtest.md) with the same origins, horizons and metrics. Model background: [timestral-model.md](timestral-model.md). Data sources: [data-sources.md](data-sources.md).
+Run on 2026-10-29. Prototype and rerun commands: [`timestral-covariates/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-covariates) on the `prototypes` branch (see its README). It extends the baseline spike [spike-timestral-backtest.md](spike-timestral-backtest.md) with the same origins, horizons and metrics. Model background: [timestral-model.md](timestral-model.md). Data sources: [data-sources.md](data-sources.md).
 
 ## TL;DR
 
@@ -35,7 +35,7 @@ Run on 2026-10-29. Prototype and rerun commands: `prototypes/timestral-covariate
 
 ### Covariate API in the installed package
 
-`timestral` 1.0.0 from git commit `a534bdb`, as installed in `prototypes/timestral-backtest/.venv/Lib/site-packages/timestral/`. The API is present and works; nothing had to be patched.
+`timestral` 1.0.0 from git commit `a534bdb`, as installed in `.venv/Lib/site-packages/timestral/` of [`timestral-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-backtest) on the `prototypes` branch. The API is present and works; nothing had to be patched.
 
 - `TimestralForecaster.forecast()` (`forecaster.py` line 161) takes `past_covariates` `(B, C_past, T)` and `known_covariates` `(B, C_known, T + prediction_length)` (docstring, lines 181 to 183), plus `categorical_past_covariates` and `categorical_known_covariates` (lines 184 to 190). Categorical codes are target-encoded per series against the forward-filled context.
 - Shapes are enforced: past covariates "must cover exactly the context" (line 352), known covariates "the context plus the horizon" (line 364). NaN marks a missing covariate value and is masked.

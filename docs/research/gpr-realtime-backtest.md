@@ -1,6 +1,6 @@
 # Real-time GPR backtest: how much the latest vintage flatters Timestral
 
-Run on 2026-10-31 for issue #145, checklist item 12 of [Best practice previsioni probabilistiche](reports/Best%20practice%20previsioni%20probabilistiche.md). Prototype and rerun commands: `prototypes/gpr-realtime-backtest/` (see its README). Every number below is in [gpr-realtime-backtest.json](gpr-realtime-backtest.json).
+Run on 2026-10-31 for issue #145, checklist item 12 of [Best practice previsioni probabilistiche](reports/Best%20practice%20previsioni%20probabilistiche.md). Prototype and rerun commands: [`gpr-realtime-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/gpr-realtime-backtest) on the `prototypes` branch (see its README). Every number below is in [gpr-realtime-backtest.json](gpr-realtime-backtest.json).
 
 ## TL;DR
 
@@ -117,7 +117,7 @@ The defaults, 0 days, 0% and no ratio, keep the old rule for every series whose 
 
 ### Calibration
 
-`prototypes/gpr-realtime-backtest/revisions.py` replays each of the 277 updates (consecutive vintages aseri would have archived) through the production `archive.check_revisions`, with the archive's view set to the vintage before it, and counts through `archive.deep_revision` the days older than 90 days that each update moves by more than a tolerance:
+[`gpr-realtime-backtest/revisions.py`](https://github.com/exdsgift/aseri/blob/prototypes/gpr-realtime-backtest/revisions.py) on the `prototypes` branch replays each of the 277 updates (consecutive vintages aseri would have archived) through the production `archive.check_revisions`, with the archive's view set to the vintage before it, and counts through `archive.deep_revision` the days older than 90 days that each update moves by more than a tolerance:
 
 | Old days moved by more than | Most in a normal update | Fewest in a February 2024 file |
 |---|---|---|

@@ -388,7 +388,8 @@ def test_the_messages_name_one_value_and_a_tolerance_under_one_percent(tmp_path)
     ).startswith("1 archived value older than its 90-day revision window revised")
 
 
-# Real updates of the GPR authors' archive, recorded by prototypes/gpr-realtime-backtest/revisions.py: every
+# Real updates of the GPR authors' archive, recorded by
+# https://github.com/exdsgift/aseri/blob/prototypes/gpr-realtime-backtest/revisions.py: every
 # day an update changed or added since the vintage before it (`since`, an earlier one when weeks were
 # missed), with its value before and after. The days it left alone are filled in.
 REAL_UPDATES = pd.read_csv(
