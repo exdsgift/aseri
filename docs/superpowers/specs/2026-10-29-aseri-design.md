@@ -187,6 +187,8 @@ One workflow, `daily.yml`, on a cron.
    Score against a stated observation vintage, because GPR revises its recent values.
 6. **Publish:** build the API files and the page data, build the web app, check every API file against the contract (the gate, 6.6), and deploy one Pages artifact.
 
+**Page-only deploys.** A push to master that changes only `web/` runs the `page` job instead: it tests and builds the page, takes `api/v1` from the newest Pages artifact of master (kept 7 days), and deploys, with no fetch, no model and no archive, in about two minutes. The same runs by hand with `page_only`. A push that also changes anything outside `web/` deploys nothing and waits for the daily run, which deploys the whole site.
+
 **Weights cache.** Use `actions/cache` keyed by the model revision. Cold start downloads the 837 MB weights once.
 
 **Failure policy.** The job fails loudly when nothing could be published, or when the schemas fail. A failing or stale source fails only its own series: the run summary lists each source's status, and the page shows "data to {date}" in the caution colour.

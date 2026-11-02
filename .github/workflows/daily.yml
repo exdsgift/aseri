@@ -3,8 +3,16 @@ name: daily
 on:
   schedule:
     - cron: "0 7 * * *"
+  # A change to the page alone deploys on its own, through the page job.
+  push:
+    branches: [master]
+    paths: ["web/**"]
   workflow_dispatch:
     inputs:
+      page_only:
+        description: "Deploy only the page, on the API files of the last deploy: no fetch, no forecast, no archive"
+        type: boolean
+        default: false
       accept_revisions:
         description: "Accept an upstream rewrite the revision check held (more old values moved than a normal update, or one scaled past its limit), after reviewing it (this run only)"
         type: boolean
@@ -21,6 +29,7 @@ concurrency:
 jobs:
   # Runs the tests, the model and third-party code, so it gets no write rights.
   build:
+    if: github.event_name != 'push' && !inputs.page_only
     runs-on: ubuntu-latest
     outputs:
       archive_exists: ${{ steps.archive.outputs.exists }}
@@ -108,9 +117,77 @@ jobs:
           name: archive-adds
           path: ${{ runner.temp }}/archive-adds
           if-no-files-found: error
+      # Kept a week, so the page job can take its API files even after a missed cron.
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
+          retention-days: 7
+
+  # A change to the page alone, pushed to master or run by hand with page_only: the page is tested and built,
+  # then deployed on the API files of the last deploy. No fetch, no model, no archive. Like build, no write rights.
+  page:
+    if: github.event_name == 'push' || inputs.page_only
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      deploy: ${{ steps.scope.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # A push that also changes the pipeline, the API or this workflow needs the daily run, which deploys it whole.
+      - name: Check the push changes the page alone
+        id: scope
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            others=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -v '^web/' || true)
+            if [ -n "$others" ]; then
+              echo "::notice::This push changes more than the page, so it waits for the daily run: $(echo $others)"
+              exit 0
+            fi
+          fi
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+      - if: steps.scope.outputs.deploy == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: web/.node-version
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Test and build the page into site/
+        if: steps.scope.outputs.deploy == 'true'
+        working-directory: web
+        run: npm ci && npm run typecheck && npm test && npm run build
+      - name: Take the API files of the last deploy
+        if: steps.scope.outputs.deploy == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The newest Pages artifact of master, newest first: the last deploy's files, which passed the gate.
+          id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=github-pages&per_page=50"             --jq '[.artifacts[] | select(.expired | not) | select(.workflow_run.head_branch == "master")][0].id // empty')
+          if [ -z "$id" ]; then
+            echo "::error::No Pages artifact of master from the last 7 days to take the API from: run the daily workflow instead"
+            exit 1
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" > "$RUNNER_TEMP/last.zip"
+          mkdir "$RUNNER_TEMP/last"
+          unzip -q "$RUNNER_TEMP/last.zip" -d "$RUNNER_TEMP/last"
+          tar -xf "$RUNNER_TEMP/last/artifact.tar" -C "$RUNNER_TEMP/last"
+          mkdir -p site/api
+          cp -r "$RUNNER_TEMP/last/api/v1" site/api/
+          test -f site/api/v1/series.json
+      - name: Check the first load against its budget
+        if: steps.scope.outputs.deploy == 'true'
+        working-directory: web
+        run: node scripts/budget.js ../site/api/v1 || echo "::warning::The page's first load is over its budget (spec 6.8), or could not be measured; see this step's log"
+      - if: steps.scope.outputs.deploy == 'true'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+          retention-days: 7
 
   # Holds the write rights, so it runs only git and shell: no Python packages, no model.
   archive:
@@ -286,9 +363,10 @@ jobs:
           Each series' api/v1/series/{id}/scores.json gives the coverage per bucket. Check whether the data changed (a level shift, a source fault) before judging the model; any calibration change gets a new model ID (#146)."
 
   deploy:
-    needs: [build, archive]
-    # Also on a day with nothing new to archive, when archive is skipped; never after a failure, never off master.
-    if: ${{ github.ref == 'refs/heads/master' && !cancelled() && !failure() }}
+    needs: [build, archive, page]
+    # Also on a day with nothing new to archive, when archive is skipped; never after a failure, never off master;
+    # and only when build or page made the site.
+    if: ${{ github.ref == 'refs/heads/master' && !cancelled() && !failure() && (needs.build.result == 'success' || needs.page.outputs.deploy == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
