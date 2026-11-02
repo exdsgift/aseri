@@ -165,6 +165,7 @@ npm run dev                                       # on the published API
 - **What is scored.** Every forecast step, once its day's value has settled (35 days for GPR, which revises its last month), against that settled value.
 - **How.** The weighted interval score (WIS) on the 21 levels, the share of days inside the 5 in 10 and 8 in 10 ranges, and the error of the middle estimate against the series' own simple baseline, by horizon bucket (1-7 and 8-28 days), each ratio with its 95% interval.
 - **Live and backtest apart.** Live forecasts are issued by the daily run. Retrospective ones, the 120-day launch backfill and any day issued after the fact, are backtests. They are never added into one figure, and a series shows its live score only after 30 resolved forecasts.
+- **One model per record.** A record scores one model's forecasts, named in its `scored_model_id`. After a model change, until the new model has a scored forecast, a series shows the previous model's record, and the page says so.
 - **Where.** [The Record on the live page](https://exdsgift.github.io/aseri/#record), and each series' `scores.json` in the API.
 
 ## Contributing

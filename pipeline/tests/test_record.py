@@ -157,6 +157,63 @@ def test_a_record_with_no_forecast_of_the_model_is_the_empty_table_itself(tmp_pa
     assert list(rows.columns) == list(record.SCORED)
 
 
+def shown(archive_dir, today):
+    """The model whose record the series shows on `today`, and its rows."""
+    return record.shown(
+        SUEZ,
+        archive.read(archive_dir, SUEZ.id),
+        archive.vintages(archive_dir, SUEZ.id),
+        pd.Timestamp(today),
+    )
+
+
+def test_until_this_model_has_a_scored_target_the_record_is_the_newest_model_before_it(
+    tmp_path, monkeypatch
+):
+    def under(model_id, *run_args):
+        with monkeypatch.context() as before:
+            before.setattr(archive, "MODEL_ID", model_id)
+            before.setattr(archive, "ROUNDS", Path("model-output", model_id))
+            run(tmp_path, *run_args)
+
+    # Two models before this one: the first launched, the second forecast the same day again, a ship higher.
+    under(
+        "aseri-timestral209m",
+        [around("2026-10-01", 42.0)],
+        ships("2026-10-25"),
+        date(2026, 10, 26),
+    )
+    under(
+        "aseri-timestral209m_c0",
+        [around("2026-10-01", 43.0)],
+        ships("2026-10-25"),
+        date(2026, 10, 27),
+    )
+
+    # This model has no forecast yet: the record is the newest model's before it, that one alone.
+    model_id, rows = shown(tmp_path, "2026-11-08")
+    assert model_id == "aseri-timestral209m_c0"
+    assert rows["reference_date"].unique().tolist() == [pd.Timestamp("2026-10-01")]
+    assert (rows["ae_median"] == (rows["observation"] - 43.0).abs()).all()
+
+    # Its first forecast; once one of its targets is scored, the record is its own alone.
+    run(tmp_path, [around("2026-10-28", 42.0)], ships("2026-10-28"), date(2026, 10, 29))
+    run(tmp_path, [], ships("2026-11-10"), date(2026, 11, 11))
+    model_id, rows = shown(tmp_path, "2026-11-11")
+    assert model_id == "aseri-timestral209m_c0"
+    model_id, rows = shown(tmp_path, "2026-11-12")
+    assert model_id == forecast_module.MODEL_ID
+    assert rows["reference_date"].unique().tolist() == [pd.Timestamp("2026-10-28")]
+    assert rows["horizon"].tolist() == [1]
+
+
+def test_an_archive_of_one_model_shows_its_record_as_before(first_run):
+    model_id, rows = shown(first_run, "2026-11-08")
+
+    assert model_id == forecast_module.MODEL_ID
+    assert rows.equals(scored(first_run, "2026-11-08"))
+
+
 def test_a_rerun_on_a_later_day_scores_every_target_it_had_scored_byte_for_byte(
     first_run,
 ):

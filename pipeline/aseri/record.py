@@ -83,6 +83,7 @@ def scored(
     today: date,
     *,
     latest: bool = False,
+    model_id: str | None = None,
 ) -> pd.DataFrame:
     """Every target of `archived` due by `today`, one row each: its forecast's reference date and mode, the observation and its `as_of`, and the scores.
 
@@ -90,11 +91,11 @@ def scored(
     that day. The archive is append-only, so that value, and the score, are the same on every later
     run. `latest` scores the same targets against today's vintage instead: the sensitivity check of a
     series that revises. `vintages` are the archive's, as `archive.vintages` reads them.
-    A new MODEL_ID restarts the record: only the forecasts of the model in the code are scored.
+    Only one model's forecasts are scored, the model in the code's or `model_id`'s: a record never mixes two.
     shortcut: every run rescores the whole archive, about 45 s for the launch backfill and growing with it;
     keep the scores of past runs outside the archive if a run ever spends minutes here.
     """
-    archived = archive.this_model(archived)
+    archived = archive.this_model(archived, model_id)
     today = pd.Timestamp(today)
     vintages = vintages[vintages["as_of"] <= today]
     # A registered measurement error is blank in the model's input, and no observation to score against.
@@ -172,14 +173,43 @@ def settled(
     return found
 
 
-def summary(series: Series, rows: pd.DataFrame, latest: pd.DataFrame) -> dict:
+def shown(
+    series: Series, archived: list[Archived], vintages: pd.DataFrame, today: date
+) -> tuple[str, pd.DataFrame]:
+    """The model whose record `series` shows on `today`, and its rows as `scored` gives them.
+
+    The model in the code's, from its first scored target on. Until then, after a MODEL_ID change,
+    the newest model before it with a scored target, so a rerun on the day of the change, which
+    archives nothing, never blanks the record. One model's alone either way.
+    """
+    rows = scored(series, archived, vintages, today)
+    if rows.empty:
+        newest_first = sorted(archived, key=lambda a: a.forecast_date, reverse=True)
+        before = (a.model_id for a in newest_first if a.model_id != archive.MODEL_ID)
+        for model_id in dict.fromkeys(before):
+            earlier = scored(series, archived, vintages, today, model_id=model_id)
+            if not earlier.empty:
+                return model_id, earlier
+    return archive.MODEL_ID, rows
+
+
+def summary(
+    series: Series,
+    rows: pd.DataFrame,
+    latest: pd.DataFrame,
+    model_id: str | None = None,
+) -> dict:
     """The record of `series` for its score file: the live and the retrospective forecasts, never combined, then the same against the latest vintage.
 
-    `rows` and `latest` are what `scored` returns for the same day, without and with `latest`.
+    `rows` and `latest` are what `scored` returns for the same day and `model_id`, the model in the
+    code's by default, without and with `latest`.
     """
     live = _mode(series, rows, "live")
     return {
         "series_id": series.id,
+        # Additive to v1: the model whose forecasts this record scores, which is the files' own model_id
+        # but on the day of a model change, before the new one has a scored target (`shown`).
+        "scored_model_id": model_id or archive.MODEL_ID,
         # The live forecasts resolved 7 days ahead: the page shows the live scores from MIN_N.
         "n": live["n"],
         "min_n_to_display": MIN_N,

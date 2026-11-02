@@ -12,6 +12,7 @@
     "schema_version": {"$ref": "defs.schema.json#/$defs/schema_version"},
     "model_id": {"$ref": "defs.schema.json#/$defs/model_id"},
     "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+    "scored_model_id": {"$ref": "#/$defs/scored_model_id"},
     "n": {"$ref": "#/$defs/n"},
     "min_n_to_display": {"$ref": "#/$defs/min_n_to_display"},
     "primary_baseline": {"$ref": "#/$defs/primary_baseline"},
@@ -40,6 +41,10 @@
     }
   },
   "$defs": {
+    "scored_model_id": {
+      "description": "Additive to v1: the model whose forecasts this record scores, one model only. It is the file's own model_id, but after a model change, until the new model has a scored target, when the record is the newest earlier model's.",
+      "$ref": "defs.schema.json#/$defs/model_id"
+    },
     "n": {"description": "The live forecasts resolved 7 steps ahead: the page shows the live scores from min_n_to_display.", "type": "integer", "minimum": 0},
     "min_n_to_display": {"type": "integer", "minimum": 1},
     "primary_baseline": {"description": "The baseline the verdict is against, chosen on the backtest before the live record.", "enum": ["naive", "snaive7", "mean28"]},

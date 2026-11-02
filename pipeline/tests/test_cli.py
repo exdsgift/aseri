@@ -702,10 +702,10 @@ def run_under_the_model_before(monkeypatch, moment, gpr_file, api_dir, archive_d
         run_on(before, moment, gpr_file, api_dir, archive_dir)
 
 
-def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_of_the_model_before(
-    tmp_path, monkeypatch, stub_model, short_backfill
+def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_and_record_of_the_model_before(
+    tmp_path, monkeypatch, stub_model
 ):
-    monkeypatch.setattr(publish, "REPLAY_DAYS", archive.REPLAY_DAYS)
+    # The whole backfill, 60 days: GPR waits 35 days to score a target, so only its oldest are due.
     archive_dir = tmp_path / "archive"
     # The morning's run, under the model before; then the new MODEL_ID lands the same day.
     run_under_the_model_before(
@@ -739,13 +739,20 @@ def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_of_the_model_before(
         morning["model_id"],
         morning["attribution"],
     )
-    # The record is the new model's: empty, and it says so.
-    scores = read(tmp_path / "afternoon" / "scores.json")
+    # The new model has nothing scored yet, so the record is the model before's, labelled with it,
+    # as it stood that morning; the files' own model_id stays the new one.
+    morning_scores, scores = (
+        read(tmp_path / run / "scores.json") for run in ("morning", "afternoon")
+    )
+    (gpr,) = scores["series"]
     assert scores["model_id"] == MODEL_ID
-    assert (
-        scores["series"][0]["live"]["n"]
-        == scores["series"][0]["retrospective"]["n"]
-        == 0
+    assert gpr["scored_model_id"] == "aseri-timestral209m"
+    assert gpr["retrospective"]["n"] > 0
+    assert gpr["retrospective"] == morning_scores["series"][0]["retrospective"]
+    own = read(tmp_path / "afternoon" / "series" / "gpr_daily" / "scores.json")
+    assert (own["model_id"], own["scored_model_id"]) == (
+        MODEL_ID,
+        "aseri-timestral209m",
     )
     assert gate.contract(tmp_path / "afternoon") == []
 

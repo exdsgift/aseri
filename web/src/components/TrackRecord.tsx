@@ -34,6 +34,8 @@ export function TrackRecord({
   })
   const live = shown.filter(({ record }) => isLive(record))
   const collecting = shown.filter(({ record }) => !isLive(record))
+  // The day of a model change, before the new one has a scored forecast.
+  const earlier = shown.filter(({ record }) => record.earlier)
   const counted = live.length ? live : shown
   const squares = counted.flatMap(({ record }) =>
     scoredOf(record).weekly.map((week) => week.inside_80)
@@ -66,6 +68,11 @@ export function TrackRecord({
           far). Until then, backtests made after the fact.
         </p>
       )}
+      {earlier.length > 0 && (
+        <p className="text-secondary">
+          Scores of the previous model until the new one has its own.
+        </p>
+      )}
       {/* The key, once, with how many should miss: 8 of 8 is no triumph, 6 of 8 no failure. */}
       <p className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-secondary">
         <span className="flex items-center gap-1.5">
@@ -86,8 +93,11 @@ export function TrackRecord({
           >
             <h3 className="text-secondary">
               {entry.title}
-              {/* A backtest beside live records says so. */}
+              {/* A backtest beside live records says so, and the previous model's beside the new one's. */}
               {live.length > 0 && !isLive(record) && ", backtest"}
+              {earlier.length < shown.length &&
+                record.earlier &&
+                ", previous model"}
             </h3>
             <RecordSquares
               name={entry.title}

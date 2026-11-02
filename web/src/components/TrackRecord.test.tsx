@@ -388,6 +388,33 @@ it("counts Brent's days ahead in trading days, from its real backtest", () => {
   )
 })
 
+it("says in one line when the records are the previous model's, and names them when only some are", () => {
+  const lines = () =>
+    screen.queryAllByText(
+      "Scores of the previous model until the new one has its own."
+    )
+  const hormuz = { ...suez, series_id: "hormuz_transits" }
+
+  titled([suez, hormuz])
+  expect(lines()).toHaveLength(0)
+  cleanup()
+
+  // The day of a model change: every record is the previous model's, said once.
+  titled([
+    { ...suez, earlier: true },
+    { ...hormuz, earlier: true },
+  ])
+  expect(lines()).toHaveLength(1)
+  expect(screen.queryByRole("heading", { name: /previous model/ })).toBeNull()
+  cleanup()
+
+  // A series the new model could not score yet beside one it could: the card says which.
+  titled([{ ...suez, earlier: true }, hormuz])
+  expect(lines()).toHaveLength(1)
+  card("Suez Canal, previous model")
+  card("Strait of Hormuz")
+})
+
 it("leaves out a series the page has not loaded", () => {
   render(
     <TrackRecord

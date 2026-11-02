@@ -24,7 +24,7 @@
     "/scores.json": {
       "get": {
         "operationId": "getScoreboard",
-        "summary": "Every series' track record, as the page shows it.",
+        "summary": "Every series' track record, as the page shows it, each labelled with the model it scores.",
         "responses": {
           "200": {"description": "The scoreboard.", "content": {"application/json": {"schema": {"$ref": "schemas/scoreboard.schema.json"}}}}
         }
@@ -88,7 +88,7 @@
     "/series/{series_id}/scores.json": {
       "get": {
         "operationId": "getSeriesScores",
-        "summary": "A series' track record, live and retrospective apart, with the latest-vintage sensitivity check.",
+        "summary": "A series' track record, live and retrospective apart, with the latest-vintage sensitivity check and the model it scores.",
         "parameters": [{"$ref": "#/components/parameters/series_id"}],
         "responses": {
           "200": {"description": "The track record.", "content": {"application/json": {"schema": {"$ref": "schemas/scores.schema.json"}}}},
