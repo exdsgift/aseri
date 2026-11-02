@@ -159,7 +159,11 @@ def test_a_daily_run_publishes_an_api_that_keeps_to_its_contract(
         tmp_path / "archive",
     )
 
-    # Every file, the contract's own included, and their agreement.
+    # Every file, the contract's own included, and their agreement; the bulk files too, which the
+    # catalog links only once they are written.
+    assert read(tmp_path / "api" / "series.json")["links"] == {
+        "bulk": "bulk/datapackage.json"
+    }
     assert gate.contract(tmp_path / "api") == []
 
 

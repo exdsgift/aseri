@@ -12,8 +12,7 @@ from aseri import archive
 from aseri.archive import DELTAS, RUNS, timestamp
 from aseri.forecast import measurement_errors
 from aseri.publish import FORECAST_LICENSE, credit
-from aseri.record import SCORED, settled
-from aseri.scoring import scoreable_on
+from aseri.record import SCORED
 
 # The Arrow type of each Table Schema type the files use.
 ARROW = {
@@ -234,17 +233,36 @@ def _oracle(archive_dir: Path, series, today: pd.Timestamp) -> pd.DataFrame:
     """Every day of each of `series` due by `today`, with the value the record scores it against and that value's as_of.
 
     From the vintages, as `record.scored` reads them, so a failure of the scores costs none of it.
+    `record.settled`'s rule for every day at once: called day by day it took 93 s on the archive of
+    2026-11-02, which a test checks this against row by row.
     """
-    rows = []
+    frames = []
     for one in series:
         vintages = archive.vintages(archive_dir, one.id)
-        vintages = vintages[vintages["as_of"] <= today]
-        # A registered measurement error is no observation to score against.
-        errors = set(measurement_errors(one))
-        for day in vintages["target_end_date"].drop_duplicates().sort_values():
-            if scoreable_on(day, one.score_lag) <= today and day not in errors:
-                rows.append((one.id, day, *settled(vintages, day, one.score_lag)))
-    return pd.DataFrame(rows, columns=list(ORACLE))
+        lag = pd.Timedelta(days=one.score_lag)
+        # Due by today, and no registered measurement error, which is no observation to score against.
+        due = vintages[
+            (vintages["as_of"] <= today)
+            & (vintages["target_end_date"] + lag <= today)
+            & ~vintages["target_end_date"].isin(measurement_errors(one))
+        ]
+        # Its newest value seen by its scoring day; for a day not yet published then, its first value seen.
+        known = due[due["as_of"] <= due["target_end_date"] + lag]
+        late = due[~due["target_end_date"].isin(known["target_end_date"])]
+        late = late[
+            late["as_of"] == late.groupby("target_end_date")["as_of"].transform("min")
+        ]
+        frames.append(
+            pd.concat([known, late])
+            .drop_duplicates("target_end_date", keep="last")
+            .sort_values("target_end_date")
+            .rename(columns={"observation": "oracle_value"})
+        )
+    return (
+        pd.concat(frames)[list(ORACLE)]
+        if frames
+        else pd.DataFrame(columns=list(ORACLE))
+    )
 
 
 def _credits(models: pd.Series, weights: dict) -> list[dict]:

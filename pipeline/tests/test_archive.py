@@ -272,6 +272,23 @@ def test_each_day_resolves_to_its_value_in_the_first_vintage_that_held_it(tmp_pa
     )
 
 
+def test_the_vintages_keep_their_types_after_a_run_that_saw_no_new_value(tmp_path):
+    observed = days_to("2026-10-26", [120.5, 98.23, 101.3])
+    archive_run(tmp_path, [], observed, date(2026, 10, 29))
+    # Nothing new: the run's delta holds its header alone.
+    archive_run(
+        tmp_path, [two_step_forecast("2026-10-26")], observed, date(2026, 10, 30)
+    )
+
+    vintages = archive.vintages(tmp_path, "gpr_daily")
+
+    assert vintages.dtypes[["target_end_date", "observation", "as_of"]].tolist() == [
+        "datetime64[us]",
+        "float64",
+        "datetime64[us]",
+    ]
+
+
 def test_a_day_dated_ahead_of_its_download_resolves_only_from_a_vintage_on_or_after_it(
     tmp_path,
 ):

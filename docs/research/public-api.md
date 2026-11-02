@@ -383,6 +383,7 @@ Caveats:
 | Dated JSON files | 5.9 MB, 5.6 KB a file | about 17.7 MB |
 | `scores.parquet` (every year in one file) | 0.92 MB, 14,903 rows | about 3.4 MB more |
 | `time-series.parquet` and the six CSVs | 0.26 MB and 1.85 MB, 43,376 rows | well under 1 MB more |
+| `oracle-output.csv`, every day due since each series begins | 1.85 MB | about 0.15 MB more |
 
 That is **about 35 MB a year**: the bulk files keep within their estimate, and the dated JSON files run about 6 MB over theirs, since each carries its provenance and attribution: 5.6 KB a file against the 3.8 KB estimated. The 1 GB limit is about 28 years away. The plan to drop the dated JSON of closed years, if it is ever needed, is in the spec, 6.7.
 

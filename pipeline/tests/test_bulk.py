@@ -15,6 +15,7 @@ import pyarrow.csv as pacsv
 import pyarrow.parquet as pq
 import pytest
 
+import aseri.forecast as forecast_module
 from aseri import archive, bulk, gate, record
 from aseri.__main__ import SOURCES
 from aseri.forecast import MODEL_ID, WEIGHTS, Forecast
@@ -257,6 +258,27 @@ def test_the_oracle_output_is_every_due_day_s_value_from_the_vintages_even_with_
                 value,
                 f"{as_of:%Y-%m-%d}",
             )
+
+
+def test_a_registered_measurement_error_has_no_oracle_value(hub, tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        forecast_module,
+        "ANOMALIES",
+        pd.DataFrame(
+            {
+                "series_id": ["suez_transits"],
+                "date": pd.to_datetime(["2026-12-20"]),
+                "evidence": ["a test entry"],
+            }
+        ),
+    )
+    run(hub, date(2027, 1, 20), [])
+    files = write(tmp_path / "bulk", hub, today="2027-01-20")
+
+    oracle = pd.read_csv(files / "oracle-output.csv", dtype=str)
+    suez = oracle.loc[oracle["target"] == "suez_transits", "target_end_date"]
+    assert "2026-12-20" not in suez.tolist()
+    assert {"2026-12-19", "2026-12-21"} <= set(suez)
 
 
 def test_each_score_is_against_its_day_s_oracle_value(hub, tmp_path):
