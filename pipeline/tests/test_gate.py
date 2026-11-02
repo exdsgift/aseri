@@ -2,6 +2,7 @@
 
 import itertools
 import json
+import math
 import shutil
 from pathlib import Path
 
@@ -11,7 +12,9 @@ import pandas as pd
 import pytest
 
 from aseri import gate
+from aseri.forecast import Forecast
 from aseri.publish import CONTRACT
+from aseri.series import GPR_DAILY
 
 FIXTURES = Path(__file__).resolve().parents[2] / "web" / "src" / "fixtures"
 # The OpenAPI 3.1 schema of 2022-10-07, from https://spec.openapis.org/oas/3.1/schema/2022-10-07.
@@ -24,7 +27,7 @@ def read(path):
 
 @pytest.fixture
 def api(tmp_path):
-    """The web fixtures: what the daily runs published, less the files the page never reads."""
+    """The web fixtures: the files of a real run that the page reads, as the pipeline wrote them."""
     return shutil.copytree(FIXTURES, tmp_path / "api")
 
 
@@ -52,16 +55,29 @@ def test_the_contract_is_valid_openapi_and_json_schema():
 
 
 def test_the_web_fixtures_keep_to_the_contract(api):
+    """The page's fixtures cannot drift from what the pipeline publishes."""
     assert gate.contract(api, subset=True) == []
-    assert gate.bounds(api) == ([], [])
 
 
 def test_a_linked_file_must_be_published_unless_the_api_is_a_subset(api):
     errors = gate.contract(api)
 
     assert "series/gpr_daily/forecasts.json: missing, linked from series.json" in errors
+    assert "series/gpr_daily/scores.json: missing, linked from series.json" in errors
     assert "licenses/CC-BY-NC-4.0.txt: missing, linked from series.json" in errors
-    assert "openapi.json: no file for /series/{series_id}/scores.json" in errors
+    # A file at a fixed path; one at a templated path is needed only where a file links to it.
+    assert "openapi.json: no file for /openapi.json" in errors
+    assert not [e for e in errors if "no file for /series/{series_id}" in e]
+
+
+def test_a_subset_without_a_series_daily_values_or_replay_is_checked_without_them(
+    api, capsys
+):
+    (api / "series" / "gpr_daily" / "actuals.json").unlink()
+    (api / "series" / "gpr_daily" / "replay.json").unlink()
+
+    assert gate.main(api, subset=True) == 0
+    assert capsys.readouterr().out.endswith(": 0 errors\n")
 
 
 def test_a_file_off_its_schema_fails(api):
@@ -112,6 +128,19 @@ def test_a_timestamp_off_utc_to_the_second_fails(api, value):
     ]
 
 
+@pytest.mark.parametrize("value", ["portwatch.imf.org", "https://portwatch imf.org/"])
+def test_a_link_that_is_no_uri_fails(api, value):
+    edit(
+        api,
+        "series.json",
+        lambda catalog: catalog["series"][0]["source"].update(url=value),
+    )
+
+    assert gate.contract(api, subset=True) == [
+        f"series.json: series/0/source/url: '{value}' is not a 'uri'"
+    ]
+
+
 def test_a_number_json_cannot_hold_fails(api):
     path = api / "series" / "suez_transits" / "actuals.json"
     text = path.read_text(encoding="utf-8")
@@ -135,8 +164,8 @@ def test_a_file_openapi_does_not_describe_fails(api):
     [
         (
             "series/gpr_daily/latest.json",
-            lambda latest: latest.update(forecast_date="2026-10-31"),
-            "series/gpr_daily/latest.json: forecast_date is 2026-10-31, the catalog's latest_forecast_date 2026-10-30",
+            lambda latest: latest.update(forecast_date="2026-11-01"),
+            "series/gpr_daily/latest.json: forecast_date is 2026-11-01, the catalog's latest_forecast_date 2026-10-31",
         ),
         (
             "series/gpr_daily/actuals.json",
@@ -342,6 +371,70 @@ def test_a_large_change_from_the_forecast_before_only_warns():
     )
 
 
+def test_a_day_the_forecast_before_gave_no_band_is_no_scale_for_a_change():
+    # Counts held at 0, or a band the replay rounded to nothing: step 2 of the one before has no width.
+    before = {
+        "0.1": [0.0, 12.0, 14.0],
+        "0.5": [0.0, 12.0, 16.0],
+        "0.9": [0.0, 12.0, 18.0],
+    }
+
+    # Today's step 1 is 3.5 from it, which would read as millions of widths; step 2 moved 1.
+    moved = bands(step_1=(14.5, 15.5, 16.5))
+    assert gate.check_forecast(moved, YEAR, "2026-10-26", before, 1) == ([], [])
+
+
+def test_a_band_clipped_at_its_series_floor_may_have_no_width():
+    # A count between 0 and 10, every daily move 1; on step 1 the forecast is all 0: none, surely.
+    counts = YEAR - 10
+    at_zero = {"0.1": [0.0, 1.0], "0.5": [0.0, 2.0], "0.9": [0.0, 3.0]}
+
+    assert gate.check_forecast(at_zero, counts, "2026-10-26", limits=(0, math.inf)) == (
+        [],
+        [],
+    )
+    # Unclipped, the same band would be one of no width.
+    assert gate.check_forecast(at_zero, counts, "2026-10-26")[0] == [
+        "the 8 in 10 band is 0 times the mean daily move of its 365 days, outside 0.06 to 48"
+    ]
+
+
+@pytest.mark.parametrize("days", [0, 1, 27])
+def test_a_forecast_with_too_few_days_before_it_is_not_bounded_and_says_so(days):
+    short = YEAR.iloc[365 - days :]
+
+    assert gate.check_forecast(
+        bands(step_2=(90.0, 95.0, 99.0)), short, "2026-10-26"
+    ) == (
+        [],
+        [
+            f"{days} days in the 365 before its reference date, fewer than 28: not bounded"
+        ],
+    )
+
+
+def test_a_run_s_new_forecasts_are_each_checked_against_the_one_before_it():
+    def forecast(day, median):
+        return Forecast(
+            reference_date=pd.Timestamp(day),
+            levels=(0.1, 0.5, 0.9),
+            quantiles=np.array([[median - 1, median, median + 1]] * 2),
+        )
+
+    archived = [forecast("2026-10-24", 15.0)]
+    # The 25th is in bounds and moved 0.5; the 26th far outside, and 5 widths from the 25th's step 2.
+    new = [forecast("2026-10-25", 16.0), forecast("2026-10-26", 26.0)]
+
+    errors, warnings = gate.check_forecasts(GPR_DAILY, new, YEAR, archived)
+
+    assert errors == [
+        "2026-10-26: the median leaves the range of its 365 days by 0.6 of it, over 0.5"
+    ]
+    assert warnings == [
+        "2026-10-26: the median moved by 5 band widths of the forecast before on the same day, over 1.5"
+    ]
+
+
 def test_steps_between_two_forecasts_count_days_or_prices():
     prices = pd.Series(
         1.0, index=pd.DatetimeIndex(["2026-10-23", "2026-10-26", "2026-10-27"])
@@ -349,21 +442,6 @@ def test_steps_between_two_forecasts_count_days_or_prices():
 
     assert gate.steps_between(prices, "2026-10-23", "2026-10-27", trading=False) == 4
     assert gate.steps_between(prices, "2026-10-23", "2026-10-27", trading=True) == 2
-
-
-def test_the_newest_forecast_is_held_to_its_bounds_through_the_files(api):
-    def change(latest):
-        for values in latest["quantiles"].values():
-            values[0] = latest["quantiles"]["0.5"][0]
-
-    edit(api, "series/suez_transits/latest.json", change)
-
-    assert gate.bounds(api) == (
-        [
-            "series/suez_transits/latest.json: the 8 in 10 band is 0 times the mean daily move of its 365 days, outside 0.06 to 48"
-        ],
-        [],
-    )
 
 
 def test_the_bounds_hold_every_forecast_of_the_backfill_without_a_warning():

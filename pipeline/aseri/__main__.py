@@ -9,6 +9,7 @@ from pathlib import Path
 
 from aseri import archive, record
 from aseri.forecast import forecast, load_model, make_context, under_review
+from aseri.gate import annotate, check_forecasts
 from aseri.publish import publish, publish_catalog, publish_contract, publish_scores
 from aseri.series import (
     BAB_EL_MANDEB_TRANSITS,
@@ -94,16 +95,14 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         # shortcut: only the newest day is checked, so a dropout inside a PortWatch weekly batch is still a
         # retrospective origin; check every new day if the replay ever shows one.
         usable = observed.iloc[:-1] if under_review(series, observed) else observed
+        archived = archive.read(archive_dir, series.id)
         new_dates = (
             []
             if ran_today
             else archive.new_reference_dates(
                 # Only from a day with a value: the drones' day without a report starts none.
                 usable.dropna(),
-                [
-                    a.forecast.reference_date
-                    for a in archive.read(archive_dir, series.id)
-                ],
+                [a.forecast.reference_date for a in archived],
             )
         )
         forecasts = []
@@ -132,6 +131,16 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 "failed",
                 f"forecast: {type(error).__name__}: {error}",
             )
+            forecasts = []
+        # Before anything is archived, for good: a new forecast far from its series' history holds that series
+        # alone, as a model error does, its data archived all the same. Why here and not in the gate: gate.py.
+        found = check_forecasts(
+            series, forecasts, observed, [a.forecast for a in archived]
+        )
+        for warning in found[1]:
+            annotate("warning", f"{series.id}: {warning}")
+        if found[0]:
+            skipped[series.id] = ("out of bounds", "; ".join(found[0]))
             forecasts = []
         issued[series.id] = len(forecasts)
         if not ran_today and (
@@ -165,6 +174,11 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             # The vintage it republishes, not the day it failed to fetch a newer one.
             as_of = archive.newest_as_of(archive_dir, series.id)
             detail = f"{detail}; last good files kept"
+            if status == "out of bounds":
+                note = (
+                    "The newest forecasts are held for review, far outside the series' last 365 days: "
+                    f"the latest shown starts from {archived[-1].forecast.reference_date:%Y-%m-%d}."
+                )
         else:
             _, observed, as_of, _ = fetched[series.id]
             # Said only while the latest forecast does start from the day before the suspect value.
@@ -232,10 +246,13 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         catalog = json.loads((api_dir / "series.json").read_text(encoding="utf-8"))
         late = [s["series_id"] for s in catalog["series"] if s["stale_since"]]
         held = [id for id, (status, _) in skipped.items() if status == "held"]
+        bounded = [
+            id for id, (status, _) in skipped.items() if status == "out of bounds"
+        ]
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as file:
             file.write(
                 f"stale={','.join(late)}\nrevision_hold={','.join(held)}\n"
-                f"calibration_red={','.join(red)}\n"
+                f"bounds_hold={','.join(bounded)}\ncalibration_red={','.join(red)}\n"
             )
 
 

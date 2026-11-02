@@ -1,7 +1,17 @@
-"""The pre-publish gate: every file under api/v1 against the contract in the repo's api/, the files against each other, and each series' newest forecast against its own history.
+"""The pre-publish gate: the API against its contract, and each new forecast against its series' history.
 
-Usage: python -m aseri.gate API_DIR [--subset]. It exits 1 on an error; a warning never fails it.
+Two checks, split by what a failure puts at risk:
+- The contract, `python -m aseri.gate API_DIR`, a step of daily.yml after the run writes the site. A file
+  off its schema, files that disagree, or a file the catalog links to and the run did not write make the
+  API unsafe for every client: the step fails the run, so nothing is archived or deployed.
+- The bounds, `check_forecasts`, which the daily run calls on each series' new forecasts before archiving
+  them. A forecast far from its series' history is that series' problem alone: the run holds the series,
+  as it does a failed download or a model error. Its last good files stay up, its data is still archived,
+  an issue says so, and the other series are archived and deployed. The gate step comes after the run has
+  written the day's archive files, one round for every series, never rewritten: too late to drop one.
+
 --subset checks a part of the API, such as the web fixtures: a file the catalog links to may be missing.
+It exits 1 on an error.
 """
 
 import json
@@ -18,12 +28,14 @@ import pandas as pd
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
+from aseri.forecast import BOUNDS, Forecast
 from aseri.publish import CONTRACT
+from aseri.series import Series
 
 # Each pair is (warn, fail). Calibrated on the 120-day backfill of the nine series, 1,054 forecasts each
-# against the 365 days up to its reference date: the web fixtures' replays of 2026-10-30 and a local run
-# of 2026-10-31, its dated files at four decimals. The median never left the range of its 365 days
-# (by 0.00001 of it at most, a rounding): more than 5% of that range outside it warns, half fails.
+# against the 365 days up to its reference date, as published on 2026-10-30 and 2026-10-31 (the web
+# fixtures). The median never left the range of its 365 days (by 0.00001 of it at most, a rounding):
+# more than 5% of that range outside it warns, half fails.
 OUTSIDE = (0.05, 0.5)
 # The 8 in 10 band was 0.131 (Wikipedia's views, calm after a spike) to 23.6 (Brent, 14 trading days
 # ahead) times the mean daily move of its 365 days: outside 0.12 to 24 warns, outside half the low
@@ -32,7 +44,12 @@ WIDTH = ((0.12, 24.0), (0.06, 48.0))
 # The median moved at most 1.43 band widths of the forecast before it, on the same day (Brent): more
 # than 1.5 warns, and never fails, since the news can move it as far.
 CHANGE = 1.5
+# Fewer days than four weeks give no range or scale to judge a forecast by: it is not bounded.
+MIN_DAYS = 28
+# The dated forecast files, which never change: the contract reads only those issued on the day.
+DATED = "/series/{series_id}/forecasts/{reference_date}.json"
 
+# With the uri and uri-reference checkers rfc3986-validator brings.
 FORMATS = FormatChecker()
 
 
@@ -48,7 +65,7 @@ def _utc_to_the_second(value) -> bool:
 
 @cache
 def validator(name: str, strict: bool = True) -> Draft202012Validator:
-    """The validator of the schema `name`, with the date formats checked.
+    """The validator of the schema `name`, with the formats checked.
 
     Strict, the gate's: an object may hold no key its schema leaves out, so the schemas document every
     key published. Not strict, the published schemas as they are: a key added within v1 passes.
@@ -107,7 +124,23 @@ def _finite(text: str) -> float:
 def contract(api_dir: Path, *, subset: bool = False) -> list[str]:
     """The errors of the files under `api_dir` against the contract: each file against its schema, then the files against each other."""
     routes = _routes()
-    errors, documents, served = [], {}, set()
+    errors, documents, dated, served = [], {}, [], set()
+
+    def check(path: str, schema: str) -> None:
+        try:
+            document = json.loads(
+                (api_dir / path).read_text(encoding="utf-8"),
+                parse_float=_finite,
+                parse_constant=_finite,
+            )
+        except ValueError as error:
+            errors.append(f"{path}: not JSON with finite numbers: {error}")
+            return
+        for error in validator(schema).iter_errors(document):
+            where = "/".join(map(str, error.absolute_path))
+            errors.append(f"{path}: {where + ': ' if where else ''}{error.message}")
+        documents[path] = document
+
     for file in sorted(p for p in api_dir.rglob("*") if p.is_file()):
         path = file.relative_to(api_dir).as_posix()
         template = next(
@@ -117,31 +150,52 @@ def contract(api_dir: Path, *, subset: bool = False) -> list[str]:
             errors.append(f"{path}: no path of openapi.json describes it")
             continue
         served.add(template)
-        schema = routes[template][1]
-        if schema is None:
-            continue
-        try:
-            document = json.loads(
-                file.read_text(encoding="utf-8"),
-                parse_float=_finite,
-                parse_constant=_finite,
-            )
-        except ValueError as error:
-            errors.append(f"{path}: not JSON with finite numbers: {error}")
-            continue
-        for error in validator(schema).iter_errors(document):
-            where = "/".join(map(str, error.absolute_path))
-            errors.append(f"{path}: {where + ': ' if where else ''}{error.message}")
-        documents[path] = document
-    # The files' agreement reads them in the shapes their schemas give.
+        if template == DATED:
+            dated.append(path)
+        elif schema := routes[template][1]:
+            check(path, schema)
+    # What follows reads the files in the shapes their schemas give.
     if errors:
         return errors
+    # Of the dated files, only the day's: an older one was checked the day it was issued and never
+    # changes, so the work stays a day's, and a check tightened later never holds a file for good.
+    today = _issued_today(documents)
+    for path in dated:
+        if path in today:
+            check(path, routes[DATED][1])
+    if errors:
+        return errors
+    # A file at a fixed path is always written; one at a templated path, where a file links to it.
     if not subset:
-        errors = [f"openapi.json: no file for {t}" for t in routes if t not in served]
-    return errors + _agreement(documents, api_dir, subset)
+        errors = [
+            f"openapi.json: no file for {t}"
+            for t in routes
+            if "{" not in t and t not in served
+        ]
+    return errors + _agreement(documents, dated, api_dir, subset)
 
 
-def _agreement(documents: dict, api_dir: Path, subset: bool) -> list[str]:
+def _issued_today(documents: dict) -> set[str]:
+    """The dated files the indexes list as issued on the catalog's day, and the one each latest.json copies."""
+    catalog = documents.get("series.json")
+    today = catalog and catalog["generated_at"][:10]
+    paths = set()
+    for path, document in documents.items():
+        base = path.rsplit("/", 1)[0]
+        if path.endswith("/forecasts.json"):
+            paths |= {
+                f"{base}/{f['url']}"
+                for f in document["forecasts"]
+                if f["forecast_date"] == today
+            }
+        elif path.endswith("/latest.json"):
+            paths.add(f"{base}/{document['links'].get('canonical')}")
+    return paths
+
+
+def _agreement(
+    documents: dict, dated: list[str], api_dir: Path, subset: bool
+) -> list[str]:
     errors = []
 
     def published(path: str, by: str) -> None:
@@ -158,11 +212,12 @@ def _agreement(documents: dict, api_dir: Path, subset: bool) -> list[str]:
     errors += [
         f"series/{id}: not a series of the catalog"
         for id in sorted(
-            {p.split("/")[1] for p in documents if p.startswith("series/")} - set(ids)
+            {p.split("/")[1] for p in [*documents, *dated] if p.startswith("series/")}
+            - set(ids)
         )
     ]
     for entry in catalog["series"]:
-        errors += _series(entry, documents, published)
+        errors += _series(entry, documents, dated, published)
     board = documents.get("scores.json")
     if board:
         listed = [record["series_id"] for record in board["series"]]
@@ -185,7 +240,7 @@ def _agreement(documents: dict, api_dir: Path, subset: bool) -> list[str]:
     return errors
 
 
-def _series(entry: dict, documents: dict, published) -> list[str]:
+def _series(entry: dict, documents: dict, dated: list[str], published) -> list[str]:
     """The disagreements of a series' files with its catalog entry and with each other."""
     id, errors = entry["series_id"], []
     base = f"series/{id}/"
@@ -266,20 +321,21 @@ def _series(entry: dict, documents: dict, published) -> list[str]:
             if f["url"] != f"forecasts/{f['reference_date']}.json":
                 errors.append(f"{base}forecasts.json: lists {f['url']}")
             published(path, f"{base}forecasts.json")
-            dated = mine.get(path)
-            if dated and any(
-                dated[k] != f[k]
+            new = mine.get(path)
+            if new and any(
+                new[k] != f[k]
                 for k in ("reference_date", "forecast_date", "forecast_mode")
             ):
                 errors.append(f"{path}: is not as {base}forecasts.json lists it")
+        errors += [
+            f"{path}: not in {base}forecasts.json"
+            for path in dated
+            if path.startswith(base) and path not in listed
+        ]
     for path, forecast in mine.items():
-        if path.startswith(f"{base}forecasts/"):
-            if index and path not in listed:
-                errors.append(f"{path}: not in {base}forecasts.json")
-            if path != f"{base}forecasts/{forecast['reference_date']}.json":
-                errors.append(
-                    f"{path}: its reference_date is {forecast['reference_date']}"
-                )
+        named = f"{base}forecasts/{forecast.get('reference_date')}.json"
+        if path.startswith(f"{base}forecasts/") and path != named:
+            errors.append(f"{path}: its reference_date is {forecast['reference_date']}")
         if path.startswith(f"{base}forecasts/") or path == f"{base}latest.json":
             errors += [f"{path}: {e}" for e in _forecast(forecast)]
     return errors
@@ -351,44 +407,46 @@ def step_dates(reference_date: str, dates: list[str], unit: str) -> list[str]:
     return errors
 
 
-def bounds(api_dir: Path) -> tuple[list[str], list[str]]:
-    """The errors and warnings of each series' newest forecast, latest.json, against its own history."""
+def check_forecasts(
+    series: Series,
+    forecasts: list[Forecast],
+    observed: pd.Series,
+    archived: list[Forecast] = (),
+) -> tuple[list[str], list[str]]:
+    """The errors and warnings of a run's new `forecasts` of `series`, each by its reference date.
+
+    Each against `observed`, the series' vintage, up to its reference date, and against the forecast
+    before it, new or `archived`.
+    """
     errors, warnings = [], []
-    catalog = _read(api_dir / "series.json")
-    for entry in catalog["series"]:
-        base = f"series/{entry['series_id']}/"
-        latest = _read(api_dir / base / "latest.json")
-        actuals = _read(api_dir / base / "actuals.json")
-        observed = pd.Series(
-            actuals["observation"], index=pd.DatetimeIndex(actuals["date"])
-        )
-        # The forecast the day before, from the replay: its values are rounded, which a warning can bear.
+    trading = series.horizon_unit == "trading_day"
+    every = sorted([*archived, *forecasts], key=lambda f: f.reference_date)
+    for forecast in forecasts:
         before = next(
-            (
-                forecast
-                for forecast in reversed(
-                    _read(api_dir / base / "replay.json")["forecasts"]
-                )
-                if forecast["reference_date"] < latest["reference_date"]
-            ),
+            (f for f in reversed(every) if f.reference_date < forecast.reference_date),
             None,
         )
+        day = f"{forecast.reference_date:%Y-%m-%d}"
         found = check_forecast(
-            latest["quantiles"],
+            _by_level(forecast),
             observed,
-            latest["reference_date"],
-            before and before["quantiles"],
+            day,
+            before and _by_level(before),
             before
             and steps_between(
-                observed,
-                before["reference_date"],
-                latest["reference_date"],
-                trading=entry["horizon_unit"] == "trading_day",
+                observed, before.reference_date, forecast.reference_date, trading
             ),
+            limits=BOUNDS[series.kind],
         )
-        errors += [f"{base}latest.json: {e}" for e in found[0]]
-        warnings += [f"{base}latest.json: {w}" for w in found[1]]
+        errors += [f"{day}: {e}" for e in found[0]]
+        warnings += [f"{day}: {w}" for w in found[1]]
     return errors, warnings
+
+
+def _by_level(forecast: Forecast) -> dict:
+    return {
+        str(level): forecast.quantiles[:, i] for i, level in enumerate(forecast.levels)
+    }
 
 
 def check_forecast(
@@ -397,47 +455,59 @@ def check_forecast(
     reference_date: str,
     before: dict | None = None,
     shift: int = 0,
+    limits: tuple[float, float] = (-math.inf, math.inf),
 ) -> tuple[list[str], list[str]]:
     """The errors and warnings of a forecast against the 365 days of `observed` up to its reference date.
 
     Its median against their range, its 8 in 10 band against their mean daily move, and, given the
     forecast `before` it, `shift` steps earlier, how far its median moved on the days both forecast.
+    `limits` are the range its series' values keep, where a band may be clipped.
     """
     day = pd.Timestamp(reference_date)
-    year = observed.loc[day - pd.Timedelta(days=364) : day].to_numpy()
+    year = observed.loc[day - pd.Timedelta(days=364) : day].dropna().to_numpy()
     low, median, high = (np.array(quantiles[level]) for level in ("0.1", "0.5", "0.9"))
     errors, warnings = [], []
 
-    span = max(year.max() - year.min(), 1e-9)
-    outside = max(
-        0.0, (median.max() - year.max()) / span, (year.min() - median.min()) / span
-    )
-    for limit, found in zip(reversed(OUTSIDE), (errors, warnings)):
-        if outside > limit:
-            found.append(
-                f"the median leaves the range of its 365 days by {outside:.2g} of it, over {limit:g}"
-            )
-            break
-
-    move = np.abs(np.diff(year)).mean()
-    # A year without a move has no scale to judge a band by.
-    for ratio in sorted(
-        {(high - low).min() / move, (high - low).max() / move} if move else ()
-    ):
-        for (least, most), found in zip(reversed(WIDTH), (errors, warnings)):
-            if not least <= ratio <= most:
+    if len(year) < MIN_DAYS:
+        warnings.append(
+            f"{len(year)} days in the 365 before its reference date, fewer than {MIN_DAYS}: not bounded"
+        )
+    else:
+        span = max(year.max() - year.min(), 1e-9)
+        outside = max(
+            0.0, (median.max() - year.max()) / span, (year.min() - median.min()) / span
+        )
+        for limit, found in zip(reversed(OUTSIDE), (errors, warnings)):
+            if outside > limit:
                 found.append(
-                    f"the 8 in 10 band is {ratio:.2g} times the mean daily move of its 365 days, outside {least:g} to {most:g}"
+                    f"the median leaves the range of its 365 days by {outside:.2g} of it, over {limit:g}"
                 )
                 break
+        move = np.abs(np.diff(year)).mean()
+        width = high - low
+        # A band clipped at its series' floor or ceiling, counts held at 0, can be narrow as it likes.
+        free = width[(low > limits[0]) & (high < limits[1])]
+        # The narrowest free band against the low ends, the widest band against the high ends. A year
+        # without a move has no scale to judge a band by.
+        ratios = [(free.min() / move, 0)] if move and free.size else []
+        ratios += [(width.max() / move, 1)] if move else []
+        for ratio, side in ratios:
+            for (least, most), found in zip(reversed(WIDTH), (errors, warnings)):
+                if (ratio < least, ratio > most)[side]:
+                    found.append(
+                        f"the 8 in 10 band is {ratio:.2g} times the mean daily move of its 365 days, outside {least:g} to {most:g}"
+                    )
+                    break
 
     if before is not None:
-        shared = min(len(median), len(before["0.5"]) - shift)
-        then = slice(shift, shift + max(shared, 0))
+        shared = max(min(len(median), len(before["0.5"]) - shift), 0)
+        then = slice(shift, shift + shared)
         band = np.array(before["0.9"][then]) - np.array(before["0.1"][then])
-        moves = np.abs(
-            median[: max(shared, 0)] - np.array(before["0.5"][then])
-        ) / np.maximum(band, 1e-9)
+        # A day the forecast before gave no band (counts held at 0) is no scale for a move.
+        wide = band > 0
+        moves = (
+            np.abs(median[:shared] - np.array(before["0.5"][then]))[wide] / band[wide]
+        )
         if moves.size and moves.max() > CHANGE:
             warnings.append(
                 f"the median moved by {moves.max():.2g} band widths of the forecast before on the same day, over {CHANGE:g}"
@@ -445,29 +515,26 @@ def check_forecast(
     return errors, warnings
 
 
-def steps_between(observed: pd.Series, before: str, after: str, trading: bool) -> int:
+def steps_between(observed: pd.Series, before, after, trading: bool) -> int:
     """The steps from one reference date to a later one: days, or for trading days the prices between."""
+    before, after = pd.Timestamp(before), pd.Timestamp(after)
     if trading:
         index = observed.index
         return int(((index > before) & (index <= after)).sum())
-    return (pd.Timestamp(after) - pd.Timestamp(before)).days
+    return (after - before).days
 
 
-def _read(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+def annotate(level: str, message: str) -> None:
+    """Print `message`, in GitHub Actions as an annotation on the run."""
+    form = "::{}::" if "GITHUB_ACTIONS" in os.environ else "{}: "
+    print(form.format(level) + message, flush=True)
 
 
 def main(api_dir: Path, subset: bool = False) -> int:
-    errors, warnings = contract(api_dir, subset=subset), []
-    # The bounds read the files in the shapes the contract gives them.
-    if not errors:
-        errors, warnings = bounds(api_dir)
-    # In GitHub Actions, as annotations on the run.
-    form = "::{}::" if "GITHUB_ACTIONS" in os.environ else "{}: "
-    for level, messages in (("warning", warnings), ("error", errors)):
-        for message in messages:
-            print(form.format(level) + message)
-    print(f"{api_dir}: {len(errors)} errors, {len(warnings)} warnings")
+    errors = contract(api_dir, subset=subset)
+    for error in errors:
+        annotate("error", error)
+    print(f"{api_dir}: {len(errors)} errors")
     return 1 if errors else 0
 
 

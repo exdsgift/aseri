@@ -6,7 +6,7 @@ model_name: Timestral-209M, zero-shot
 model_abbr: timestral209m
 model_version: "weights mistralai/Timestral-209M at 9874d252ab0aae16f7f7c999f98f98d6ad7d8365, package timestral at a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
 model_contributors:
-  - name: exdsgift
+  - name: Gabriele Durante
     affiliation: aseri
 website_url: https://exdsgift.github.io/aseri/
 repo_url: https://github.com/exdsgift/aseri

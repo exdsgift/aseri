@@ -26,6 +26,7 @@ jobs:
       archive_exists: ${{ steps.archive.outputs.exists }}
       archive_adds: ${{ steps.adds.outputs.any }}
       revision_hold: ${{ steps.run.outputs.revision_hold }}
+      bounds_hold: ${{ steps.run.outputs.bounds_hold }}
       stale: ${{ steps.run.outputs.stale }}
       calibration_red: ${{ steps.run.outputs.calibration_red }}
     defaults:
@@ -84,9 +85,9 @@ jobs:
         # A series whose upstream rewrote data older than its revision window is held: it keeps its last good files,
         # and its id goes to the revision_hold output, for revision-alert. The other series go on.
         run: uv run python -m aseri ../site/api/v1 ../archive
-      # Before the archive takes today's forecasts for good, and before deploy: a file off its schema, files
-      # that disagree, or a newest forecast far outside its series' history fails the run. A large change
-      # from the forecast the day before only warns.
+      # Before the archive and the deploy take the files: one off its schema, files that disagree, or a linked
+      # file missing make the whole API unsafe, so they fail the run. A new forecast far outside its series'
+      # history is one series' problem: the run step held that series alone, for bounds-alert (gate.py).
       - name: Check the API against its contract
         run: uv run python -m aseri.gate ../site/api/v1
       # The day's real first load against spec 6.8's budget (CI checks the fixtures). Only a
@@ -192,6 +193,34 @@ jobs:
           Run: $RUN_URL
 
           The run summary names the oldest changed day of each held series. Review the change upstream. If it is genuine, run the daily workflow by hand with accept_revisions ticked: that run records the rewrite (for every series, so check none is still broken), and the daily runs go on from it. If the file is broken, wait for upstream to fix it."
+
+  # Opens an issue when the run holds a series whose new forecast fell outside its bounds; like revision-alert
+  # it runs only gh, with issues: write alone.
+  bounds-alert:
+    needs: build
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' && needs.build.outputs.bounds_hold != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open an issue, unless one is open already
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          HELD: ${{ needs.build.outputs.bounds_hold }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Forecast out of bounds: $HELD"
+          # The model is deterministic, so every daily run holds the same series until the data or the code changes.
+          if [ "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq length)" -gt 0 ]; then
+            echo "An issue is open already"
+            exit 0
+          fi
+          gh issue create --title "$title" --body "A new forecast of these series fell far outside the bounds drawn from the series' last 365 days (pipeline/aseri/gate.py), so the daily run archived and published none of their new forecasts. Their data was archived, their last good forecasts stay up with a note on the page, and the other series went on as usual.
+
+          Run: $RUN_URL
+
+          The run summary gives each held forecast and the bound it broke. Check the data first: a source fault or a level shift. The next runs forecast the same days again and hold them again until the data moves or the code changes (the bounds, recalibrated with a reason, or the model, under a new model ID)."
 
   # Opens an issue when the page shows a series as late; like revision-alert it runs only gh, with issues: write alone.
   stale-alert:

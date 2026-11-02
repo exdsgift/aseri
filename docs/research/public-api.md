@@ -39,7 +39,7 @@ Key design decisions:
 6. **One contract, checked before every deploy.**
    - JSON Schema 2020-12 files are the single source of truth.
    - OpenAPI 3.1.1 references them, since its Schema Object is a superset of 2020-12 [OAS].
-   - A gate in `daily.yml` (`pipeline/aseri/gate.py`, #135) checks every file against its schema, the files against each other, forecast-specific rules (arrays line up, quantiles never decrease, each step's date) and each newest forecast against its series' history, before the archive and the deploy (3.5).
+   - A gate in `daily.yml` (`pipeline/aseri/gate.py`, #135) checks every file against its schema, the files against each other and forecast-specific rules (arrays line up, quantiles never decrease, each step's date) before the archive and the deploy, and fails the run on an error. The daily run checks each new forecast against its series' history before archiving it, and holds that series alone when one is far off (3.5).
 7. **Versioning:**
    - The major version is in the path. Within v1, changes are additive only, as endoflife.date does [EOL].
    - **Corrected (#135):** `schema_version` stays `1.0.0` within v1 rather than counting minor versions. The dated forecast files carry it, and they never change.
@@ -324,21 +324,27 @@ Each forecast file and the per-run manifest on the archive branch carry this blo
 - **A discontinued series** stays in the catalog with `"status": "discontinued"`.
 - **A new model or new inference settings** get a new `model_id`. **A new quantile set or horizon** gets a new `schema_version` major.
 
-**The gate before the archive and the deploy (#135).** `python -m aseri.gate ../site/api/v1`, a step of `daily.yml` right after the run writes the site. It uses `jsonschema` [TOOLS] and nothing else new. An error fails the build job, so neither today's forecasts are archived nor the site deployed: a forecast is permanent once archived, so it is held before. A warning is an annotation on the run. `--subset` checks a part of the API, the web fixtures, where a linked file may be missing; a test runs it on them, so the page's fixtures cannot drift from the contract.
-1. Every file under `api/v1/` matches a path of `openapi.json`, and every path has a file. Every JSON file parses with finite numbers only (`NaN` and `Infinity` are refused) and validates against its schema, closed, with a format checker: `date` is an ISO calendar day, and `date-time` RFC 3339 in UTC to the second.
-2. The files agree with each other: the catalog's IDs are unique and every `series/{id}/` is one of them; its links and licence texts exist; `latest.json`, `actuals.json`, `replay.json` and `forecasts.json` hold the reference date, forecast date, last observation, unit and horizon the catalog gives; each file names its own series; the index lists every dated file, in order, as the file says it is; `latest.json` is a copy of the newest dated file; the scoreboard lists exactly the series the catalog links to scores.
-3. Rules the schema cannot express, for every forecast file: `horizon` counts 1, 2, 3 and on; every level has a value per step (the schema holds exactly the 21 levels); values never decrease from level to level; `reference_date` ≤ `forecast_date`; `target_end_date` is `reference_date` plus h days, or for `trading_day` weekdays in order that skip at most two in a row (the archive's holiday calendar needs 7 years of prices, more than the API holds). The replay's forecasts get the same level checks.
-4. Each newest forecast against its series' 365 days up to its reference date in `actuals.json`, calibrated on the 120-day backfill (1,054 forecasts, the web fixtures of 2026-10-30 and a local run of 2026-10-31):
+**Two checks, split by what a failure puts at risk (#135, `pipeline/aseri/gate.py`).** It uses `jsonschema` [TOOLS], `referencing` and `rfc3986-validator`, nothing else new.
+- **The contract** makes the whole API safe or not, so it fails the run. `python -m aseri.gate ../site/api/v1` is a step of `daily.yml` right after the run writes the site; an error fails the build job, so nothing is archived or deployed. `--subset` checks a part of the API, the web fixtures, where a linked file may be missing; a test runs it on them, so the page's fixtures cannot drift from the contract.
+- **The bounds** are one series' problem, so they hold that series alone. The daily run checks each new forecast before archiving it, where nothing is ever rewritten. A forecast past a failing bound holds its series as a failed download or a model error does: none of its new forecasts is archived or published, its data is archived all the same, its last good files stay up with a catalog `note` saying so, the run summary gives the forecast and the bound, `bounds_hold` names it for an issue (`bounds-alert`), and every other series is archived and deployed. The model is deterministic, so the next runs hold it again until the data moves or the code changes.
 
-   | Check | Backfill | Warns | Fails |
-   |---|---|---|---|
-   | The median outside the range of the 365 days, in that range | never outside (0.00001 at most, a rounding) | over 0.05 | over 0.5 |
-   | The 8 in 10 band (q0.9 - q0.1), in mean daily moves of the 365 days | 0.131 (Wikipedia's views) to 23.6 (Brent at 14 trading days) | outside 0.12 to 24 | outside 0.06 to 48 |
-   | The median's move from the forecast before, on the same days, in that forecast's band widths (from `replay.json`) | 1.43 at most (Brent) | over 1.5 | never |
+The contract:
+1. Every file under `api/v1/` matches a path of `openapi.json`, and every fixed path (`series.json`, `scores.json`, `openapi.json`) has a file; a templated path needs a file only where another file links to it, so a day whose scores all fail, which drops their links, still passes. Every JSON file parses with finite numbers only (`NaN` and `Infinity` are refused) and validates against its schema, closed, with a format checker: `date` is an ISO calendar day, `date-time` RFC 3339 in UTC to the second, and `uri` RFC 3986.
+2. Of the dated forecast files, only those issued on the catalog's day are read, with the one each `latest.json` copies. An older one was checked the day it was issued and never changes: reading it again would grow the work every day, and a check tightened later would hold for good a file that can no longer be fixed. The index must still list every dated file, and every file it lists must exist.
+3. The files agree with each other: the catalog's IDs are unique and every `series/{id}/` is one of them; its links and licence texts exist; `latest.json`, `actuals.json`, `replay.json` and `forecasts.json` hold the reference date, forecast date, last observation, unit and horizon the catalog gives; each file names its own series; the index is in order and lists each new file as the file says it is; `latest.json` is a copy of the newest dated file; the scoreboard lists exactly the series the catalog links to scores.
+4. Rules the schema cannot express, for every forecast file read: `horizon` counts 1, 2, 3 and on; every level has a value per step (the schema holds exactly the 21 levels); values never decrease from level to level; `reference_date` ≤ `forecast_date`; `target_end_date` is `reference_date` plus h days, or for `trading_day` weekdays in order that skip at most two in a row (the archive's holiday calendar needs 7 years of prices, more than the API holds). The replay's forecasts get the same level checks.
 
-   A test holds every forecast of the fixtures' backfill inside the warning bounds.
-5. Elsewhere: the archive job keeps the archive append-only and under 50 MB (6.7 of the spec), and a test reruns the daily run on a later day and finds every earlier dated file byte-identical.
-6. **Not done:** budgets on the round file and the site artifact, a smoke test after deploy, values ≥ 0 per series (the catalog does not publish the series' kind; `forecast.py` clips them), an R job that runs `hubValidations` on the round CSV [HV-MO], and `frictionless validate` on the CSV resources.
+The bounds, each new forecast against the 365 days of its series' vintage up to its reference date, calibrated on the 120-day backfill (1,054 forecasts, as published on 2026-10-30 and 2026-10-31):
+
+| Check | Backfill | Warns | Holds the series |
+|---|---|---|---|
+| The median outside the range of the 365 days, in that range | never outside (0.00001 at most, a rounding) | over 0.05 | over 0.5 |
+| The 8 in 10 band (q0.9 - q0.1), in mean daily moves of the 365 days | 0.131 (Wikipedia's views) to 23.6 (Brent at 14 trading days) | outside 0.12 to 24 | outside 0.06 to 48 |
+| The median's move from the forecast before (new or archived), on the same days, in that forecast's band widths; a day it gave no band is skipped | 1.43 at most (Brent) | over 1.5 | never |
+
+Fewer than 28 days in the window leave a forecast unbounded, with a warning. A band clipped at its series' floor or ceiling (counts held at 0) is never judged too narrow. A test holds every forecast of the fixtures' backfill inside the warning bounds.
+
+Elsewhere: the archive job keeps the archive append-only and under 50 MB (6.7 of the spec), and a test reruns the daily run on a later day and finds every earlier dated file byte-identical. **Not done:** budgets on the round file and the site artifact, a smoke test after deploy, values ≥ 0 per series (the catalog does not publish the series' kind; `forecast.py` clips them), an R job that runs `hubValidations` on the round CSV [HV-MO], and `frictionless validate` on the CSV resources.
 
 ### 3.6 Storage growth and keeping the repository small
 
@@ -728,7 +734,7 @@ The research's skeleton is now the real document, `api/openapi.json` (#135): Ope
 - the bulk files wait for #136;
 - `info.license` is CC BY-NC 4.0.
 
-`format` is an annotation by default in 2020-12, so the gate turns on format checking (`date` from `jsonschema`, `date-time` its own, UTC to the second). Equal array lengths, monotone quantiles and step dates are checked in code (section 3.5).
+`format` is an annotation by default in 2020-12, so the gate turns on format checking (`date` from `jsonschema`, `uri` from `rfc3986-validator`, `date-time` its own, UTC to the second). Equal array lengths, monotone quantiles and step dates are checked in code (section 3.5).
 
 ## Sources
 

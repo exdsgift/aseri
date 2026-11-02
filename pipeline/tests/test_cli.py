@@ -37,7 +37,11 @@ LEVELS = (
 
 
 class StubModel:
-    """Stands in for Timestral: the last known value, in a band that widens with each step. It keeps every context it reads."""
+    """Stands in for Timestral: the last known value, in a band that widens with each step. It keeps every context it reads.
+
+    The band scales with the context's mean daily move over its last year, as a real forecast's does,
+    so the run's bounds pass it: 2 moves wide on the first step, 2 times the root of h on step h.
+    """
 
     def __init__(self):
         self.contexts = []
@@ -46,7 +50,9 @@ class StubModel:
         self.contexts.append(context)
         steps = np.arange(1, prediction_length + 1)[:, None]
         # Like Timestral, it reads a blank as unknown, never as a value.
-        band = context[~np.isnan(context)][-1] + steps * (np.array(LEVELS) - 0.5)
+        known = context[~np.isnan(context)]
+        move = np.abs(np.diff(known[-365:])).mean() if len(known) > 1 else 0.0
+        band = known[-1] + 2.5 * move * np.sqrt(steps) * (np.array(LEVELS) - 0.5)
         return SimpleNamespace(
             quantiles=torch.tensor(band)[None, None], quantile_levels=LEVELS
         )
@@ -151,9 +157,60 @@ def test_a_daily_run_publishes_an_api_that_keeps_to_its_contract(
         tmp_path / "archive",
     )
 
-    # Every file, the contract's own included, and their agreement. The stub's bands are no
-    # forecast's, so the bounds are left to test_gate.
+    # Every file, the contract's own included, and their agreement.
     assert gate.contract(tmp_path / "api") == []
+
+
+def test_a_day_whose_scores_all_fail_still_keeps_to_the_contract(
+    tmp_path, monkeypatch, stub_model
+):
+    def broken(*args, **kwargs):
+        raise ValueError("a broken vintage")
+
+    monkeypatch.setattr(record, "scored", broken)
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 29, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+
+    api = tmp_path / "api"
+    assert read(api / "scores.json")["series"] == []
+    assert not list(api.glob("series/*/scores.json"))
+    # The catalog links no scores, so none is missing.
+    assert gate.contract(api) == []
+
+
+def test_the_contract_reads_only_the_dated_forecasts_issued_on_the_day(
+    tmp_path, monkeypatch, stub_model
+):
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 29, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+    api = tmp_path / "api"
+    # A forecast of the day's backfill, its levels crossed.
+    path = api / "series" / "gpr_daily" / "forecasts" / "2026-10-01.json"
+    dated = read(path)
+    quantiles = dated["quantiles"]
+    quantiles["0.4"][0], quantiles["0.6"][0] = quantiles["0.6"][0], quantiles["0.4"][0]
+    path.write_text(json.dumps(dated), encoding="utf-8")
+
+    assert gate.contract(api) == [
+        "series/gpr_daily/forecasts/2026-10-01.json: step 1 decreases from level 0.4 to 0.45"
+    ]
+
+    # The next day it is an old file, checked the day it was issued and never changed: not read again,
+    # so a check tightened later can never hold a file that can no longer be fixed.
+    catalog = read(api / "series.json")
+    catalog["generated_at"] = "2026-10-30T07:02:00Z"
+    (api / "series.json").write_text(json.dumps(catalog), encoding="utf-8")
+    assert gate.contract(api) == []
 
 
 def test_a_run_in_github_actions_records_its_commit_and_run(
@@ -625,7 +682,7 @@ def test_data_past_its_expected_lag_warns_in_the_run_summary_and_on_the_page_and
     assert (
         outputs.read_text(encoding="utf-8")
         == ("stale=gpr_daily\n" if stale_since else "stale=\n")
-        + "revision_hold=\ncalibration_red=\n"
+        + "revision_hold=\nbounds_hold=\ncalibration_red=\n"
     )
 
 
@@ -1061,6 +1118,75 @@ def test_a_model_error_in_one_series_fails_only_that_series_and_still_archives_i
     assert [f["reference_date"] for f in index if f["forecast_mode"] == "live"] == [
         "2026-10-25"
     ]
+
+
+class SuezLeaps(StubModel):
+    """The stub, except on Suez's contexts, where its forecast leaps a thousand ships above any day of the year."""
+
+    def forecast(self, context, prediction_length):
+        result = super().forecast(context, prediction_length)
+        if set(np.unique(context[~np.isnan(context)])) <= {41, 42, 43}:
+            result.quantiles += 1000
+        return result
+
+
+def test_a_forecast_out_of_its_bounds_holds_only_its_own_series_and_names_it_for_the_alert(
+    tmp_path, monkeypatch, stub_model, summary, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day1",
+        archive_dir,
+    )
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
+
+    # The next weekly batch, with Suez's forecasts far above anything it saw.
+    monkeypatch.setattr(cli, "load_model", SuezLeaps)
+    serve(monkeypatch, sea_lanes("2026-11-01"), edited=NEXT_EDIT)
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 5, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    # None of Suez's new forecasts is archived, for good; its data is, and the other lanes go on.
+    manifest = read(archive_dir / "runs" / "2026-11-05.json")
+    assert {f["target"] for f in manifest["forecasts"]} == {
+        "hormuz_transits",
+        "bab_el_mandeb_transits",
+        "taiwan_strait_transits",
+    }
+    assert archive.as_of_view(archive_dir, "suez_transits", date(2026, 11, 5)).index[
+        -1
+    ] == pd.Timestamp("2026-11-01")
+    row = [line for line in summary().splitlines() if "suez" in line][-1]
+    assert row.startswith(
+        "| suez_transits | out of bounds | 2026-11-01 | 2026-10-26: the median leaves the range of its 365 days by "
+    )
+    assert row.endswith("; last good files kept |")
+    # Its last good forecast stays up, saying why it starts before the newest data.
+    day1 = tmp_path / "day1" / "series" / "suez_transits"
+    day2 = tmp_path / "day2" / "series" / "suez_transits"
+    assert read(day2 / "latest.json") == read(day1 / "latest.json")
+    entries = {
+        s["series_id"]: s for s in read(tmp_path / "day2" / "series.json")["series"]
+    }
+    assert entries["suez_transits"]["last_observation_date"] == "2026-11-01"
+    assert entries["suez_transits"]["note"] == (
+        "The newest forecasts are held for review, far outside the series' last 365 days: "
+        "the latest shown starts from 2026-10-25."
+    )
+    assert entries["hormuz_transits"]["latest_reference_date"] == "2026-11-01"
+    assert "bounds_hold=suez_transits\n" in output.read_text(encoding="utf-8")
+    # The rest of the API is whole, so the run publishes it.
+    assert gate.contract(tmp_path / "day2") == []
 
 
 def with_day(lanes, port, day, ships):
