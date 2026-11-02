@@ -6,6 +6,7 @@ daily forecasts. Usage: python -m aseri.scout ARCHIVE_DIR REPORT_DIR CACHE_DIR [
 
 import argparse
 import copy
+import functools
 import hashlib
 import os
 import re
@@ -17,6 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import aseri.forecast as forecast_module
 from aseri import archive
 from aseri import series as series_module
 from aseri.forecast import (
@@ -29,10 +31,20 @@ from aseri.forecast import (
     make_context,
     measurement_errors,
 )
-from aseri.scoring import TRADING_YEAR, WINDOW, _binom_cdf, bootstrap, score
+from aseri.scoring import (
+    TRADING_YEAR,
+    WINDOW,
+    _binom_cdf,
+    bootstrap,
+    score,
+    scoreable_on,
+)
 from aseri.series import Series
 
 SERIES = {s.id: s for s in vars(series_module).values() if isinstance(s, Series)}
+# The code that shapes a forecast after the model (calibration, sort, clip), in the cache key: an edit there
+# without a new MODEL_ID must still make new forecasts.
+FORECAST_CODE = hashlib.sha256(Path(forecast_module.__file__).read_bytes()).hexdigest()
 # Lunar New Year's day, 2015 to 2030. Outside these years the row is unknown, NaN, never a wrong 0.
 LUNAR_NEW_YEAR = pd.to_datetime(
     [
@@ -143,13 +155,17 @@ def failures(
     mase: float,
     coverage: float,
     origins: int,
+    region: tuple[int, int],
     rule: dict,
 ) -> list[str]:
-    """Why a bucket fails the keep rule, empty when it passes. A missing number fails: written so NaN compares false."""
+    """Why a bucket fails the keep rule, empty when it passes. A missing number fails: written so NaN compares false.
+
+    `region` is the acceptance region of the 8 in 10 range's hits over the bucket's `origins`.
+    """
+    if not origins:
+        return ["no scored target in this bucket"]
     ratio, _, high = wql
-    low_hits, high_hits = acceptance_region(
-        origins, rule["coverage"], rule["coverage_alpha"]
-    )
+    low_hits, high_hits = region
     checks = {
         f"WQL under {1 - rule['wql_ratio']:.0%} better": not ratio <= rule["wql_ratio"],
         f"its {rule['interval']:.0%} interval reaches 0": not high < 1,
@@ -161,16 +177,16 @@ def failures(
     return [reason for reason, failed in checks.items() if failed]
 
 
-def hold_back(covariate: Series, target: Series) -> int:
+def hold_back(covariate: Series, target: Series, fewest_lag: dict[str, int]) -> int:
     """Days a past-only covariate is held back behind the target's last day, so a backtest reads only what the daily run would have.
 
-    The run forecasts the target at the earliest `fewest_lag` days after its last day, and the
+    The run forecasts the target at the earliest its `fewest_lag` days after its last day, and the
     covariate's newest value is then up to its `expected_lag` days old. One fetch brings every
     PortWatch lane, so they hold nothing back from each other.
     """
     if covariate.source["title"] == target.source["title"]:
         return 0
-    return max(0, covariate.expected_lag - CONFIG["fewest_lag"][target.id])
+    return max(0, covariate.expected_lag - fewest_lag[target.id])
 
 
 def past_row(
@@ -211,8 +227,9 @@ def covariates(
     context: pd.Series,
     future: pd.DatetimeIndex,
     observed: dict[str, pd.Series],
+    fewest_lag: dict[str, int],
 ) -> dict[str, np.ndarray]:
-    """The model's covariate arguments for a candidate's `members`: past-only rows over the context, calendar rows over the context and the horizon."""
+    """The model's covariate arguments for a candidate's `members`: past-only rows over the context, held back as `hold_back` says, and calendar rows over the context and the horizon."""
     rows = {
         "past_covariates": [],
         "known_covariates": [],
@@ -223,7 +240,7 @@ def covariates(
         name, lag = MEMBER.fullmatch(member).groups()
         shift = pd.Timedelta(days=int(lag or 0))
         if name in SERIES:
-            held = hold_back(SERIES[name], target)
+            held = hold_back(SERIES[name], target, fewest_lag)
             rows["past_covariates"].append(
                 past_row(observed[name], context.index, held, int(lag or 0))
             )
@@ -236,14 +253,21 @@ def covariates(
     return {kind: np.stack(r)[None] for kind, r in rows.items() if r}
 
 
-def origins(series: Series, observed: pd.Series, n: int) -> list[pd.Timestamp]:
-    """The newest `n` days on `series`' record weekday whose every step is observed, oldest first."""
+def origins(
+    series: Series, observed: pd.Series, n: int, as_of: pd.Timestamp
+) -> list[pd.Timestamp]:
+    """The newest `n` days on `series`' record weekday whose every step is observed and settled by `as_of`, oldest first.
+
+    Settled as the record scores it (`scoring.scoreable_on`): a target waits its `score_lag`, so no
+    candidate is judged on preliminary values that GPR or PortWatch revise later.
+    """
     days = observed.dropna().index
     found = []
     for day in reversed(days[days.day_of_week == series.record_weekday]):
         if len(found) == n:
             break
-        if series.target_dates(days[days <= day], series.horizon)[-1] <= days[-1]:
+        last = series.target_dates(days[days <= day], series.horizon)[-1]
+        if last <= days[-1] and scoreable_on(last, series.score_lag) <= as_of:
             found.append(day)
     return found[::-1]
 
@@ -251,8 +275,9 @@ def origins(series: Series, observed: pd.Series, n: int) -> list[pd.Timestamp]:
 def cached(model, context: pd.Series, series: Series, rows: dict, cache_dir: Path):
     """The production forecast of `context` with covariate `rows`, and the model's seconds for it: none when the cache has it.
 
-    The key is every input: the model, the context with its dates, and each row. A revised value or a
-    new MODEL_ID makes a new forecast; an unchanged origin is never made twice. `model` loads the model on first call.
+    The key is every input: the model, the code and the offsets that shape its output, the context with
+    its dates, and each row. A revised value, an offset or a new MODEL_ID makes a new forecast; an
+    unchanged origin is never made twice. `model` loads the model on first call.
     shortcut: the cache only grows, 2 to 5 KB a forecast and some 700 forecasts a month; delete what a run
     did not read once scout.yml's cache artifact passes 100 MB.
     """
@@ -261,6 +286,9 @@ def cached(model, context: pd.Series, series: Series, rows: dict, cache_dir: Pat
         MODEL_ID,
         WEIGHTS_REVISION,
         PACKAGE_COMMIT,
+        FORECAST_CODE,
+        # Read at call time, as calibrate reads it.
+        forecast_module.OFFSETS.to_csv(index=False),
         series.id,
         str(series.horizon),
         archive.input_sha256(context),
@@ -292,14 +320,18 @@ def judge(
     judged = []
     for name, steps in buckets(series).items():
         b, c = (frame[frame["horizon"].isin(steps)] for frame in (base, candidate))
-        # One value per origin, in date order, as scoring.bootstrap expects.
-        per_origin = [frame.groupby("reference_date")["wis"].mean() for frame in (c, b)]
-        wql = bootstrap(
-            *per_origin, block=rule["block"], tail=(1 - rule["interval"]) / 2
-        )
-        mase = c["ase_median"].mean() / b["ase_median"].mean()
-        coverage = c["interval_coverage_80"].mean()
         n = c["reference_date"].nunique()
+        # One value per origin, in date order, as scoring.bootstrap expects; a bucket no origin scores has none.
+        per_origin = [frame.groupby("reference_date")["wis"].mean() for frame in (c, b)]
+        tail = (1 - rule["interval"]) / 2
+        wql = (
+            bootstrap(*per_origin, block=rule["block"], tail=tail)
+            if n
+            else (np.nan,) * 3
+        )
+        mase = c["ase_median"].mean() / b["ase_median"].mean() if n else np.nan
+        coverage = c["interval_coverage_80"].mean()
+        region = acceptance_region(n, rule["coverage"], rule["coverage_alpha"])
         judged.append(
             {
                 "bucket": name,
@@ -307,10 +339,8 @@ def judge(
                 "wql": wql,
                 "mase": mase,
                 "coverage": coverage,
-                "region": acceptance_region(
-                    n, rule["coverage"], rule["coverage_alpha"]
-                ),
-                "failures": failures(wql, mase, coverage, n, rule),
+                "region": region,
+                "failures": failures(wql, mase, coverage, n, region, rule),
             }
         )
     return judged
@@ -334,24 +364,17 @@ def run(
         for members in candidates.values()
         for member in members
     }
-    # Read-only: the archive's newest view of every series the run uses, as of today.
-    observed = {
-        id: archive.as_of_view(archive_dir, id, today) for id in used & set(SERIES)
-    }
-    as_of = max(archive.newest_as_of(archive_dir, id) for id in candidates_of)
-    model = None
-
-    def loaded():
-        nonlocal model
-        if model is None:
-            model = load()
-        return model
-
+    # Read-only, and once: every value the archive holds, then each series' newest view and the day of its newest vintage.
+    every = archive.vintages(archive_dir)
+    seen = {id: every[every["target"] == id] for id in used & set(SERIES)}
+    observed = {id: archive.view(rows, today) for id, rows in seen.items()}
+    as_of = {id: rows["as_of"].max() for id, rows in seen.items()}
+    loaded = functools.cache(load)
     results, runtime = {}, {"made": 0, "cached": 0, "seconds": 0.0}
     for target, candidates in candidates_of.items():
         series, y = SERIES[target], observed[target]
         trading = series.horizon_unit == "trading_day"
-        found = origins(series, y, config["run"]["origins"])
+        found = origins(series, y, config["run"]["origins"], as_of[target])
         scored = {name: [] for name in (None, *candidates)}
         for i, day in enumerate(found, start=1):
             context = make_context(series, y, day)
@@ -361,7 +384,9 @@ def run(
             actual = y.reindex(steps).mask(steps.isin(measurement_errors(series)))
             actual = np.r_[actual, np.full(series.horizon - len(actual), np.nan)]
             for name, members in ((None, []), *candidates.items()):
-                rows = covariates(members, series, context, future, observed)
+                rows = covariates(
+                    members, series, context, future, observed, config["fewest_lag"]
+                )
                 made, seconds = cached(loaded, context, series, rows, cache_dir)
                 runtime["made" if seconds is not None else "cached"] += 1
                 runtime["seconds"] += seconds or 0.0
@@ -387,10 +412,14 @@ def run(
             tested.append(
                 {"name": name, "members": members, "buckets": judged, "passed": passed}
             )
-        results[target] = {"origins": found, "candidates": tested}
+        results[target] = {
+            "origins": found,
+            "as_of": as_of[target],
+            "candidates": tested,
+        }
     report_dir.mkdir(parents=True, exist_ok=True)
     (report_dir / f"{today}.md").write_text(
-        report(today, results, config, f"{as_of}", runtime),
+        report(today, results, config, runtime),
         encoding="utf-8",
         newline="\n",
     )
@@ -402,9 +431,11 @@ def run(
     ]
 
 
-def report(day: date, results: dict, config: dict, as_of: str, runtime: dict) -> str:
+def report(day: date, results: dict, config: dict, runtime: dict) -> str:
     """The Markdown report of a run: what was tested, how, every candidate's numbers per bucket, and what passed."""
     rule, bounds = config["rule"], config["run"]
+    # The archive's own newest vintage, which a late or missed daily run leaves older than the run's day.
+    as_of = max(result["as_of"] for result in results.values())
     passed = [
         f"{target} `{c['name']}`"
         for target, result in results.items()
@@ -428,13 +459,14 @@ def report(day: date, results: dict, config: dict, as_of: str, runtime: dict) ->
             "each candidate's rows on the same origins."
         ),
         (
-            f"- **Data:** the archive's vintage of {as_of}, read-only. Pseudo-real-time: each context is that vintage "
-            "cut at its origin; each past-only covariate is held back by its publication lag (its `expected_lag` in "
-            "series.py less the target's `fewest_lag` in the config); each calendar row is a function of the date alone."
+            f"- **Data:** the archive's newest vintage, of {as_of:%Y-%m-%d}, read-only. Pseudo-real-time: each "
+            "context is that vintage cut at its origin; each past-only covariate is held back by its publication lag "
+            "(its `expected_lag` in series.py less the target's `fewest_lag` in the config); each calendar row is a "
+            "function of the date alone."
         ),
         (
             f"- **Origins:** up to {bounds['origins']} a series, weekly on its record weekday, the newest whose every "
-            "step is observed."
+            "step is observed and settled, its `score_lag` past, by the series' own vintage."
         ),
         (
             f"- **Keep rule,** in every bucket the series has: WQL on the 21 levels at least "
@@ -451,10 +483,15 @@ def report(day: date, results: dict, config: dict, as_of: str, runtime: dict) ->
         found = result["origins"]
         lines += ["", f"## {target}", ""]
         if not found:
-            lines.append("No origin has every step observed yet: nothing tested.")
+            lines.append(
+                "No origin has every step observed and settled: nothing tested."
+            )
             continue
         lines += [
-            f"Origins: {len(found)}, {found[0]:%Y-%m-%d} to {found[-1]:%Y-%m-%d}.",
+            (
+                f"Origins: {len(found)}, {found[0]:%Y-%m-%d} to {found[-1]:%Y-%m-%d}, "
+                f"on its vintage of {result['as_of']:%Y-%m-%d}."
+            ),
             "",
             (
                 f"| Candidate | Members | Bucket | Origins | ΔWQL [{rule['interval']:.0%} CI] | ΔMASE "
@@ -464,15 +501,20 @@ def report(day: date, results: dict, config: dict, as_of: str, runtime: dict) ->
         ]
         for c in result["candidates"]:
             for b in c["buckets"]:
-                ratio, low, high = (100 * (x - 1) for x in b["wql"])
                 n, (fewest, most) = b["origins"], b["region"]
                 verdict = (
                     "fails: " + "; ".join(b["failures"]) if b["failures"] else "passes"
                 )
+                numbers = "- | - | -"
+                if n:
+                    ratio, low, high = (100 * (x - 1) for x in b["wql"])
+                    numbers = (
+                        f"{ratio:+.1f}% [{low:+.1f}, {high:+.1f}] | {100 * (b['mase'] - 1):+.1f}% "
+                        f"| {b['coverage']:.2f} ({fewest / n:.2f} to {most / n:.2f})"
+                    )
                 lines.append(
                     f"| {c['name']} | {', '.join(c['members'])} | {b['bucket']} | {n} "
-                    f"| {ratio:+.1f}% [{low:+.1f}, {high:+.1f}] | {100 * (b['mase'] - 1):+.1f}% "
-                    f"| {b['coverage']:.2f} ({fewest / n:.2f} to {most / n:.2f}) | {verdict} |"
+                    f"| {numbers} | {verdict} |"
                 )
     lines += [
         "",
@@ -508,6 +550,10 @@ def main(argv=None) -> None:
     config = copy.deepcopy(CONFIG)
     candidates = config["candidates"]
     if args.series:
+        if unknown := set(args.series) - set(candidates):
+            parser.error(
+                f"no candidates in scout.toml for: {', '.join(sorted(unknown))}"
+            )
         candidates = {id: candidates[id] for id in args.series}
     if args.candidates:
         # A series left with no candidate is dropped: its univariate forecasts alone test nothing.
@@ -516,8 +562,12 @@ def main(argv=None) -> None:
             for id, c in candidates.items()
             if (kept := {name: c[name] for name in args.candidates if name in c})
         }
+        if not candidates:
+            parser.error("--candidates names none of these series' candidates")
     config["candidates"] = candidates
-    if args.origins:
+    if args.origins is not None:
+        if args.origins < 1:
+            parser.error("--origins needs at least 1")
         config["run"]["origins"] = args.origins
     today = datetime.now(UTC).date()
     passed = run(

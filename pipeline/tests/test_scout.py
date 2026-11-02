@@ -11,6 +11,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from scipy.stats import binom
 
+import aseri.forecast as forecast_module
 from aseri import scout
 from aseri.forecast import MODEL_ID
 from aseri.scout import (
@@ -18,11 +19,15 @@ from aseri.scout import (
     SERIES,
     acceptance_region,
     buckets,
+    cached,
     calendar,
     check,
     failures,
     hold_back,
+    judge,
+    main,
     model_id,
+    origins,
     past_row,
     report,
     run,
@@ -33,6 +38,7 @@ LEVELS = (0.01, 0.05, *np.round(np.arange(0.1, 0.91, 0.05), 2).tolist(), 0.95, 0
 # Hubverse's model_id: team_abbr-model_abbr, each part at most 16 letters, digits, "_" or "+".
 HUBVERSE = re.compile(r"([A-Za-z0-9_+]{1,16})-([A-Za-z0-9_+]{1,16})")
 RULE = CONFIG["rule"]
+FEWEST = CONFIG["fewest_lag"]
 
 
 # The keep rule
@@ -49,7 +55,13 @@ def test_buckets_are_those_the_series_has():
 
 def test_a_bucket_passes_only_when_every_part_of_the_rule_holds():
     # 52 origins: the 8 in 10 range's region at 5% is 36 to 47 hits, 0.69 to 0.90.
-    good = {"wql": (0.95, 0.92, 0.99), "mase": 0.97, "coverage": 0.80, "origins": 52}
+    good = {
+        "wql": (0.95, 0.92, 0.99),
+        "mase": 0.97,
+        "coverage": 0.80,
+        "origins": 52,
+        "region": (36, 47),
+    }
 
     assert failures(**good, rule=RULE) == []
     assert failures(**good | {"wql": (0.981, 0.95, 0.99)}, rule=RULE) == [
@@ -71,12 +83,53 @@ def test_a_bucket_with_no_number_fails_rather_than_passes():
     # A flat history gives no MASE scale, and an empty bucket no ratio: neither may pass for a gain.
     nan = float("nan")
 
-    assert failures((nan, nan, nan), nan, nan, 0, RULE) == [
+    assert failures((nan, nan, nan), nan, nan, 52, (36, 47), RULE) == [
         "WQL under 2% better",
         "its 90% interval reaches 0",
         "MASE worse",
         "8 in 10 coverage outside its region",
     ]
+    # A bucket no origin scores has nothing to judge: it fails for that alone.
+    assert failures((nan, nan, nan), nan, nan, 0, (0, 0), RULE) == [
+        "no scored target in this bucket"
+    ]
+
+
+def test_an_empty_bucket_fails_and_reports_without_a_crash():
+    # Hormuz's days 8-14 all unscored: nothing to bootstrap, nothing to divide by.
+    cells = pd.DataFrame(
+        {
+            "reference_date": pd.Timestamp("2026-10-04"),
+            "horizon": range(1, 8),
+            "wis": 2.0,
+            "ase_median": 0.5,
+            "interval_coverage_80": True,
+        }
+    )
+
+    judged = judge(cells, cells, SERIES["hormuz_transits"], RULE)
+
+    late = judged[1]
+    assert (late["bucket"], late["origins"], late["failures"]) == (
+        "8-14",
+        0,
+        ["no scored target in this bucket"],
+    )
+    results = {
+        "hormuz_transits": {
+            "origins": [pd.Timestamp("2026-10-04")],
+            "as_of": pd.Timestamp("2026-11-02"),
+            "candidates": [
+                {"name": "dow", "members": ["dow"], "buckets": judged, "passed": False}
+            ],
+        }
+    }
+    runtime = {"made": 2, "cached": 0, "seconds": 1.0}
+    text = report(date(2026, 11, 3), results, CONFIG, runtime)
+    assert (
+        "| dow | dow | 8-14 | 0 | - | - | - | fails: no scored target in this bucket |"
+        in text
+    )
 
 
 @given(
@@ -106,15 +159,32 @@ def test_the_coverage_region_widens_as_origins_get_fewer():
 
 def test_a_past_covariate_is_held_back_by_its_lag_against_the_targets_freshest():
     # Brent is up to 8 days old at a run, a PortWatch lane as fresh as 3: 5 days are not out yet.
-    assert hold_back(SERIES["brent_spot"], SERIES["hormuz_transits"]) == 5
+    assert hold_back(SERIES["brent_spot"], SERIES["hormuz_transits"], FEWEST) == 5
     # GPR is up to 8 days old, the views as fresh as 1.
-    assert hold_back(SERIES["gpr_daily"], SERIES["wiki_ww3_views"]) == 7
+    assert hold_back(SERIES["gpr_daily"], SERIES["wiki_ww3_views"], FEWEST) == 7
     # A fresher covariate than its target is still never read past the target's last day.
-    assert hold_back(SERIES["wiki_ww3_views"], SERIES["gpr_daily"]) == 0
+    assert hold_back(SERIES["wiki_ww3_views"], SERIES["gpr_daily"], FEWEST) == 0
+
+
+def test_the_hold_back_follows_the_runs_config():
+    # Were Hormuz forecast the day its data ends, Brent's whole 8-day lag would be held back.
+    fewest = FEWEST | {"hormuz_transits": 0}
+    target = SERIES["hormuz_transits"]
+    context = pd.Series(1.0, pd.date_range("2026-01-01", "2026-10-29", freq="D"))
+    future = target.target_dates(context.index, target.horizon)
+
+    rows = scout.covariates(
+        ["brent_spot"], target, context, future, {"brent_spot": context}, fewest
+    )
+
+    assert hold_back(SERIES["brent_spot"], target, fewest) == 8
+    assert np.isnan(rows["past_covariates"][0, 0, -8:]).all()
+    assert rows["past_covariates"][0, 0, -9] == 1
 
 
 def test_one_fetch_brings_both_lanes_so_nothing_is_held_back():
-    assert hold_back(SERIES["bab_el_mandeb_transits"], SERIES["suez_transits"]) == 0
+    lanes = SERIES["bab_el_mandeb_transits"], SERIES["suez_transits"]
+    assert hold_back(*lanes, FEWEST) == 0
 
 
 def test_a_past_row_blanks_what_is_not_yet_published_and_reads_no_later_value():
@@ -189,7 +259,7 @@ def test_a_candidates_rows_cover_the_context_and_known_ones_the_horizon_too():
     future = target.target_dates(context.index, target.horizon)
 
     rows = scout.covariates(
-        ["dow", "lny@7", "suez_transits@2"], target, context, future, observed
+        ["dow", "lny@7", "suez_transits@2"], target, context, future, observed, FEWEST
     )
 
     assert rows["past_covariates"].shape == (1, 1, len(context))
@@ -200,6 +270,22 @@ def test_a_candidates_rows_cover_the_context_and_known_ones_the_horizon_too():
     assert lny["2026-02-22"] == 0 and lny["2026-02-23"] == 1 and lny["2026-03-02"] == 1
     # The same source, so no hold-back: lagged 2 days, its last value is that of 2 days before the last.
     assert rows["past_covariates"][0, 0, -1] == len(days) - 3
+
+
+def test_an_origin_waits_until_its_every_target_is_settled():
+    # Suez: 28 steps, each scored 14 days after its day. Data to Oct 29, the archive's vintage of Oct 30.
+    suez = SERIES["suez_transits"]
+    y = pd.Series(1.0, pd.date_range("2026-01-01", "2026-10-29", freq="D"))
+
+    # From Sunday Sep 13 the last target, Oct 11, settles on Oct 25; from Sep 20 not before Nov 1.
+    assert origins(suez, y, 2, pd.Timestamp("2026-10-30")) == [
+        pd.Timestamp("2026-09-06"),
+        pd.Timestamp("2026-09-13"),
+    ]
+    # A month on, with no newer data, every target is settled: the data's end is the limit.
+    assert origins(suez, y, 1, pd.Timestamp("2026-11-30")) == [
+        pd.Timestamp("2026-09-27")
+    ]
 
 
 # The config, checked at import
@@ -259,6 +345,41 @@ def test_every_candidates_model_id_fits_hubverse():
     assert len(model_id("gpr_daily", {"gpr_daily": "abcdef"}).split("-")[1]) == 16
 
 
+# The cache
+
+
+def test_a_changed_offset_misses_the_cache(tmp_path, monkeypatch):
+    model = StubModel()
+    suez = SERIES["suez_transits"]
+    context = pd.Series(100.0, pd.date_range("2026-01-01", "2026-09-13", freq="D"))
+
+    def made():
+        return cached(lambda: model, context, suez, {}, tmp_path)[1] is not None
+
+    assert made()
+    assert not made()
+    offsets = forecast_module.OFFSETS.copy()
+    offsets.loc[offsets["series_id"] == "suez_transits", "offset"] += 0.1
+    monkeypatch.setattr(forecast_module, "OFFSETS", offsets)
+    assert made()
+    assert model.calls == 2
+
+
+# The command line
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [["--series", "nosuch"], ["--candidates", "nosuch"], ["--origins", "0"]],
+)
+def test_the_command_line_refuses_what_would_test_nothing(flags, tmp_path, capsys):
+    with pytest.raises(SystemExit) as stop:
+        main([str(tmp_path / "a"), str(tmp_path / "r"), str(tmp_path / "c"), *flags])
+
+    assert stop.value.code == 2
+    assert "error:" in capsys.readouterr().err
+
+
 # The report
 
 
@@ -278,6 +399,7 @@ def test_the_report_gives_every_candidate_its_numbers_and_verdict():
     results = {
         "taiwan_strait_transits": {
             "origins": [pd.Timestamp("2026-04-12"), pd.Timestamp("2026-10-04")],
+            "as_of": pd.Timestamp("2026-11-02"),
             "candidates": [
                 {
                     "name": "lny",
@@ -302,11 +424,12 @@ def test_the_report_gives_every_candidate_its_numbers_and_verdict():
     }
     runtime = {"made": 30, "cached": 48, "seconds": 61.0}
 
-    text = report(date(2026, 11, 3), results, CONFIG, "2026-11-02", runtime)
+    text = report(date(2026, 11, 3), results, CONFIG, runtime)
 
     assert text.startswith("# Covariate scout, 2026-11-03\n")
     assert "**Passed: taiwan_strait_transits `lny`.**" in text
-    assert "Origins: 2, 2026-04-12 to 2026-10-04." in text
+    assert "the archive's newest vintage, of 2026-11-02" in text
+    assert "Origins: 2, 2026-04-12 to 2026-10-04, on its vintage of 2026-11-02." in text
     assert (
         "| lny | lny | 1-7 | 26 | -3.0% [-5.0, -1.0] | -1.0% | 0.81 (0.65 to 0.92) | passes |"
         in text
@@ -324,6 +447,7 @@ def test_a_report_with_no_pass_says_so():
     results = {
         "gpr_daily": {
             "origins": [pd.Timestamp("2026-10-05")],
+            "as_of": pd.Timestamp("2026-11-02"),
             "candidates": [
                 {
                     "name": "xmas",
@@ -339,7 +463,6 @@ def test_a_report_with_no_pass_says_so():
         date(2026, 11, 3),
         results,
         CONFIG,
-        "2026-11-02",
         {"made": 2, "cached": 0, "seconds": 4.0},
     )
 
