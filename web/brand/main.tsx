@@ -299,22 +299,28 @@ function Composition({ plan, hero }: { plan: Plan; hero: Hero }) {
   )
 }
 
-// An avatar: the favicon's winged hat without its ground tile, so that it casts the words'
-// shadow, or 焦, 16 px (one pixel of its grid a page pixel) on a square `size` px.
+// The 16 px drawings an avatar shows: the winged hat alone (the first favicon's, without
+// its ground tile), which casts the words' shadow here, and the favicon, whose 16 px redraw
+// of the hat has its shadow drawn in.
+const drawings: Record<string, string> = {
+  hat: "/brand/hat.svg",
+  favicon: "/favicon.svg",
+}
+
+// An avatar: a drawing or 焦, 16 px (one pixel of its grid a page pixel) on a square
+// `size` px.
 function Avatar({ mark, size }: { mark: string; size: number }) {
   const hat = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const drawn =
-      mark === "hat"
-        ? fetch("/favicon.svg")
+      mark in drawings
+        ? fetch(drawings[mark])
             .then((response) => response.text())
             .then((svg) => {
-              const parsed = new DOMParser().parseFromString(
+              const icon = new DOMParser().parseFromString(
                 svg,
                 "image/svg+xml"
-              )
-              parsed.querySelector('path[fill="#1b1bf2"]')?.remove()
-              const icon = parsed.documentElement
+              ).documentElement
               icon.setAttribute("width", "16")
               icon.setAttribute("height", "16")
               hat.current!.replaceChildren(icon)
@@ -334,13 +340,13 @@ function Avatar({ mark, size }: { mark: string; size: number }) {
         color: "var(--primary)",
       }}
     >
-      {mark === "hat" ? (
+      {mark in drawings ? (
         <div
           ref={hat}
           style={{
             width: 16,
             height: 16,
-            filter: `drop-shadow(${drop})`,
+            filter: mark === "hat" ? `drop-shadow(${drop})` : undefined,
           }}
         />
       ) : (

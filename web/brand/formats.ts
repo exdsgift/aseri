@@ -171,7 +171,7 @@ export const formats: Format[] = [
   },
 ]
 
-// The avatars: the favicon's winged hat, or 焦, 16 px on its own grid, centred on the
+// The avatars: the first favicon's winged hat, or 焦, 16 px on its own grid, centred on the
 // ground in a square `size` px of the page, at `scale`: each pixel of the mark is `scale`
 // of the image's, and the mark, 64% of the side, keeps inside the circle a platform crops.
 export const avatars = [
@@ -184,7 +184,31 @@ export const avatars = [
 // The hero whose image gets the alternative lines and the art-only banner's twins.
 export const alternativesFor: Hero = "messenger"
 
-// Every image: its file, the page's query for it, its size in the page's px and its scale.
+// The site's favicons: public/favicon.svg, the hat redrawn on 16 px with its shadow, at 1 and
+// 2 image pixels a pixel, and the touch icon, the hat avatar at 7 (180 px, the hat 112).
+const favicons = [
+  {
+    file: "web/public/favicon-16.png",
+    query: "avatar=favicon&size=16",
+    size: 16,
+    scale: 1,
+  },
+  {
+    file: "web/public/favicon-32.png",
+    query: "avatar=favicon&size=16",
+    size: 16,
+    scale: 2,
+  },
+  {
+    file: "web/public/apple-touch-icon.png",
+    query: `avatar=hat&size=${180 / 7}`,
+    size: 180 / 7,
+    scale: 7,
+  },
+]
+
+// Every image: its file from the repository's root, the page's query for it, its size in
+// the page's px and its scale.
 export function shots() {
   const all: {
     file: string
@@ -214,14 +238,14 @@ export function shots() {
         })
         const query = `format=${format.name}&hero=${hero}${variant.query}`
         const name = `${format.folder}/${format.name}-${hero}${variant.suffix}`
-        all.push({ file: `${name}.png`, query, width, height, scale })
+        all.push({ file: `branding/${name}.png`, query, width, height, scale })
         // The banner is shown near its full size: a retina screen gets twice the pixels.
         if (
           format.name === "linkedin-banner" &&
           !variant.suffix.includes("line")
         )
           all.push({
-            file: `${name}@2x.png`,
+            file: `branding/${name}@2x.png`,
             query,
             width,
             height,
@@ -230,11 +254,13 @@ export function shots() {
       }
   for (const avatar of avatars)
     all.push({
-      file: `avatar/avatar-${avatar.mark}-${avatar.pixels}.png`,
+      file: `branding/avatar/avatar-${avatar.mark}-${avatar.pixels}.png`,
       query: `avatar=${avatar.mark}&size=${avatar.size}`,
       width: avatar.size,
       height: avatar.size,
       scale: avatar.scale,
     })
+  for (const { file, query, size, scale } of favicons)
+    all.push({ file, query, width: size, height: size, scale })
   return all
 }

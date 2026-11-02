@@ -1,21 +1,40 @@
-// Renders the brand images into branding/ at the repository's root, from the brand page
-// (brand/index.html, with its formats in brand/formats.ts): the site's own hero art, fonts
+// Renders the brand images into branding/ and the site's favicon PNGs into public/, from the
+// brand page (brand/index.html, with every file in brand/formats.ts): the site's own hero art, fonts
 // and tokens, and today's GPR value from the live API, through the dev server's proxy.
-// From web/: node scripts/brand.mjs [filter], where `filter` keeps the files whose path
-// holds it. Needs Playwright's Chromium (npx playwright install chromium); oxipng on the
-// PATH, when there, then shrinks every file without changing a pixel.
+// Then the README's screenshots of the live site. From web/: node scripts/brand.mjs [filter],
+// where `filter` keeps the files whose path holds it. Needs Playwright's Chromium and WebKit
+// (npx playwright install chromium webkit); oxipng on the PATH, when there, then shrinks
+// every file without changing a pixel.
 import { spawnSync } from "node:child_process"
 import { mkdirSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 
-import { chromium } from "playwright"
+import { chromium, webkit } from "playwright"
 import { createServer } from "vite"
 
 const web = join(import.meta.dirname, "..")
-const out = join(web, "../branding")
+const root = join(web, "..")
 const filter = process.argv[2] ?? ""
 // The API is read with a User-Agent that names the project.
 const userAgent = "aseri (+https://github.com/exdsgift/aseri)"
+// The live site for the README, with Messenger as the hero: at 1440 px from the top through
+// the forecast panel, and an iPhone's first screen in WebKit.
+const pages = [
+  {
+    file: "branding/screenshots/page-1440.png",
+    engine: chromium,
+    viewport: { width: 1440, height: 900 },
+    scale: 1,
+    through: "#forecast > div",
+  },
+  {
+    file: "branding/screenshots/page-phone.png",
+    engine: webkit,
+    viewport: { width: 390, height: 844 },
+    scale: 2,
+    mobile: true,
+  },
+]
 
 const server = await createServer({ root: web, logLevel: "error" })
 await server.listen()
@@ -50,7 +69,7 @@ try {
     if (ready !== "true") throw new Error(`${shot.file}: ${ready}`)
     if (value && !written.length)
       console.log(`GPR 7-day average to ${referenceDate}: ${value}`)
-    const path = join(out, shot.file)
+    const path = join(root, shot.file)
     mkdirSync(dirname(path), { recursive: true })
     // Through Chromium's own call, which keeps a half page pixel (313.5 at scale 2 is 627)
     // where Playwright's screenshot drops it.
@@ -69,6 +88,47 @@ try {
     await page.close()
     written.push(path)
     console.log(shot.file)
+  }
+  for (const shot of pages.filter((p) => p.file.includes(filter))) {
+    const engine = await shot.engine.launch()
+    try {
+      const context = await engine.newContext({
+        viewport: shot.viewport,
+        deviceScaleFactor: shot.scale,
+        isMobile: shot.mobile,
+        hasTouch: shot.mobile,
+        reducedMotion: "reduce",
+        userAgent,
+      })
+      await context.addInitScript(() =>
+        localStorage.setItem("aseri.hero", "messenger")
+      )
+      const page = await context.newPage()
+      await page.goto("https://exdsgift.github.io/aseri/", {
+        waitUntil: "networkidle",
+      })
+      // The forecast panel shows once the data has loaded.
+      await page.locator("#forecast").waitFor()
+      await page.evaluate(() => document.fonts.ready)
+      // The art and the margins draw on the frames after that.
+      await page.waitForTimeout(1000)
+      const height = shot.through
+        ? await page
+            .locator(shot.through)
+            .evaluate((panel) => panel.getBoundingClientRect().bottom + 40)
+        : shot.viewport.height
+      const path = join(root, shot.file)
+      mkdirSync(dirname(path), { recursive: true })
+      await page.screenshot({
+        path,
+        fullPage: Boolean(shot.through),
+        clip: { x: 0, y: 0, width: shot.viewport.width, height },
+      })
+      written.push(path)
+      console.log(shot.file)
+    } finally {
+      await engine.close()
+    }
   }
   const optimised = spawnSync(
     "oxipng",
