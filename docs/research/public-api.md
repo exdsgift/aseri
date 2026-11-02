@@ -242,9 +242,9 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `scores.json` | Cross-series summary for the site's record: each series' file without its sensitivity check | Daily |
 | `bulk/forecasts-{YYYY}.parquet`, `bulk/forecasts-{YYYY}.csv.gz` | Every forecast of the year's runs (by `forecast_date`), every model's, in collected-hub shape: `model_id` plus the Hubverse columns, the rows as the archive's rounds hold them. The current year is rebuilt daily; a closed year's rounds never change, so its files come out byte for byte the same | Current year daily |
 | `bulk/time-series.parquet`, `bulk/time-series-{source}.csv` | Hubverse time series with columns `target, target_end_date, observation, as_of`, stored as a change-log (see 3.3): the archive's deltas. The CSVs are split by upstream source (`gpr`, `portwatch`, `wikimedia`, `fred`, `sirens`, `losses`, the adapters' names) so each carries one licence | Daily |
-| `bulk/oracle-output.csv` | `target, target_end_date, oracle_value, as_of`: the value each scored target was scored against, and the vintage it came from [HV-TD] | Daily |
-| `bulk/scores.parquet` | One row per (model, series, reference date, horizon) with each metric, the target's date and the `observation_as_of` used; every model's, while `scores.json` counts the model in use alone | Daily |
-| `bulk/datapackage.json` | Frictionless Data Package v2 for all bulk files: each one's columns and types, primary key, `licenses` (with the attribution) and `sources` [DP]. The catalog links it as `links.bulk` | Daily |
+| `bulk/oracle-output.csv` | `target, target_end_date, oracle_value, as_of`: each observed day, once its series' score lag has passed, with the value the record scores a target on it against (`record.settled`) and the vintage it came from [HV-TD]. Built from the vintages, so a scoring failure costs it nothing | Daily |
+| `bulk/scores.parquet` | One row per (model, series, reference date, horizon) with each metric; `target_end_date` as the round dates the step, which joins it to the bulk forecasts; `observation_date`, the day observed; and the `observation_as_of` used. Every model's, while `scores.json` counts the model in use alone | Daily |
+| `bulk/datapackage.json` | Frictionless Data Package v2 for all bulk files: each one's columns and types, primary key, `licenses` (with the attribution: for the forecasts and scores, one per model of their rows) and `sources` [DP]. The catalog links it as `links.bulk`, and leaves the link out on a day the bulk step failed, which publishes without the bulk files | Daily |
 | `openapi.json`, `schemas/*.schema.json` | Contract: OpenAPI 3.1.1, and a JSON Schema per file type (`catalog`, `forecast`, `forecast-index`, `actuals`, `replay`, `scores`, `scoreboard`) with the shared `defs` | Per release |
 | `licenses/*.txt` | Full texts that must travel with the data: `CC-BY-NC-4.0` (aseri's), `CC-BY-4.0` (GPR), `CC0-1.0` (pageviews), `MIT-Klymenko`, `MIT-Ivaniuk`, and the terms of the IMF and the EIA, quoted with their links (`IMF-terms`, `EIA-public-domain`). Each licence object names its file in `text`, a path under `/api/v1/` | Rarely |
 | `model-metadata/{model_id}.yml` | Hubverse model metadata, one file per model: `aseri-timestral209m_c1.yml`, the model in use, whose `methods` say the bands are calibrated per series on a two-year backtest and link ADR 0001, and `aseri-timestral209m.yml`, the one before. Its `license` is `other`, since no hub's list holds CC BY-NC 4.0, and `methods_long` states the licence | Per model |
@@ -438,6 +438,7 @@ Checked on 2026-10-31 (#135): the GPR page's "Creative Commons BY license" links
 
 - Brent has no weekend values, and holidays are not known in advance. Map horizon to target date with a Monday-to-Friday calendar.
 - If a target date turns out to be a holiday, score that forecast step against the next observation by step index, and flag it.
+- **In the bulk files (#136)** each scored step keeps the round's `target_end_date`, so the scores join the forecasts on Hubverse's keys, and gives the price's day as `observation_date`. The oracle output is keyed on observed days instead: one round date can stand for two prices, since a forecast made before an unforeseen holiday dates each step after it one weekday early, and one made after it does not.
 - Timestral has no frequency input, so its steps are observation steps [timestral-model.md].
 
 ### 4.4 Revised data
@@ -732,6 +733,8 @@ Arrays and level sets are abridged. Real files carry all 21 levels and the full 
         {"name": "value", "type": "number"}],
       "primaryKey": ["model_id", "target", "reference_date", "horizon", "output_type_id"]},
      "licenses": [{"title": "CC BY-NC 4.0", "path": "https://creativecommons.org/licenses/by-nc/4.0/",
+                   "attribution": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)."},
+                  {"title": "CC BY-NC 4.0", "path": "https://creativecommons.org/licenses/by-nc/4.0/",
                    "attribution": "Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI)."}],
      "sources": [{"title": "IMF PortWatch, Daily Chokepoints Data", "path": "https://portwatch.imf.org/"}, "..."]},
     {"name": "time-series-portwatch-csv", "path": "time-series-portwatch.csv", "type": "table", "format": "csv", "...": "...",
@@ -743,6 +746,7 @@ Arrays and level sets are abridged. Real files carry all 21 levels and the full 
 ```
 
 - **No package-level licence.** Every resource names its own, and a package licence would read as covering the time series too, which are under their sources' terms.
+- **The forecasts and scores credit each model of their rows,** read from the run manifests, so a closed year's entry never changes when `MODEL_ID` does.
 - **Licences carry no Open Definition `name`,** since the IMF's terms have none: `title` and `path` instead, which the profile allows, plus the catalog's `attribution` as an extra property.
 - **The primary key is (model, series, reference date, step, level),** not the run day: a run can forecast many reference dates (the backfill), and `(model_id, series_id, reference_date)` identifies a forecast.
 - `compression` is not in the profile, so it is a custom property. Whether Frictionless tooling reads `.csv.gz` directly is **unverified**. A test validates the file against the v2 profile, vendored in `pipeline/tests/fixtures/`; `frictionless validate` on the data is not run.

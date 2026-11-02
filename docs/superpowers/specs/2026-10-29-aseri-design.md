@@ -261,8 +261,9 @@ Follow `docs/research/public-api.md`. The essentials:
   - `bulk/forecasts-{YYYY}.parquet` and `.csv.gz`, `bulk/time-series.parquet` and `bulk/time-series-{source}.csv`, `bulk/oracle-output.csv`, `bulk/scores.parquet`, `bulk/datapackage.json` (#136), written by `pipeline/aseri/bulk.py`:
     - the forecasts of each year's runs in the collected-hub shape, `model_id` then the round's columns, every model's told apart; the current year is rebuilt daily, and a closed year's rounds never change, so its files come out byte for byte the same, as the dated files do;
     - the archive's observation deltas as a Hubverse time series, in one Parquet file and one CSV per source, so that each CSV has one licence;
-    - the value each scored target was scored against, with its `as_of`, and every model's scores, one row per target with its `observation_as_of`;
-    - a Frictionless data package (v2) giving each file's columns, licences with their attribution, and sources, which the catalog links as `links.bulk`;
+    - the oracle output, each observed day's value as the record scores against it, from the vintages, and every model's scores, one row per step on the round's `target_end_date`, with the day observed (`observation_date`, Brent's next price after an unforeseen holiday) and its `observation_as_of`;
+    - a Frictionless data package (v2) giving each file's columns, licences with their attribution (for the forecasts and scores, one per model of their rows, so a closed year's never changes), and sources, which the catalog links as `links.bulk`;
+    - a failure of the bulk step costs only them: the run summary says so, the catalog leaves out its link, and the day is still archived and published;
   - `openapi.json`, `schemas/*.schema.json`, `licenses/*.txt` and `model-metadata/aseri-timestral209m.yml`, the Hubverse model metadata (#135).
 
   A human docs page at `/api/` carries a schema.org `Dataset` block: `web/api/index.html`, a second page of the Vite build on the site's tokens and fonts, with no script, and under the copy lint (#135). The page's footer links to it.
