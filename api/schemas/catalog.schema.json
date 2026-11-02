@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/catalog.schema.json",
+  "title": "series.json: the catalog",
+  "description": "Every series aseri forecasts, with its unit, horizon, newest data and forecast, source, licence and links; the model; the quantile levels; aseri's own licence; and the errata.",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "model", "quantile_levels", "license", "errata", "series"],
+  "properties": {
+    "schema_version": {"$ref": "defs.schema.json#/$defs/schema_version"},
+    "generated_at": {"$ref": "defs.schema.json#/$defs/timestamp", "description": "When the daily run wrote the site."},
+    "model": {
+      "type": "object",
+      "required": ["model_id", "hf_id", "revision"],
+      "properties": {
+        "model_id": {"$ref": "defs.schema.json#/$defs/model_id"},
+        "hf_id": {"description": "The weights on Hugging Face.", "type": "string"},
+        "revision": {"description": "The pinned commit of the weights.", "type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "quantile_levels": {
+      "description": "The 21 levels every forecast gives. A new set would be a new major version.",
+      "const": [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99]
+    },
+    "license": {"$ref": "defs.schema.json#/$defs/license", "description": "aseri's forecasts, scores and API: CC BY-NC 4.0. Upstream terms still apply to the underlying data."},
+    "errata": {
+      "description": "Corrections, oldest first. A forecast is never edited: an erratum says what was wrong, and the original stays published and scored.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["date", "series_id", "reference_date", "description"],
+        "properties": {
+          "date": {"$ref": "defs.schema.json#/$defs/date", "description": "When the erratum was published."},
+          "series_id": {"description": "The series concerned, or null for all of them.", "anyOf": [{"$ref": "defs.schema.json#/$defs/series_id"}, {"type": "null"}]},
+          "reference_date": {"description": "The forecast concerned, or null for a series' other files.", "anyOf": [{"$ref": "defs.schema.json#/$defs/date"}, {"type": "null"}]},
+          "description": {"type": "string"}
+        }
+      }
+    },
+    "series": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/entry"}
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": [
+        "series_id", "title", "unit", "baseline", "baseline_label", "horizon_unit", "horizon_max", "interval_steps",
+        "last_observation_date", "latest_reference_date", "latest_forecast_date", "stale_since", "note", "weekly",
+        "day_to_day_tie", "source", "license", "links"
+      ],
+      "properties": {
+        "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+        "title": {"type": "string"},
+        "unit": {"type": "string"},
+        "baseline": {"description": "What the page's \"vs\" figures compare with: a fixed value, or the mean of the last 365 days.", "type": "number"},
+        "baseline_label": {"type": "string"},
+        "horizon_unit": {"$ref": "defs.schema.json#/$defs/horizon_unit"},
+        "horizon_max": {"description": "The steps of every forecast, 1 to this.", "type": "integer", "minimum": 1},
+        "interval_steps": {"description": "The steps the page lists ranges for.", "type": "array", "items": {"type": "integer", "minimum": 1}},
+        "last_observation_date": {"$ref": "defs.schema.json#/$defs/date", "description": "The newest day in actuals.json."},
+        "latest_reference_date": {"$ref": "defs.schema.json#/$defs/date", "description": "The data cutoff of latest.json."},
+        "latest_forecast_date": {"$ref": "defs.schema.json#/$defs/date", "description": "The run day that issued latest.json."},
+        "stale_since": {"description": "The day its data turned late, or null while it is on time.", "anyOf": [{"$ref": "defs.schema.json#/$defs/date"}, {"type": "null"}]},
+        "note": {"description": "Why the latest forecast starts before the last observation, then any standing caveat on the data.", "type": ["string", "null"]},
+        "weekly": {"description": "Whether its values follow the week, so a day compares with the same weekday.", "type": "boolean"},
+        "day_to_day_tie": {
+          "description": "How the real days moved together within a forecast: the lag-1 correlation of the normal scores of their PITs over the last 120 days, 0 below 100 pairs.",
+          "type": "object",
+          "required": ["rho", "n"],
+          "properties": {
+            "rho": {"type": "number", "minimum": -1, "maximum": 1},
+            "n": {"description": "Its number of pairs.", "type": "integer", "minimum": 0}
+          }
+        },
+        "source": {
+          "type": "object",
+          "required": ["title", "url", "data_url", "field"],
+          "properties": {
+            "title": {"type": "string"},
+            "url": {"type": "string", "format": "uri"},
+            "data_url": {"description": "What the daily run downloads.", "type": "string", "format": "uri"},
+            "field": {"type": "string"}
+          }
+        },
+        "license": {"$ref": "defs.schema.json#/$defs/license", "description": "The source's terms. aseri's forecasts of it are also under the catalog's license."},
+        "links": {
+          "description": "The series' files, relative to series.json. scores is left out when its scores failed that day.",
+          "type": "object",
+          "required": ["latest", "forecasts", "replay", "actuals"],
+          "properties": {
+            "latest": {"$ref": "defs.schema.json#/$defs/path"},
+            "forecasts": {"$ref": "defs.schema.json#/$defs/path"},
+            "replay": {"$ref": "defs.schema.json#/$defs/path"},
+            "actuals": {"$ref": "defs.schema.json#/$defs/path"},
+            "scores": {"$ref": "defs.schema.json#/$defs/path"}
+          }
+        }
+      }
+    }
+  }
+}

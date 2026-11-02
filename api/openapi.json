@@ -1,0 +1,161 @@
+{
+  "openapi": "3.1.1",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "aseri forecasts API",
+    "version": "1.0.0",
+    "summary": "Static, read-only daily probabilistic forecasts of nine public risk signals, in Hubverse quantile semantics.",
+    "description": "Files on GitHub Pages, rebuilt by one daily run at about 07:00 UTC. GET only, no query parameters and no custom request headers: a CORS preflight is refused. Pages caches for 10 minutes; poll at most once an hour. Dated forecast files never change. Within v1, fields, files and enum values are only added, so a client must ignore what it does not know; anything else ships under /api/v2/ next to v1. Corrections go to the catalog's errata, and the original forecast stays published. A missing file answers 404 with an HTML body: check the status before parsing.",
+    "license": {"name": "CC BY-NC 4.0 (aseri's forecasts, scores and API; upstream terms still apply to the underlying data, per series)", "identifier": "CC-BY-NC-4.0"},
+    "contact": {"name": "aseri", "url": "https://github.com/exdsgift/aseri"}
+  },
+  "externalDocs": {"description": "The API page, for humans", "url": "https://exdsgift.github.io/aseri/api/"},
+  "servers": [{"url": "https://exdsgift.github.io/aseri/api/v1"}],
+  "paths": {
+    "/series.json": {
+      "get": {
+        "operationId": "getCatalog",
+        "summary": "The catalog: every series, the model, the levels, the licences and the errata.",
+        "responses": {
+          "200": {"description": "The catalog.", "content": {"application/json": {"schema": {"$ref": "schemas/catalog.schema.json"}}}}
+        }
+      }
+    },
+    "/scores.json": {
+      "get": {
+        "operationId": "getScoreboard",
+        "summary": "Every series' track record, as the page shows it.",
+        "responses": {
+          "200": {"description": "The scoreboard.", "content": {"application/json": {"schema": {"$ref": "schemas/scoreboard.schema.json"}}}}
+        }
+      }
+    },
+    "/series/{series_id}/latest.json": {
+      "get": {
+        "operationId": "getLatestForecast",
+        "summary": "The newest forecast: a copy of its dated file, with links to it.",
+        "parameters": [{"$ref": "#/components/parameters/series_id"}],
+        "responses": {
+          "200": {"description": "The newest forecast.", "content": {"application/json": {"schema": {"$ref": "schemas/forecast.schema.json"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/series/{series_id}/forecasts.json": {
+      "get": {
+        "operationId": "listForecasts",
+        "summary": "Every forecast issued, oldest first, with the URL of its dated file.",
+        "parameters": [{"$ref": "#/components/parameters/series_id"}],
+        "responses": {
+          "200": {"description": "The index.", "content": {"application/json": {"schema": {"$ref": "schemas/forecast-index.schema.json"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/series/{series_id}/forecasts/{reference_date}.json": {
+      "get": {
+        "operationId": "getForecast",
+        "summary": "One forecast, from its reference date. Written once, never changed.",
+        "parameters": [{"$ref": "#/components/parameters/series_id"}, {"$ref": "#/components/parameters/reference_date"}],
+        "responses": {
+          "200": {"description": "The forecast.", "content": {"application/json": {"schema": {"$ref": "schemas/forecast.schema.json"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/series/{series_id}/replay.json": {
+      "get": {
+        "operationId": "getReplay",
+        "summary": "The forecasts of the last 120 days at seven levels, rounded as the page writes them.",
+        "parameters": [{"$ref": "#/components/parameters/series_id"}],
+        "responses": {
+          "200": {"description": "The replay.", "content": {"application/json": {"schema": {"$ref": "schemas/replay.schema.json"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/series/{series_id}/actuals.json": {
+      "get": {
+        "operationId": "getActuals",
+        "summary": "The observed values of the last 400 days, as known on as_of.",
+        "parameters": [{"$ref": "#/components/parameters/series_id"}],
+        "responses": {
+          "200": {"description": "The observed values.", "content": {"application/json": {"schema": {"$ref": "schemas/actuals.schema.json"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/series/{series_id}/scores.json": {
+      "get": {
+        "operationId": "getSeriesScores",
+        "summary": "A series' track record, live and retrospective apart, with the latest-vintage sensitivity check.",
+        "parameters": [{"$ref": "#/components/parameters/series_id"}],
+        "responses": {
+          "200": {"description": "The track record.", "content": {"application/json": {"schema": {"$ref": "schemas/scores.schema.json"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "getOpenApi",
+        "summary": "This document.",
+        "responses": {"200": {"description": "OpenAPI 3.1.", "content": {"application/json": {}}}}
+      }
+    },
+    "/schemas/{name}.schema.json": {
+      "get": {
+        "operationId": "getSchema",
+        "summary": "A JSON Schema (Draft 2020-12) of the files above; defs holds the shared definitions.",
+        "parameters": [{"name": "name", "in": "path", "required": true, "schema": {"enum": ["defs", "catalog", "forecast", "forecast-index", "actuals", "replay", "scores", "scoreboard"]}}],
+        "responses": {
+          "200": {"description": "The schema.", "content": {"application/json": {}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/licenses/{name}.txt": {
+      "get": {
+        "operationId": "getLicense",
+        "summary": "A full licence text, or a source's terms: the license.text of a catalog entry names it.",
+        "parameters": [{"name": "name", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9.-]+$"}}],
+        "responses": {
+          "200": {"description": "The text.", "content": {"text/plain": {}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/model-metadata/{model_id}.yml": {
+      "get": {
+        "operationId": "getModelMetadata",
+        "summary": "The model's Hubverse model-metadata file.",
+        "parameters": [{"name": "model_id", "in": "path", "required": true, "schema": {"const": "aseri-timestral209m"}}],
+        "responses": {
+          "200": {"description": "Hubverse model metadata, YAML.", "content": {"text/yaml": {}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "series_id": {
+        "name": "series_id",
+        "in": "path",
+        "required": true,
+        "description": "A series of the catalog. New series may be added within v1.",
+        "schema": {"type": "string", "pattern": "^[a-z0-9_]+$", "examples": ["gpr_daily", "wiki_ww3_views", "brent_spot", "suez_transits", "hormuz_transits", "bab_el_mandeb_transits", "taiwan_strait_transits", "ua_air_raid_hours", "ua_drones_downed_claimed"]}
+      },
+      "reference_date": {
+        "name": "reference_date",
+        "in": "path",
+        "required": true,
+        "description": "A reference date listed in the series' forecasts.json.",
+        "schema": {"type": "string", "format": "date"}
+      }
+    },
+    "responses": {
+      "NotFound": {"description": "No such file: GitHub Pages' 404 page, with an HTML body.", "content": {"text/html": {}}}
+    }
+  }
+}

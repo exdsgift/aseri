@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/scores.schema.json",
+  "title": "series/{series_id}/scores.json: a series' track record",
+  "description": "Every past forecast scored once, score_lag_days after its target day, against the value known then. Live and retrospective forecasts apart, never combined; then the same targets against the latest vintage, as a sensitivity check.",
+  "type": "object",
+  "required": [
+    "schema_version", "model_id", "series_id", "n", "min_n_to_display", "primary_baseline", "score_lag_days",
+    "live", "retrospective", "latest_vintage", "method", "license", "generated_at", "links"
+  ],
+  "properties": {
+    "schema_version": {"$ref": "defs.schema.json#/$defs/schema_version"},
+    "model_id": {"$ref": "defs.schema.json#/$defs/model_id"},
+    "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+    "n": {"$ref": "#/$defs/n"},
+    "min_n_to_display": {"$ref": "#/$defs/min_n_to_display"},
+    "primary_baseline": {"$ref": "#/$defs/primary_baseline"},
+    "score_lag_days": {"$ref": "#/$defs/score_lag_days"},
+    "live": {"$ref": "#/$defs/mode"},
+    "retrospective": {"$ref": "#/$defs/mode"},
+    "latest_vintage": {
+      "description": "The same targets scored against the newest vintage: it differs only where the source revised them (GPR).",
+      "type": "object",
+      "required": ["live", "retrospective"],
+      "properties": {
+        "live": {"$ref": "#/$defs/mode"},
+        "retrospective": {"$ref": "#/$defs/mode"}
+      }
+    },
+    "method": {"$ref": "#/$defs/method"},
+    "license": {"$ref": "defs.schema.json#/$defs/license"},
+    "generated_at": {"$ref": "defs.schema.json#/$defs/timestamp"},
+    "links": {
+      "type": "object",
+      "required": ["catalog", "scores"],
+      "properties": {
+        "catalog": {"$ref": "defs.schema.json#/$defs/path"},
+        "scores": {"$ref": "defs.schema.json#/$defs/path"}
+      }
+    }
+  },
+  "$defs": {
+    "n": {"description": "The live forecasts resolved 7 steps ahead: the page shows the live scores from min_n_to_display.", "type": "integer", "minimum": 0},
+    "min_n_to_display": {"type": "integer", "minimum": 1},
+    "primary_baseline": {"description": "The baseline the verdict is against, chosen on the backtest before the live record.", "enum": ["naive", "snaive7", "mean28"]},
+    "score_lag_days": {"description": "Days a target waits after its date before it is scored.", "type": "integer", "minimum": 0},
+    "mode": {
+      "description": "The scores of the live or the retrospective forecasts.",
+      "type": "object",
+      "required": ["n", "since", "observation_as_of", "buckets", "weekly"],
+      "properties": {
+        "n": {"description": "Forecasts with every day of the 1-7 bucket scored.", "type": "integer", "minimum": 0},
+        "since": {"description": "The oldest reference date scored, or null.", "anyOf": [{"$ref": "defs.schema.json#/$defs/date"}, {"type": "null"}]},
+        "observation_as_of": {
+          "description": "The oldest and the newest vintage scored against, or null.",
+          "anyOf": [{"type": "array", "prefixItems": [{"$ref": "defs.schema.json#/$defs/date"}, {"$ref": "defs.schema.json#/$defs/date"}], "items": false, "minItems": 2}, {"type": "null"}]
+        },
+        "buckets": {
+          "description": "Steps 1 to 7 and 8 to 28 (to the series' horizon).",
+          "type": "object",
+          "required": ["1-7"],
+          "propertyNames": {"enum": ["1-7", "8-28"]},
+          "additionalProperties": {"$ref": "#/$defs/bucket"}
+        },
+        "weekly": {
+          "description": "The last 8 forecasts from the series' record weekday, 7 steps ahead: the page's squares.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["reference_date", "inside_80"],
+            "properties": {
+              "reference_date": {"$ref": "defs.schema.json#/$defs/date"},
+              "inside_80": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    },
+    "bucket": {
+      "type": "object",
+      "required": ["n"],
+      "properties": {
+        "n": {"description": "Forecasts scored on every day of the bucket.", "type": "integer", "minimum": 0},
+        "coverage_50": {"$ref": "#/$defs/coverage"},
+        "coverage_80": {"$ref": "#/$defs/coverage"},
+        "wis": {
+          "type": "object",
+          "required": ["wis", "dispersion", "overprediction", "underprediction", "vs_probabilistic_naive"],
+          "properties": {
+            "wis": {"$ref": "defs.schema.json#/$defs/number_or_null"},
+            "dispersion": {"$ref": "defs.schema.json#/$defs/number_or_null"},
+            "overprediction": {"$ref": "defs.schema.json#/$defs/number_or_null"},
+            "underprediction": {"$ref": "defs.schema.json#/$defs/number_or_null"},
+            "vs_probabilistic_naive": {"$ref": "#/$defs/comparison"}
+          }
+        },
+        "ae_median": {
+          "type": "object",
+          "required": ["mean", "vs"],
+          "properties": {
+            "mean": {"$ref": "defs.schema.json#/$defs/number_or_null"},
+            "vs": {
+              "type": "object",
+              "required": ["naive", "snaive7", "mean28"],
+              "properties": {
+                "naive": {"$ref": "#/$defs/comparison"},
+                "snaive7": {"$ref": "#/$defs/comparison"},
+                "mean28": {"$ref": "#/$defs/comparison"}
+              }
+            }
+          }
+        },
+        "mase": {"$ref": "defs.schema.json#/$defs/number_or_null"}
+      },
+      "if": {"properties": {"n": {"minimum": 1}}},
+      "then": {"required": ["coverage_50", "coverage_80", "wis", "ae_median", "mase"]}
+    },
+    "coverage": {
+      "description": "How many scored days fell inside the range, with a 95% Clopper-Pearson interval.",
+      "type": "object",
+      "required": ["hits", "targets", "rate", "ci"],
+      "properties": {
+        "hits": {"type": "integer", "minimum": 0},
+        "targets": {"type": "integer", "minimum": 1},
+        "rate": {"$ref": "defs.schema.json#/$defs/number_or_null"},
+        "ci": {"$ref": "#/$defs/interval"}
+      }
+    },
+    "comparison": {
+      "description": "The ratio of the model's mean score to a baseline's, its 95% block-bootstrap interval and the verdict.",
+      "type": "object",
+      "required": ["ratio", "ci", "verdict"],
+      "properties": {
+        "ratio": {"$ref": "defs.schema.json#/$defs/number_or_null"},
+        "ci": {"$ref": "#/$defs/interval"},
+        "verdict": {"description": "beats when the whole interval is under 1, loses when over 1, ties otherwise; null when a baseline has no error.", "enum": ["beats", "ties", "loses", null]}
+      }
+    },
+    "interval": {
+      "type": "array",
+      "prefixItems": [{"$ref": "defs.schema.json#/$defs/number_or_null"}, {"$ref": "defs.schema.json#/$defs/number_or_null"}],
+      "items": false,
+      "minItems": 2
+    },
+    "method": {
+      "description": "How every score is computed, in words, and the bootstrap's settings.",
+      "type": "object",
+      "required": ["wis", "observation", "bootstrap", "verdict", "baselines"],
+      "properties": {
+        "wis": {"type": "string"},
+        "observation": {"type": "string"},
+        "origins": {"type": "string"},
+        "coverage_interval": {"type": "string"},
+        "bootstrap": {
+          "type": "object",
+          "required": ["method", "block_length", "resamples", "seed", "interval"],
+          "properties": {
+            "method": {"type": "string"},
+            "block_length": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 1}},
+            "resamples": {"type": "integer", "minimum": 1},
+            "seed": {"type": "integer"},
+            "interval": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1}
+          }
+        },
+        "verdict": {"type": "string"},
+        "mase_scale": {"type": "string"},
+        "baselines": {"type": "object", "additionalProperties": {"type": "string"}},
+        "weekly": {"type": "string"},
+        "calibration_monitor": {"type": "string"},
+        "trading_days": {"type": "string"}
+      }
+    }
+  }
+}

@@ -15,11 +15,12 @@ import latest from "@/fixtures/series/gpr_daily/latest.json"
 import replay from "@/fixtures/series/gpr_daily/replay.json"
 import { monthDay } from "@/lib/format"
 
+import apiPage from "../api/index.html?raw"
 import page from "../index.html?raw"
 import { App } from "./App"
 
-// What the daily runs published, at the URLs the page reads: GPR's of 2026-10-30,
-// and the four sea lanes of the prototype's run of 2026-10-29.
+// What a daily run published on 2026-10-31, at the URLs the page reads (the fixtures
+// are its files, as the pipeline wrote them).
 const published: Record<string, unknown> = Object.fromEntries(
   Object.entries(
     import.meta.glob("./fixtures/**/*.json", { eager: true, import: "default" })
@@ -48,7 +49,7 @@ afterEach(() => {
 })
 // The day latest.json's forecast was made, so the panel calls it today.
 beforeEach(() => {
-  vi.useFakeTimers({ now: new Date("2026-10-30T12:00:00Z"), toFake: ["Date"] })
+  vi.useFakeTimers({ now: new Date("2026-10-31T12:00:00Z"), toFake: ["Date"] })
 })
 
 // The cards fill in as each series loads, so a test waits for the last one it expects.
@@ -116,7 +117,7 @@ it("cautions when the site was last updated more than 2 days ago", async () => {
 
 // The words beside the numbers prevent the known misreadings: a median read as a promise,
 // a range read as false precision. Each "most likely" value comes after its range.
-it("keeps the copy honest, today and in replay, and in index.html's tags", async () => {
+it("keeps the copy honest, today and in replay, in index.html's tags and on the API's page", async () => {
   // A chart with a width draws its labels, and a tap on it opens a day's readout.
   vi.stubGlobal(
     "ResizeObserver",
@@ -185,8 +186,8 @@ it("keeps the copy honest, today and in replay, and in index.html's tags", async
   fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
   fireEvent.pointerDown(chart, { clientX: 692 })
   seen.push(copy())
-  const text = [...seen.map((s) => s.text), page].join(" ")
-  const medians = [...seen.flatMap((s) => s.medians), page]
+  const text = [...seen.map((s) => s.text), page, apiPage].join(" ")
+  const medians = [...seen.flatMap((s) => s.medians), page, apiPage]
 
   expect(text).not.toMatch(/\bwill\b/i)
   expect(text).not.toMatch(/%\s*confidence/i)
@@ -202,6 +203,29 @@ const bareMedians = (block: string) =>
     .split(/most likely:? (?=\d)/i)
     .slice(0, -1)
     .filter((before) => !/\d+ in 10\b.*?\d+(?:-| and )\d/i.test(before))
+
+// For dataset search engines: schema.org's Dataset, with what Google asks of one.
+it("describes the API's data as a schema.org Dataset, under aseri's licence", () => {
+  const block = apiPage.match(
+    /<script type="application\/ld\+json">([\s\S]*?)<\/script>/
+  )
+  const dataset = JSON.parse(block![1])
+
+  expect(dataset["@type"]).toBe("Dataset")
+  expect(dataset.name).toMatch(/^aseri/)
+  expect(dataset.description.length).toBeGreaterThanOrEqual(50)
+  expect(dataset.description.length).toBeLessThanOrEqual(5000)
+  expect(dataset.license).toBe(
+    "https://creativecommons.org/licenses/by-nc/4.0/"
+  )
+  expect(dataset.creditText).toBe(
+    "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)"
+  )
+  expect(dataset.variableMeasured).toHaveLength(9)
+  expect(dataset.distribution[0].contentUrl).toBe(
+    "https://exdsgift.github.io/aseri/api/v1/series.json"
+  )
+})
 
 it("finds a most likely value given without its range first", () => {
   expect(bareMedians("Nov 23: most likely 168 · 8 in 10: 111-251")).toEqual([
@@ -426,14 +450,14 @@ it("groups a card for each series in the catalog, with its 7-day average, its ch
   ).toEqual(["Risk, attention and oil", "Sea lanes", "War in Ukraine"])
   expect(cards.getAllByRole("button").map((b) => b.textContent)).toEqual([
     "Geopolitical risk [1] 181 index (1985-2019 average = 100) 7-day average to Oct 26 81% above its 1985-2019 average In 28 days: 111-251 8 in 10 for Nov 23 alone",
-    '"World War III" [2] 1,833 Wikipedia views a day 7-day average to Oct 29 61% below its 365-day mean In 14 days: 1,456-4,571 8 in 10 for Nov 12 alone',
+    '"World War III" [2] 2,053 Wikipedia views a day 7-day average to Oct 30 57% below its 365-day mean In 14 days: 1,455-5,423 8 in 10 for Nov 13 alone',
     // Brent's week has 5 prices, and its 14 steps are trading days: Nov 16 is 20 days on.
     "Brent oil [3] 124 $ a barrel 7-day average to Oct 27 38% above its 365-day mean In 14 trading days: 102-145 8 in 10 for Nov 16 alone",
     "Suez Canal [4] 41 ships a day 7-day average to Oct 25 1% above its 365-day mean In 28 days: 33-51 8 in 10 for Nov 22 alone",
     "Strait of Hormuz [5] 3 ships a day 7-day average to Oct 25 88% below its 365-day mean In 14 days: 0-6 8 in 10 for Nov 08 alone",
     "Bab el-Mandeb [6] 29 ships a day 7-day average to Oct 25 14% below its 365-day mean In 14 days: 20-36 8 in 10 for Nov 08 alone",
     "Taiwan Strait [7] 190 ships a day 7-day average to Oct 25 18% below its 365-day mean In 28 days: 183-268 8 in 10 for Nov 22 alone",
-    "Air-raid alerts [8] 66 alert hours a day, all regions 7-day average to Oct 29 6% above its 365-day mean In 7 days: 49-88 8 in 10 for Nov 05 alone",
+    "Air-raid alerts [8] 62 alert hours a day, all regions 7-day average to Oct 30 1% below its 365-day mean In 7 days: 50-88 8 in 10 for Nov 06 alone",
     "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures 7-day average to Oct 30 20% above its 365-day mean In 7 days: 1,158-1,968 8 in 10 for Nov 06 alone",
   ])
   // The key hint is for the eye: the button says it as a shortcut.

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>aseri API</title>
+    <meta
+      name="description"
+      content="aseri's daily forecasts of nine public risk signals as static JSON files: the catalog, each forecast at 21 quantile levels, the real values and the track record, with OpenAPI, JSON Schemas and licences."
+    />
+    <link rel="stylesheet" href="/src/index.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "aseri: daily probabilistic forecasts of nine public risk signals",
+        "description": "Daily quantile forecasts from Timestral-209M of nine public series: the Caldara and Iacoviello geopolitical risk index, Wikipedia views of World War III, the Brent oil price, ship transits through the Suez Canal, the Strait of Hormuz, Bab el-Mandeb and the Taiwan Strait, hours of air-raid alerts in Ukraine and the drones Ukraine's General Staff claims downed. Each forecast gives 21 quantile levels for each day ahead, in Hubverse model-output semantics, with the real values and a track record scored against naive baselines. Static JSON files, rebuilt daily.",
+        "url": "https://exdsgift.github.io/aseri/api/",
+        "sameAs": "https://github.com/exdsgift/aseri",
+        "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "creditText": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)",
+        "isAccessibleForFree": true,
+        "creator": {
+          "@type": "Organization",
+          "name": "aseri",
+          "url": "https://github.com/exdsgift/aseri"
+        },
+        "keywords": [
+          "probabilistic forecasts",
+          "quantile forecasts",
+          "Hubverse",
+          "geopolitical risk",
+          "shipping",
+          "oil price",
+          "Ukraine"
+        ],
+        "measurementTechnique": "Zero-shot quantile forecasts of Timestral-209M (Mistral AI), univariate, scored with WIS and interval coverage",
+        "variableMeasured": [
+          "Geopolitical risk index (GPR daily)",
+          "Wikipedia views of World War III",
+          "Brent oil spot price",
+          "Ships through the Suez Canal",
+          "Ships through the Strait of Hormuz",
+          "Ships through Bab el-Mandeb",
+          "Ships through the Taiwan Strait",
+          "Air-raid alert hours in Ukraine",
+          "Drones downed, as claimed by Ukraine's General Staff"
+        ],
+        "isBasedOn": [
+          "https://www.matteoiacoviello.com/gpr.htm",
+          "https://wikimedia.org/api/rest_v1/",
+          "https://fred.stlouisfed.org/series/DCOILBRENTEU",
+          "https://portwatch.imf.org/",
+          "https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "https://github.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset"
+        ],
+        "distribution": [
+          {
+            "@type": "DataDownload",
+            "name": "Catalog",
+            "encodingFormat": "application/json",
+            "contentUrl": "https://exdsgift.github.io/aseri/api/v1/series.json"
+          },
+          {
+            "@type": "DataDownload",
+            "name": "OpenAPI description",
+            "encodingFormat": "application/json",
+            "contentUrl": "https://exdsgift.github.io/aseri/api/v1/openapi.json"
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <main
+      class="mx-auto flex max-w-[72ch] flex-col gap-14 px-4 pt-24 pb-14 text-[12px]/[20px] [&_a]:underline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-2 [&_a]:focus-visible:outline-primary [&_a:hover]:text-primary [&_code]:font-sans [&_code]:wrap-anywhere [&_code]:text-primary"
+    >
+      <header class="flex flex-col items-center gap-6 text-center">
+        <p class="text-[8px]/[12px] text-muted-foreground uppercase">
+          <a href="../">aseri</a> · for programs and people
+        </p>
+        <h1
+          class="font-display text-[96px]/none tracking-[0.04em] text-primary"
+        >
+          API
+        </h1>
+        <p class="text-balance">
+          Every forecast on this site, as files: nine daily series, a forecast
+          of each from its newest data, the real values, and how past forecasts
+          did. Static JSON, read-only, rebuilt each day at about 07:00 UTC.
+        </p>
+        <p class="flex flex-col gap-2 border-2 border-border px-3 py-2 chip">
+          <span class="text-[8px]/[12px] text-muted-foreground uppercase"
+            >Base URL</span
+          >
+          <code>https://exdsgift.github.io/aseri/api/v1/</code>
+        </p>
+      </header>
+
+      <section aria-labelledby="files" class="flex flex-col gap-6">
+        <h2
+          id="files"
+          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
+        >
+          Files
+        </h2>
+        <dl class="flex flex-col gap-4">
+          <div>
+            <dt>
+              <a href="v1/series.json"><code>series.json</code></a>
+            </dt>
+            <dd class="text-muted-foreground">
+              The catalog: each series' unit, horizon, newest data and forecast,
+              source, licence and links, the model, the 21 quantile levels and
+              the errata.
+            </dd>
+          </div>
+          <div>
+            <dt><code>series/{series_id}/latest.json</code></dt>
+            <dd class="text-muted-foreground">
+              The newest forecast, a copy of its dated file.
+            </dd>
+          </div>
+          <div>
+            <dt><code>series/{series_id}/forecasts.json</code></dt>
+            <dd class="text-muted-foreground">
+              Every forecast issued, oldest first, with its file.
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <code>series/{series_id}/forecasts/{reference_date}.json</code>
+            </dt>
+            <dd class="text-muted-foreground">
+              One forecast. Written once, never changed.
+            </dd>
+          </div>
+          <div>
+            <dt><code>series/{series_id}/actuals.json</code></dt>
+            <dd class="text-muted-foreground">
+              The real values of the last 400 days, as known on its
+              <code>as_of</code> day.
+            </dd>
+          </div>
+          <div>
+            <dt><code>series/{series_id}/replay.json</code></dt>
+            <dd class="text-muted-foreground">
+              The forecasts of the last 120 days at seven levels, rounded as
+              this site writes them.
+            </dd>
+          </div>
+          <div>
+            <dt><code>series/{series_id}/scores.json</code></dt>
+            <dd class="text-muted-foreground">
+              The track record: live forecasts and the backtest apart, never
+              combined.
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <a href="v1/scores.json"><code>scores.json</code></a>
+            </dt>
+            <dd class="text-muted-foreground">
+              Every series' track record, as this site shows it.
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <a href="v1/openapi.json"><code>openapi.json</code></a
+              >,
+              <code>schemas/{name}.schema.json</code>
+            </dt>
+            <dd class="text-muted-foreground">
+              The contract: OpenAPI 3.1 and JSON Schema 2020-12.
+            </dd>
+          </div>
+          <div>
+            <dt><code>licenses/{name}.txt</code></dt>
+            <dd class="text-muted-foreground">The full licence texts.</dd>
+          </div>
+          <div>
+            <dt>
+              <a href="v1/model-metadata/aseri-timestral209m.yml"
+                ><code>model-metadata/aseri-timestral209m.yml</code></a
+              >
+            </dt>
+            <dd class="text-muted-foreground">
+              The model, in Hubverse model metadata.
+            </dd>
+          </div>
+        </dl>
+        <p class="text-muted-foreground">
+          The series:
+          <code>gpr_daily</code>, <code>wiki_ww3_views</code>,
+          <code>brent_spot</code>, <code>suez_transits</code>,
+          <code>hormuz_transits</code>, <code>bab_el_mandeb_transits</code>,
+          <code>taiwan_strait_transits</code>,
+          <code>ua_air_raid_hours</code> and
+          <code>ua_drones_downed_claimed</code>.
+        </p>
+      </section>
+
+      <section aria-labelledby="forecast" class="flex flex-col gap-6">
+        <h2
+          id="forecast"
+          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
+        >
+          A forecast
+        </h2>
+        <p>
+          A forecast reads its series up to <code>reference_date</code>, its
+          last observed day, and gives each step <code>h</code> of
+          <code>horizon</code> a day, <code>target_end_date</code>:
+          <code>reference_date</code> plus <code>h</code> days, or for
+          <code>brent_spot</code> the <code>h</code>-th trading day after it.
+          <code>forecast_date</code> is the UTC day of the run that made it.
+          <code>forecast_mode</code> is <code>live</code>, or
+          <code>retrospective</code> for one made after the fact, such as the
+          120-day backfill at launch; the live record counts live forecasts
+          only.
+        </p>
+        <p>
+          <code>quantiles</code> holds an array per level, from
+          <code>"0.01"</code> to <code>"0.99"</code>, aligned with
+          <code>horizon</code>. From <code>"0.1"</code> to <code>"0.9"</code> is
+          the 8 in 10 range: the daily value should land inside it 8 days in 10,
+          outside it about 2 in 10. It is not a high and a low.
+          <code>"0.5"</code> splits the forecast in half.
+        </p>
+        <pre
+          class="overflow-x-auto border-2 border-border px-3 py-2 text-[8px]/[14px] chip"
+        ><code>fetch("https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/latest.json")
+  .then((response) =&gt; response.json())
+  .then((forecast) =&gt; forecast.quantiles["0.9"])</code></pre>
+      </section>
+
+      <section aria-labelledby="contract" class="flex flex-col gap-6">
+        <h2
+          id="contract"
+          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
+        >
+          Contract
+        </h2>
+        <p>
+          <code>openapi.json</code> and the JSON Schemas are the contract, kept
+          in the repository's <code>api/</code> folder. Before each deploy the
+          daily run checks every file against its schema, dates included, and
+          that the files agree with each other and each step's day follows from
+          its reference date. It holds each newest forecast to bounds drawn from
+          its series' last 365 days. A file that fails stops the deploy.
+        </p>
+        <p>
+          <code>v1</code> only grows: new fields, files, series and values.
+          Ignore what you do not know. Anything else goes to
+          <code>/api/v2/</code>, next to <code>v1</code> for 6 months at least.
+          A dated forecast never changes: a correction goes to
+          <code>errata</code> in <code>series.json</code>, each with its
+          <code>date</code>, <code>series_id</code>,
+          <code>reference_date</code> and <code>description</code>, and the
+          original stays published and scored. None so far.
+        </p>
+      </section>
+
+      <section aria-labelledby="use" class="flex flex-col gap-6">
+        <h2
+          id="use"
+          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
+        >
+          Use
+        </h2>
+        <ul class="flex list-['-_'] flex-col gap-3 pl-4">
+          <li>
+            GET only, no query strings. Send no custom headers: GitHub Pages
+            refuses the CORS preflight they cause.
+          </li>
+          <li>
+            Pages caches for 10 minutes, so poll once an hour at most. Right
+            after a deploy <code>series.json</code> and
+            <code>latest.json</code> can disagree for a moment: both carry
+            <code>forecast_date</code>.
+          </li>
+          <li>
+            A missing file answers 404 with an HTML page: check the status
+            before parsing.
+          </li>
+          <li>
+            Days are ISO 8601 dates with no time zone. Timestamps are UTC, to
+            the second.
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="licences" class="flex flex-col gap-6">
+        <h2
+          id="licences"
+          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
+        >
+          Licences
+        </h2>
+        <p>
+          aseri's forecasts, scores and this API are under
+          <a href="v1/licenses/CC-BY-NC-4.0.txt">CC BY-NC 4.0</a>. Credit them
+          as: Forecasts: aseri (model aseri-timestral209m, Timestral-209M by
+          Mistral AI). The terms of the data underneath still apply, series by
+          series. Each catalog entry's <code>license</code> gives the credit
+          line to paste, and its <code>text</code> the full terms.
+        </p>
+        <ul class="flex list-['-_'] flex-col gap-3 pl-4">
+          <li>
+            <code>gpr_daily</code>:
+            <a href="v1/licenses/CC-BY-4.0.txt">CC BY 4.0</a>. Caldara, D. and
+            M. Iacoviello (2022), "Measuring Geopolitical Risk", American
+            Economic Review.
+          </li>
+          <li>
+            <code>wiki_ww3_views</code>:
+            <a href="v1/licenses/CC0-1.0.txt">CC0 1.0</a>. Wikimedia Foundation,
+            Analytics API.
+          </li>
+          <li>
+            <code>brent_spot</code>:
+            <a href="v1/licenses/EIA-public-domain.txt">public domain</a>. U.S.
+            Energy Information Administration, through FRED; its price source is
+            Refinitiv, an LSEG business.
+          </li>
+          <li>
+            <code>suez_transits</code>, <code>hormuz_transits</code>,
+            <code>bab_el_mandeb_transits</code> and
+            <code>taiwan_strait_transits</code>:
+            <a href="v1/licenses/IMF-terms.txt">the IMF's terms</a>. Sources: UN
+            Global Platform; IMF PortWatch. Reuse for profit needs the IMF's
+            permission.
+          </li>
+          <li>
+            <code>ua_air_raid_hours</code>:
+            <a href="v1/licenses/MIT-Klymenko.txt">MIT</a>. Vadym Klymenko's
+            Ukrainian air raid sirens dataset.
+          </li>
+          <li>
+            <code>ua_drones_downed_claimed</code>:
+            <a href="v1/licenses/MIT-Ivaniuk.txt">MIT</a>. Petro Ivaniuk's 2022
+            Ukraine Russia War Dataset: claimed by Ukraine's General Staff, one
+            side's figures.
+          </li>
+        </ul>
+        <p>
+          The code is
+          <a href="https://github.com/exdsgift/aseri/blob/master/LICENSE">MIT</a
+          >.
+        </p>
+      </section>
+    </main>
+    <footer
+      class="mx-auto max-w-[72ch] px-4 pb-14 text-center text-[8px]/[14px] text-muted-foreground uppercase"
+    >
+      <p>
+        <a
+          href="../"
+          class="underline hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >Back to aseri</a
+        >
+        ·
+        <a
+          href="https://github.com/exdsgift/aseri"
+          class="underline hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >Source on GitHub</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>

@@ -105,7 +105,7 @@ Each series is a daily value. The page shows the daily values, their 7-day avera
 
 | id | Name on page | Source and access | Transform | Unit | Horizon | Interval steps | Attribution / licence |
 |---|---|---|---|---|---|---|---|
-| `gpr_daily` | Geopolitical risk | Caldara & Iacoviello GPR daily, `data_gpr_daily_recent.dta` (or `.xls`), column `GPRD` | none; baseline 100 = 1985-2019 average (verified: mean 100.0) | index | 28 | 7, 14, 28 | CC BY; cite Caldara and Iacoviello (2022, AER) |
+| `gpr_daily` | Geopolitical risk | Caldara & Iacoviello GPR daily, `data_gpr_daily_recent.dta` (or `.xls`), column `GPRD` | none; baseline 100 = 1985-2019 average (verified: mean 100.0) | index | 28 | 7, 14, 28 | CC BY 4.0; cite Caldara and Iacoviello (2022, AER) |
 | `wiki_ww3_views` | "World War III" | Wikimedia pageviews REST API, en.wikipedia, `user` agent type, User-Agent header required | none | Wikipedia views a day | 14 | 3, 7, 14 | CC0 |
 | `brent_spot` | Brent oil | FRED `DCOILBRENTEU` (EIA) | trading days only; see note | $ a barrel | 14 | 3, 7, 14 | EIA public domain, source FRED/EIA |
 | `suez_transits` | Suez Canal | IMF PortWatch ArcGIS `Daily_Chokepoints_Data`, `n_total` | none | ships a day | 28 | 7, 14, 28 | "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org)"; commercial reuse needs IMF permission |
@@ -185,7 +185,7 @@ One workflow, `daily.yml`, on a cron.
    - absolute error of the median vs naive (last value), seasonal naive (7 days) and the 28-day mean, plus MASE.
 
    Score against a stated observation vintage, because GPR revises its recent values.
-6. **Publish:** build the API files and the page data, validate every JSON file against its schema, build the web app, and deploy one Pages artifact.
+6. **Publish:** build the API files and the page data, build the web app, check every API file against the contract (the gate, 6.6), and deploy one Pages artifact.
 
 **Weights cache.** Use `actions/cache` keyed by the model revision. Cold start downloads the 837 MB weights once.
 
@@ -247,7 +247,7 @@ Follow `docs/research/public-api.md`. The essentials:
 
 - **The format is Hubverse model output:** `reference_date`, `target`, `horizon`, `target_end_date`, `output_type = quantile`, `output_type_id`, `value`. The model ID is `aseri-timestral209m`.
 - **Base URL:** `https://<owner>.github.io/aseri/api/v1/`, every path ending in a file name:
-  - `series.json`: catalog, with unit, horizon, cadence, last observation, source, licence, attribution text and day-to-day tie per series, model info, quantile levels, errata;
+  - `series.json`: catalog, with unit, horizon, last observation, source, licence, attribution text and day-to-day tie per series, model info, quantile levels, aseri's licence, errata;
   - `series/{id}/latest.json`;
   - `series/{id}/forecasts.json`: the index;
   - `series/{id}/forecasts/{reference_date}.json`: immutable;
@@ -255,27 +255,29 @@ Follow `docs/research/public-api.md`. The essentials:
   - `series/{id}/actuals.json`;
   - `series/{id}/scores.json`;
   - `scores.json`;
-  - `bulk/forecasts-{YYYY}.parquet` and `.csv.gz`, `bulk/time-series.parquet`, `bulk/oracle-output.csv`, `bulk/scores.parquet`, `bulk/datapackage.json`;
-  - `openapi.json`, `schemas/*.schema.json`, `licenses/*.txt`.
+  - `bulk/forecasts-{YYYY}.parquet` and `.csv.gz`, `bulk/time-series.parquet`, `bulk/oracle-output.csv`, `bulk/scores.parquet`, `bulk/datapackage.json` (#136);
+  - `openapi.json`, `schemas/*.schema.json`, `licenses/*.txt` and `model-metadata/aseri-timestral209m.yml`, the Hubverse model metadata (#135).
 
-  A human docs page at `/api/` carries a schema.org `Dataset` block.
+  A human docs page at `/api/` carries a schema.org `Dataset` block: `web/api/index.html`, a second page of the Vite build on the site's tokens and fonts, with no script, and under the copy lint (#135). The page's footer links to it.
 - **Provenance in every forecast file:**
   - model ID, weights revision and package commit;
   - `reference_date`, `forecast_date`, `generated_at`;
   - code version (git SHA);
   - `forecast_mode`;
   - input `as_of` per source.
-- **The contract:**
-  - OpenAPI 3.1 plus JSON Schemas, kept in the repo as the source of truth;
-  - CI validates every published file against them;
-  - `v1` only changes in additive ways, and anything breaking goes to `v2`;
-  - corrections go to `errata`, the original forecast stays published.
-- **Licences:** each resource carries its own licence and attribution. The bulk CSVs are split by source so that each file has one licence.
+- **The contract (#135):**
+  - OpenAPI 3.1.1 plus JSON Schemas (Draft 2020-12), kept in `api/` at the repo root as the source of truth (`api/openapi.json`, `api/schemas/`), with the licence texts and the model metadata; the daily run copies them into the site's `api/v1/`;
+  - a gate, `python -m aseri.gate` (`pipeline/aseri/gate.py`), runs in `daily.yml` after the run writes the site and before the archive and the deploy. It fails the run when a file is off its schema (closed to undeclared keys, with dates and URIs checked), when the files disagree with each other or with the catalog, or when a step's `target_end_date` is not the reference date plus its horizon (calendar days, or trading days for Brent). Of the dated files it reads only the day's: the others never change;
+  - the bounds are one series' problem, not the API's: the daily run checks each new forecast against its series' last 365 days before archiving it, and a median or an 8 in 10 band far off holds that series alone, as a failed download does. Its last good files stay up with a note, its data is archived, `bounds-alert` opens an issue, and the other series publish. A large change from the forecast before only warns. The bounds are calibrated on the 120-day backfill (`public-api.md` 3.5);
+  - dated forecast files stay byte-identical across reruns, which a test checks;
+  - `v1` only changes in additive ways, and anything breaking goes to `v2`. `schema_version` stays `1.0.0` within v1, since the dated files carry it and never change;
+  - corrections go to `errata` in `series.json` (date, series, reference date, description), empty so far; the original forecast stays published.
+- **Licences:** each resource carries its own licence and attribution: the catalog per series, with `text`, the path of the full licence under `/api/v1/licenses/`. The bulk CSVs are split by source so that each file has one licence. An `attribution` string is never edited, since the dated files carry it.
 - **aseri's own licences (owner's choice):**
   - forecasts, scores and the API: **CC BY-NC 4.0**, attributed as "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)", with a note that upstream terms still apply to the underlying data;
   - code: **MIT**, in `LICENSE` at the root.
 
-  If the Hubverse model-metadata licence list has no CC BY-NC 4.0 value, use its `other` option and state the licence in the text.
+  The Hubverse model-metadata licence lists (the example hubs, FluSight, the CDC COVID-19 hub, checked 2026-10-31) have no CC BY-NC 4.0 value, nor an `other` one: the model metadata says `other` as asked and states the licence in `methods_long`.
 
 ### 6.7 Storage and repository rules
 
@@ -409,7 +411,8 @@ pipeline/                 Python project (uv)
   aseri/forecast.py       Timestral wrapper (pinned model, quantile selection, clamping)
   aseri/archive.py        Hubverse round files, manifests, append-only writes
   aseri/score.py          coverage, WIS, MASE, baselines
-  aseri/publish.py        API files + page data, schema validation
+  aseri/publish.py        API files + page data
+  aseri/gate.py           the pre-publish gate: schemas, agreement, bounds
   aseri/scout.py          covariate scout (6.5)
   tests/
 web/                      Vite + React + TypeScript + Tailwind + shadcn (static build)
