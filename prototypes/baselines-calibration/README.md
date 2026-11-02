@@ -17,8 +17,8 @@ uv sync
 # GPR's vintages and #145's forecast cache, once (about 8 minutes, then 35 if its cache is missing):
 (cd ../../pipeline && uv sync && uv run python -I ../prototypes/gpr-realtime-backtest/fetch.py && uv run python -I -X utf8 ../prototypes/gpr-realtime-backtest/backtest.py > /dev/null)
 uv run python -I fetch.py
-uv run python -I -X utf8 forecasts.py            # about 2.3 h of model time; see the ADR for the split
-uv run python -I -X utf8 evaluate.py > data/report_stdout.md
+uv run python -I -X utf8 forecasts.py            # 2.9 h of model time; 78 min wall split in three processes (below)
+uv run python -I -X utf8 evaluate.py > data/report_stdout.md   # about 80 s once every forecast is cached
 ```
 
-`forecasts.py MODEL ...` runs only those models, so the work splits across processes, for example `timestral timestral_ctx512 ...` in one and `ets` in another. The weights download once, at the revisions pinned in `forecasts.py`, with aseri's User-Agent appended to the Hugging Face client's. A cached forecast is checked against its origins; delete it after changing them.
+`forecasts.py MODEL ...` runs only those models, so the work splits across processes. The run of 2026-10-31 used three: `timestral timestral_ctx512 timestral_ctx1024 timestral_ctx2048 timestral_log1p`, then `timestral_smooth chronos2 timesfm25`, then `ets` (with `OMP_NUM_THREADS=2`). The context variants read the `timestral` cache, making it if missing, and reuse its forecast wherever the history is no longer than the context. The weights download once, at the revisions pinned in `forecasts.py`, with aseri's User-Agent appended to the Hugging Face client's. A cached forecast is checked against its origins; delete it after changing them.
