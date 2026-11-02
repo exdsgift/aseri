@@ -4,6 +4,7 @@ import {
   engrave,
   grown,
   label,
+  word,
   type Art,
   type Frame,
   type Inks,
@@ -121,10 +122,6 @@ const phases = remember((field: ReturnType<typeof polar>, turned: number) => {
   }
   return phase
 })
-
-// A colour's channels as one little-endian pixel word, as every browser lays them out.
-const word = ([r, g, b]: Uint8ClampedArray) =>
-  ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0
 
 // The vortex in two inks. Inside the ring, twelve stippled arms turn `turned` degrees from
 // the head to the ring, the solid arm along one of them. Outside, stripes curve on, turning
