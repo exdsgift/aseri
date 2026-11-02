@@ -145,6 +145,7 @@ it("keeps the copy honest, today and in replay, in index.html's tags and on the 
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
     clearRect() {},
     fillRect() {},
+    drawImage() {},
   } as never)
   serve(published)
   render(<App />)
