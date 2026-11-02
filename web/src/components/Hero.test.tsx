@@ -130,8 +130,9 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   prefers(false)
-  // Back to jsdom's own visible document.
+  // Back to jsdom's own visible document, which has no fonts to wait for.
   delete (document as { hidden?: boolean }).hidden
+  delete (document as { fonts?: unknown }).fonts
 })
 
 // Each hero's art behaves alike: behind the text, in step with the number, calm behind the
@@ -267,6 +268,36 @@ describe.each(heroes)("%s", (hero) => {
 
     expect(loaded).toEqual([expect.stringContaining(engravings[hero])])
   })
+
+  it("keeps its calm veil when today's value arrives", () => {
+    const { rerender } = render(<Hero hero={hero} failed={false} />)
+    const veils = canvas.createImageData.mock.calls.length
+    rerender(<Hero hero={hero} today={today} failed={false} />)
+    expect(drawn()).toBeGreaterThan(1)
+    expect(canvas.createImageData.mock.calls.length).toBe(veils)
+  })
+
+  it("waits for the pixel font only if it letters the canvas, then draws its labels again", async () => {
+    prefers(true)
+    let arrive!: () => void
+    const ready = new Promise<void>((resolve) => (arrive = resolve))
+    const asked = vi.fn(() => ready)
+    Object.defineProperty(document, "fonts", {
+      configurable: true,
+      value: {
+        get ready() {
+          return asked()
+        },
+      },
+    })
+    render(<Hero hero={hero} today={today} failed={false} />)
+    const before = drawn()
+    await act(async () => arrive())
+
+    const lettered = hero !== "messenger"
+    expect(asked).toHaveBeenCalledTimes(lettered ? 1 : 0)
+    expect(drawn() > before).toBe(lettered)
+  })
 })
 
 describe("messenger", () => {
@@ -355,5 +386,52 @@ describe("vortex", () => {
     expect(canvas.setLineDash).toHaveBeenCalledWith([4, 4])
     const labels = canvas.fillText.mock.calls.map((call) => call[0])
     expect(labels.toSorted()).toEqual(["100", "181"])
+  })
+
+  it("draws no arm, tick or label for a baseline that is not a number", () => {
+    prefers(true)
+    render(
+      <Hero
+        hero={hero}
+        today={{ ...today, baseline: Number.NaN }}
+        failed={false}
+      />
+    )
+    expect(drawn()).toBeGreaterThan(0)
+    expect(canvas.fillText).toBeUndefined()
+    expect(canvas.setLineDash).toBeUndefined()
+  })
+})
+
+describe("signal, at 4 times the baseline on a phone", () => {
+  it("keeps the value's frame and its label inside the hero", () => {
+    prefers(true)
+    // The phone's hero: 390 px wide, its text from 224 px down.
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: Element) {
+        return (
+          this.tagName === "DIV" && this.querySelector("h1")
+            ? new DOMRect(16, 224, 358, 1106)
+            : new DOMRect(0, 0, 390, 1400)
+        ) as DOMRect
+      }
+    )
+    render(
+      <Hero
+        hero="signal"
+        today={{ ...today, sevenDayAverage: 400 }}
+        failed={false}
+      />
+    )
+    for (const [left, top, width] of canvas.strokeRect.mock.calls) {
+      expect(top - 15).toBeGreaterThanOrEqual(0)
+      expect(left).toBeGreaterThanOrEqual(0)
+      expect(left + width).toBeLessThanOrEqual(390)
+    }
+    // The labels' blocks, and the 1 px probes that read the tokens.
+    for (const [x, y] of canvas.fillRect.mock.calls) {
+      expect(x).toBeGreaterThanOrEqual(0)
+      expect(y).toBeGreaterThanOrEqual(0)
+    }
   })
 })

@@ -213,6 +213,34 @@ describe("paintChart", () => {
     }
   )
 
+  it("keeps its heavy lines inside the plot, off the frame's row, however low or late the values", () => {
+    // A day of 0 sits the scale's floor on the frame, and what happened runs to the last day.
+    const low = {
+      ...forecast,
+      values: values.map((value, day) =>
+        day === chart.origin - 3 ? 0 : value
+      ),
+      actuals: Array(28).fill(0),
+    }
+    const floored = chartLayout(low, 692)
+    expect(floored.y(0)).toBe(floored.bottom)
+    const calls: { x: number; y: number; color: string }[] = []
+    paintChart(
+      (x, y, color) => calls.push({ x, y, color }),
+      floored,
+      low,
+      colors,
+      path
+    )
+    const lines = calls.filter(({ color }) => color === "daily")
+    expect(Math.max(...lines.map(({ y }) => y))).toBe(floored.bottom)
+    expect(Math.max(...lines.map(({ x }) => x))).toBeLessThanOrEqual(
+      floored.right
+    )
+    // The ring alone stays whole, in the margin kept for it, so that it still reads as a ring.
+    expect(calls.filter(({ color }) => color === "real")).toHaveLength(8)
+  })
+
   it("keeps the ring hollow where the path runs through it, and the band clear round it", () => {
     // The path's value, well inside the 8-in-10 band, on the 10th day.
     const happened = { ...forecast, actuals: Array(10).fill(185) }

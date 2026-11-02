@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { screenAt, selection, signalLayout } from "./signal"
+import { placed, screenAt, selection, signalLayout } from "./signal"
 
 describe("selection", () => {
   it("frames the baseline small and the value as many times as wide as it is the baseline's", () => {
@@ -66,17 +66,68 @@ describe("signalLayout", () => {
   })
 })
 
+describe("placed", () => {
+  const hero = { width: 390, height: 1400 }
+  // A phone: his torso in the band above the text.
+  const layout = signalLayout(390, 1400, {
+    left: 16,
+    top: 224,
+    right: 374,
+    bottom: 1330,
+  })
+
+  it("centres a frame on his back while it fits", () => {
+    const frame = placed(
+      layout.back,
+      selection(181, 100, layout.small)!.value,
+      hero
+    )
+    expect(frame.left + frame.width / 2).toBeCloseTo(layout.back[0], 0)
+    expect(frame.top + frame.height / 2).toBeCloseTo(layout.back[1], 0)
+  })
+
+  it("keeps the frame and the label above it inside the hero, however large the value", () => {
+    for (const value of [300, 400, 1000]) {
+      const size = selection(value, 100, layout.small)!.value
+      const frame = placed(layout.back, size, hero)
+      // The label's block, 12 px tall, sits 3 px above the frame.
+      expect(frame.top - 15).toBeGreaterThanOrEqual(0)
+      expect(frame.left).toBeGreaterThanOrEqual(0)
+      expect(frame.left + frame.width).toBeLessThanOrEqual(hero.width)
+      // Moved, never shrunk: the value stays as many times the baseline.
+      expect(frame.width).toBe(Math.round(size.width))
+    }
+  })
+})
+
 describe("screenAt", () => {
-  it("warms up through three noisy pictures, then flickers among three settled ones, a new one each tick", () => {
-    expect([0, 299, 300, 600, 899].map((ms) => screenAt(ms, false))).toEqual([
-      0, 0, 1, 2, 2,
-    ])
-    const settled = [900, 1100, 1300, 1500].map((ms) => screenAt(ms, false))
+  it("warms up through three noisy pictures, then flickers among three settled ones", () => {
+    expect(
+      [0, 599, 600, 1200, 1799].map((ms) => screenAt(ms, false).picture)
+    ).toEqual([0, 0, 1, 2, 2])
+    const settled = [1800, 2400, 3000, 3600].map(
+      (ms) => screenAt(ms, false).picture
+    )
     expect(new Set(settled).size).toBe(3)
     for (const picture of settled) expect(picture).toBeGreaterThanOrEqual(3)
   })
 
-  it("holds one settled picture when still", () => {
-    expect(screenAt(Infinity, true)).toBe(3)
+  it("changes the screen under twice a second, slips included, far from the 3 flashes WCAG allows", () => {
+    const changes: number[] = []
+    let last = ""
+    for (let ms = 0; ms <= 60_000; ms += 10) {
+      const now = JSON.stringify(screenAt(ms, false))
+      if (now !== last) changes.push(ms)
+      last = now
+    }
+    expect(changes.some((ms) => screenAt(ms, false).slip !== undefined)).toBe(
+      true
+    )
+    for (let i = 2; i < changes.length; i++)
+      expect(changes[i] - changes[i - 2]).toBeGreaterThan(1000)
+  })
+
+  it("holds one settled picture when still, with no slip", () => {
+    expect(screenAt(Infinity, true)).toEqual({ picture: 3 })
   })
 })

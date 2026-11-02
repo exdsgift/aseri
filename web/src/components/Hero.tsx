@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react"
 
-import { HeroArt } from "@/components/HeroArt"
+import { HeroArt, type Art } from "@/components/HeroArt"
 import { messenger } from "@/components/Messenger"
 import { signal } from "@/components/Signal"
 import { vortex } from "@/components/Vortex"
@@ -16,7 +16,8 @@ import {
 import { type HeroName } from "@/lib/heroes"
 import { countMs, countUp, useSteps } from "@/lib/motion"
 
-const arts = { messenger, signal, vortex }
+// Each hero's art, with its engraving's credit.
+export const arts: Record<HeroName, Art> = { messenger, signal, vortex }
 
 // `hero` names the art behind the text. `updated` is when the daily run last wrote the site.
 export function Hero({

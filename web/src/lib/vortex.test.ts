@@ -4,16 +4,21 @@ import { armDegrees, armPoints, dialTicks, vortexLayout } from "./vortex"
 
 describe("armDegrees", () => {
   it("turns the arm one degree per point", () => {
-    expect([100, 181, 300].map(armDegrees)).toEqual([100, 181, 300])
+    expect([100, 181, 300].map((value) => armDegrees(value, 100))).toEqual([
+      100, 181, 300,
+    ])
   })
 
   it("stops at 400, past one turn, and never turns back", () => {
-    expect(armDegrees(1000)).toBe(400)
-    expect(armDegrees(-40)).toBe(0)
+    expect(armDegrees(1000, 100)).toBe(400)
+    expect(armDegrees(-40, 100)).toBe(0)
   })
 
-  it("draws no arm when today's value is missing", () => {
-    expect(armDegrees(Number.NaN)).toBeUndefined()
+  it("draws no arm when today's value or its baseline is missing, as the other heroes draw no mark", () => {
+    expect(armDegrees(Number.NaN, 100)).toBeUndefined()
+    expect(armDegrees(181, Number.NaN)).toBeUndefined()
+    expect(armDegrees(181, 0)).toBeUndefined()
+    expect(armDegrees(181, undefined as never)).toBeUndefined()
   })
 })
 
@@ -28,6 +33,18 @@ describe("dialTicks", () => {
     expect(ticks.filter((t) => t.label)).toEqual(longest)
     for (const { degrees, length } of ticks)
       if (degrees !== 100) expect(length).toBe(degrees % 90 === 0 ? 10 : 6)
+  })
+
+  it("writes the baseline as the page writes numbers", () => {
+    expect(dialTicks(99.6).find((t) => t.label)?.label).toBe("100")
+  })
+
+  it("marks no baseline that is not a number", () => {
+    const ticks = dialTicks(Number.NaN)
+    expect(ticks).toHaveLength(36)
+    expect(ticks.every((t) => Number.isFinite(t.degrees) && !t.label)).toBe(
+      true
+    )
   })
 })
 

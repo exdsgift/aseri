@@ -23,6 +23,12 @@ import {
 // arm turning one degree per point of GPR's 7-day average from the head to the ring.
 export const vortex: Art = {
   src: apollo,
+  credit: {
+    work: "Apollo Belvedere (Apollo Pythius), engraving, Rijksmuseum",
+    source:
+      "https://commons.wikimedia.org/wiki/File:Apollo_Belvedere_Apollo_Pythius_(titel_op_object),_RP-P-OB-102.457.jpg",
+  },
+  lettered: true,
   compose({ width, height, text }, inks, image) {
     const layout = vortexLayout(width, height, text)
     const {
@@ -38,9 +44,9 @@ export const vortex: Art = {
     return (context, frame) => {
       // The vortex winds up as the number counts up.
       const turned =
-        frame.value === undefined
+        frame.value === undefined || frame.baseline === undefined
           ? undefined
-          : armDegrees(frame.value * counted(frame.count))
+          : armDegrees(frame.value * counted(frame.count), frame.baseline)
       stripes(context, field, turned ?? 0, frame, ink, ground)
       if (face)
         context.drawImage(face, Math.round(x - head), Math.round(y - head))
@@ -49,9 +55,13 @@ export const vortex: Art = {
   },
 }
 
+// The cells' kinds in `polar`'s `cell`: under the head, between it and the ring, and
+// outside the ring in a plain or a checker square. Bit 2 marks a cell on the pixel checker.
+const [under, arms, plain, square] = [0, 1, 2, 3]
+
 // The hero at half its resolution, about the vortex's eye at (x, y): each cell's angle
-// clockwise from the top, its radius on a log scale from the head (0) to the ring (1), or
-// -1 under the head, its checker square and its grain. Kept while the size holds.
+// clockwise from the top, its radius on a log scale from the head (0) to the ring (1), its
+// kind and its grain. Kept while the size holds.
 const polar = remember(
   (
     width: number,
@@ -65,7 +75,7 @@ const polar = remember(
     const random = noise(3)
     const angle = new Float32Array(w * h)
     const radius = new Float32Array(w * h)
-    const square = new Uint8Array(w * h)
+    const cell = new Uint8Array(w * h)
     const grain = new Uint8Array(w * h)
     const span = Math.log(ring / head)
     for (let row = 0, i = 0; row < h; row++)
@@ -73,8 +83,16 @@ const polar = remember(
         const [dx, dy] = [2 * column + 1 - x, 2 * row + 1 - y]
         const r = Math.hypot(dx, dy)
         angle[i] = Math.atan2(dx, -dy)
-        radius[i] = r < head - 1 ? -1 : Math.max(0, Math.log(r / head) / span)
-        square[i] = (Math.floor(column / 18) + Math.floor(row / 18)) & 1
+        radius[i] = Math.max(0, Math.log(r / head) / span)
+        const kind =
+          r < head - 1
+            ? under
+            : radius[i] <= 1
+              ? arms
+              : (Math.floor(column / 18) + Math.floor(row / 18)) & 1
+                ? square
+                : plain
+        cell[i] = kind | ((column + row) % 2 === 0 ? 4 : 0)
         grain[i] = Math.floor(random() * 255)
       }
     const canvas = document.createElement("canvas")
@@ -82,14 +100,36 @@ const polar = remember(
     canvas.height = h
     const context = canvas.getContext("2d")!
     const pixels = context.createImageData(w, h)
-    return { w, h, angle, radius, square, grain, canvas, context, pixels }
+    // One write a cell, as the frame redraws every one of them.
+    const words = new Uint32Array(pixels.data.buffer)
+    return { w, h, angle, radius, cell, grain, canvas, context, pixels, words }
   }
 )
+
+// The stripes' phase in each cell once the vortex has wound `turned` degrees, kept while the
+// count-up holds still: between the head and the ring, the twelve arms' (whole numbers on
+// an arm's centre line); outside, the field's, before it turns.
+const phases = remember((field: ReturnType<typeof polar>, turned: number) => {
+  const twist = (turned * Math.PI) / 180
+  const phase = new Float32Array(field.angle.length)
+  for (let i = 0; i < phase.length; i++) {
+    const r = field.radius[i]
+    phase[i] =
+      (field.cell[i] & 3) === arms
+        ? (field.angle[i] - twist * r) * (6 / Math.PI) + 0.19
+        : (field.angle[i] - twist - 0.45 * (r - 1)) * (28 / Math.PI)
+  }
+  return phase
+})
+
+// A colour's channels as one little-endian pixel word, as every browser lays them out.
+const word = ([r, g, b]: Uint8ClampedArray) =>
+  ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0
 
 // The vortex in two inks. Inside the ring, twelve stippled arms turn `turned` degrees from
 // the head to the ring, the solid arm along one of them. Outside, stripes curve on, turning
 // about once in 15 minutes, through checker squares that invert and stipple them, their
-// grain shifting each tick.
+// grain shifting each tick. Only the turn and the grain change from frame to frame.
 function stripes(
   context: CanvasRenderingContext2D,
   field: ReturnType<typeof polar>,
@@ -98,34 +138,34 @@ function stripes(
   ink: Uint8ClampedArray,
   ground: Uint8ClampedArray
 ) {
-  const twist = (turned * Math.PI) / 180
-  const turn = still ? 0 : art * 7e-6
+  const phase = phases(field, turned)
+  const turn = still ? 0 : art * 7e-6 * (28 / Math.PI)
   const shift = still ? 0 : Math.floor(art / 200) % 3
   const [cut, sparse] = [[232, 238, 244][shift], [30, 22, 38][shift]]
-  const data = field.pixels.data
-  for (let i = 0; i < field.angle.length; i++) {
-    const r = field.radius[i]
-    if (r < 0) {
-      data[4 * i + 3] = 0
+  const [on, off] = [word(ink), word(ground)]
+  const { cell, grain, words } = field
+  for (let i = 0; i < words.length; i++) {
+    const kind = cell[i] & 3
+    if (kind === under) {
+      words[i] = 0
       continue
     }
-    const checker = ((i % field.w) + Math.floor(i / field.w)) % 2 === 0
-    const grain = field.grain[i]
+    const checker = cell[i] & 4
+    const g = grain[i]
     let inked: boolean
-    if (r <= 1) {
-      const s = (field.angle[i] - twist * r) * (6 / Math.PI) + 0.19
-      inked = s - Math.floor(s) < 0.38 && (grain < 140 || checker)
-    } else {
-      const s =
-        (field.angle[i] - twist - 0.45 * (r - 1) - turn) * (28 / Math.PI)
+    if (kind === arms)
+      inked = phase[i] - Math.floor(phase[i]) < 0.38 && (g < 140 || !!checker)
+    else {
+      const s = phase[i] - turn
       const stripe = s - Math.floor(s) < 0.5
-      inked = field.square[i]
-        ? stripe
-          ? grain < sparse
-          : checker || grain < 90
-        : stripe && grain < cut
+      inked =
+        kind === square
+          ? stripe
+            ? g < sparse
+            : !!checker || g < 90
+          : stripe && g < cut
     }
-    data.set(inked ? ink : ground, 4 * i)
+    words[i] = inked ? on : off
   }
   field.context.putImageData(field.pixels, 0, 0)
   context.imageSmoothingEnabled = false

@@ -13,6 +13,11 @@ import { counted, easeOut } from "@/lib/motion"
 // baseline.
 export const messenger: Art = {
   src: mercury,
+  credit: {
+    work: "Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art",
+    source:
+      "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg",
+  },
   compose({ width, height, text }, inks, image) {
     const layout = messengerLayout(width, height, text)
     const figure =

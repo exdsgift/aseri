@@ -1,4 +1,4 @@
-import { besideText, calmAround, clamp, type Box } from "@/lib/art"
+import { besideText, calmAround, clamp, hash, type Box } from "@/lib/art"
 
 // The engraving in src/assets/hercules.png: Goltzius's Farnese Hercules from behind, the
 // study's crop at 360 px wide in 8 greys, which the failing screen smears. The selection
@@ -55,12 +55,31 @@ export function selection(value: number, baseline: number, small: number) {
   return { baseline: frame(small), value: frame(small * clamp(ratio, 0, 4)) }
 }
 
-// Which of the screen's six pictures shows `art` ms after the art showed: it warms up
-// through three noisier ones, 300 ms each, then flickers among three settled ones, a new
-// one each 200 ms tick. Still, one settled picture.
-export const screenAt = (art: number, still: boolean) =>
-  still
-    ? 3
-    : art < 900
-      ? Math.floor(art / 300)
-      : 3 + (Math.floor(art / 200) % 3)
+// Where a frame of `size` goes in the `hero`: centred on his back at (x, y), moved only as
+// far as keeps it, and its label 15 px above it, inside. Never shrunk, as its size is the value.
+export function placed(
+  [x, y]: number[],
+  { width, height }: { width: number; height: number },
+  hero: { width: number; height: number }
+) {
+  return {
+    left: Math.round(clamp(x - width / 2, 1, hero.width - width - 1)),
+    top: Math.round(clamp(y - height / 2, 16, hero.height - height - 1)),
+    width: Math.round(width),
+    height: Math.round(height),
+  }
+}
+
+// The screen `art` ms after the art showed: which of its six pictures shows, and the seed of
+// a band slipping sideways, if one is. It changes only every 600 ms, which the 200 ms tick
+// keeps, under twice a second: WCAG 2.3.1 allows 3 flashes. It warms up through three
+// noisier pictures, then flickers among three settled ones; most 8th pictures slip a band.
+// Still, one settled picture.
+export function screenAt(art: number, still: boolean) {
+  if (still) return { picture: 3 }
+  const n = Math.floor(art / 600)
+  return {
+    picture: n < 3 ? n : 3 + (n % 3),
+    slip: n > 3 && n % 8 === 7 && hash(n) > 0.35 ? n : undefined,
+  }
+}

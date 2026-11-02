@@ -22,10 +22,13 @@ export type Frame = {
   value?: number
   baseline?: number
 }
-// A hero's art: its engraving, and how it lays out in a hero of `size`, with the engraving
-// once it has loaded, into what draws each frame.
+// A hero's art: its engraving and the engraving's credit, whether it letters the canvas, and
+// how it lays out in a hero of `size`, with the engraving once it has loaded, into what
+// draws each frame.
 export type Art = {
   src: string
+  credit: { work: string; source: string }
+  lettered?: boolean
   compose: (
     size: Size,
     inks: Inks,
@@ -49,7 +52,7 @@ export function HeroArt({
   const canvas = useRef<HTMLCanvasElement>(null)
   const [size, setSize] = useState<Size>()
   const [image, setImage] = useState<HTMLImageElement>()
-  // The labels on the canvas wait for the pixel font, which a still frame never redraws.
+  // Labels on the canvas wait for the pixel font, which a still frame never redraws.
   const [lettered, setLettered] = useState(false)
   const reduced = useReducedMotion()
   // When the art and the value first showed: a resize, or the engraving arriving late,
@@ -60,8 +63,16 @@ export function HeroArt({
     const loading = new Image()
     loading.onload = () => setImage(loading)
     loading.src = art.src
-    document.fonts?.ready.then(() => setLettered(true))
   }, [art.src])
+
+  useEffect(() => {
+    if (!art.lettered) return
+    let shown = true
+    document.fonts?.ready.then(() => shown && setLettered(true))
+    return () => {
+      shown = false
+    }
+  }, [art.lettered])
 
   useEffect(() => {
     const layer = canvas.current!.parentElement!
@@ -102,7 +113,7 @@ export function HeroArt({
       ground: css.getPropertyValue("--background"),
     }
     const paint = art.compose(size, inks, image)
-    const veil = calm(size, calmAround(size.text), inks.ground)
+    const veil = calm(size, inks.ground)
     const start = performance.now()
     since.current.art ??= start
     if (value !== undefined) since.current.value ??= start
@@ -206,8 +217,11 @@ export function label(
 
 // The calm behind the text: the ground over the text and its margin, nearly opaque, so the
 // art shows only faintly through, dissolving in a dither over 48 px at its edge. Only as
-// big as that, within the hero, and drawn at its `left` and `top`.
-function calm({ width, height }: Size, box: Box, ground: string) {
+// big as that, within the hero, and drawn at its `left` and `top`. Kept while the hero's
+// size and the ground hold: today's value arriving changes neither.
+const calm = remember((size: Size, ground: string) => {
+  const { width, height } = size
+  const box = calmAround(size.text)
   const edge = 48
   const left = Math.max(0, Math.floor(box.left - edge))
   const top = Math.max(0, Math.floor(box.top - edge))
@@ -234,4 +248,4 @@ function calm({ width, height }: Size, box: Box, ground: string) {
     }
   context.putImageData(pixels, 0, 0)
   return { canvas, left, top }
-}
+})

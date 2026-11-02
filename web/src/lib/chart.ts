@@ -257,9 +257,13 @@ export function paintChart(
   for (let px = left; px <= right; px++) lit(px, bottom + 1, color.frame)
   if (!marks) return
 
-  // The lines and marks, laid out first so that the bands can keep clear of them.
+  // The lines and marks, laid out first so that the bands can keep clear of them. Inside the
+  // plot: a 2 art px line on its last column or row would cover the frame's.
   const laid: [number, number, string][] = []
-  const mark: Plot = (px, py, markColor) => void laid.push([px, py, markColor])
+  const lay: Plot = (px, py, markColor) => void laid.push([px, py, markColor])
+  const mark: Plot = (px, py, markColor) => {
+    if (px <= right && py <= bottom) lay(px, py, markColor)
+  }
   polyline(
     mark,
     path.map((value, k): Point => [x(origin + k), y(value)]),
@@ -298,17 +302,19 @@ export function paintChart(
     for (const run of runs)
       if (run.length === 1) square(mark, ...run[0], dot, color.daily)
       else polyline(mark, run, color.daily, 2)
-    if (ringed) ring(mark, ex - 1, ey - 1, color.real)
+    // Whole, in the margin kept for it: cut, it would no longer read as a ring.
+    if (ringed) ring(lay, ex - 1, ey - 1, color.real)
   }
   // An art pixel of the ground round every mark: over the 50% band, the gold path would
-  // average 2.2:1, and beside each band pixel it is 1.35:1.
-  const keyline = new Set(
-    laid.flatMap(([px, py]) =>
-      [-1, 0, 1].flatMap((dx) =>
-        [-1, 0, 1].map((dy) => `${px + dx},${py + dy}`)
-      )
-    )
-  )
+  // average 2.2:1, and beside each band pixel it is 1.35:1. One cell per art pixel, as the
+  // slider repaints on every step.
+  const { width, height } = chart.art
+  const keyline = new Uint8Array(width * height)
+  for (const [px, py] of laid)
+    for (let dy = -1; dy <= 1; dy++)
+      for (let dx = -1; dx <= 1; dx++)
+        if (px + dx >= 0 && px + dx < width && py + dy >= 0 && py + dy < height)
+          keyline[(py + dy) * width + px + dx] = 1
 
   // The bands, column by column: 5 in 10 at 50% of the dither, 8 in 10 at 25%, with solid edges.
   // From the first day ahead: the last value may still be revised, so no width-zero pinch.
@@ -323,7 +329,7 @@ export function paintChart(
         (py === y90 ||
           py === y10 ||
           bayer[(py % 4) * 4 + (px % 4)] < (inner ? 8 : 4)) &&
-        !keyline.has(`${px},${py}`)
+        !keyline[py * width + px]
       )
         lit(px, py, color.band)
     }

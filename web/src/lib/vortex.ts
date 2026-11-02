@@ -1,20 +1,24 @@
 import { besideText, calmAround, clamp, type Box } from "@/lib/art"
+import { formatValue } from "@/lib/format"
 
 // The arm turns one degree per point of GPR's 7-day average between the head and the ring,
 // up to 400: past one turn, as Mercury's fans stop at 4 times the baseline. No arm when
-// the value is not a number, so a broken file draws none rather than a wrong one.
-export const armDegrees = (value: number) =>
-  Number.isFinite(value) ? clamp(value, 0, 400) : undefined
+// the value against its baseline is not a number, as Messenger's `fan` and Signal's
+// `selection` draw none: a broken file draws no mark rather than a wrong one.
+export const armDegrees = (value: number, baseline: number) =>
+  Number.isFinite(value / baseline) ? clamp(value, 0, 400) : undefined
 
 // The ring's ticks, in degrees clockwise from the top: one every 10 points, longer on the
-// quarters, and the longest at the baseline, the one labelled.
+// quarters, and the longest at the baseline, the one labelled, when it is a number.
 export const dialTicks = (
   baseline: number
 ): { degrees: number; length: number; label?: string }[] => [
   ...Array.from({ length: 36 }, (_, i) => i * 10)
     .filter((degrees) => degrees !== baseline)
     .map((degrees) => ({ degrees, length: degrees % 90 === 0 ? 10 : 6 })),
-  { degrees: baseline, length: 18, label: String(baseline) },
+  ...(Number.isFinite(baseline)
+    ? [{ degrees: baseline, length: 18, label: formatValue(baseline) }]
+    : []),
 ]
 
 // The arm, about `center`: from the top of the head's disc, of radius `head`, out to the

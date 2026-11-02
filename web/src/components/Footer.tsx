@@ -1,30 +1,9 @@
-import { type Choice } from "@/lib/heroes"
+import { arts } from "@/components/Hero"
+import { heroes, type Choice } from "@/lib/heroes"
 
 const repository = "https://github.com/exdsgift/aseri"
-// The heroes' engravings, all in the public domain, cropped and dithered for the page.
-const engravings = [
-  [
-    "Messenger",
-    "Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art",
-    "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg",
-  ],
-  [
-    "Signal",
-    "Hendrick Goltzius, The Farnese Hercules, c. 1592, published 1617, The Metropolitan Museum of Art",
-    "https://commons.wikimedia.org/wiki/File:Farnese_Hercules_MET_DP102198.jpg",
-  ],
-  [
-    "Vortex",
-    "Apollo Belvedere (Apollo Pythius), engraving, Rijksmuseum",
-    "https://commons.wikimedia.org/wiki/File:Apollo_Belvedere_Apollo_Pythius_(titel_op_object),_RP-P-OB-102.457.jpg",
-  ],
-]
-const choices: [Choice, string][] = [
-  ["messenger", "Messenger"],
-  ["signal", "Signal"],
-  ["vortex", "Vortex"],
-  ["rotate", "Rotate"],
-]
+const choices: Choice[] = [...heroes, "rotate"]
+const named = (choice: Choice) => choice[0].toUpperCase() + choice.slice(1)
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 const link = `underline hover:text-primary ${focusRing}`
@@ -71,7 +50,7 @@ export function Footer({
           <span id="hero-choice" className="mr-1">
             Hero
           </span>
-          {choices.map(([value, name]) => (
+          {choices.map((value) => (
             <button
               key={value}
               type="button"
@@ -79,15 +58,16 @@ export function Footer({
               onClick={() => onChoose(value)}
               className={`cursor-pointer px-1.5 py-1 uppercase hover:bg-white hover:text-background aria-pressed:bg-secondary aria-pressed:text-background motion-safe:transition-colors motion-safe:duration-160 ${focusRing}`}
             >
-              {name}
+              {named(value)}
             </button>
           ))}
         </div>
+        {/* The engravings, all in the public domain, cropped and dithered for the page. */}
         <ul className="flex flex-col gap-1">
-          {engravings.map(([hero, work, source]) => (
+          {heroes.map((hero) => (
             <li key={hero}>
-              {hero}: {work}, CC0, from{" "}
-              <a href={source} className={link}>
+              {named(hero)}: {arts[hero].credit.work}, CC0, from{" "}
+              <a href={arts[hero].credit.source} className={link}>
                 Wikimedia Commons
               </a>
             </li>

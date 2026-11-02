@@ -11,6 +11,7 @@ import { clamp, hash, noise, remember } from "@/lib/art"
 import { formatValue } from "@/lib/format"
 import { counted, easeOut } from "@/lib/motion"
 import {
+  placed,
   screenAt,
   selection,
   signalLayout,
@@ -22,6 +23,12 @@ import {
 // GPR's 7-day average.
 export const signal: Art = {
   src: hercules,
+  credit: {
+    work: "Hendrick Goltzius, The Farnese Hercules, c. 1592, published 1617, The Metropolitan Museum of Art",
+    source:
+      "https://commons.wikimedia.org/wiki/File:Farnese_Hercules_MET_DP102198.jpg",
+  },
+  lettered: true,
   compose({ width, height, text }, inks, image) {
     const layout = signalLayout(width, height, text)
     const { rows, width: wide, height: tall } = layout.screen
@@ -30,7 +37,7 @@ export const signal: Art = {
     return (context, frame) => {
       light(context, layout, height, frame, inks.ink)
       if (pictures) show(context, layout, pictures, frame, inks.ink)
-      frames(context, layout, frame, inks)
+      frames(context, layout, { width, height }, frame, inks)
     }
   },
 }
@@ -61,7 +68,7 @@ function light(
 }
 
 // The screen as it comes on: a line across its middle that opens into the picture, which
-// warms up and then flickers (`screenAt`). Now and then a band of it slips sideways for a tick.
+// warms up and then flickers, a band of it slipping sideways now and then (`screenAt`).
 function show(
   context: CanvasRenderingContext2D,
   { screen }: SignalLayout,
@@ -69,7 +76,8 @@ function show(
   { art, still }: Frame,
   ink: string
 ) {
-  const picture = pictures[screenAt(art, still)]
+  const { picture: shown, slip } = screenAt(art, still)
+  const picture = pictures[shown]
   const on = still ? 1 : clamp((art - 120) / 380, 0, 1)
   if (on < 1) {
     const middle = screen.y + screen.height / 2
@@ -90,8 +98,7 @@ function show(
     return
   }
   context.drawImage(picture, screen.x, screen.y)
-  const slip = Math.floor(art / 4800)
-  if (still || art < 1500 || art % 4800 >= 200 || hash(slip) < 0.35) return
+  if (slip === undefined) return
   const top = Math.floor(hash(7 * slip) * 0.8 * screen.height)
   const rows = 8 + Math.floor(hash(11 * slip) * 18)
   const shift = Math.round((hash(13 * slip) - 0.5) * 30)
@@ -172,10 +179,12 @@ const screens = remember(
 )
 
 // The selection frames on his back, once today's value is in: the value's grows with the
-// number as it counts up, its dashes marching slowly; the baseline's over it.
+// number as it counts up, its dashes marching slowly; the baseline's over it. Each is
+// labelled above its top left corner, and kept inside the `hero` with its label.
 function frames(
   context: CanvasRenderingContext2D,
   layout: SignalLayout,
+  hero: { width: number; height: number },
   { art, count, still, value, baseline }: Frame,
   inks: Inks
 ) {
@@ -183,39 +192,31 @@ function frames(
   const shown = value * counted(count)
   const sizes = selection(shown, baseline, layout.small)
   if (!sizes) return
-  const marching = still ? 0 : -art / 400
-  outline(context, layout.back, sizes.value, [6, 4], marching, 2, inks)
-  label(
-    context,
-    formatValue(shown),
-    corner(layout.back, sizes.value, shown),
-    inks
-  )
-  outline(context, layout.back, sizes.baseline, [2, 3], 0, 1, inks)
-  label(
-    context,
-    formatValue(baseline),
-    corner(layout.back, sizes.baseline, baseline),
-    inks
-  )
+  for (const [size, dash, offset, thick, words] of [
+    [sizes.value, [6, 4], still ? 0 : -art / 400, 2, formatValue(shown)],
+    [sizes.baseline, [2, 3], 0, 1, formatValue(baseline)],
+  ] as const) {
+    const box = placed(layout.back, size, hero)
+    outline(context, box, [...dash], offset, thick, inks)
+    label(
+      context,
+      words,
+      [box.left + (8 * words.length + 6) / 2, box.top - 9],
+      inks
+    )
+  }
 }
 
-// A dotted frame centred on (x, y), on a band of the ground so that it reads over the noise.
+// A dotted frame, on a band of the ground so that it reads over the noise.
 function outline(
   context: CanvasRenderingContext2D,
-  [x, y]: number[],
-  { width, height }: { width: number; height: number },
+  { left, top, width, height }: ReturnType<typeof placed>,
   dash: number[],
   offset: number,
   thick: number,
   { ink, ground }: Inks
 ) {
-  const box = [
-    Math.round(x - width / 2) + 0.5,
-    Math.round(y - height / 2) + 0.5,
-    Math.round(width),
-    Math.round(height),
-  ] as const
+  const box = [left + 0.5, top + 0.5, width, height] as const
   context.strokeStyle = ground
   context.lineWidth = thick + 3
   context.strokeRect(...box)
@@ -226,13 +227,3 @@ function outline(
   context.strokeRect(...box)
   context.setLineDash([])
 }
-
-// Where a frame's label goes: above its top left corner.
-const corner = (
-  [x, y]: number[],
-  { width, height }: { width: number; height: number },
-  value: number
-) => [
-  Math.round(x - width / 2) + (8 * formatValue(value).length + 6) / 2,
-  Math.round(y - height / 2) - 9,
-]
