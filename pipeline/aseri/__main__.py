@@ -2,12 +2,14 @@
 
 import json
 import os
+import shutil
 import subprocess
 import sys
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from aseri import archive, record
+from aseri import archive, bulk, record
 from aseri.forecast import forecast, load_model, make_context, under_review
 from aseri.gate import annotate, check_forecasts
 from aseri.publish import publish, publish_catalog, publish_contract, publish_scores
@@ -172,7 +174,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             generated_at=generated_at,
         )
     # After the archive: a target due today is scored against the values this run has just archived.
-    entries, rows, levels, records, red = [], [], None, [], []
+    entries, rows, levels, records, red, scores = [], [], None, [], [], []
     for series, _ in SOURCES:
         archived = archive.read(archive_dir, series.id)
         # A fresh series with no archive waits for tomorrow: today's run was archived before it had data.
@@ -264,8 +266,18 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 if model_id == archive.MODEL_ID
                 else {}
             )
+            # The bulk scores keep every model's, where the record shows one: the shown model's rows as
+            # scored above, and each other model's.
+            by_model = {model_id: scored} | {
+                model: record.scored(series, archived, vintages, today, model_id=model)
+                for model in sorted({a.model_id for a in archived} - {model_id})
+            }
             # Kept only once all of it worked, so a series has its whole record or none.
             records.append(summary)
+            scores += [
+                frame.assign(model_id=model, target=series.id)
+                for model, frame in by_model.items()
+            ]
             if "red" in zones.values():
                 red.append(series.id)
         # Whatever breaks its scores costs the series its scores only: it still publishes, as do the others.
@@ -273,10 +285,34 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             del entries[-1]["links"]["scores"]
             detail = f"{detail}; scores failed: {type(error).__name__}: {error}"
         rows.append((series.id, status, f"{observed.index[-1]:%Y-%m-%d}", detail))
+    # Under api/v1, so the page job's copy of the last deploy's api/v1 carries them too; before the
+    # report, so that a failure is in the run summary.
+    written = False
+    if entries:
+        started = time.monotonic()
+        try:
+            bulk.write(api_dir / "bulk", archive_dir, SOURCES, scores, generated_at)
+            written = True
+            print(
+                f"Bulk files written in {time.monotonic() - started:.1f} s", flush=True
+            )
+        # Whatever breaks them costs the API its bulk files alone: the day is still archived and published,
+        # where a failed run would never archive it, and fail again every day.
+        except Exception as error:  # noqa: BLE001
+            # A half-written file would pass for a whole one; the run's API directory starts empty.
+            shutil.rmtree(api_dir / "bulk", ignore_errors=True)
+            rows.append(
+                (
+                    "bulk files",
+                    "failed",
+                    None,
+                    f"{type(error).__name__}: {error}; published without them",
+                )
+            )
     report(rows)
     if not entries:
         sys.exit("Nothing to publish: no series is fresh or has an archived forecast.")
-    publish_catalog(api_dir, entries, levels, generated_at)
+    publish_catalog(api_dir, entries, levels, generated_at, bulk=written)
     publish_scores(api_dir, records, generated_at)
     publish_contract(api_dir)
     # The series the page now shows as late, read from what it reads, the held ones, and those whose live

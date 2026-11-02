@@ -88,6 +88,13 @@ def test_a_target_is_scored_from_its_score_lag_after_its_date_and_not_before(
     # Two weeks on, every day observed is due: Oct 25 is the last, 24 days ahead. The live
     # forecast's days are not observed yet.
     assert two_weeks_on["horizon"].tolist() == list(range(1, 25))
+    # Each row names its target's day, as the round dates it, and the observation's: the same, day by day.
+    assert (
+        two_weeks_on["target_end_date"]
+        == two_weeks_on["reference_date"]
+        + pd.to_timedelta(two_weeks_on["horizon"], unit="D")
+    ).all()
+    assert (two_weeks_on["observation_date"] == two_weeks_on["target_end_date"]).all()
     # The archive began on Oct 26, after most of these were due: they wait for the first value seen.
     assert (two_weeks_on["observation_as_of"] == pd.Timestamp("2026-10-26")).all()
     assert (
@@ -144,6 +151,12 @@ def test_a_new_model_restarts_the_record_and_never_scores_the_model_before(
     assert rows["horizon"].tolist() == list(range(1, 7))
     # The empty record has the very columns of a scored one, in their types.
     assert empty.dtypes.to_dict() == rows.dtypes.to_dict()
+    # The model before is scored only when named, for the bulk scores: never in its record.
+    before = scored(tmp_path, "2026-11-20", model_id="aseri-timestral209m")
+    assert before["reference_date"].unique().tolist() == [
+        pd.Timestamp("2026-10-01"),
+        pd.Timestamp("2026-10-25"),
+    ]
 
 
 def test_a_record_with_no_forecast_of_the_model_is_the_empty_table_itself(tmp_path):
@@ -518,6 +531,13 @@ def test_brent_s_steps_are_scored_against_the_prints_after_its_day_in_order(tmp_
     assert (
         rows["observation"].tolist()
         == observed[observed.index > "2026-10-09"].iloc[:14].tolist()
+    )
+    # Each step keeps the round's date, the bulk forecasts' join key; the price it was scored
+    # against is dated apart. Four months of history cannot foresee the holiday: step 1 is Oct 12.
+    weekdays = pd.bdate_range("2026-10-12", periods=14)
+    assert rows["target_end_date"].tolist() == weekdays.tolist()
+    assert (
+        rows["observation_date"].tolist() == prints[prints > "2026-10-09"][:14].tolist()
     )
 
 

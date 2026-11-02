@@ -118,9 +118,13 @@ def publish(
 
 
 def publish_catalog(
-    api_dir: Path, entries: list[dict], levels: tuple, generated_at: datetime
+    api_dir: Path,
+    entries: list[dict],
+    levels: tuple,
+    generated_at: datetime,
+    bulk: bool = True,
 ) -> None:
-    """Write the catalog, `series.json`: the model, its quantile `levels`, and the entry `publish` returned for each series."""
+    """Write the catalog, `series.json`: the model, its quantile `levels`, the entry `publish` returned for each series, and, if `bulk`, the link to the bulk files."""
     _write(
         api_dir / "series.json",
         {
@@ -135,7 +139,9 @@ def publish_catalog(
             "license": FORECAST_LICENSE,
             "errata": ERRATA,
             "series": entries,
-        },
+        }
+        # Additive to v1 (#136): written by bulk.write, and left out on a day it failed.
+        | ({"links": {"bulk": "bulk/datapackage.json"}} if bulk else {}),
     )
 
 
@@ -286,7 +292,7 @@ def _replay(series, archived, attribution) -> dict:
 
 
 def _actuals(series, observed, as_of, generated_at) -> dict:
-    # shortcut: the last 400 days, enough for the page; the full history comes with the bulk files (#136).
+    # The last 400 days, enough for the page; the full history is in bulk/time-series.parquet (#136).
     observed = observed.iloc[-400:]
     return {
         "schema_version": SCHEMA_VERSION,

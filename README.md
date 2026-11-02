@@ -23,15 +23,16 @@ aseri
 
 ## Latest News
 
+- **[2026/11]** **[Bulk downloads](https://exdsgift.github.io/aseri/api/v1/bulk/datapackage.json)**: every forecast, value and score as Hubverse tables in Parquet and CSV, with a Frictionless data package that carries each file's licences ([#136](https://github.com/exdsgift/aseri/issues/136)).
 - **[2026/11]** **[Calibrated bands](docs/adr/0001-baselines-and-calibration-before-the-live-record.md)**: the calibration layer of ADR 0001 merged as the model `aseri-timestral209m_c1` ([#151](https://github.com/exdsgift/aseri/issues/151)). On a two-year backtest its 8 in 10 range holds about 8 days in 10. A new model ID starts a new live record.
 - **[2026/11]** **[Public API v1](https://exdsgift.github.io/aseri/api/)**: an OpenAPI 3.1 contract, JSON Schemas, licence texts, Hubverse model metadata, and a gate that checks every file before each deploy ([#135](https://github.com/exdsgift/aseri/issues/135)).
 - **[2026/11]** **[A page with less text](https://exdsgift.github.io/aseri/)**: each thing said once, on the chart ([#152](https://github.com/exdsgift/aseri/issues/152)), white on electric blue with three heroes in turn ([#150](https://github.com/exdsgift/aseri/issues/150)), and op-art margins ([#154](https://github.com/exdsgift/aseri/issues/154)).
 - **[2026/11]** **[Nine series](#signals)**: Brent oil, "World War III" on Wikipedia, air-raid alerts and drones claimed join geopolitical risk and the four sea lanes ([#133](https://github.com/exdsgift/aseri/issues/133)).
-- **[2026/10]** **[A real-time GPR backtest](docs/research/gpr-realtime-backtest.md)**: 232 weekly origins from the authors' archived vintages, each scored against the value known 35 days later ([#145](https://github.com/exdsgift/aseri/issues/145)).
 
 <details>
 <summary>Previous news</summary>
 
+- **[2026/10]** **[A real-time GPR backtest](docs/research/gpr-realtime-backtest.md)**: 232 weekly origins from the authors' archived vintages, each scored against the value known 35 days later ([#145](https://github.com/exdsgift/aseri/issues/145)).
 - **[2026/10]** **Track record**: WIS, the coverage of the 5 in 10 and 8 in 10 ranges, and the error against simple baselines, live and backtest apart ([#134](https://github.com/exdsgift/aseri/issues/134)).
 - **[2026/10]** **Forecast archive**: every forecast appended to the `archive` branch in the Hubverse format, live and retrospective apart ([#129](https://github.com/exdsgift/aseri/issues/129)).
 - **[2026/10]** **First daily forecast**: GPR forecast with Timestral-209M and published on GitHub Pages every day ([#127](https://github.com/exdsgift/aseri/issues/127)).
@@ -139,6 +140,14 @@ f = json.load(urlopen(f"{BASE}/series/hormuz_transits/latest.json"))
 q = f["quantiles"]
 for day, lo, mid, hi in zip(f["target_end_date"], q["0.1"], q["0.5"], q["0.9"]):
     print(f"{day}: likely {lo:.0f}-{hi:.0f} ships (8 in 10), middle estimate {mid:.0f}")
+```
+
+For research, everything is also in bulk, as Hubverse tables in Parquet and CSV: each year's forecasts, every value as first seen, the values scored against and every score. [`bulk/datapackage.json`](https://exdsgift.github.io/aseri/api/v1/bulk/datapackage.json) lists the files with their columns, licences and sources.
+
+```python
+import pandas as pd
+
+forecasts = pd.read_parquet(f"{BASE}/bulk/forecasts-2026.parquet")
 ```
 
 The [API page](https://exdsgift.github.io/aseri/api/) documents every file, the [OpenAPI 3.1 contract](https://exdsgift.github.io/aseri/api/v1/openapi.json) its shapes, and the [`archive`](https://github.com/exdsgift/aseri/tree/archive) branch holds every Hubverse round ever written.

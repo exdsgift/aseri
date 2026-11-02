@@ -36,7 +36,9 @@ SCORED = {
     "reference_date": "datetime64[us]",
     "forecast_mode": "str",
     "horizon": "int64",
+    "target_end_date": "datetime64[us]",
     "bucket": "str",
+    "observation_date": "datetime64[us]",
     "observation": "float64",
     "observation_as_of": "datetime64[us]",
     **dict.fromkeys(
@@ -85,7 +87,7 @@ def scored(
     latest: bool = False,
     model_id: str | None = None,
 ) -> pd.DataFrame:
-    """Every target of `archived` due by `today`, one row each: its forecast's reference date and mode, the observation and its `as_of`, and the scores.
+    """Every target of `archived` due by `today`, one row each: its forecast's reference date and mode, its day as the round dates it, the observation, its day and its `as_of`, and the scores.
 
     A target is due from its scoring day, `scoring.scoreable_on`, and scored against the value known
     that day. The archive is append-only, so that value, and the score, are the same on every later
@@ -94,6 +96,8 @@ def scored(
     Only one model's forecasts are scored, the model in the code's or `model_id`'s: a record never mixes two.
     shortcut: every run rescores the whole archive, about 45 s for the launch backfill and growing with it;
     keep the scores of past runs outside the archive if a run ever spends minutes here.
+    shortcut: the daily run rescores each retired model for the bulk scores, about 15 s each, though its
+    forecasts no longer change; carry their scores over from the last deploy once more than two models exist.
     """
     archived = archive.this_model(archived, model_id)
     today = pd.Timestamp(today)
@@ -144,6 +148,17 @@ def scored(
         )
         rows.insert(0, "reference_date", forecast.reference_date)
         rows.insert(1, "forecast_mode", issued.provenance["forecast_mode"])
+        step = rows["horizon"] - 1
+        # The round's date of each step, the key that joins it to the bulk forecasts, and apart from it
+        # the day observed: after a holiday the calendar did not foresee, Brent's next price.
+        rows.insert(
+            rows.columns.get_loc("horizon") + 1,
+            "target_end_date",
+            pd.DatetimeIndex(issued.target_end_dates)[step].as_unit("us"),
+        )
+        rows.insert(
+            rows.columns.get_loc("observation"), "observation_date", targets[step]
+        )
         rows.insert(
             rows.columns.get_loc("observation") + 1,
             "observation_as_of",

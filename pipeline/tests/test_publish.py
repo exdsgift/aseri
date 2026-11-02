@@ -466,6 +466,8 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
         "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
     }
     assert catalog["quantile_levels"] == list(LEVELS)
+    # Additive to v1 (#136): every file of the API in bulk, with its data package.
+    assert catalog["links"] == {"bulk": "bulk/datapackage.json"}
     assert catalog["series"] == [
         {
             "series_id": "gpr_daily",

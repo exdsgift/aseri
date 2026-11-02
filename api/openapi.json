@@ -5,7 +5,7 @@
     "title": "aseri forecasts API",
     "version": "1.0.0",
     "summary": "Static, read-only daily probabilistic forecasts of nine public risk signals, in Hubverse quantile semantics.",
-    "description": "Files on GitHub Pages, rebuilt by one daily run at about 07:00 UTC. GET only, no query parameters and no custom request headers: a CORS preflight is refused. Pages caches for 10 minutes; poll at most once an hour. Dated forecast files never change. Within v1, fields, files and enum values are only added, so a client must ignore what it does not know; anything else ships under /api/v2/ next to v1. Corrections go to the catalog's errata, and the original forecast stays published. A missing file answers 404 with an HTML body: check the status before parsing.",
+    "description": "Files on GitHub Pages, rebuilt by one daily run at about 07:00 UTC. GET only, no query parameters and no custom request headers: a CORS preflight is refused. Pages caches for 10 minutes; poll at most once an hour. Dated forecast files never change, nor do the bulk forecasts of a closed year. Pages gzips Parquet in transit too, so a byte range counts gzipped bytes: download a bulk file whole. Within v1, fields, files and enum values are only added, so a client must ignore what it does not know; anything else ships under /api/v2/ next to v1. Corrections go to the catalog's errata, and the original forecast stays published. A missing file answers 404 with an HTML body: check the status before parsing.",
     "license": {"name": "CC BY-NC 4.0 (aseri's forecasts, scores and API; upstream terms still apply to the underlying data, per series)", "identifier": "CC-BY-NC-4.0"},
     "contact": {"name": "aseri", "url": "https://github.com/exdsgift/aseri"}
   },
@@ -107,7 +107,7 @@
       "get": {
         "operationId": "getSchema",
         "summary": "A JSON Schema (Draft 2020-12) of the files above; defs holds the shared definitions.",
-        "parameters": [{"name": "name", "in": "path", "required": true, "schema": {"enum": ["defs", "catalog", "forecast", "forecast-index", "actuals", "replay", "scores", "scoreboard"]}}],
+        "parameters": [{"name": "name", "in": "path", "required": true, "schema": {"enum": ["defs", "catalog", "forecast", "forecast-index", "actuals", "replay", "scores", "scoreboard", "datapackage"]}}],
         "responses": {
           "200": {"description": "The schema.", "content": {"application/json": {}}},
           "404": {"$ref": "#/components/responses/NotFound"}
@@ -135,6 +135,75 @@
           "404": {"$ref": "#/components/responses/NotFound"}
         }
       }
+    },
+    "/bulk/datapackage.json": {
+      "get": {
+        "operationId": "getDataPackage",
+        "summary": "The bulk files as a Frictionless Data Package (v2): each file's columns, licences and sources.",
+        "responses": {
+          "200": {"description": "The data package.", "content": {"application/json": {"schema": {"$ref": "schemas/datapackage.schema.json"}}}}
+        }
+      }
+    },
+    "/bulk/forecasts-{year}.parquet": {
+      "get": {
+        "operationId": "getYearOfForecasts",
+        "summary": "Every forecast of the runs of a year, every model's, in the collected Hubverse model-output shape: model_id, then the round's columns. The current year is rebuilt daily; a closed year never changes.",
+        "parameters": [{"$ref": "#/components/parameters/year"}],
+        "responses": {
+          "200": {"description": "Parquet, zstd.", "content": {"application/vnd.apache.parquet": {}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bulk/forecasts-{year}.csv.gz": {
+      "get": {
+        "operationId": "getYearOfForecastsAsCsv",
+        "summary": "The same year of forecasts as gzipped CSV.",
+        "parameters": [{"$ref": "#/components/parameters/year"}],
+        "responses": {
+          "200": {"description": "CSV, gzipped.", "content": {"application/gzip": {}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bulk/time-series.parquet": {
+      "get": {
+        "operationId": "getTimeSeries",
+        "summary": "Every series' values as first seen, a Hubverse time series stored as a change-log: target, target_end_date, observation, as_of.",
+        "responses": {
+          "200": {"description": "Parquet, zstd.", "content": {"application/vnd.apache.parquet": {}}}
+        }
+      }
+    },
+    "/bulk/time-series-{source}.csv": {
+      "get": {
+        "operationId": "getSourceTimeSeries",
+        "summary": "One source's time series, so that each file has one licence.",
+        "parameters": [{"name": "source", "in": "path", "required": true, "description": "A source of the data package. New sources may be added within v1.", "schema": {"type": "string", "pattern": "^[a-z0-9_]+$", "examples": ["gpr", "portwatch", "wikimedia", "fred", "sirens", "losses"]}}],
+        "responses": {
+          "200": {"description": "CSV.", "content": {"text/csv": {}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bulk/oracle-output.csv": {
+      "get": {
+        "operationId": "getOracleOutput",
+        "summary": "Each observed day's value as the record scores a target on it, once its series' score lag has passed, with the as_of of its vintage. Built from the vintages, not from the scores.",
+        "responses": {
+          "200": {"description": "CSV.", "content": {"text/csv": {}}}
+        }
+      }
+    },
+    "/bulk/scores.parquet": {
+      "get": {
+        "operationId": "getScores",
+        "summary": "Every scored target of every model, one row per model, series, reference date and step: target_end_date as the forecast dates the step, which joins it to the bulk forecasts, and the day observed, observation_date, with its as_of. They differ only for Brent, after a market holiday its calendar did not foresee.",
+        "responses": {
+          "200": {"description": "Parquet, zstd.", "content": {"application/vnd.apache.parquet": {}}}
+        }
+      }
     }
   },
   "components": {
@@ -152,6 +221,13 @@
         "required": true,
         "description": "A reference date listed in the series' forecasts.json.",
         "schema": {"type": "string", "format": "date"}
+      },
+      "year": {
+        "name": "year",
+        "in": "path",
+        "required": true,
+        "description": "A year with forecasts, by their forecast_date, as the data package lists them.",
+        "schema": {"type": "string", "pattern": "^\\d{4}$"}
       }
     },
     "responses": {

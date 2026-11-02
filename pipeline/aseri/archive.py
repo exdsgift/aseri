@@ -378,7 +378,16 @@ def vintages(archive_dir: Path, series_id: str | None = None) -> pd.DataFrame:
             {"target_end_date": empty, "observation": [], "as_of": empty}
         )
     rows = pd.concat(
-        pd.read_csv(path, parse_dates=["target_end_date", "as_of"]) for path in deltas
+        pd.read_csv(path, parse_dates=["target_end_date", "as_of"])
+        for path in deltas
+        # A run that saw no new value wrote its header alone, whose columns, untyped, would leave every
+        # column untyped, and arithmetic on a date failing.
+    ).astype(
+        {
+            "target_end_date": "datetime64[us]",
+            "observation": "float64",
+            "as_of": "datetime64[us]",
+        }
     )
     if series_id is not None:
         rows = rows[rows["target"] == series_id]

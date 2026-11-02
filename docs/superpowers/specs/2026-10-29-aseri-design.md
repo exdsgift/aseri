@@ -188,7 +188,7 @@ One workflow, `daily.yml`, on a cron.
    Score against a stated observation vintage, because GPR revises its recent values.
 6. **Publish:** build the API files and the page data, build the web app, check every API file against the contract (the gate, 6.6), and deploy one Pages artifact.
 
-**Page-only deploys.** A push to master that changes only `web/` runs the `page` job instead: it tests and builds the page, takes `api/v1` from the newest Pages artifact of master (kept 7 days), and deploys, with no fetch, no model and no archive, in about two minutes. The same runs by hand with `page_only`. A push that also changes anything outside `web/` deploys nothing and waits for the daily run, which deploys the whole site.
+**Page-only deploys.** A push to master that changes only `web/` runs the `page` job instead: it tests and builds the page, takes `api/v1` from the newest Pages artifact of master (kept 7 days), the bulk files included, and deploys, with no fetch, no model and no archive, in about two minutes. The same runs by hand with `page_only`. A push that also changes anything outside `web/` deploys nothing and waits for the daily run, which deploys the whole site.
 
 **Weights cache.** Use `actions/cache` keyed by the model revision. Cold start downloads the 837 MB weights once.
 
@@ -258,7 +258,12 @@ Follow `docs/research/public-api.md`. The essentials:
   - `series/{id}/actuals.json`;
   - `series/{id}/scores.json`;
   - `scores.json`;
-  - `bulk/forecasts-{YYYY}.parquet` and `.csv.gz`, `bulk/time-series.parquet`, `bulk/oracle-output.csv`, `bulk/scores.parquet`, `bulk/datapackage.json` (#136);
+  - `bulk/forecasts-{YYYY}.parquet` and `.csv.gz`, `bulk/time-series.parquet` and `bulk/time-series-{source}.csv`, `bulk/oracle-output.csv`, `bulk/scores.parquet`, `bulk/datapackage.json` (#136), written by `pipeline/aseri/bulk.py`:
+    - the forecasts of each year's runs in the collected-hub shape, `model_id` then the round's columns, every model's told apart; the current year is rebuilt daily, and a closed year's rounds never change, so its files come out byte for byte the same, as the dated files do;
+    - the archive's observation deltas as a Hubverse time series, in one Parquet file and one CSV per source, so that each CSV has one licence;
+    - the oracle output, each observed day's value as the record scores against it, from the vintages, and every model's scores, one row per step on the round's `target_end_date`, with the day observed (`observation_date`, Brent's next price after an unforeseen holiday) and its `observation_as_of`;
+    - a Frictionless data package (v2) giving each file's columns, licences with their attribution (for the forecasts and scores, one per model of their rows, so a closed year's never changes), and sources, which the catalog links as `links.bulk`;
+    - a failure of the bulk step costs only them: the run summary says so, the catalog leaves out its link, and the day is still archived and published;
   - `openapi.json`, `schemas/*.schema.json`, `licenses/*.txt` and `model-metadata/aseri-timestral209m.yml`, the Hubverse model metadata (#135).
 
   A human docs page at `/api/` carries a schema.org `Dataset` block: `web/api/index.html`, a second page of the Vite build on the site's tokens and fonts, with no script, and under the copy lint (#135). The page's footer links to it.
@@ -270,12 +275,12 @@ Follow `docs/research/public-api.md`. The essentials:
   - input `as_of` per source.
 - **The contract (#135):**
   - OpenAPI 3.1.1 plus JSON Schemas (Draft 2020-12), kept in `api/` at the repo root as the source of truth (`api/openapi.json`, `api/schemas/`), with the licence texts and the model metadata; the daily run copies them into the site's `api/v1/`;
-  - a gate, `python -m aseri.gate` (`pipeline/aseri/gate.py`), runs in `daily.yml` after the run writes the site and before the archive and the deploy. It fails the run when a file is off its schema (closed to undeclared keys, with dates and URIs checked), when the files disagree with each other or with the catalog, or when a step's `target_end_date` is not the reference date plus its horizon (calendar days, or trading days for Brent). Of the dated files it reads only the day's: the others never change;
+  - a gate, `python -m aseri.gate` (`pipeline/aseri/gate.py`), runs in `daily.yml` after the run writes the site and before the archive and the deploy. It fails the run when a file is off its schema (closed to undeclared keys, with dates and URIs checked), when the files disagree with each other or with the catalog, or when a step's `target_end_date` is not the reference date plus its horizon (calendar days, or trading days for Brent). Of the dated files it reads only the day's: the others never change. The bulk files are checked against their data package: each file it lists is published, each one published is listed, with the columns it lists, and the Parquet files with its types;
   - the bounds are one series' problem, not the API's: the daily run checks each new forecast against its series' last 365 days before archiving it, and a median or an 8 in 10 band far off holds that series alone, as a failed download does. Its last good files stay up with a note, its data is archived, `bounds-alert` opens an issue, and the other series publish. A large change from the forecast before only warns. The bounds are calibrated on the 120-day backfill (`public-api.md` 3.5);
   - dated forecast files stay byte-identical across reruns, which a test checks;
   - `v1` only changes in additive ways, and anything breaking goes to `v2`. `schema_version` stays `1.0.0` within v1, since the dated files carry it and never change;
   - corrections go to `errata` in `series.json` (date, series, reference date, description), empty so far; the original forecast stays published.
-- **Licences:** each resource carries its own licence and attribution: the catalog per series, with `text`, the path of the full licence under `/api/v1/licenses/`. The bulk CSVs are split by source so that each file has one licence. An `attribution` string is never edited, since the dated files carry it.
+- **Licences:** each resource carries its own licence and attribution: the catalog per series, with `text`, the path of the full licence under `/api/v1/licenses/`. The bulk time-series CSVs are split by source so that each file has one licence; the files that hold every source (`time-series.parquet`, `oracle-output.csv`) list every source's terms, and the forecasts and scores carry aseri's. An `attribution` string is never edited, since the dated files carry it.
 - **aseri's own licences (owner's choice):**
   - forecasts, scores and the API: **CC BY-NC 4.0**, attributed as "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)", with a note that upstream terms still apply to the underlying data;
   - code: **MIT**, in `LICENSE` at the root.
@@ -290,7 +295,16 @@ Follow `docs/research/public-api.md`. The essentials:
    - The build checks it out shallow.
 3. **Never commit upstream raw downloads.** The alerts CSV alone is 9 MB and rewritten daily.
 4. **A size alarm:** CI checks `git count-objects` on `archive` against a budget **(my call: 50 MB)**.
-5. **The site** grows about 30 MB a year, against the 1 GB limit. If it is ever needed, drop the dated JSON files for closed years and keep the yearly bulk files.
+5. **The site** grows about 35 MB a year, against the 1 GB limit: about 28 years. Measured on the archive of 2026-11-02 (#136), scaled to a year of daily runs, 54,600 steps of 21 levels:
+   - the dated JSON files, 5.6 KB each with their provenance and about 3,170 a year: about 18 MB, more than the 12 MB first estimated;
+   - the year's bulk forecasts, 4.5 bytes a row in Parquet (zstd, level 9) and 7 in CSV.gz, 1.15 million rows: about 5 and 8 MB, under the 7 and 10 estimated;
+   - the files rewritten whole: the scores, about 3.4 MB more a year, and the time series, the oracle output and the indexes, under 1 MB;
+   - a new model ID adds its replay window once, about 4.4 MB of bulk forecasts.
+
+   **If it is ever needed, drop the dated JSON files of closed years and keep the yearly bulk files,** which hold every forecast at every level, of every model:
+   - when: the Pages artifact passes 500 MB, half the limit;
+   - how: removing files is not additive, so it ships as `/api/v2/`, beside v1 for 6 months (6.6). v2 publishes the dated files of the current year and the replay window only; its `forecasts.json` still lists every forecast, and gives a closed year's the bulk file that holds it. The page moves to v2, then v1 goes;
+   - what it saves: about 18 MB a year, so the site then grows about 17 MB a year.
 6. **The throwaway prototypes** moved to the [`prototypes`](https://github.com/exdsgift/aseri/tree/prototypes) branch once the real code covered them (#141) **(my call)**, so that `master` stays clean.
 
 ### 6.8 Website: structure and behaviour
