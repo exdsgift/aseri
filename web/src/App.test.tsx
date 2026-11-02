@@ -66,7 +66,8 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
 
   render(<App />)
 
-  await screen.findByText("181", { selector: "p" })
+  // The first render of the file pays for the page's modules: under a full parallel run it can pass 1 s.
+  await screen.findByText("181", { selector: "p" }, { timeout: 5000 })
   const wordmark = screen.getByRole("heading", { level: 1 })
   expect(wordmark.textContent).toBe("焦りあせり · aseri")
   const hero = within(wordmark.closest("section")!)
