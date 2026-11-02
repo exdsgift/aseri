@@ -1,0 +1,742 @@
+<title>aseri README drafts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one centred column. A header names the job, a short index compares the four READMEs,
+   then tabs over a single GitHub README frame that has its own light and dark switch. */
+:root {
+  --paper: #f3f3fa;
+  --surface: #ffffff;
+  --ink: #16163a;
+  --ink-soft: #57577c;
+  --rule: #d6d6ea;
+  --accent: #1b1bf2;
+  --accent-ink: #ffffff;
+  --display: "DotGothic16", "MS Gothic", ui-monospace, monospace;
+  --ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  /* GitHub's own palette, light. The frame switches to the dark set on its own, whatever the page's theme. */
+  --gh-bg: #ffffff;
+  --gh-fg: #1f2328;
+  --gh-muted: #59636e;
+  --gh-border: #d1d9e0;
+  --gh-border-muted: #d1d9e0b3;
+  --gh-subtle: #f6f8fa;
+  --gh-link: #0969da;
+  --gh-code: #818b981f;
+  --gh-note: #0969da;
+  --gh-tip: #1a7f37;
+  --gh-important: #8250df;
+  --gh-warning: #9a6700;
+  --gh-caution: #d1242f;
+  --gh-check: #59636e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0c0c20; --surface: #15152e; --ink: #e9e9fb; --ink-soft: #a7a7cb; --rule: #2c2c55;
+    --accent: #9d9dff; --accent-ink: #0c0c20; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0c0c20; --surface: #15152e; --ink: #e9e9fb; --ink-soft: #a7a7cb; --rule: #2c2c55;
+  --accent: #9d9dff; --accent-ink: #0c0c20; color-scheme: dark;
+}
+.gh[data-gh="dark"] {
+  --gh-bg: #0d1117; --gh-fg: #f0f6fc; --gh-muted: #9198a1; --gh-border: #3d444d; --gh-border-muted: #3d444db3;
+  --gh-subtle: #151b23; --gh-link: #4493f8; --gh-code: #656c7633; --gh-note: #4493f8; --gh-tip: #3fb950;
+  --gh-important: #ab7df8; --gh-warning: #d29922; --gh-caution: #f85149; --gh-check: #9198a1;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font: 15px/1.55 var(--ui);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 56px;
+}
+.page { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.masthead { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow { margin: 0; font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.masthead h1 { margin: 0; font: 400 clamp(28px, 6vw, 40px)/1.1 var(--display); letter-spacing: .01em; text-wrap: balance; }
+.masthead h1 .kanji { color: var(--accent); margin-right: .2em; }
+.lede { margin: 0; max-width: 66ch; color: var(--ink-soft); }
+.lede code { font: 13px var(--mono); color: var(--ink); }
+
+.glance h2 { margin: 0 0 10px; font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.scroll-x { overflow-x: auto; }
+.glance table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.glance th { text-align: left; font: 500 12px/1.4 var(--mono); color: var(--ink-soft); padding: 6px 12px 6px 0; border-bottom: 1px solid var(--rule); }
+.glance td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.glance td:first-child { white-space: nowrap; }
+.glance .num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; white-space: nowrap; }
+.glance button { background: none; border: 0; padding: 0; font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+.viewer { display: flex; flex-direction: column; gap: 12px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--rule); }
+.tabs [role="tab"] {
+  background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px;
+  padding: 8px 10px 9px; font-weight: 500; color: var(--ink-soft); cursor: pointer;
+}
+.tabs [role="tab"]:hover { color: var(--ink); }
+.tabs [role="tab"][aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.seg button { background: none; border: 0; padding: 6px 11px; font-size: 13px; color: var(--ink-soft); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.copy { border: 0; border-radius: 6px; padding: 7px 13px; font-size: 13px; font-weight: 600; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.status { font: 12px var(--mono); color: var(--ink-soft); }
+.meta { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-soft); }
+.meta strong { color: var(--ink); font-weight: 500; }
+.meta code { font: 12px var(--mono); overflow-wrap: anywhere; }
+
+/* The GitHub frame: a repository's README box. */
+.gh { background: var(--gh-bg); color: var(--gh-fg); border: 1px solid var(--gh-border); border-radius: 6px; min-width: 0; }
+.gh-head { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--gh-border);
+  font: 600 14px/20px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; }
+.gh-head svg { fill: var(--gh-muted); flex: none; }
+.gh-head span { overflow-wrap: anywhere; }
+.gh-body { padding: 32px; }
+.raw { margin: 0; padding: 16px 32px 32px; font: 12px/1.6 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  white-space: pre-wrap; overflow-wrap: anywhere; color: var(--gh-fg); }
+@media (max-width: 600px) { .gh-body { padding: 16px; } .raw { padding: 12px 16px 16px; } }
+
+/* GitHub's Markdown, after github-markdown-css, trimmed to what the drafts use. */
+.markdown-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; word-wrap: break-word; }
+.markdown-body > :first-child { margin-top: 0 !important; }
+.markdown-body > :last-child { margin-bottom: 0 !important; }
+.markdown-body a { color: var(--gh-link); text-decoration: underline; text-underline-offset: .2rem; }
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body table, .markdown-body pre, .markdown-body .gh-mermaid { margin-top: 0; margin-bottom: 16px; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3 { margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25; }
+.markdown-body h1 { font-size: 2em; padding-bottom: .3em; border-bottom: 1px solid var(--gh-border-muted); }
+.markdown-body h2 { font-size: 1.5em; padding-bottom: .3em; border-bottom: 1px solid var(--gh-border-muted); }
+.markdown-body h3 { font-size: 1.25em; }
+.markdown-body ul, .markdown-body ol { padding-left: 2em; }
+.markdown-body li + li { margin-top: .25em; }
+.markdown-body li:has(> input[type="checkbox"]) { list-style: none; }
+.markdown-body li > input[type="checkbox"] { margin: 0 .2em .25em -1.4em; vertical-align: middle; accent-color: var(--gh-check); }
+.markdown-body code { padding: .2em .4em; margin: 0; font-size: 85%; white-space: break-spaces; background: var(--gh-code); border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+.markdown-body pre { padding: 16px; overflow: auto; font-size: 85%; line-height: 1.45; background: var(--gh-subtle); border-radius: 6px; }
+.markdown-body pre code { padding: 0; font-size: 100%; white-space: pre; background: transparent; border-radius: 0; }
+.markdown-body table { display: block; width: max-content; max-width: 100%; overflow: auto; border-spacing: 0; border-collapse: collapse; font-variant: tabular-nums; }
+.markdown-body th { font-weight: 600; }
+.markdown-body th, .markdown-body td { padding: 6px 13px; border: 1px solid var(--gh-border); }
+.markdown-body tr { background: var(--gh-bg); border-top: 1px solid var(--gh-border-muted); }
+.markdown-body tr:nth-child(2n) { background: var(--gh-subtle); }
+.markdown-body img { max-width: 100%; height: auto; box-sizing: content-box; vertical-align: middle; }
+.markdown-body blockquote { padding: 0 1em; color: var(--gh-muted); border-left: .25em solid var(--gh-border); }
+.markdown-body [align="center"] { text-align: center; }
+.markdown-body td[align="center"], .markdown-body th[align="center"] { text-align: center; }
+.markdown-alert { padding: 8px 16px; margin-bottom: 16px; border-left: .25em solid var(--alert); --alert: var(--gh-note); }
+.markdown-alert > :last-child { margin-bottom: 0; }
+.markdown-alert-title { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-weight: 500; line-height: 1; color: var(--alert); }
+.markdown-alert-title svg { fill: currentColor; }
+.markdown-alert.tip { --alert: var(--gh-tip); }
+.markdown-alert.important { --alert: var(--gh-important); }
+.markdown-alert.warning { --alert: var(--gh-warning); }
+.markdown-alert.caution { --alert: var(--gh-caution); }
+.gh-mermaid { overflow-x: auto; text-align: center; }
+.gh-mermaid svg { max-width: 100%; height: auto; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tabs [role="tab"], .seg button, .glance button { transition: color .15s, background-color .15s, border-color .15s; }
+}
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">exdsgift/aseri · issue #153, step 1</p>
+    <h1><span class="kanji" lang="ja">焦り</span>aseri README drafts</h1>
+    <p class="lede">Four ways for the repository to introduce aseri, plus drafts of CONTRIBUTING.md and the pull request template, rendered as GitHub shows them. Every picture is a placeholder that names its image and size, at the <code>branding/</code> path where the real file drops in. Pick one; the final README follows with the real images.</p>
+  </header>
+
+  <section class="glance" aria-labelledby="glance-title">
+    <h2 id="glance-title">The four READMEs</h2>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th scope="col">Draft</th><th scope="col">Who it is for</th><th scope="col" class="num">Words</th></tr></thead>
+        <tbody id="glance-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="viewer" aria-label="Drafts">
+    <div class="tabs" role="tablist" aria-label="Drafts" id="tabs"></div>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" id="view-rendered" aria-pressed="true">Rendered</button>
+        <button type="button" id="view-raw" aria-pressed="false">Raw Markdown</button>
+      </div>
+      <div class="seg" role="group" aria-label="GitHub theme">
+        <button type="button" id="gh-light" aria-pressed="true">GitHub light</button>
+        <button type="button" id="gh-dark" aria-pressed="false">GitHub dark</button>
+      </div>
+      <button type="button" class="copy" id="copy">Copy Markdown</button>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+    <article class="gh" id="frame" data-gh="light" role="tabpanel" aria-labelledby="tab-minimal">
+      <div class="gh-head">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"/></svg>
+        <span id="frame-name">README.md</span>
+      </div>
+      <div class="gh-body markdown-body" id="rendered"></div>
+      <pre class="raw" id="raw" hidden></pre>
+    </article>
+    <p class="meta"><strong id="meta-who"></strong><span id="meta-words"></span><code id="meta-path"></code></p>
+  </section>
+</div>
+
+<!-- The drafts, refilled from the .md files beside this page by build.py. -->
+<script type="text/markdown" data-file="README.minimal.md">
+![Banner: Messenger, 1280x640](branding/github-social/github-social-messenger.png)
+
+# aseri
+
+Nine public signals of geopolitical risk, forecast every day with Mistral's Timestral, each with its range and its own track record.
+
+**[exdsgift.github.io/aseri](https://exdsgift.github.io/aseri/)**
+
+![Screenshot: page at 1440 px, 1440x900](branding/screenshots/page-1440.png)
+
+- **Daily, by itself.** A GitHub Action fetches nine public series at 07:00 UTC, forecasts them with Timestral-209M on CPU and publishes a static page.
+- **Scored in public.** Every forecast is archived append-only and scored against what happened. Backtests are labelled and never mixed into the live record.
+- **Data you can use.** The forecasts are a public JSON API in the Hubverse format: [exdsgift.github.io/aseri/api](https://exdsgift.github.io/aseri/api/).
+
+Code: [MIT](LICENSE) · Forecasts and data: [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), each source on its own terms · © 2026 Gabriele Durante
+</script>
+<script type="text/markdown" data-file="README.complete.md">
+![Banner: Messenger with the wordmark, wide, 1584x396](branding/linkedin-banner/linkedin-banner-messenger.png)
+
+# aseri
+
+焦り (*aseri*): impatience, restlessness. A daily forecast of geopolitical risk from nine public signals, made by Mistral's Timestral and scored against what happened.
+
+**Live: [exdsgift.github.io/aseri](https://exdsgift.github.io/aseri/)** · **API: [exdsgift.github.io/aseri/api](https://exdsgift.github.io/aseri/api/)**
+
+![Screenshot: page at 1440 px, 1440x900](branding/screenshots/page-1440.png)
+
+## What it forecasts
+
+| Signal | Source | Ahead |
+|---|---|---|
+| Geopolitical risk, index (1985-2019 average = 100) | [Caldara and Iacoviello, GPR daily](https://www.matteoiacoviello.com/gpr.htm) | 28 days |
+| "World War III", Wikipedia views a day | [Wikimedia pageviews](https://pageviews.wmcloud.org/?project=en.wikipedia.org&platform=all-access&agent=user&pages=World_War_III) | 14 days |
+| Brent oil, $ a barrel | [EIA, through FRED](https://fred.stlouisfed.org/series/DCOILBRENTEU) | 14 trading days |
+| Suez Canal, ships a day | [IMF PortWatch](https://portwatch.imf.org/) | 28 days |
+| Strait of Hormuz, ships a day | IMF PortWatch | 14 days |
+| Bab el-Mandeb, ships a day | IMF PortWatch | 14 days |
+| Taiwan Strait, ships a day | IMF PortWatch | 28 days |
+| Air-raid alerts in Ukraine, alert hours a day | [Ukrainian air raid sirens dataset](https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset) | 7 days |
+| Drones downed, as claimed by Ukraine's General Staff | [2022 Ukraine Russia War Dataset](https://github.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset) | 7 days |
+
+## How it works
+
+```mermaid
+flowchart LR
+  fetch["Fetch<br/>9 public series"] --> model["Forecast<br/>Timestral-209M on CPU"]
+  model --> gate{"Gate<br/>API contract"}
+  gate -- pass --> archive[("archive branch<br/>append-only Hubverse")]
+  gate -- pass --> pages["GitHub Pages<br/>page and /api/v1"]
+  gate -- fail --> stop["Run stops<br/>the last site stays up"]
+```
+
+Every day at 07:00 UTC, [`daily.yml`](.github/workflows/daily.yml) tests the code and checks that the pinned model still gives its golden quantiles. Then it fetches each series and forecasts every new day, at 21 quantile levels, counted from the last observed day. A series that fails, runs late or lands out of bounds is held alone: its last good forecast stays up, labelled, and the run opens an issue. A change to the page alone deploys on its own, on the last run's API files.
+
+## Why the API matters
+
+- **Dated and append-only.** A forecast file is written once and never edited. A correction goes to the catalog's errata, and the original stays published.
+- **A standard format.** Hubverse quantile output, the format public-health forecast hubs such as the CDC's and the ECDC's use, so their scoring tools read aseri as it is.
+- **Its own track record.** Each series' `scores.json` gives coverage, WIS and the error against simple baselines, live and backtest apart.
+- **Static and keyless.** Plain JSON on GitHub Pages, CORS open. It updates once a day: poll at most once an hour.
+
+```sh
+curl -s https://exdsgift.github.io/aseri/api/v1/series.json | jq -r '.series[].series_id'
+curl -s https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/latest.json | jq '{model_id, reference_date, target_end_date}'
+curl -s https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/scores.json | jq '{live: .live.n, needed: .min_n_to_display}'
+```
+
+```python
+import json
+from urllib.request import urlopen
+
+BASE = "https://exdsgift.github.io/aseri/api/v1"
+f = json.load(urlopen(f"{BASE}/series/hormuz_transits/latest.json"))
+q = f["quantiles"]
+for day, lo, mid, hi in zip(f["target_end_date"], q["0.1"], q["0.5"], q["0.9"]):
+    print(f"{day}: likely {lo:.0f}-{hi:.0f} ships (8 in 10), middle estimate {mid:.0f}")
+```
+
+Docs, schemas and every licence: [exdsgift.github.io/aseri/api](https://exdsgift.github.io/aseri/api/) · [OpenAPI 3.1](https://exdsgift.github.io/aseri/api/v1/openapi.json) · every Hubverse file ever written: the [`archive`](https://github.com/exdsgift/aseri/tree/archive) branch.
+
+## How good it is
+
+> [!NOTE]
+> The live record is new. A series shows its live score once 30 of its forecasts have resolved. Until then the page shows backtests, labelled as such, and never adds the two together.
+
+- **Calibrated ranges.** The 8 in 10 range is calibrated per series on a two-year backtest, so it holds about 8 days in 10, with WIS unchanged ([ADR 0001](docs/adr/0001-baselines-and-calibration-before-the-live-record.md)). The model is `aseri-timestral209m_c1`; any change to the published ranges gets a new model ID and a fresh record.
+- **Backtests may flatter the model.** Mistral has not published Timestral's training cutoff, backtest origins overlap, and only GPR has real-time vintages. On Brent, Timestral is about as good as repeating the last price.
+- **Methods:** the [design spec](docs/superpowers/specs/2026-10-29-aseri-design.md) and [ADR 0001](docs/adr/0001-baselines-and-calibration-before-the-live-record.md).
+
+## Run it locally
+
+```sh
+git clone https://github.com/exdsgift/aseri && cd aseri
+
+# The pipeline: Python 3.12 and uv
+cd pipeline && uv sync
+uv run pytest
+uv run python -m aseri ../site/api/v1 ../archive  # one daily run; downloads the 837 MB weights once
+
+# The page: Node 22 and npm
+cd ../web && npm ci
+npm run dev  # reads the published API through a proxy
+```
+
+## Licences and credits
+
+- **Code:** [MIT](LICENSE).
+- **Forecasts, scores and the API:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), credited as "Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI)".
+- **Data:** each source keeps its own terms, given per series in the [catalog](https://exdsgift.github.io/aseri/api/v1/series.json) and in [`api/licenses/`](api/licenses). GPR is CC BY 4.0 (Caldara and Iacoviello, 2022, *American Economic Review*); Wikimedia pageviews CC0; Brent prices public domain (U.S. EIA); PortWatch under the IMF's terms, whose commercial use needs the IMF's permission; the two Ukraine datasets MIT (Vadym Klymenko; Petro Ivaniuk).
+- **Model:** [Timestral-209M](https://huggingface.co/mistralai/Timestral-209M) by Mistral AI.
+- **Engravings,** CC0 from Wikimedia Commons: Hendrick Goltzius after Polidoro da Caravaggio, *Mercury*, probably 1592, National Gallery of Art (Messenger); Hendrick Goltzius, *The Farnese Hercules*, c. 1592, published 1617, The Metropolitan Museum of Art (Signal); *Apollo Belvedere (Apollo Pythius)*, engraving, Rijksmuseum (Vortex).
+- © 2026 Gabriele Durante.
+
+## Contributing
+
+New series, new charts and fixes: start with [CONTRIBUTING.md](CONTRIBUTING.md). Questions and ideas go to [Issues](https://github.com/exdsgift/aseri/issues).
+
+## Support
+
+If aseri is useful to you, [buy me a coffee](https://buymeacoffee.com/exdsgift). Find me on [GitHub](https://github.com/exdsgift) and [LinkedIn](https://www.linkedin.com/in/gabrieledurante/).
+</script>
+<script type="text/markdown" data-file="README.visual.md">
+![Banner: Vortex, art only, wide, 1584x396](branding/linkedin-banner/linkedin-banner-vortex-art.png)
+
+<h1 align="center">焦り aseri</h1>
+
+<p align="center">How unstable is the world right now, and where is it heading?<br>Nine public signals, forecast every day.</p>
+
+<p align="center"><a href="https://exdsgift.github.io/aseri/"><b>Open the page</b></a> · <a href="https://exdsgift.github.io/aseri/api/">Use the API</a></p>
+
+| Messenger | Signal | Vortex |
+|:---:|:---:|:---:|
+| ![Hero: Messenger, portrait, 1080x1350](branding/linkedin-post/linkedin-post-portrait-messenger.png) | ![Hero: Signal, portrait, 1080x1350](branding/linkedin-post/linkedin-post-portrait-signal.png) | ![Hero: Vortex, portrait, 1080x1350](branding/linkedin-post/linkedin-post-portrait-vortex.png) |
+| Goltzius's *Mercury*. His fans of rays open wider as the risk index climbs. | The *Farnese Hercules* on a failing screen. The large frame is the 7-day average, the small one normal. | The *Apollo Belvedere* in an op-art vortex. The arm turns one degree per point of risk. |
+
+Each hero draws today's geopolitical risk. The page shows them in turn, and you can keep one from its foot.
+
+## What it is
+
+A GitHub Action runs at 07:00 UTC. It fetches nine public series, forecasts each with Mistral's Timestral-209M on CPU, and publishes the page and a JSON API. Every forecast is archived, never edited, and scored against what happened.
+
+**The nine signals:** geopolitical risk · "World War III" on Wikipedia · Brent oil · Suez · Hormuz · Bab el-Mandeb · Taiwan Strait · air-raid alerts in Ukraine · drones downed, as claimed by Ukraine's General Staff.
+
+**The data:** dated forecasts in the Hubverse format, with their track record, at [exdsgift.github.io/aseri/api](https://exdsgift.github.io/aseri/api/).
+
+**Run it:** `uv run pytest` in `pipeline/`, `npm run dev` in `web/`. More in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Credits
+
+Engravings, CC0 from Wikimedia Commons: Hendrick Goltzius after Polidoro da Caravaggio, *Mercury*, probably 1592, National Gallery of Art · Hendrick Goltzius, *The Farnese Hercules*, c. 1592, published 1617, The Metropolitan Museum of Art · *Apollo Belvedere (Apollo Pythius)*, engraving, Rijksmuseum. Model: Timestral-209M by Mistral AI.
+
+Code: [MIT](LICENSE) · Forecasts and data: [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), each source on its own terms · © 2026 Gabriele Durante
+
+<p align="center"><a href="https://buymeacoffee.com/exdsgift">Buy me a coffee</a> · <a href="https://github.com/exdsgift">GitHub</a> · <a href="https://www.linkedin.com/in/gabrieledurante/">LinkedIn</a></p>
+</script>
+<script type="text/markdown" data-file="README.api.md">
+# aseri
+
+Daily probabilistic forecasts of nine public geopolitical-risk signals, as static JSON in the Hubverse quantile format. Dated, append-only, and scored against what happened.
+
+**Base URL** `https://exdsgift.github.io/aseri/api/v1/` · [Docs](https://exdsgift.github.io/aseri/api/) · [OpenAPI 3.1](https://exdsgift.github.io/aseri/api/v1/openapi.json) · [The page](https://exdsgift.github.io/aseri/) · CC BY-NC 4.0
+
+```sh
+curl -s https://exdsgift.github.io/aseri/api/v1/series.json | jq -r '.series[].series_id'
+curl -s https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/latest.json | jq '{model_id, reference_date, target_end_date}'
+curl -s https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/forecasts.json | jq -r '.forecasts[] | "\(.reference_date) \(.forecast_mode)"'
+```
+
+```python
+import json
+from urllib.request import urlopen
+
+BASE = "https://exdsgift.github.io/aseri/api/v1"
+f = json.load(urlopen(f"{BASE}/series/hormuz_transits/latest.json"))
+q = f["quantiles"]
+for day, lo, mid, hi in zip(f["target_end_date"], q["0.1"], q["0.5"], q["0.9"]):
+    print(f"{day}: likely {lo:.0f}-{hi:.0f} ships (8 in 10), middle estimate {mid:.0f}")
+```
+
+## Why use it
+
+- **Nothing is rewritten.** A dated forecast file is written once. Corrections go to the catalog's `errata`, and the original stays published.
+- **Hubverse semantics.** The format of the public-health forecast hubs, so their validation and scoring tools work on it unchanged.
+- **Provenance in every file:** the model and its weights revision, the inference package commit, the code commit and run, each input's `as_of` and SHA-256.
+- **A track record that counts honestly.** Live forecasts and backtests are scored apart, against a data vintage fixed in advance.
+
+## Files
+
+| Path | What it holds |
+|---|---|
+| `series.json` | The catalog: each series' unit, horizon, source, licence and attribution; the model; the errata |
+| `scores.json` | Every series' track record, as the page shows it |
+| `series/{id}/latest.json` | The newest forecast, a copy of its dated file |
+| `series/{id}/forecasts.json` | Every forecast issued, oldest first |
+| `series/{id}/forecasts/{reference_date}.json` | One forecast, written once, never changed |
+| `series/{id}/replay.json` | The last 120 days of forecasts at seven levels |
+| `series/{id}/actuals.json` | The observed values of the last 400 days, as known on `as_of` |
+| `series/{id}/scores.json` | Live and backtest records apart, with a latest-vintage check |
+| `schemas/`, `licenses/`, `model-metadata/` | JSON Schemas (2020-12), licence texts, Hubverse model metadata |
+
+The full archive, every Hubverse round CSV, observation delta and run manifest, lives on the [`archive`](https://github.com/exdsgift/aseri/tree/archive) branch: `model-output/{model_id}/`, `target-data/deltas/`, `runs/`.
+
+## Series
+
+| `id` | Unit | Horizon | Source and terms |
+|---|---|---|---|
+| `gpr_daily` | index, 1985-2019 average = 100 | 28 days | [Caldara and Iacoviello](https://www.matteoiacoviello.com/gpr.htm), CC BY 4.0 |
+| `wiki_ww3_views` | Wikipedia views a day | 14 days | [Wikimedia pageviews](https://pageviews.wmcloud.org/?project=en.wikipedia.org&platform=all-access&agent=user&pages=World_War_III), CC0 |
+| `brent_spot` | $ a barrel | 14 trading days | [EIA through FRED](https://fred.stlouisfed.org/series/DCOILBRENTEU), public domain |
+| `suez_transits` | ships a day | 28 days | [IMF PortWatch](https://portwatch.imf.org/), IMF terms |
+| `hormuz_transits` | ships a day | 14 days | IMF PortWatch, IMF terms |
+| `bab_el_mandeb_transits` | ships a day | 14 days | IMF PortWatch, IMF terms |
+| `taiwan_strait_transits` | ships a day | 28 days | IMF PortWatch, IMF terms |
+| `ua_air_raid_hours` | alert hours a day, all regions | 7 days | [Air raid sirens dataset](https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset), MIT |
+| `ua_drones_downed_claimed` | drones a day, claimed by Ukraine's General Staff | 7 days | [Ukraine Russia War Dataset](https://github.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset), MIT |
+
+## Reading a forecast
+
+- `reference_date` is the last observed day. `horizon` counts steps from it, trading days for Brent, and `target_end_date` is the day each step lands on. `forecast_date` is the UTC run date.
+- 21 quantile levels, 0.01 to 0.99. Levels 0.1 and 0.9 bound the 8 in 10 range, 0.25 and 0.75 the middle half.
+- `forecast_mode` is `live` or `retrospective`. Only live forecasts count in the record.
+- `model_id` names the model and its inference settings, now `aseri-timestral209m_c1`. Any change to the published quantiles gets a new ID; older forecasts stay as they were.
+- Within v1, fields and files are only added: ignore what you do not know. A missing file is a 404 with an HTML body, so check the status before parsing. The files update once a day, around 07:00 UTC.
+
+## Caveats
+
+- **The live record is new.** A series shows live scores after 30 resolved forecasts; until then, `scores.json` holds backtests, marked `retrospective`.
+- **Calibrated ranges.** The 8 in 10 range is calibrated per series on a two-year backtest ([ADR 0001](docs/adr/0001-baselines-and-calibration-before-the-live-record.md)).
+- **Backtests may flatter the model.** Timestral's training cutoff is unpublished, and only GPR has real-time vintages.
+
+## The page
+
+![Screenshot: page at 1440 px, 1440x900](branding/screenshots/page-1440.png)
+
+[exdsgift.github.io/aseri](https://exdsgift.github.io/aseri/) draws the same files: the GPR headline, nine signal cards, a replay of 120 days and the record.
+
+## Licence and citation
+
+Forecasts, scores and the API are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Credit them as "Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI)". Upstream terms still apply to the data: each series' `license` in `series.json` gives its attribution, kept verbatim in every dated file. Code: [MIT](LICENSE). © 2026 Gabriele Durante.
+
+Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Support: [buy me a coffee](https://buymeacoffee.com/exdsgift) · [GitHub](https://github.com/exdsgift) · [LinkedIn](https://www.linkedin.com/in/gabrieledurante/)
+</script>
+<script type="text/markdown" data-file="CONTRIBUTING.md">
+# Contributing to aseri
+
+aseri does one thing: a few clean public series, forecast daily, shown clearly. Before a large change, open an issue so the scope is agreed first. The owner decides what goes in.
+
+## Setup
+
+```sh
+git clone https://github.com/exdsgift/aseri && cd aseri
+cd pipeline && uv sync   # Python 3.12, uv
+cd ../web && npm ci      # Node 22, npm
+```
+
+## Checks
+
+CI runs the same commands on every push ([`ci.yml`](.github/workflows/ci.yml)). Run them before you open a pull request.
+
+| Where | Command | What it checks |
+|---|---|---|
+| `pipeline/` | `uv run ruff check` and `uv run ruff format --check` | Lint and format |
+| `pipeline/` | `uv run pytest` | Transforms, scoring, the Hubverse writers, the archive rule, the gate |
+| `pipeline/` | `uv run pytest -m slow` | The real model against its golden quantiles (downloads 837 MB once) |
+| `web/` | `npm run lint` | ESLint and Prettier |
+| `web/` | `npm run typecheck` | `tsc` |
+| `web/` | `npm test` | Vitest, with the contrast, word-budget and copy tests |
+| `web/` | `npm run build`, then `node scripts/budget.js` | The build, and the page's size budget |
+
+## Add a new series
+
+1. **Propose it in an issue:** the source, its licence, its cadence, and why it matters.
+2. **Check the licence first.** Its terms must allow forecasts derived from it to be published under CC BY-NC 4.0, with attribution. A source whose terms forbid this use is never added. Put its licence text in `api/licenses/`.
+3. **Write the source adapter** in `pipeline/aseri/sources/`, one module per source: fetch with retries, validate the body (a 200 can carry an error), and return a daily series. Test it on a small recorded file in `pipeline/tests/fixtures/`.
+4. **Add the registry entry** in `pipeline/aseri/series.py`, and the series with its adapter to `SOURCES` in `pipeline/aseri/__main__.py`. The `id` is public and permanent: it is the API path and the Hubverse target. Give the unit, the horizon in whole weeks, the interval steps, the revision window and deep-revision rule, the expected lag, the score lag, the edge check, the record weekday, any standing note, and the source and licence with its attribution. Comment the evidence behind each number, as the other entries do.
+5. **Pick the primary baseline on a backtest,** by [ADR 0001](docs/adr/0001-baselines-and-calibration-before-the-live-record.md)'s rule 1: of naive, `snaive7` and `mean28`, the one with the lowest mean absolute error. Write the numbers in the comment.
+6. **Register known measurement errors** in `pipeline/aseri/anomalies.csv`, one row per series and day, with the evidence. The model's context leaves those days blank; the actuals and the scores keep them.
+7. **Give it a card:** its group and pictogram in `web/src/components/Signals.tsx`. Each series may add at most 30 words to the default view.
+8. **Regenerate the fixtures through the pipeline's writers,** never by hand: run the pipeline and copy the series' files into `web/src/fixtures/`. The gate's tests check them against the API contract.
+9. **Mind the model ID.** Anything that changes published quantiles needs a new `MODEL_ID` in `pipeline/aseri/forecast.py` (ADR 0001, rule 4): a calibration offset in `offsets.csv`, the context, the inputs, an ensemble, or the weights or package pin. Regenerate the goldens with it, and only with it: `uv run python -m tests.test_real_model`. A primary baseline, the anomalies register and the page never change the model ID.
+
+## Add a chart or a visual
+
+- **Pixel art.** Charts are custom canvas components, drawn at 2 CSS px per art pixel with `image-rendering: pixelated` and Bresenham lines. Bands are a 4x4 Bayer dither. No dashed or dotted lines in charts.
+- **One accent.** Gold, `--forecast`, is the model's path: a mark colour, never text. Everything else is white on electric blue, every tint on the line from the ground to white.
+- **Tokens and contrast.** Colours come only from the tokens in `web/src/index.css`. `web/src/contrast.test.ts` checks text at 4.5:1, marks at 3:1, APCA, and the path against the real values under colour-blindness; a new token gets its checks there.
+- **Words.** The default view stays under its word budget (`web/src/words.test.tsx`). Copy passes the lint in `web/src/App.test.tsx`: a range reads "likely 33-51" or "8 in 10 days land here", never as a promise or a "% confidence", and never with an em dash.
+- **Fonts.** Press Start 2P at 8, 12, 16 or 24 px for UI text; Jacquard 24 for big numbers and titles; DotGothic16 for the wordmark.
+- **Size.** Under 150 KB gzipped of JS and CSS, and under 100 KB gzipped of first-load data (`node scripts/budget.js`).
+- **Motion.** The first frame reads at rest. `prefers-reduced-motion` turns every animation off, and nothing flashes more than 3 times a second.
+- **Prototype first.** Explore on a throwaway `prototype-<name>` branch, publish the options as an artifact, and let the owner choose. The chosen one is rewritten properly, never ported.
+
+## Commits and pull requests
+
+- **One issue, one branch, one pull request:** `ticket-<number>-<name>` for work, `prototype-<name>` for throwaway prototypes.
+- **Commit subjects** name the area, then what changed, in plain words, with the issue: `pipeline: a forecast out of bounds is held alone (#151)`. The areas are `pipeline`, `web`, `api`, `docs` and `ci`, joined with commas when a commit spans several.
+- **Pull requests** fill in the template, pass CI, and answer review findings in their own commits: `web: address the #152 review`.
+- **Deploys.** A merge that changes only `web/` deploys the page within minutes; anything else waits for the next daily run, which deploys the whole site.
+
+## Decisions
+
+- A decision that is hard to reverse, or that changes what the record means, gets an ADR in `docs/adr/`, as `NNNN-short-title.md` with a `status` line.
+- Fix the rules before running the experiment, and commit them first: ADR 0001 committed its rules before any backtest forecast was made.
+- Give the owner the options and the evidence. The ADR records the choice under **Decision**, and the options not taken stay in it.
+- The design lives in [the spec](docs/superpowers/specs/2026-10-29-aseri-design.md), the evidence in `docs/research/`.
+</script>
+<script type="text/markdown" data-file="pull_request_template.md">
+## What and why
+
+<!-- One or two sentences on what changes and why. Link the issue: Closes #123 -->
+
+## Checks run
+
+Pipeline, in `pipeline/`:
+
+- [ ] `uv run ruff check` and `uv run ruff format --check`
+- [ ] `uv run pytest`
+- [ ] `uv run pytest -m slow`, if the model, its inputs or its offsets changed
+
+Page, in `web/`:
+
+- [ ] `npm run lint`
+- [ ] `npm run typecheck`
+- [ ] `npm test`, with the contrast, word-budget and copy tests
+- [ ] `npm run build`, then `node scripts/budget.js`
+
+## Screenshots
+
+<!-- For any visual change: before and after, at 1440 px and at 390 px. If it moves, also with reduced motion. Delete this section otherwise. -->
+
+## Model ID
+
+- [ ] No published quantile changes: the model ID stays as it is.
+- [ ] Published quantiles change: a new `MODEL_ID` in `pipeline/aseri/forecast.py`, goldens regenerated, and the reason below.
+
+<!-- The reason, and the ADR or issue that decided it. -->
+
+## Data and licences
+
+- [ ] No new source; or its licence is checked, its text is in `api/licenses/`, and its attribution is in the registry.
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+const DRAFTS = [
+  { id: "minimal", tab: "Minimal", file: "README.minimal.md", frame: "README.md",
+    who: "For a visitor deciding in a few seconds whether to open the site." },
+  { id: "complete", tab: "Complete", file: "README.complete.md", frame: "README.md",
+    who: "For the visitor who stays: what it forecasts, how, how well, and how to use, run and credit it. The shape #153 asks for." },
+  { id: "visual", tab: "Visual-first", file: "README.visual.md", frame: "README.md",
+    who: "For people arriving from a social post, who know the heroes before the data." },
+  { id: "api", tab: "Data/API-first", file: "README.api.md", frame: "README.md",
+    who: "For researchers and developers who want the forecasts as data before the page." },
+  { id: "contributing", tab: "CONTRIBUTING.md", file: "CONTRIBUTING.md", frame: "CONTRIBUTING.md",
+    who: "For someone adding a series, a chart or a fix." },
+  { id: "pr-template", tab: "PR template", file: "pull_request_template.md", frame: ".github/pull_request_template.md",
+    who: "For every pull request: what and why, the checks run, screenshots, and the model ID." },
+];
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(key, value); } catch {} },
+};
+
+for (const d of DRAFTS) {
+  d.md = document.querySelector(`script[data-file="${d.file}"]`).textContent.replace(/^\n/, "");
+  d.html = window.marked ? marked.parse(d.md, { gfm: true }) : `<pre><code>${escapeHtml(d.md)}</code></pre>`;
+  d.words = countWords(d.html);
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+// Prose only: code blocks, diagrams and images are left out.
+function countWords(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  div.querySelectorAll("pre, img").forEach((n) => n.remove());
+  return (div.textContent.match(/[\p{L}\p{N}][\p{L}\p{N}'’._/-]*/gu) || []).length;
+}
+
+// A stand-in the size of the real image, so it sits in the layout exactly as the file will.
+function placeholder(alt, path) {
+  const size = alt.match(/(\d+)\s*x\s*(\d+)/);
+  const w = size ? +size[1] : 1200, h = size ? +size[2] : 630;
+  const slash = path.lastIndexOf("/");
+  const lines = [path.slice(0, slash + 1), path.slice(slash + 1)];
+  const fit = (len) => (0.86 * w) / (0.6 * len);
+  const big = Math.min(h / 8, fit(alt.length));
+  const small = Math.min(big * 0.62, fit(Math.max(...lines.map((l) => l.length))));
+  const stroke = Math.max(2, w / 360);
+  const boxH = big * 1.5 + small * 3;
+  const tag = big * 0.42;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+<rect width="${w}" height="${h}" fill="#1b1bf2"/>
+<path d="M0 0L${w} ${h}M${w} 0L0 ${h}" stroke="#5454f5" stroke-width="${stroke}"/>
+<rect x="${stroke}" y="${stroke}" width="${w - 2 * stroke}" height="${h - 2 * stroke}" fill="none" stroke="#5454f5" stroke-width="${stroke * 2}"/>
+<rect x="${w * 0.05}" y="${h / 2 - boxH / 2}" width="${w * 0.9}" height="${boxH}" fill="#1b1bf2"/>
+<g font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle">
+<text x="${w / 2}" y="${h / 2 - boxH / 2 + big}" font-size="${big}" fill="#ffffff">${escapeHtml(alt)}</text>
+<text x="${w / 2}" y="${h / 2 - boxH / 2 + big * 1.5 + small * 1.2}" font-size="${small}" fill="#dbdbfd">${escapeHtml(lines[0])}</text>
+<text x="${w / 2}" y="${h / 2 - boxH / 2 + big * 1.5 + small * 2.4}" font-size="${small}" fill="#dbdbfd">${escapeHtml(lines[1])}</text>
+</g>
+<text x="${stroke * 3 + tag * 0.4}" y="${stroke * 3 + tag * 1.2}" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="${tag}" fill="#ffc94a">IMAGE PLACEHOLDER</text>
+</svg>`;
+  return { src: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg), w, h };
+}
+
+const ALERT_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg>';
+
+// What GitHub adds on top of plain Markdown: alerts, image files, Mermaid.
+function githubify(root, dark) {
+  root.querySelectorAll("img").forEach((img) => {
+    const path = img.getAttribute("src") || "";
+    if (!path.startsWith("branding/")) return;
+    const ph = placeholder(img.alt, path);
+    img.src = ph.src;
+    img.title = path;
+    if (!img.hasAttribute("width")) { img.width = ph.w; img.height = ph.h; }
+  });
+  root.querySelectorAll("blockquote").forEach((q) => {
+    const p = q.querySelector("p");
+    const m = p && p.innerHTML.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/);
+    if (!m) return;
+    p.innerHTML = p.innerHTML.slice(m[0].length);
+    const type = m[1].toLowerCase();
+    const div = document.createElement("div");
+    div.className = `markdown-alert ${type}`;
+    div.innerHTML = `<p class="markdown-alert-title">${ALERT_ICON}${type[0].toUpperCase() + type.slice(1)}</p>`;
+    div.append(...q.childNodes);
+    q.replaceWith(div);
+  });
+  root.querySelectorAll("pre > code.language-mermaid").forEach(async (code) => {
+    if (!window.mermaid) return;
+    const pre = code.parentElement;
+    const box = document.createElement("div");
+    box.className = "gh-mermaid";
+    try {
+      mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "default", securityLevel: "strict" });
+      const { svg } = await mermaid.render(`mmd-${Math.random().toString(36).slice(2)}`, code.textContent);
+      box.innerHTML = svg;
+      pre.replaceWith(box);
+    } catch { /* GitHub shows the source when a diagram fails, and so does this. */ }
+  });
+}
+
+let current = DRAFTS[0];
+let view = "rendered";
+
+function ghDark() { return $("frame").dataset.gh === "dark"; }
+
+function show(id, focus) {
+  current = DRAFTS.find((d) => d.id === id) || DRAFTS[0];
+  for (const d of DRAFTS) {
+    const tab = $(`tab-${d.id}`);
+    const on = d === current;
+    tab.setAttribute("aria-selected", on);
+    tab.tabIndex = on ? 0 : -1;
+    if (on && focus) tab.focus();
+  }
+  $("frame").setAttribute("aria-labelledby", `tab-${current.id}`);
+  $("frame-name").textContent = current.frame;
+  $("rendered").innerHTML = current.html;
+  githubify($("rendered"), ghDark());
+  $("raw").textContent = current.md;
+  $("meta-who").textContent = current.who;
+  $("meta-words").textContent = `${current.words} words, code left out`;
+  $("meta-path").textContent = `prototypes/readme/${current.file}`;
+  $("status").textContent = "";
+}
+
+function setView(next) {
+  view = next;
+  $("view-rendered").setAttribute("aria-pressed", next === "rendered");
+  $("view-raw").setAttribute("aria-pressed", next === "raw");
+  $("rendered").hidden = next !== "rendered";
+  $("raw").hidden = next !== "raw";
+}
+
+function setGh(theme) {
+  $("frame").dataset.gh = theme;
+  $("gh-light").setAttribute("aria-pressed", theme === "light");
+  $("gh-dark").setAttribute("aria-pressed", theme === "dark");
+  store.set("aseri-readme-gh", theme);
+  show(current.id);
+}
+
+const tabs = $("tabs");
+for (const d of DRAFTS) {
+  const tab = document.createElement("button");
+  tab.type = "button";
+  tab.id = `tab-${d.id}`;
+  tab.setAttribute("role", "tab");
+  tab.setAttribute("aria-controls", "frame");
+  tab.textContent = d.tab;
+  tab.addEventListener("click", () => { location.hash = d.id; });
+  tabs.append(tab);
+}
+tabs.addEventListener("keydown", (e) => {
+  const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+  if (!step) return;
+  const i = (DRAFTS.indexOf(current) + step + DRAFTS.length) % DRAFTS.length;
+  location.hash = DRAFTS[i].id;
+  show(DRAFTS[i].id, true);
+});
+
+$("glance-rows").innerHTML = DRAFTS.slice(0, 4).map((d) =>
+  `<tr><td><button type="button" data-id="${d.id}">${d.tab}</button></td><td>${escapeHtml(d.who)}</td><td class="num">${d.words}</td></tr>`).join("");
+$("glance-rows").addEventListener("click", (e) => {
+  const id = e.target.closest("button")?.dataset.id;
+  if (!id) return;
+  location.hash = id;
+  $("tabs").scrollIntoView({ block: "start" });
+});
+
+$("view-rendered").addEventListener("click", () => setView("rendered"));
+$("view-raw").addEventListener("click", () => setView("raw"));
+$("gh-light").addEventListener("click", () => setGh("light"));
+$("gh-dark").addEventListener("click", () => setGh("dark"));
+$("copy").addEventListener("click", () => {
+  const select = () => {
+    setView("raw");
+    const range = document.createRange();
+    range.selectNodeContents($("raw"));
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    $("status").textContent = "Selected: press Ctrl+C or ⌘C to copy";
+  };
+  try {
+    navigator.clipboard.writeText(current.md).then(() => { $("status").textContent = `Copied ${current.file}`; }, select);
+  } catch { select(); }
+});
+
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+
+const pageDark = document.documentElement.dataset.theme
+  ? document.documentElement.dataset.theme === "dark"
+  : matchMedia("(prefers-color-scheme: dark)").matches;
+current = DRAFTS.find((d) => d.id === location.hash.slice(1)) || DRAFTS[0];
+const saved = store.get("aseri-readme-gh");
+setGh(saved === "light" || saved === "dark" ? saved : pageDark ? "dark" : "light");
+</script>
