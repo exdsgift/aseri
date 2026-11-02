@@ -166,6 +166,10 @@ export function channels(color: string) {
   return context.getImageData(0, 0, 1, 1).data
 }
 
+// A colour's channels as one little-endian pixel word, as every browser lays them out.
+export const word = ([r, g, b]: Uint8ClampedArray) =>
+  ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0
+
 // A dithered engraving (its paper's red channel 255, its lines' 0, transparent outside its
 // cut) at `scale`, dithered again so that it stays in two inks at any size: its paper in
 // the ink, its lines in the ground. Kept while the scale and the inks hold.

@@ -197,6 +197,14 @@ describe("text", () => {
   })
 })
 
+// A retro game's shadow, for a touch more contrast on the blue: it replaces none of the
+// checks above, and no outline is drawn round the letters.
+it("gives every word a crisp black shadow, 1 px down and right", () => {
+  expect(css).toMatch(/--drop:\s*1px 1px 0 #000000;/)
+  expect(css).toMatch(/\*\s*\{[^}]*text-shadow:\s*var\(--drop\);/)
+  expect(css).not.toMatch(/text-stroke/)
+})
+
 describe("marks", () => {
   // The frame's hatch and grid lines say nothing the text does not: the forecast zone's
   // name and the value ticks. WCAG 1.4.11 asks 3:1 only of marks that carry meaning.

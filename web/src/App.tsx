@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Footer } from "@/components/Footer"
 import { ForecastPanel } from "@/components/ForecastPanel"
 import { Hero } from "@/components/Hero"
+import { Margins } from "@/components/Margins"
 import { SideNav, type Section } from "@/components/SideNav"
 import { Signals } from "@/components/Signals"
 import { TrackRecord } from "@/components/TrackRecord"
@@ -29,6 +30,10 @@ const nav = {
     shortcut: "R",
   },
 } satisfies Record<string, Section>
+
+// The panel's heading, focused so screen readers land on the panel, with no second jump.
+const focusHeading = (box: HTMLElement | null) =>
+  box?.querySelector("h2")?.focus({ preventScroll: true })
 
 export function App() {
   // Every series of the catalog that loaded, with its entry, to load its replay from.
@@ -91,11 +96,58 @@ export function App() {
     loadScores().then(({ series }) => setRecords(series), console.error)
   }, [])
 
+  // Each pick brings the panel into view once its new series is drawn, not again when the
+  // replay arrives. Asked from the click, the scroll began before the panel changed height
+  // above the card, and scroll anchoring, keeping the card still, cut it short: anchoring is
+  // off from the pick until the page settles, and only then.
+  const [asked, setAsked] = useState(0)
+  useEffect(() => {
+    if (!asked) return
+    let quiet: ReturnType<typeof setTimeout> | undefined
+    const stop = () => {
+      clearTimeout(quiet)
+      removeEventListener("scroll", wait)
+      removeEventListener("scrollend", settle)
+    }
+    const settle = () => {
+      stop()
+      document.documentElement.style.overflowAnchor = ""
+    }
+    // Where there is no scrollend: 300 ms after the last scroll.
+    const wait = () => {
+      clearTimeout(quiet)
+      quiet = setTimeout(settle, 300)
+    }
+    const frame = requestAnimationFrame(() => {
+      // Smooth unless the reader asks for less motion: see index.css.
+      panelBox.current!.scrollIntoView({ block: "start" })
+      focusHeading(panelBox.current)
+      addEventListener("scroll", wait)
+      addEventListener("scrollend", settle)
+      wait()
+    })
+    return () => {
+      cancelAnimationFrame(frame)
+      stop()
+    }
+  }, [asked])
+  // Whether the focus is in the panel. The replay arriving draws the panel anew, which drops
+  // it: then it goes back on the heading, and only then.
+  const focusInPanel = useRef(false)
+  const length = panel?.forecasts.length
+  useEffect(() => {
+    if (
+      focusInPanel.current &&
+      !panelBox.current?.contains(document.activeElement)
+    )
+      focusHeading(panelBox.current)
+  }, [length])
+
   const pick = (id: string) => {
+    document.documentElement.style.overflowAnchor = "none"
     setPicked(id)
     setOpened(undefined)
-    // Smooth unless the reader asks for less motion: see index.css.
-    panelBox.current!.scrollIntoView({ block: "start" })
+    setAsked((count) => count + 1)
     const { entry } = find(id)!
     // Only today's forecast so far: the replay loads the first time the series is picked, whatever comes back.
     if (!replayed.current.has(id)) {
@@ -112,6 +164,7 @@ export function App() {
 
   return (
     <>
+      <Margins />
       <SideNav sections={sections} />
       <main>
         <Hero
@@ -125,7 +178,18 @@ export function App() {
             <div
               id="forecast"
               ref={panelBox}
-              className="scroll-mt-4 px-4 pb-14"
+              onFocus={() => {
+                focusInPanel.current = true
+              }}
+              // A blur as the panel is drawn anew leaves it so: the element is gone by then.
+              onBlur={({ target, relatedTarget }) =>
+                queueMicrotask(() => {
+                  if (target.isConnected)
+                    focusInPanel.current =
+                      !!panelBox.current?.contains(relatedTarget)
+                })
+              }
+              className="scroll-mt-[calc(16px+env(safe-area-inset-top))] px-4 pb-20 md:pb-32"
             >
               {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
                 or on the past forecast a square of the record opened. */}
