@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import replace
 from datetime import UTC, date, datetime
 
@@ -6,9 +7,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from aseri import gate
 from aseri.__main__ import SOURCES
 from aseri.archive import Archived
-from aseri.forecast import Forecast
+from aseri.forecast import MODEL_ID, Forecast
 from aseri.publish import (
     CONTRACT,
     publish,
@@ -65,12 +67,12 @@ ATTRIBUTION = (
     'Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", '
     "American Economic Review 112(4), 1194-1225. "
     "Data: https://www.matteoiacoviello.com/gpr.htm "
-    "Forecasts: aseri (model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)."
+    "Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI)."
 )
 FORECAST_LICENSE = {
     "name": "CC BY-NC 4.0",
     "url": "https://creativecommons.org/licenses/by-nc/4.0/",
-    "attribution": "Forecasts: aseri (model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI).",
+    "attribution": "Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI).",
     "note": "Upstream terms still apply to the underlying data: see each series' license.",
     "text": "licenses/CC-BY-NC-4.0.txt",
 }
@@ -86,7 +88,7 @@ def archived(reference_date, forecast_mode, forecast_date="2026-10-29", dates=No
             # As the archive reads them back: already rounded, in float64.
             quantiles=np.array([QUANTILES[str(level)] for level in LEVELS]).T,
         ),
-        model_id="aseri-timestral209m_cqr1",
+        model_id="aseri-timestral209m_c1",
         forecast_date=forecast_date,
         provenance=PROVENANCE | {"forecast_mode": forecast_mode},
         target_end_dates=dates
@@ -187,7 +189,7 @@ def test_a_forecast_keys_each_quantile_level_without_float_noise(api_dir):
 def test_a_forecast_carries_the_provenance_of_the_run_that_issued_it(api_dir):
     forecast = dated(api_dir, "2026-10-26")
 
-    assert forecast["model_id"] == "aseri-timestral209m_cqr1"
+    assert forecast["model_id"] == "aseri-timestral209m_c1"
     assert forecast["provenance"] == PROVENANCE | {"forecast_mode": "live"}
     # Issued once, so republishing it never changes it.
     assert forecast["generated_at"] == "2026-10-29T07:03:12Z"
@@ -252,18 +254,20 @@ def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_le
     assert replay == {
         "schema_version": "1.0.0",
         "series_id": "gpr_daily",
-        "model_id": "aseri-timestral209m_cqr1",
+        "model_id": "aseri-timestral209m_c1",
         "horizon": [1, 2],
         "quantile_levels": list(shown),
         "forecasts": [
             {
                 "reference_date": "2026-06-28",
+                "model_id": "aseri-timestral209m_c1",
                 "forecast_mode": "retrospective",
                 "quantiles": shown,
             }
             | PSEUDO_REAL_TIME,
             {
                 "reference_date": "2026-10-26",
+                "model_id": "aseri-timestral209m_c1",
                 "forecast_mode": "live",
                 "quantiles": shown,
             },
@@ -271,6 +275,34 @@ def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_le
         "license": FORECAST_LICENSE,
         "attribution": ATTRIBUTION,
     }
+
+
+def test_a_replay_that_holds_two_models_names_the_model_of_each_forecast(tmp_path):
+    # The new model forecast the 25th again but not the 24th, which it dropped, say, out of bounds:
+    # the replay holds the model before's 24th and the new model's 25th.
+    before = [
+        replace(archived(day, mode), model_id="aseri-timestral209m")
+        for day, mode in (("2026-10-24", "retrospective"), ("2026-10-25", "live"))
+    ]
+    again = replace(
+        before[1],
+        model_id=MODEL_ID,
+        forecast_date="2026-10-31",
+        provenance=before[1].provenance | {"forecast_mode": "retrospective"},
+    )
+
+    publish_gpr(tmp_path, days_to("2026-10-27", range(200)), [*before, again])
+
+    replay = read(tmp_path / "series" / "gpr_daily" / "replay.json")
+    assert [(f["reference_date"], f["model_id"]) for f in replay["forecasts"]] == [
+        ("2026-10-24", "aseri-timestral209m"),
+        ("2026-10-25", MODEL_ID),
+    ]
+    # The file's own model and credit are its newest forecast's.
+    assert replay["model_id"] == MODEL_ID
+    assert replay["attribution"] == ATTRIBUTION
+    # The contract declares the field, so the gate's closed schema takes it.
+    assert list(gate.validator("replay.schema.json").iter_errors(replay)) == []
 
 
 @pytest.mark.parametrize(
@@ -323,7 +355,7 @@ def test_a_day_a_new_model_forecasts_again_keeps_its_first_forecast_in_its_dated
     again = [
         replace(
             a,
-            model_id="aseri-timestral209m_cqr1",
+            model_id="aseri-timestral209m_c1",
             forecast_date="2026-10-31",
             provenance=a.provenance | {"forecast_mode": "retrospective"},
             forecast=replace(a.forecast, quantiles=a.forecast.quantiles + 1),
@@ -344,7 +376,7 @@ def test_a_day_a_new_model_forecasts_again_keeps_its_first_forecast_in_its_dated
         assert (series / path).read_bytes() == published[series / path]
     # The new model's forecasts of those days are in the replay, and in the archive's round.
     replay = read(series / "replay.json")
-    assert replay["model_id"] == "aseri-timestral209m_cqr1"
+    assert replay["model_id"] == "aseri-timestral209m_c1"
     assert [
         (f["reference_date"], f["forecast_mode"], f["quantiles"]["0.5"])
         for f in replay["forecasts"]
@@ -353,7 +385,7 @@ def test_a_day_a_new_model_forecasts_again_keeps_its_first_forecast_in_its_dated
         ("2026-10-25", "retrospective", [101, 102]),
     ]
     assert replay["attribution"].endswith(
-        "(model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)."
+        "(model aseri-timestral209m_c1, Timestral-209M by Mistral AI)."
     )
 
 
@@ -396,7 +428,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
     assert catalog["schema_version"] == "1.0.0"
     assert catalog["generated_at"] == "2026-10-30T07:01:05Z"
     assert catalog["model"] == {
-        "model_id": "aseri-timestral209m_cqr1",
+        "model_id": "aseri-timestral209m_c1",
         "hf_id": "mistralai/Timestral-209M",
         "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
     }
@@ -458,9 +490,25 @@ def test_the_contract_is_published_next_to_the_files_it_describes(tmp_path):
         "schemas/forecast.schema.json",
         "licenses/CC-BY-NC-4.0.txt",
         "model-metadata/aseri-timestral209m.yml",
-        "model-metadata/aseri-timestral209m_cqr1.yml",
+        f"model-metadata/{MODEL_ID}.yml",
     ):
         assert (tmp_path / name).read_bytes() == (CONTRACT / name).read_bytes()
+
+
+def test_every_model_metadata_file_names_its_model_as_hubverse_allows():
+    # hubTemplate's and FluSight's model-metadata-schema.json: both abbreviations at most 16
+    # characters of letters, digits, "_" and "+", and the model ID is the two joined by "-".
+    files = sorted((CONTRACT / "model-metadata").glob("*.yml"))
+    assert CONTRACT / "model-metadata" / f"{MODEL_ID}.yml" in files
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        team, model = (
+            re.search(rf"^{key}: (.*)$", text, re.MULTILINE)[1]
+            for key in ("team_abbr", "model_abbr")
+        )
+        for abbr in (team, model):
+            assert re.fullmatch(r"[a-zA-Z0-9_+]{1,16}", abbr), (path.name, abbr)
+        assert path.name == f"{team}-{model}.yml"
 
 
 # 400 days: the 35 oldest at 1000, then 364 at 250 and the newest at 615, so the 365 newest average 251.
@@ -569,7 +617,7 @@ def test_each_series_has_its_track_record_and_the_page_one_file_of_them_all(
     record = read(tmp_path / "series" / "gpr_daily" / "scores.json")
     assert {k: record[k] for k in RECORD} == RECORD
     assert record["schema_version"] == "1.0.0"
-    assert record["model_id"] == "aseri-timestral209m_cqr1"
+    assert record["model_id"] == "aseri-timestral209m_c1"
     assert record["method"]["bootstrap"] == {
         "method": record["method"]["bootstrap"]["method"],
         "block_length": {"1-7": 7, "8-28": 28},

@@ -7,7 +7,7 @@ import pandas as pd
 
 from aseri import archive
 from aseri.archive import Archived
-from aseri.forecast import MODEL_ID, make_context, measurement_errors
+from aseri.forecast import make_context, measurement_errors
 from aseri.scoring import (
     BUCKETS,
     REPS,
@@ -31,6 +31,24 @@ MIN_N = 30
 SQUARES, SQUARE_HORIZON = 8, 7
 # The baselines of the median's error, as `scoring.score` names its columns.
 BASELINES = ("naive", "snaive7", "mean28")
+# The columns of `scored` and their types: those of its empty table, before any target of the model is due.
+SCORED = {
+    "reference_date": "datetime64[us]",
+    "forecast_mode": "str",
+    "horizon": "int64",
+    "bucket": "str",
+    "observation": "float64",
+    "observation_as_of": "datetime64[us]",
+    **dict.fromkeys(
+        ("wis", "dispersion", "overprediction", "underprediction"), "float64"
+    ),
+    "interval_coverage_50": "bool",
+    "interval_coverage_80": "bool",
+    "ae_median": "float64",
+    "ase_median": "float64",
+    **{f"ae_{name}": "float64" for name in BASELINES},
+    "wis_naive": "float64",
+}
 # How every published score is computed, stated in the score files.
 METHOD = {
     "wis": "Bracher et al. (2021), as scoringutils computes it: on the 21 levels, (2/21) times the sum of their pinball losses, which is twice the plain pinball loss of scoringrules and utilsforecast. Components: dispersion, overprediction (observations below the band), underprediction.",
@@ -76,8 +94,7 @@ def scored(
     shortcut: every run rescores the whole archive, about 45 s for the launch backfill and growing with it;
     keep the scores of past runs outside the archive if a run ever spends minutes here.
     """
-    # Until the model has a forecast, the newest of the model before keeps the empty table's columns.
-    archived = [a for a in archived if a.model_id == MODEL_ID] or archived[-1:]
+    archived = archive.this_model(archived)
     today = pd.Timestamp(today)
     vintages = vintages[vintages["as_of"] <= today]
     # A registered measurement error is blank in the model's input, and no observation to score against.
@@ -105,14 +122,12 @@ def scored(
                 observations[target] = known_on(vintages, target, today)
             else:
                 observations[target] = settled(vintages, target, series.score_lag)
-        # The steps no price has reached yet are not due, nor any of the model before's.
+        # The steps no price has reached yet are not due.
         seen = [observations[target] for target in targets] + [None] * (
             steps - len(targets)
         )
-        if issued.model_id != MODEL_ID:
-            seen = [None] * steps
-        # Nothing due yet: skipped, which saves most of the work, but for one empty table that keeps the columns.
-        if not any(seen) and (frames or issued is not archived[-1]):
+        # Nothing due yet: skipped, which saves most of the work.
+        if not any(seen):
             continue
         # The vintage the forecast was made from, never today's: its baselines saw what it saw.
         as_of = issued.provenance["data"]["as_of"]
@@ -134,6 +149,10 @@ def scored(
             pd.DatetimeIndex([found[1] for found in seen if found is not None]),
         )
         frames.append(rows)
+    if not frames:
+        return pd.DataFrame(
+            {column: pd.Series(dtype=t) for column, t in SCORED.items()}
+        )
     return pd.concat(frames, ignore_index=True)
 
 

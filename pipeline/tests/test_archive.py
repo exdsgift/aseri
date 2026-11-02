@@ -68,8 +68,8 @@ def test_a_round_holds_every_level_of_every_forecast_in_the_long_hubverse_shape(
     round_file = (
         tmp_path
         / "model-output"
-        / "aseri-timestral209m_cqr1"
-        / "2026-10-29-aseri-timestral209m_cqr1.csv"
+        / "aseri-timestral209m_c1"
+        / "2026-10-29-aseri-timestral209m_c1.csv"
     )
     assert round_file.read_text(encoding="utf-8").splitlines() == [
         "forecast_date,target,reference_date,horizon,target_end_date,output_type,output_type_id,value",
@@ -112,8 +112,8 @@ def test_brent_s_steps_are_dated_by_trading_days_from_its_prints(tmp_path):
     rounds = pd.read_csv(
         tmp_path
         / "model-output"
-        / "aseri-timestral209m_cqr1"
-        / "2026-10-29-aseri-timestral209m_cqr1.csv"
+        / "aseri-timestral209m_c1"
+        / "2026-10-29-aseri-timestral209m_c1.csv"
     ).drop_duplicates(["reference_date", "horizon"])
     assert rounds[["reference_date", "horizon", "target_end_date"]].values.tolist() == [
         ["2026-10-22", 1, "2026-10-23"],
@@ -499,7 +499,7 @@ def test_a_forecast_from_the_archive_is_blind_to_every_value_and_vintage_after_i
             archive.as_of_view(archive_dir, "gpr_daily", origin),
             pd.Timestamp(origin),
         )
-        return forecast(model, context, horizon=3), model.contexts
+        return forecast(model, context, replace(GPR_DAILY, horizon=3)), model.contexts
 
     clean_forecast, clean_contexts = forecast_from(clean)
     poisoned_forecast, poisoned_contexts = forecast_from(poisoned)
@@ -553,12 +553,12 @@ def test_a_run_manifest_records_the_modes_provenance_inputs_upstream_file_and_ch
         "as_of": "2026-10-29",
     }
     round_file = (
-        "model-output/aseri-timestral209m_cqr1/2026-10-29-aseri-timestral209m_cqr1.csv"
+        "model-output/aseri-timestral209m_c1/2026-10-29-aseri-timestral209m_c1.csv"
     )
     delta_file = "target-data/deltas/2026-10-29.csv"
     assert manifest == {
         "forecast_date": "2026-10-29",
-        "model_id": "aseri-timestral209m_cqr1",
+        "model_id": "aseri-timestral209m_c1",
         "forecasts": [
             {
                 "target": "gpr_daily",
@@ -636,7 +636,7 @@ def test_one_run_of_two_series_archives_one_round_one_delta_and_one_manifest(
     )
 
     round_file = (
-        "model-output/aseri-timestral209m_cqr1/2026-10-29-aseri-timestral209m_cqr1.csv"
+        "model-output/aseri-timestral209m_c1/2026-10-29-aseri-timestral209m_c1.csv"
     )
     delta_file = "target-data/deltas/2026-10-29.csv"
     assert sorted(
@@ -820,5 +820,5 @@ def test_archived_forecasts_keep_the_model_that_made_them_after_a_model_change(
 
     (archived,) = archive.read(tmp_path, "gpr_daily")
 
-    assert archived.model_id == "aseri-timestral209m_cqr1"
+    assert archived.model_id == "aseri-timestral209m_c1"
     assert archived.forecast.quantiles.shape == (2, 3)

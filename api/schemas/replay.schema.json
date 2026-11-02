@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/replay.schema.json",
   "title": "series/{series_id}/replay.json: the forecasts of the last 120 days, for the page",
-  "description": "Every forecast from the 120 days to the newest reference date, oldest first, at seven levels and rounded as the page writes values: whole from 10 up, one decimal below. The dated files keep all 21 levels to four decimals.",
+  "description": "Every forecast from the 120 days to the newest reference date, oldest first, at seven levels and rounded as the page writes values: whole from 10 up, one decimal below. The dated files keep all 21 levels to four decimals. A day the current model forecast holds its forecast; model_id and attribution are the newest forecast's.",
   "type": "object",
   "required": ["schema_version", "series_id", "model_id", "horizon", "quantile_levels", "forecasts", "license", "attribution"],
   "properties": {
@@ -22,6 +22,10 @@
         "required": ["reference_date", "forecast_mode", "quantiles"],
         "properties": {
           "reference_date": {"$ref": "defs.schema.json#/$defs/date"},
+          "model_id": {
+            "description": "Additive to v1 (#151): the model that made this forecast. After a model change the window can hold days of the model before.",
+            "$ref": "defs.schema.json#/$defs/model_id"
+          },
           "forecast_mode": {"$ref": "defs.schema.json#/$defs/forecast_mode"},
           "quantiles": {
             "type": "object",

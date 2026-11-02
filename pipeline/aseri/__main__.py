@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from aseri import archive, record
-from aseri.forecast import MODEL_ID, forecast, load_model, make_context, under_review
+from aseri.forecast import forecast, load_model, make_context, under_review
 from aseri.gate import annotate, check_forecasts
 from aseri.publish import publish, publish_catalog, publish_contract, publish_scores
 from aseri.series import (
@@ -106,7 +106,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 # Only from a day with a value: the drones' day without a report starts none.
                 usable.dropna(),
                 # A new MODEL_ID forecasts the replay window again, for its replay and its record.
-                [a.forecast.reference_date for a in archived if a.model_id == MODEL_ID],
+                [a.forecast.reference_date for a in archive.this_model(archived)],
             )
         )
         forecasts = []
@@ -116,13 +116,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                     model = load_model()
                 # Each forecast sees only the data up to its own date.
                 forecasts.append(
-                    forecast(
-                        model,
-                        make_context(series, observed, day),
-                        series.horizon,
-                        series.kind,
-                        series.id,
-                    )
+                    forecast(model, make_context(series, observed, day), series)
                 )
                 # The launch backfill takes minutes, so the log shows it moving.
                 print(

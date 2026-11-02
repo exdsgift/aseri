@@ -266,7 +266,7 @@ it("describes the API's data as a schema.org Dataset, under aseri's licence", ()
     "https://creativecommons.org/licenses/by-nc/4.0/"
   )
   expect(dataset.creditText).toBe(
-    "Forecasts: aseri (model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)"
+    "Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI)"
   )
   expect(dataset.variableMeasured).toHaveLength(9)
   expect(dataset.distribution[0].contentUrl).toBe(

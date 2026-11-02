@@ -3,7 +3,7 @@
 team_name: aseri
 team_abbr: aseri
 model_name: Timestral-209M, zero-shot, calibrated per series
-model_abbr: timestral209m_cqr1
+model_abbr: timestral209m_c1
 model_version: "weights mistralai/Timestral-209M at 9874d252ab0aae16f7f7c999f98f98d6ad7d8365, package timestral at a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff, offsets of ADR 0001"
 model_contributors:
   - name: Gabriele Durante
@@ -43,7 +43,7 @@ methods_long: >-
   this model's forecasts of days published before it are in the archive and the replay. Timestral's
   training-data cutoff is not published, so backtests may be optimistic. Licence of the model output: CC BY-NC 4.0
   (https://creativecommons.org/licenses/by-nc/4.0/), attributed as "Forecasts: aseri (model
-  aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)"; upstream terms still apply to the
+  aseri-timestral209m_c1, Timestral-209M by Mistral AI)"; upstream terms still apply to the
   underlying data, per series (https://exdsgift.github.io/aseri/api/v1/series.json).
 ensemble_of_models: false
 ensemble_of_hub_models: false

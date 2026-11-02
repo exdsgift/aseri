@@ -129,9 +129,9 @@ def test_a_new_model_restarts_the_record_and_never_scores_the_model_before(
     run(tmp_path, [], ships("2026-10-30"), date(2026, 10, 31))
 
     # The model in the code has no forecast yet: an empty record, as on a launch day.
-    rows = scored(tmp_path, "2026-11-08")
-    summary = record.summary(SUEZ, rows, scored(tmp_path, "2026-11-08", latest=True))
-    assert rows.empty
+    empty = scored(tmp_path, "2026-11-08")
+    summary = record.summary(SUEZ, empty, scored(tmp_path, "2026-11-08", latest=True))
+    assert empty.empty
     assert summary["live"]["n"] == summary["retrospective"]["n"] == 0
 
     # Its first forecast, live: the only one its record scores.
@@ -142,6 +142,19 @@ def test_a_new_model_restarts_the_record_and_never_scores_the_model_before(
     assert (rows["forecast_mode"] == "live").all()
     # Nov 1 to 6 are due: 14 days to settle.
     assert rows["horizon"].tolist() == list(range(1, 7))
+    # The empty record has the very columns of a scored one, in their types.
+    assert empty.dtypes.to_dict() == rows.dtypes.to_dict()
+
+
+def test_a_record_with_no_forecast_of_the_model_is_the_empty_table_itself(tmp_path):
+    run(tmp_path, [], ships("2026-10-25"), date(2026, 10, 26))
+
+    rows = record.scored(
+        SUEZ, [], archive.vintages(tmp_path, SUEZ.id), date(2026, 11, 8)
+    )
+
+    assert rows.empty
+    assert list(rows.columns) == list(record.SCORED)
 
 
 def test_a_rerun_on_a_later_day_scores_every_target_it_had_scored_byte_for_byte(

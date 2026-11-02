@@ -1,5 +1,6 @@
 import json
 import math
+import re
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -15,7 +16,7 @@ from hypothesis.extra.numpy import arrays
 import aseri.forecast as forecast_module
 from aseri.__main__ import SOURCES
 from aseri.forecast import forecast, under_review
-from aseri.series import GPR_DAILY
+from aseri.series import BAB_EL_MANDEB_TRANSITS, GPR_DAILY
 
 # ADR 0001's backtest: every number of its tables.
 BACKTEST = (
@@ -39,21 +40,26 @@ def observed(last_day, days):
     return pd.Series(range(days), index=dates, dtype=float)
 
 
+def plain(horizon, kind="index"):
+    """Bab el-Mandeb, the one series without offsets, at any horizon and kind: the model's band as it is."""
+    return replace(BAB_EL_MANDEB_TRANSITS, horizon=horizon, kind=kind)
+
+
 def test_forecasts_from_the_last_observed_date():
-    result = forecast(StubModel(), observed("2026-10-26", days=10), horizon=3)
+    result = forecast(StubModel(), observed("2026-10-26", days=10), plain(3))
 
     assert result.reference_date == pd.Timestamp("2026-10-26")
 
 
 def test_forecasts_every_step_at_every_level_of_the_model():
-    result = forecast(StubModel(), observed("2026-10-26", days=10), horizon=3)
+    result = forecast(StubModel(), observed("2026-10-26", days=10), plain(3))
 
     assert result.levels == (0.1, 0.5, 0.9)
     assert result.quantiles.shape == (3, 3)
 
 
 def test_reads_the_whole_history():
-    result = forecast(StubModel(), observed("2026-10-26", days=400), horizon=3)
+    result = forecast(StubModel(), observed("2026-10-26", days=400), plain(3))
 
     assert (result.quantiles == 400).all()
 
@@ -67,7 +73,7 @@ class CrossingModel:
 
 
 def test_quantiles_never_decrease_across_levels():
-    result = forecast(CrossingModel(), observed("2026-10-26", days=10), horizon=2)
+    result = forecast(CrossingModel(), observed("2026-10-26", days=10), plain(2))
 
     assert result.quantiles.tolist() == [[1.0, 3.0, 5.0], [1.0, 3.0, 5.0]]
 
@@ -109,11 +115,11 @@ def test_published_quantiles_are_finite_ordered_and_inside_the_range_of_their_ki
     model = RawModel(band)
     if not np.isfinite(band).all():
         with pytest.raises(ValueError, match="non-finite"):
-            forecast(model, observed("2026-10-26", days=10), len(band), name)
+            forecast(model, observed("2026-10-26", days=10), plain(len(band), name))
         return
 
     quantiles = forecast(
-        model, observed("2026-10-26", days=10), len(band), name
+        model, observed("2026-10-26", days=10), plain(len(band), name)
     ).quantiles
 
     assert np.isfinite(quantiles).all()
@@ -176,6 +182,33 @@ def test_the_offsets_are_the_sides_adr_0001_keeps_refitted_on_all_origins():
     assert not [row for row in kept if row[0] == "bab_el_mandeb_transits"]
 
 
+@pytest.mark.parametrize(
+    ("row", "message"),
+    [
+        ("gpr_daily,1-7,beyond,0.1", "side 'beyond' is neither below nor above"),
+        ("gpr_daily,1-seven,above,0.1", "bucket '1-seven' is not first-last"),
+        ("gpr_daily,8-7,above,0.1", "bucket '8-7' is not first-last"),
+        ("gdp_daily,1-7,above,0.1", "series 'gdp_daily' is not one of aseri's"),
+        ("gpr_daily,1-7,above,-1.0", "offset -1.0 is not above -1"),
+    ],
+)
+def test_a_bad_row_of_the_offsets_table_is_refused_when_it_loads(
+    tmp_path, row, message
+):
+    path = tmp_path / "offsets.csv"
+    path.write_text(f"series_id,bucket,side,offset\n{row}\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match=f"offsets.csv, row 1: {re.escape(message)}"):
+        forecast_module.read_offsets(path)
+
+
+def test_a_band_without_a_median_is_never_calibrated():
+    with pytest.raises(ValueError, match="no 0.5 level to calibrate gpr_daily around"):
+        forecast(
+            BandModel([90.0, 110.0], (0.1, 0.9)), observed("2026-10-26", 10), GPR_DAILY
+        )
+
+
 class BandModel:
     """Returns `band`, one row of quantiles at `levels`, on every step."""
 
@@ -196,7 +229,7 @@ def offsets(rows):
 
 def test_an_offset_of_0_is_the_identity(monkeypatch):
     model = BandModel([90.1, 98.7, 100.2, 104.9, 131.3], (0.1, 0.25, 0.5, 0.75, 0.9))
-    raw = forecast(model, observed("2026-10-26", days=10), 14)
+    raw = forecast(model, observed("2026-10-26", days=10), plain(14))
     monkeypatch.setattr(
         forecast_module,
         "OFFSETS",
@@ -210,7 +243,7 @@ def test_an_offset_of_0_is_the_identity(monkeypatch):
     )
 
     calibrated = forecast(
-        model, observed("2026-10-26", days=10), 14, series_id="gpr_daily"
+        model, observed("2026-10-26", days=10), replace(GPR_DAILY, horizon=14)
     )
 
     assert calibrated.quantiles.tobytes() == raw.quantiles.tobytes()
@@ -238,12 +271,14 @@ def test_the_median_never_moves_and_the_quantiles_stay_ordered_and_in_range(
             ("gpr_daily", "8-28", "above", above),
         ]
     )
-    raw = forecast(model, observed("2026-10-26", days=10), 28, kind)
+    raw = forecast(model, observed("2026-10-26", days=10), plain(28, kind))
 
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(forecast_module, "OFFSETS", table)
         quantiles = forecast(
-            model, observed("2026-10-26", days=10), 28, kind, "gpr_daily"
+            model,
+            observed("2026-10-26", days=10),
+            replace(GPR_DAILY, horizon=28, kind=kind),
         ).quantiles
 
     middle = len(levels) // 2
@@ -276,11 +311,7 @@ def test_each_series_is_calibrated_by_its_own_offsets(series):
     week, later = GOLDEN[series.id]
 
     result = forecast(
-        BandModel([90.0, 100.0, 110.0]),
-        observed("2026-10-26", days=10),
-        series.horizon,
-        series.kind,
-        series.id,
+        BandModel([90.0, 100.0, 110.0]), observed("2026-10-26", days=10), series
     )
 
     expected = [

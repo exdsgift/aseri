@@ -19,7 +19,7 @@ Key design decisions:
 
 1. **Canonical format is Hubverse model-output.** One run writes these columns: `forecast_date, target, reference_date, horizon, target_end_date, output_type, output_type_id, value`.
    - All 21 Timestral quantile levels are kept.
-   - The model ID is `aseri-timestral209m_cqr1`, following the `team_abbr-model_abbr` naming [HV-MO], whose two parts hold no hyphen. It replaced `aseri-timestral209m` with #151.
+   - The model ID is `aseri-timestral209m_c1`, following the `team_abbr-model_abbr` naming [HV-MO], whose two parts hold no hyphen. It replaced `aseri-timestral209m` with #151.
    - **The bands are calibrated per series on a two-year backtest** ([ADR 0001](../adr/0001-baselines-and-calibration-before-the-live-record.md)). For each series, bucket of steps and side of the median that the ADR keeps, an offset `d` scales every quantile's distance to the median by `1 + d`, before the sort and the clip, so that the 80% band holds about 8 days in 10. The table is `pipeline/aseri/offsets.csv`; Bab el-Mandeb has none.
    - `target` is the series ID.
 2. **The clock is explicit.** These definitions follow [forecast-horizons.md](forecast-horizons.md) and the Hubverse standard task IDs [HV-TASKS]:
@@ -211,7 +211,7 @@ It is also used across institutions [HV-HOME]. Follow it for the archive and bul
 | Name | Meaning | Example |
 |---|---|---|
 | `series_id` (JSON) = `target` (Hubverse) | Stable snake_case ID, never reused | `suez_transits` |
-| `model_id` | `team_abbr-model_abbr` [HV-MO]. New ID if the weights, revision or inference settings change, the calibration offsets included | `aseri-timestral209m_cqr1` |
+| `model_id` | `team_abbr-model_abbr` [HV-MO]. New ID if the weights, revision or inference settings change, the calibration offsets included | `aseri-timestral209m_c1` |
 | `forecast_date` | UTC calendar date of the run. Round ID. One archive file per run day | `2026-10-29` |
 | `reference_date` | Last observed date in the input, the data cutoff. Forecast origin | `2026-10-25` (PortWatch lags about 4 days) |
 | `horizon` | Steps after `reference_date`, from 1 to `horizon_max` (7, 14 or 30) | `1` |
@@ -236,7 +236,7 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `series/{series_id}/latest.json` | Latest forecast. A copy of the newest dated file, with `links.canonical` pointing to that file | Daily |
 | `series/{series_id}/forecasts.json` | Index of every issued forecast: `reference_date`, `forecast_date`, mode, URL. Needed because static hosts cannot list directories | Daily, grows about 100 bytes per forecast |
 | `series/{series_id}/forecasts/{reference_date}.json` | One forecast | **Never** |
-| `series/{series_id}/replay.json` | With `schema_version`, licence and attribution, the forecasts of the 120 days to the latest, the current model's where it has one (#151), for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
+| `series/{series_id}/replay.json` | With `schema_version`, licence and attribution, the forecasts of the 120 days to the latest, the current model's where it has one, each with the `model_id` that made it (#151), for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
 | `series/{series_id}/actuals.json` | Latest vintage of the observed series (`date[]`, `observation[]`, flags) with `as_of` | Daily |
 | `series/{series_id}/scores.json` | Track record for one series, live and retrospective forecasts apart, never combined. Per horizon bucket (1-7, 8-28): 50% and 80% coverage with an exact CI, WIS and its components, the median's absolute error and its ratio to each baseline with a block-bootstrap CI and a verdict, and MASE. Also `n`, `min_n_to_display`, the primary baseline, the weekly forecasts of the record's squares, the method (WIS convention, L, block length, resamples, seed) and the latest-vintage sensitivity check (see 4.4) | Daily |
 | `scores.json` | Cross-series summary for the site's record: each series' file without its sensitivity check | Daily |
@@ -247,7 +247,7 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `bulk/datapackage.json` | Frictionless descriptor for all bulk files, with `licenses` and `sources` per resource [DP] | Daily |
 | `openapi.json`, `schemas/*.schema.json` | Contract: OpenAPI 3.1.1, and a JSON Schema per file type (`catalog`, `forecast`, `forecast-index`, `actuals`, `replay`, `scores`, `scoreboard`) with the shared `defs` | Per release |
 | `licenses/*.txt` | Full texts that must travel with the data: `CC-BY-NC-4.0` (aseri's), `CC-BY-4.0` (GPR), `CC0-1.0` (pageviews), `MIT-Klymenko`, `MIT-Ivaniuk`, and the terms of the IMF and the EIA, quoted with their links (`IMF-terms`, `EIA-public-domain`). Each licence object names its file in `text`, a path under `/api/v1/` | Rarely |
-| `model-metadata/{model_id}.yml` | Hubverse model metadata, one file per model: `aseri-timestral209m_cqr1.yml`, the model in use, whose `methods` say the bands are calibrated per series on a two-year backtest and link ADR 0001, and `aseri-timestral209m.yml`, the one before. Its `license` is `other`, since no hub's list holds CC BY-NC 4.0, and `methods_long` states the licence | Per model |
+| `model-metadata/{model_id}.yml` | Hubverse model metadata, one file per model: `aseri-timestral209m_c1.yml`, the model in use, whose `methods` say the bands are calibrated per series on a two-year backtest and link ADR 0001, and `aseri-timestral209m.yml`, the one before. Its `license` is `other`, since no hub's list holds CC BY-NC 4.0, and `methods_long` states the licence | Per model |
 
 The HTML page at `/api/` holds the human docs and a schema.org `Dataset` JSON-LD block [SO]. It is `web/api/index.html`, a second page of the Vite build on the site's styles, with no script.
 
@@ -319,7 +319,7 @@ Each forecast file and the per-run manifest on the archive branch carry this blo
 - The daily run copies `api/` into the site's `api/v1/` (`publish.publish_contract`).
 
 **Versioning and deprecation:**
-- **Within `/api/v1/`, additive changes only:** new fields, new series, new endpoints, new enum values, following endoflife.date's published policy [EOL]. Clients must ignore unknown fields. **Corrected (#135):** `schema_version` stays `1.0.0`, since the dated forecast files carry it and never change; the additions so far (`stale_since`, `note`, `weekly`, `day_to_day_tie`, `replay.json`, the score files, `errata`, a licence's `text`) are recorded here and in the commits.
+- **Within `/api/v1/`, additive changes only:** new fields, new series, new endpoints, new enum values, following endoflife.date's published policy [EOL]. Clients must ignore unknown fields. **Corrected (#135):** `schema_version` stays `1.0.0`, since the dated forecast files carry it and never change; the additions so far (`stale_since`, `note`, `weekly`, `day_to_day_tie`, `replay.json` and its forecasts' `model_id`, the score files, `errata`, a licence's `text`) are recorded here and in the commits.
 - **Errata.** `series.json` carries `errata`, a list, oldest first, empty so far. Each erratum has `date` (when it was published), `series_id` (or null for all), `reference_date` (the forecast concerned, or null) and `description`. The list lives in `publish.ERRATA`: appended by hand, never edited.
 - **A breaking change is published as `/api/v2/` next to v1.** v1 keeps being generated for at least 6 months. Every v1 body gains `"deprecation": {"deprecated_at": "...", "sunset_at": "...", "successor": ".../api/v2/..."}`, and v1 operations get `deprecated: true` in OpenAPI [OAS].
 - Pages cannot send RFC 9745 `Deprecation` or RFC 8594 `Sunset` headers [RFC9745][RFC8594][OBS], so the notice has to live in the body.

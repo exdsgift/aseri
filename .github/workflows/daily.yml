@@ -213,7 +213,7 @@ jobs:
         run: |
           # The build job runs third-party code, so a file that is not one of these (a git hook, say) stops the run.
           files=$(cd "$RUNNER_TEMP/archive-adds" && find . ! -type d -printf '%y %p\n')
-          # A model ID is Hubverse's team_abbr-model_abbr, whose model part may hold an underscore (aseri-timestral209m_cqr1).
+          # A model ID is Hubverse's team_abbr-model_abbr, whose model part may hold an underscore (aseri-timestral209m_c1).
           if printf '%s\n' "$files" | grep -vE '^f \./(model-output/[a-z0-9_-]+/[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9_-]+\.csv|target-data/deltas/[0-9]{4}-[0-9]{2}-[0-9]{2}\.csv|runs/[0-9]{4}-[0-9]{2}-[0-9]{2}\.json)$'; then
             echo "::error::The build's archive files include something that is not a round, a delta or a manifest"
             exit 1

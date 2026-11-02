@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from aseri.archive import REPLAY_DAYS, Archived, timestamp
+from aseri.archive import REPLAY_DAYS, Archived, this_model, timestamp
 from aseri.forecast import MODEL_ID, WEIGHTS, WEIGHTS_REVISION
 from aseri.record import METHOD
 from aseri.series import Series
@@ -80,10 +80,7 @@ def publish(
     for forecast in archived:
         first.setdefault(forecast.forecast.reference_date, forecast)
     replayed = list(
-        (
-            first
-            | {a.forecast.reference_date: a for a in archived if a.model_id == MODEL_ID}
-        ).values()
+        (first | {a.forecast.reference_date: a for a in this_model(archived)}).values()
     )
     archived = list(first.values())
     for forecast in archived:
@@ -107,7 +104,7 @@ def publish(
     _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
     _write(
         api_dir / links["replay"],
-        _replay(series, replayed, _forecast(series, replayed[-1])["attribution"]),
+        _replay(series, replayed, _attribution(series, replayed[-1])),
     )
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
     tie = day_to_day_tie(
@@ -206,13 +203,17 @@ def _forecast(series, archived) -> dict:
             str(level): [float(v) for v in forecast.quantiles[:, i]]
             for i, level in enumerate(forecast.levels)
         },
-        # The model that made this forecast: a later model change must not rewrite its credit.
-        "attribution": f"{series.license['attribution']} {credit(archived.model_id, archived.provenance['model']['id'])}",
+        "attribution": _attribution(series, archived),
         "provenance": archived.provenance | _labels(archived),
         "links": {"catalog": "../../../series.json"},
         # The run's, not today's: republishing a forecast never changes its file.
         "generated_at": archived.provenance["generated_at"],
     }
+
+
+def _attribution(series, archived) -> str:
+    # The model that made the forecast: a later model change must not rewrite its credit.
+    return f"{series.license['attribution']} {credit(archived.model_id, archived.provenance['model']['id'])}"
 
 
 def _labels(archived) -> dict:
@@ -260,6 +261,8 @@ def _replay(series, archived, attribution) -> dict:
         "forecasts": [
             {
                 "reference_date": f"{a.forecast.reference_date:%Y-%m-%d}",
+                # Additive to v1 (#151): a model change can leave days of the model before in the window.
+                "model_id": a.model_id,
                 "forecast_mode": a.provenance["forecast_mode"],
                 # As the page writes them, so GPR's replay, loaded with the page, stays small;
                 # the dated files keep four decimals.
