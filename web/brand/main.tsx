@@ -299,9 +299,8 @@ function Composition({ plan, hero }: { plan: Plan; hero: Hero }) {
   )
 }
 
-// The 16 px drawings an avatar shows: the winged hat alone (the first favicon's, without
-// its ground tile), which casts the words' shadow here, and the favicon, whose 16 px redraw
-// of the hat has its shadow drawn in.
+// The drawings an avatar shows at 16 px: the winged hat alone, which casts the words' shadow
+// here, and the favicon, the touch icon whole with its ground and margin.
 const drawings: Record<string, string> = {
   hat: "/brand/hat.svg",
   favicon: "/favicon.svg",

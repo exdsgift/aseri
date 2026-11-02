@@ -184,8 +184,9 @@ export const avatars = [
 // The hero whose image gets the alternative lines and the art-only banner's twins.
 export const alternativesFor: Hero = "messenger"
 
-// The site's favicons: public/favicon.svg, the hat redrawn on 16 px with its shadow, at 1 and
-// 2 image pixels a pixel, and the touch icon, the hat avatar at 7 (180 px, the hat 112).
+// The site's favicons: the touch icon, the hat avatar at 7 (180 px, the hat 112), and
+// public/favicon.svg, that same icon on its 7 px grid (owner's choice: the margin round the hat),
+// drawn at 16 and 32 px.
 const favicons = [
   {
     file: "web/public/favicon-16.png",
