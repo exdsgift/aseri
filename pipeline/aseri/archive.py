@@ -39,7 +39,7 @@ class Archived:
 
 
 def read(archive_dir: Path, series_id: str) -> list[Archived]:
-    """Every archived forecast of `series_id`, oldest reference date first."""
+    """Every archived forecast of `series_id`, of every model, oldest reference date first, then oldest run."""
     archived = []
     for path in sorted((archive_dir / RUNS).glob("*.json")):
         run = json.loads(path.read_text(encoding="utf-8"))
@@ -78,6 +78,11 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
             )
     # Run order is not date order: a backfill archives days older than the forecasts before it.
     return sorted(archived, key=lambda a: a.forecast.reference_date)
+
+
+def this_model(archived: list[Archived]) -> list[Archived]:
+    """The forecasts of `archived` that the model in the code made: a new MODEL_ID has a replay and a record of its own."""
+    return [a for a in archived if a.model_id == MODEL_ID]
 
 
 def new_reference_dates(
@@ -215,6 +220,9 @@ class SeriesRun(NamedTuple):
     observed: pd.Series
     as_of: date
     upstream: dict
+    # The reference dates of forecasts the run made but held out of bounds: never archived, but a held
+    # newest day stays the run's newest, so no older forecast passes for live.
+    held: tuple[pd.Timestamp, ...] = ()
 
 
 def write(
@@ -236,12 +244,12 @@ def write(
     round_file = ROUNDS / f"{forecast_date}-{MODEL_ID}.csv"
     delta_file = DELTAS / f"{forecast_date}.csv"
     rounds, deltas, issued = [], [], []
-    for series, forecasts, observed, as_of, _ in runs:
+    for series, forecasts, observed, as_of, _, held in runs:
         newest_archived = max(
             (a.forecast.reference_date for a in read(archive_dir, series.id)),
             default=pd.Timestamp.min,
         )
-        newest = max((f.reference_date for f in forecasts), default=None)
+        newest = max([*(f.reference_date for f in forecasts), *held], default=None)
         delta = observation_delta(observed, as_of_view(archive_dir, series.id, as_of))
         for forecast in forecasts:
             # Each step's date, from the days up to its reference date only: Brent's are trading days.

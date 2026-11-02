@@ -1,7 +1,9 @@
 """The track record wired to the archive: which targets are scored, against which observation, and what the score files and the monitor say."""
 
+import json
 from dataclasses import replace
 from datetime import UTC, date, datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -19,6 +21,10 @@ LEVELS = (
 )  # fmt: skip
 # Suez: 28 days ahead, and a target waits 14 days for its observation to settle.
 SUEZ = SUEZ_TRANSITS
+# ADR 0001's backtest: every number of its tables.
+BACKTEST = (
+    Path(__file__).parents[2] / "docs" / "research" / "baselines-calibration.json"
+)
 
 
 def ships(last_day, days=400):
@@ -107,6 +113,50 @@ def test_a_record_with_nothing_due_yet_summarises_as_empty(tmp_path):
     assert record.calibration(SUEZ, rows) == {}
 
 
+def test_a_new_model_restarts_the_record_and_never_scores_the_model_before(
+    tmp_path, monkeypatch
+):
+    # The launch, under the model before: a backfilled forecast and a live one, both due by Nov 8.
+    with monkeypatch.context() as before:
+        before.setattr(archive, "MODEL_ID", "aseri-timestral209m")
+        before.setattr(archive, "ROUNDS", Path("model-output", "aseri-timestral209m"))
+        run(
+            tmp_path,
+            [around("2026-10-01", 42.0), around("2026-10-25", 42.0)],
+            ships("2026-10-25"),
+            date(2026, 10, 26),
+        )
+    run(tmp_path, [], ships("2026-10-30"), date(2026, 10, 31))
+
+    # The model in the code has no forecast yet: an empty record, as on a launch day.
+    empty = scored(tmp_path, "2026-11-08")
+    summary = record.summary(SUEZ, empty, scored(tmp_path, "2026-11-08", latest=True))
+    assert empty.empty
+    assert summary["live"]["n"] == summary["retrospective"]["n"] == 0
+
+    # Its first forecast, live: the only one its record scores.
+    run(tmp_path, [around("2026-10-31", 42.0)], ships("2026-10-31"), date(2026, 11, 1))
+    run(tmp_path, [], ships("2026-11-10"), date(2026, 11, 11))
+    rows = scored(tmp_path, "2026-11-20")
+    assert rows["reference_date"].unique().tolist() == [pd.Timestamp("2026-10-31")]
+    assert (rows["forecast_mode"] == "live").all()
+    # Nov 1 to 6 are due: 14 days to settle.
+    assert rows["horizon"].tolist() == list(range(1, 7))
+    # The empty record has the very columns of a scored one, in their types.
+    assert empty.dtypes.to_dict() == rows.dtypes.to_dict()
+
+
+def test_a_record_with_no_forecast_of_the_model_is_the_empty_table_itself(tmp_path):
+    run(tmp_path, [], ships("2026-10-25"), date(2026, 10, 26))
+
+    rows = record.scored(
+        SUEZ, [], archive.vintages(tmp_path, SUEZ.id), date(2026, 11, 8)
+    )
+
+    assert rows.empty
+    assert list(rows.columns) == list(record.SCORED)
+
+
 def test_a_rerun_on_a_later_day_scores_every_target_it_had_scored_byte_for_byte(
     first_run,
 ):
@@ -168,17 +218,24 @@ def test_live_and_retrospective_forecasts_are_summarised_apart(tmp_path):
 
 
 def test_each_series_is_compared_with_its_primary_baseline_chosen_on_the_backtest():
-    # Pre-registered for #146: the baseline with the lowest backtest error of each series.
-    assert {series.id: series.primary_baseline for series, _ in SOURCES} == {
+    # ADR 0001: of the registry's three baselines, the one with the lowest error on its two-year backtest.
+    picks = {series.id: series.primary_baseline for series, _ in SOURCES}
+    results = json.loads(BACKTEST.read_text(encoding="utf-8"))["series"]
+
+    assert picks == {
         "gpr_daily": "mean28",
         "suez_transits": "mean28",
-        "hormuz_transits": "naive",
+        "hormuz_transits": "mean28",
         "bab_el_mandeb_transits": "mean28",
         "taiwan_strait_transits": "mean28",
-        "wiki_ww3_views": "naive",
+        "wiki_ww3_views": "snaive7",
         "brent_spot": "naive",
         "ua_air_raid_hours": "mean28",
         "ua_drones_downed_claimed": "mean28",
+    }
+    assert picks == {
+        id: min(record.BASELINES, key=result["baselines"]["mae"].get)
+        for id, result in results.items()
     }
 
 

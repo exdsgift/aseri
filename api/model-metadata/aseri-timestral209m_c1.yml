@@ -1,0 +1,49 @@
+# Hubverse model metadata (https://docs.hubverse.io/en/latest/user-guide/model-metadata.html), in the
+# fields of the example hubs' model-metadata-schema.json.
+team_name: aseri
+team_abbr: aseri
+model_name: Timestral-209M, zero-shot, calibrated per series
+model_abbr: timestral209m_c1
+model_version: "weights mistralai/Timestral-209M at 9874d252ab0aae16f7f7c999f98f98d6ad7d8365, package timestral at a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff, offsets of ADR 0001"
+model_contributors:
+  - name: Gabriele Durante
+    affiliation: aseri
+website_url: https://exdsgift.github.io/aseri/
+repo_url: https://github.com/exdsgift/aseri
+# The hubs' licence lists hold no CC BY-NC 4.0, so "other", and methods_long states it.
+license: other
+designated_model: true
+data_inputs: >-
+  Each series' own daily history only, from: the Caldara and Iacoviello daily Geopolitical Risk index;
+  Wikimedia pageviews of the English Wikipedia article World War III; the EIA Europe Brent spot price
+  through FRED; IMF PortWatch daily transits of the Suez Canal, the Strait of Hormuz, Bab el-Mandeb and
+  the Taiwan Strait; the Ukrainian air raid sirens dataset; the drones Ukraine's General Staff claims
+  downed. No covariates.
+methods: >-
+  Timestral-209M (Mistral AI), zero-shot and univariate, on each series' full daily history, on CPU:
+  21 quantile levels, calibrated per series on a two-year backtest (ADR 0001), sorted, counts clipped at 0.
+methods_long: >-
+  Each day, for every series whose data moved to a new last observed day (the reference date), the
+  pretrained Timestral-209M forecasts the next 7, 14 or 28 steps from the series' whole history up to
+  that day, one series at a time, with no covariates and no fine-tuning. A step is a calendar day, or a
+  trading day for Brent. The model gives 21 quantile levels, 0.01 to 0.99. A calibration layer then
+  widens or narrows each side of the band per series: for each series, bucket of steps (1 to 7, then 8
+  and on) and side of the median, an offset d scales every quantile's distance to the median by 1 + d,
+  so the median and the order stay. The offsets are split-conformal (Romano et al. 2019, with a scaled
+  score), fitted on a two-year backtest of weekly origins so that the 80% band holds about 8 days in 10,
+  and kept only where, held out, they moved coverage toward 80% without costing WIS; Bab el-Mandeb has
+  none. The decision, the rules fixed before the backtest and every number are in ADR 0001
+  (https://github.com/exdsgift/aseri/blob/master/docs/adr/0001-baselines-and-calibration-before-the-live-record.md).
+  aseri then sorts the quantiles, clips counts at 0 and air-raid hours at 0 to 600, and publishes them
+  to four decimals. There is no correlation between series. Known measurement errors are left blank in
+  the model's input. A forecast is issued once per model, series and reference date and never changed.
+  Those issued after the fact, such as the 120-day replay window this model forecast again when it
+  replaced aseri-timestral209m, are labelled retrospective and kept out of the live record, which
+  restarted with this model. A day's dated forecast file keeps the first forecast issued for it, so
+  this model's forecasts of days published before it are in the archive and the replay. Timestral's
+  training-data cutoff is not published, so backtests may be optimistic. Licence of the model output: CC BY-NC 4.0
+  (https://creativecommons.org/licenses/by-nc/4.0/), attributed as "Forecasts: aseri (model
+  aseri-timestral209m_c1, Timestral-209M by Mistral AI)"; upstream terms still apply to the
+  underlying data, per series (https://exdsgift.github.io/aseri/api/v1/series.json).
+ensemble_of_models: false
+ensemble_of_hub_models: false

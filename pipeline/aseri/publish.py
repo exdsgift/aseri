@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from aseri.archive import REPLAY_DAYS, Archived, timestamp
+from aseri.archive import REPLAY_DAYS, Archived, this_model, timestamp
 from aseri.forecast import MODEL_ID, WEIGHTS, WEIGHTS_REVISION
 from aseri.record import METHOD
 from aseri.series import Series
@@ -58,9 +58,9 @@ def publish(
     stale_since: date | None = None,
     note: str | None = None,
 ) -> dict:
-    """Write every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
+    """Write each day's first archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
 
-    `archived` is oldest reference date first, as `archive.read` returns it. `first_seen` holds each
+    `archived` is oldest reference date first, then oldest run, as `archive.read` returns it. `first_seen` holds each
     day as first observed, which the day-to-day tie is scored against. A series the run skipped
     has a `stale_since` date; a `note` says why its latest forecast starts before its last observation.
     """
@@ -74,6 +74,17 @@ def publish(
     }
     # A day with no value (the drones' day without a report) is left out, as the archive leaves it.
     observed = observed.dropna()
+    # A day's dated file holds its first forecast, whatever its model, and never changes. A new MODEL_ID's
+    # forecasts of days already published are in the archive's round and in the replay: each day's from
+    # the current model where it has one, else the newest run's, so a day it lacks keeps the model before's.
+    first = {}
+    for forecast in archived:
+        first.setdefault(forecast.forecast.reference_date, forecast)
+    newest = {a.forecast.reference_date: a for a in archived}
+    replayed = list(
+        (newest | {a.forecast.reference_date: a for a in this_model(archived)}).values()
+    )
+    archived = list(first.values())
     for forecast in archived:
         _write(
             api_dir / "series" / series.id / _dated(forecast),
@@ -93,10 +104,13 @@ def publish(
         },
     )
     _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
-    _write(api_dir / links["replay"], _replay(series, archived, latest["attribution"]))
+    _write(
+        api_dir / links["replay"],
+        _replay(series, replayed, _attribution(series, replayed[-1])),
+    )
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
     tie = day_to_day_tie(
-        [a.forecast for a in archived],
+        [a.forecast for a in replayed],
         first_seen,
         trading=series.horizon_unit == "trading_day",
     )
@@ -191,13 +205,17 @@ def _forecast(series, archived) -> dict:
             str(level): [float(v) for v in forecast.quantiles[:, i]]
             for i, level in enumerate(forecast.levels)
         },
-        # The model that made this forecast: a later model change must not rewrite its credit.
-        "attribution": f"{series.license['attribution']} {credit(archived.model_id, archived.provenance['model']['id'])}",
+        "attribution": _attribution(series, archived),
         "provenance": archived.provenance | _labels(archived),
         "links": {"catalog": "../../../series.json"},
         # The run's, not today's: republishing a forecast never changes its file.
         "generated_at": archived.provenance["generated_at"],
     }
+
+
+def _attribution(series, archived) -> str:
+    # The model that made the forecast: a later model change must not rewrite its credit.
+    return f"{series.license['attribution']} {credit(archived.model_id, archived.provenance['model']['id'])}"
 
 
 def _labels(archived) -> dict:
@@ -245,6 +263,8 @@ def _replay(series, archived, attribution) -> dict:
         "forecasts": [
             {
                 "reference_date": f"{a.forecast.reference_date:%Y-%m-%d}",
+                # Additive to v1 (#151): a model change can leave days of the model before in the window.
+                "model_id": a.model_id,
                 "forecast_mode": a.provenance["forecast_mode"],
                 # As the page writes them, so GPR's replay, loaded with the page, stays small;
                 # the dated files keep four decimals.

@@ -427,9 +427,11 @@ def test_a_run_s_new_forecasts_are_each_checked_against_the_one_before_it():
 
     errors, warnings = gate.check_forecasts(GPR_DAILY, new, YEAR, archived)
 
-    assert errors == [
-        "2026-10-26: the median leaves the range of its 365 days by 0.6 of it, over 0.5"
-    ]
+    assert errors == {
+        pd.Timestamp("2026-10-26"): [
+            "2026-10-26: the median leaves the range of its 365 days by 0.6 of it, over 0.5"
+        ]
+    }
     assert warnings == [
         "2026-10-26: the median moved by 5 band widths of the forecast before on the same day, over 1.5"
     ]

@@ -18,7 +18,8 @@ import torch
 
 import aseri.__main__ as cli
 import aseri.forecast as forecast_module
-from aseri import archive, gate, record
+from aseri import archive, gate, publish, record
+from aseri.forecast import MODEL_ID
 from aseri.publish import shown
 from aseri.series import GPR_DAILY, TAIWAN_STRAIT_TRANSITS
 from aseri.sources import fred, gpr, losses, portwatch
@@ -240,7 +241,7 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
     tmp_path, monkeypatch, stub_model
 ):
     archive_dir = tmp_path / "archive"
-    rounds = archive_dir / "model-output" / "aseri-timestral209m"
+    rounds = archive_dir / "model-output" / "aseri-timestral209m_c1"
     deltas = archive_dir / "target-data" / "deltas"
 
     # Day 1, on an empty archive: the launch backfill, every recorded day, only the newest live.
@@ -256,11 +257,11 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
     assert sorted(
         p.relative_to(archive_dir).as_posix() for p in files(archive_dir)
     ) == [
-        "model-output/aseri-timestral209m/2026-10-20-aseri-timestral209m.csv",
+        "model-output/aseri-timestral209m_c1/2026-10-20-aseri-timestral209m_c1.csv",
         "runs/2026-10-20.json",
         "target-data/deltas/2026-10-20.csv",
     ]
-    assert len(pd.read_csv(rounds / "2026-10-20-aseri-timestral209m.csv")) == (
+    assert len(pd.read_csv(rounds / "2026-10-20-aseri-timestral209m_c1.csv")) == (
         53 * 28 * 21
     )
     assert len(pd.read_csv(deltas / "2026-10-20.csv")) == 53
@@ -320,7 +321,7 @@ def test_a_week_of_new_data_is_forecast_from_every_new_day_and_a_rerun_changes_n
         day = actuals["date"].index(dated["reference_date"])
         assert dated["quantiles"]["0.5"][0] == actuals["observation"][day]
     # The published forecasts are the archived ones.
-    archived = pd.read_csv(rounds / "2026-10-27-aseri-timestral209m.csv")
+    archived = pd.read_csv(rounds / "2026-10-27-aseri-timestral209m_c1.csv")
     for reference_date, rows in archived.groupby("reference_date"):
         dated = read(series / "forecasts" / f"{reference_date}.json")
         assert dated["quantiles"] == {
@@ -479,7 +480,7 @@ def test_a_later_run_backfills_the_days_before_an_archived_forecast_and_latest_s
         [
             archive.SeriesRun(
                 GPR_DAILY,
-                [cli.forecast(StubModel(), observed, GPR_DAILY.horizon)],
+                [cli.forecast(StubModel(), observed, GPR_DAILY)],
                 observed,
                 date(2026, 10, 30),
                 {},
@@ -533,8 +534,8 @@ def test_a_later_run_backfills_the_days_before_an_archived_forecast_and_latest_s
     backfill = pd.read_csv(
         archive_dir
         / "model-output"
-        / "aseri-timestral209m"
-        / "2026-10-31-aseri-timestral209m.csv"
+        / "aseri-timestral209m_c1"
+        / "2026-10-31-aseri-timestral209m_c1.csv"
     )
     assert backfill["reference_date"].max() == "2026-10-25"
 
@@ -565,6 +566,228 @@ def test_a_second_run_the_same_day_with_new_data_waits_for_tomorrow(
     assert files(archive_dir) == archive_before
     latest = read(tmp_path / "afternoon" / "series" / "gpr_daily" / "latest.json")
     assert latest["reference_date"] == "2026-10-25"
+
+
+def test_a_new_model_forecasts_the_replay_window_again_without_changing_a_dated_file(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    # The replay's reach is the backfill's, as in the code.
+    monkeypatch.setattr(publish, "REPLAY_DAYS", archive.REPLAY_DAYS)
+    # Day 1, under the model before: its own ID, and no calibration layer.
+    with monkeypatch.context() as before:
+        before.setattr(archive, "MODEL_ID", "aseri-timestral209m")
+        before.setattr(archive, "ROUNDS", Path("model-output", "aseri-timestral209m"))
+        before.setattr(forecast_module, "OFFSETS", forecast_module.OFFSETS[:0])
+        run_on(
+            before,
+            datetime(2026, 10, 20, 7, 2, tzinfo=UTC),
+            recorded_gpr_until("2026-10-19"),
+            tmp_path / "day1",
+            archive_dir,
+        )
+    archive_before = files(archive_dir)
+    day1 = tmp_path / "day1" / "series" / "gpr_daily"
+    published = {p.relative_to(day1): p.read_bytes() for p in day1.glob("forecasts/*")}
+    days = pd.date_range("2026-10-05", "2026-10-26").strftime("%Y-%m-%d").tolist()
+
+    def ours(day):
+        """The replay's forecasts as this model archived them, at the replay's levels, as the page writes them."""
+        forecasts = {
+            f"{a.forecast.reference_date:%Y-%m-%d}": a.forecast
+            for a in archive.read(archive_dir, "gpr_daily")
+            if a.model_id == MODEL_ID
+        }
+        replay = read(day / "series" / "gpr_daily" / "replay.json")
+        return replay, [
+            {
+                level: [
+                    shown(v)
+                    for v in forecasts[f["reference_date"]].quantiles[
+                        :, forecasts[f["reference_date"]].levels.index(float(level))
+                    ]
+                ]
+                for level in replay["quantile_levels"]
+            }
+            for f in replay["forecasts"]
+        ]
+
+    # Day 2, the switch, under the model in the code: no new data, so its replay window alone.
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 21, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-19"),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    # The archive only grows: the model before's files untouched, the new model's round beside them.
+    after = files(archive_dir)
+    assert {p: after[p] for p in archive_before} == archive_before
+    rounds = pd.read_csv(archive_dir / archive.ROUNDS / f"2026-10-21-{MODEL_ID}.csv")
+    assert rounds["reference_date"].unique().tolist() == days[:15]
+    # Each dated file keeps the first forecast of its day, and latest.json, which copies the newest,
+    # keeps the model before's live forecast until the next new day.
+    series = tmp_path / "day2" / "series" / "gpr_daily"
+    assert {
+        p.relative_to(series): p.read_bytes() for p in series.glob("forecasts/*")
+    } == published
+    assert (series / "latest.json").read_bytes() == (day1 / "latest.json").read_bytes()
+    latest = read(series / "latest.json")
+    assert (latest["model_id"], latest["forecast_mode"]) == (
+        "aseri-timestral209m",
+        "live",
+    )
+    # The new model's forecasts of those days are in the replay, the newest included, which the
+    # page takes from latest.json instead; and the record is the new model's.
+    replay, expected = ours(tmp_path / "day2")
+    assert replay["model_id"] == MODEL_ID
+    assert [f["reference_date"] for f in replay["forecasts"]] == days[:15]
+    assert [f["quantiles"] for f in replay["forecasts"]] == expected
+    assert expected[-1]["0.9"] != [shown(v) for v in latest["quantiles"]["0.9"]]
+    assert read(tmp_path / "day2" / "scores.json")["model_id"] == MODEL_ID
+    assert gate.contract(tmp_path / "day2") == []
+
+    # Day 3, after GPR's weekly update: the new days are the new model's, the newest live.
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 4, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day3",
+        archive_dir,
+    )
+
+    series = tmp_path / "day3" / "series" / "gpr_daily"
+    index = read(series / "forecasts.json")["forecasts"]
+    assert [f["reference_date"] for f in index] == days
+    for f in index:
+        assert read(series / f["url"])["model_id"] == (
+            MODEL_ID if f["reference_date"] > "2026-10-19" else "aseri-timestral209m"
+        )
+    assert {
+        p.relative_to(series): p.read_bytes()
+        for p in series.glob("forecasts/*")
+        if p.relative_to(series) in published
+    } == published
+    latest = read(series / "latest.json")
+    assert (latest["model_id"], latest["reference_date"], latest["forecast_mode"]) == (
+        MODEL_ID,
+        "2026-10-26",
+        "live",
+    )
+    replay, expected = ours(tmp_path / "day3")
+    assert [f["reference_date"] for f in replay["forecasts"]] == days[7:]
+    assert [f["quantiles"] for f in replay["forecasts"]] == expected
+    assert gate.contract(tmp_path / "day3") == []
+
+    # The next day, the same data: nothing is forecast, and the archive does not change.
+    after = files(archive_dir)
+    monkeypatch.setattr(cli, "load_model", no_model)
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 28, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day4",
+        archive_dir,
+    )
+    assert files(archive_dir) == after
+
+
+def run_under_the_model_before(monkeypatch, moment, gpr_file, api_dir, archive_dir):
+    """A run under the model before: its own ID, and no calibration layer."""
+    with monkeypatch.context() as before:
+        before.setattr(archive, "MODEL_ID", "aseri-timestral209m")
+        before.setattr(archive, "ROUNDS", Path("model-output", "aseri-timestral209m"))
+        before.setattr(forecast_module, "OFFSETS", forecast_module.OFFSETS[:0])
+        run_on(before, moment, gpr_file, api_dir, archive_dir)
+
+
+def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_of_the_model_before(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    monkeypatch.setattr(publish, "REPLAY_DAYS", archive.REPLAY_DAYS)
+    archive_dir = tmp_path / "archive"
+    # The morning's run, under the model before; then the new MODEL_ID lands the same day.
+    run_under_the_model_before(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "morning",
+        archive_dir,
+    )
+    archive_before = files(archive_dir)
+    monkeypatch.setattr(cli, "load_model", no_model)
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 15, 0, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "afternoon",
+        archive_dir,
+    )
+
+    # Nothing is archived under the new model today, so the replay is the morning's, day for day and
+    # value for value, still credited to the model before.
+    assert files(archive_dir) == archive_before
+    morning, afternoon = (
+        read(tmp_path / run / "series" / "gpr_daily" / "replay.json")
+        for run in ("morning", "afternoon")
+    )
+    assert afternoon["forecasts"] == morning["forecasts"]
+    assert {f["model_id"] for f in afternoon["forecasts"]} == {"aseri-timestral209m"}
+    assert (afternoon["model_id"], afternoon["attribution"]) == (
+        morning["model_id"],
+        morning["attribution"],
+    )
+    # The record is the new model's: empty, and it says so.
+    scores = read(tmp_path / "afternoon" / "scores.json")
+    assert scores["model_id"] == MODEL_ID
+    assert (
+        scores["series"][0]["live"]["n"]
+        == scores["series"][0]["retrospective"]["n"]
+        == 0
+    )
+    assert gate.contract(tmp_path / "afternoon") == []
+
+
+def test_a_day_the_new_model_could_not_forecast_again_keeps_the_model_before_s(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    monkeypatch.setattr(publish, "REPLAY_DAYS", archive.REPLAY_DAYS)
+    archive_dir = tmp_path / "archive"
+    run_under_the_model_before(
+        monkeypatch,
+        datetime(2026, 10, 20, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-19"),
+        tmp_path / "day1",
+        archive_dir,
+    )
+    # The switch day: the new model's forecast from 2026-10-12, the 46th day, falls out of bounds.
+    monkeypatch.setattr(cli, "load_model", lambda: LeapsFrom(46))
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 21, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-19"),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    before, after = (
+        {
+            f["reference_date"]: f
+            for f in read(tmp_path / day / "series" / "gpr_daily" / "replay.json")[
+                "forecasts"
+            ]
+        }
+        for day in ("day1", "day2")
+    )
+    assert list(after) == list(before)
+    assert after["2026-10-12"] == before["2026-10-12"]
+    assert after["2026-10-12"]["model_id"] == "aseri-timestral209m"
+    assert {f["model_id"] for day, f in after.items() if day != "2026-10-12"} == {
+        MODEL_ID
+    }
 
 
 def test_a_revision_without_a_new_day_is_archived_as_it_is_seen(
@@ -887,7 +1110,7 @@ def test_one_run_forecasts_every_series_into_one_manifest_one_round_and_one_cata
     assert sorted(
         p.relative_to(archive_dir).as_posix() for p in files(archive_dir)
     ) == [
-        "model-output/aseri-timestral209m/2026-10-30-aseri-timestral209m.csv",
+        "model-output/aseri-timestral209m_c1/2026-10-30-aseri-timestral209m_c1.csv",
         "runs/2026-10-30.json",
         "target-data/deltas/2026-10-30.csv",
     ]
@@ -912,8 +1135,8 @@ def test_one_run_forecasts_every_series_into_one_manifest_one_round_and_one_cata
     rounds = pd.read_csv(
         archive_dir
         / "model-output"
-        / "aseri-timestral209m"
-        / "2026-10-30-aseri-timestral209m.csv"
+        / "aseri-timestral209m_c1"
+        / "2026-10-30-aseri-timestral209m_c1.csv"
     )
     assert list(rounds["target"].unique()) == ["gpr_daily", *PORTS]
     deltas = pd.read_csv(archive_dir / "target-data" / "deltas" / "2026-10-30.csv")
@@ -1319,6 +1542,80 @@ def test_a_forecast_out_of_its_bounds_holds_only_its_own_series_and_names_it_for
     assert gate.contract(tmp_path / "day2") == []
 
 
+class LeapsFrom(StubModel):
+    """The stub, except on the one context of `days` values, from where its forecast leaps far above GPR's year."""
+
+    def __init__(self, days):
+        super().__init__()
+        self.days = days
+
+    def forecast(self, context, prediction_length):
+        result = super().forecast(context, prediction_length)
+        if len(context) == self.days:
+            result.quantiles += 10_000
+        return result
+
+
+def bounds_run(tmp_path, monkeypatch, days):
+    """A first run on the recorded GPR file, 60 days to 2026-10-26, with the forecast from its `days`-th day out of bounds."""
+    monkeypatch.setattr(cli, "load_model", lambda: LeapsFrom(days))
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+    manifest = read(tmp_path / "archive" / "runs" / "2026-10-27.json")
+    issued = {f["reference_date"]: f["forecast_mode"] for f in manifest["forecasts"]}
+    return issued, output.read_text(encoding="utf-8")
+
+
+def test_a_retrospective_forecast_out_of_its_bounds_is_dropped_alone_and_named(
+    tmp_path, monkeypatch, summary
+):
+    # The 50th day, 2026-10-16, a day of the backfill.
+    issued, output = bounds_run(tmp_path, monkeypatch, days=50)
+
+    days = pd.date_range("2026-08-28", "2026-10-26").strftime("%Y-%m-%d").tolist()
+    assert list(issued) == [day for day in days if day != "2026-10-16"]
+    assert issued["2026-10-26"] == "live"
+    row = [line for line in summary().splitlines() if "gpr_daily" in line][-1]
+    assert row.startswith("| gpr_daily | ok | 2026-10-26 | days old: 1")
+    assert (
+        "; dropped, out of bounds: 2026-10-16: the median leaves the range of its 365 days"
+        in row
+    )
+    assert "bounds_hold=\n" in output
+    latest = read(tmp_path / "api" / "series" / "gpr_daily" / "latest.json")
+    assert (latest["reference_date"], latest["forecast_mode"]) == ("2026-10-26", "live")
+    assert gate.contract(tmp_path / "api") == []
+
+
+def test_a_live_forecast_out_of_its_bounds_holds_only_itself_and_names_its_series(
+    tmp_path, monkeypatch, summary
+):
+    # The 60th day, 2026-10-26, the newest: the live forecast.
+    issued, output = bounds_run(tmp_path, monkeypatch, days=60)
+
+    # The backfill is archived, and none of it passes for live: the run's newest day was held.
+    days = pd.date_range("2026-08-28", "2026-10-25").strftime("%Y-%m-%d").tolist()
+    assert issued == dict.fromkeys(days, "retrospective")
+    row = [line for line in summary().splitlines() if "gpr_daily" in line][-1]
+    assert row.startswith(
+        "| gpr_daily | out of bounds | 2026-10-26 | 2026-10-26: the median leaves the range"
+    )
+    assert "bounds_hold=gpr_daily\n" in output
+    entry = read(tmp_path / "api" / "series.json")["series"][0]
+    assert entry["note"] == (
+        "The newest forecasts are held for review, far outside the series' last 365 days: "
+        "the latest shown starts from 2026-10-25."
+    )
+    assert gate.contract(tmp_path / "api") == []
+
+
 def with_day(lanes, port, day, ships):
     lanes[port][pd.Timestamp(day)] = ships
     return lanes
@@ -1490,7 +1787,7 @@ def test_an_archive_of_single_series_manifests_reads_and_stays_byte_identical_un
         [
             archive.SeriesRun(
                 GPR_DAILY,
-                [cli.forecast(StubModel(), observed, GPR_DAILY.horizon)],
+                [cli.forecast(StubModel(), observed, GPR_DAILY)],
                 observed,
                 date(2026, 10, 30),
                 {},
@@ -1520,7 +1817,7 @@ def test_an_archive_of_single_series_manifests_reads_and_stays_byte_identical_un
     assert sorted(
         p.relative_to(archive_dir).as_posix() for p in set(after) - set(archive_before)
     ) == [
-        "model-output/aseri-timestral209m/2026-10-31-aseri-timestral209m.csv",
+        "model-output/aseri-timestral209m_c1/2026-10-31-aseri-timestral209m_c1.csv",
         "runs/2026-10-31.json",
         "target-data/deltas/2026-10-31.csv",
     ]
@@ -1579,8 +1876,8 @@ def test_brent_and_the_drones_run_end_to_end_on_trading_days_and_with_a_fall_fla
     rounds = pd.read_csv(
         archive_dir
         / "model-output"
-        / "aseri-timestral209m"
-        / "2026-10-30-aseri-timestral209m.csv"
+        / "aseri-timestral209m_c1"
+        / "2026-10-30-aseri-timestral209m_c1.csv"
     )
     brent_dates = pd.DatetimeIndex(
         rounds.loc[rounds["target"] == "brent_spot", "target_end_date"]

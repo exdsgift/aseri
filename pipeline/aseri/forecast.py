@@ -2,6 +2,7 @@
 
 import json
 import math
+import re
 from dataclasses import dataclass
 from importlib.metadata import distribution
 from pathlib import Path
@@ -11,10 +12,13 @@ import pandas as pd
 import torch
 from timestral import TimestralForecaster
 
+from aseri import series as series_module
 from aseri.series import Series
 
-# A change to any of these is a different model and needs a new MODEL_ID, so track records never mix.
-MODEL_ID = "aseri-timestral209m"
+# A change to any of these, or to OFFSETS, is a different model and needs a new MODEL_ID, so track records never mix.
+# Hubverse's team_abbr-model_abbr, each part at most 16 letters, digits, "_" or "+" (hubTemplate's and FluSight's
+# model-metadata schema): "_c1" is the calibration layer of ADR 0001.
+MODEL_ID = "aseri-timestral209m_c1"
 WEIGHTS = "mistralai/Timestral-209M"
 WEIGHTS_REVISION = "9874d252ab0aae16f7f7c999f98f98d6ad7d8365"
 # The pin lives in pyproject.toml; this reads back the commit actually installed.
@@ -23,6 +27,7 @@ PACKAGE_COMMIT = _installed.get("vcs_info", {}).get("commit_id", "unknown")
 # Known measurement errors, by series and day: blank in the model's context, never in the actuals or the scores.
 # Version-controlled, so a run's code commit pins the register its contexts were built with.
 ANOMALIES = pd.read_csv(Path(__file__).with_name("anomalies.csv"), parse_dates=["date"])
+# The calibration layer, OFFSETS, is read at the end of the module, by read_offsets.
 # The range each kind of series keeps its quantiles in; 600 alert hours is 25 regions times 24 h.
 BOUNDS = {
     "index": (-math.inf, math.inf),
@@ -75,9 +80,9 @@ def under_review(series: Series, vintage: pd.Series) -> bool:
     return bool(reach > 0 and (last < q1 - reach or last > q3 + reach))
 
 
-def forecast(model, observed: pd.Series, horizon: int, kind: str = "index") -> Forecast:
-    """Quantile forecast of the `horizon` days after the last observation, from the whole history, inside the range of its `kind`."""
-    result = model.forecast(observed.to_numpy(), prediction_length=horizon)
+def forecast(model, observed: pd.Series, series: Series) -> Forecast:
+    """Quantile forecast of `series`' horizon after the last observation, from the whole history, calibrated by its offsets, inside the range of its kind."""
+    result = model.forecast(observed.to_numpy(), prediction_length=series.horizon)
     quantiles = result.quantiles[0, 0].numpy()
     if not np.isfinite(quantiles).all():
         raise ValueError("the model returned non-finite quantiles")
@@ -86,8 +91,62 @@ def forecast(model, observed: pd.Series, horizon: int, kind: str = "index") -> F
         levels=tuple(result.quantile_levels),
         # The API promises non-decreasing quantiles: sorted after any offset, then clipped, which keeps
         # the order. Both are no-ops unless the model ever crosses them or leaves the range.
-        quantiles=np.clip(np.sort(quantiles, axis=1), *BOUNDS[kind]),
+        quantiles=np.clip(
+            np.sort(calibrate(quantiles, result.quantile_levels, series.id), axis=1),
+            *BOUNDS[series.kind],
+        ),
     )
+
+
+def calibrate(quantiles: np.ndarray, levels, series_id: str) -> np.ndarray:
+    """`quantiles` with each side's offset d of `series_id` applied to its bucket of steps (ADR 0001, rule 2).
+
+    d scales every quantile's distance to the median on its side by 1 + d: q + d(q - m) is
+    m - (1 + d)(m - q) below and m + (1 + d)(q - m) above. The median stays, and so does the order.
+    """
+    levels = np.asarray(levels)
+    offset = np.zeros(quantiles.shape)
+    for _, bucket, side, d in OFFSETS[OFFSETS["series_id"] == series_id].itertuples(
+        index=False
+    ):
+        first, last = map(int, bucket.split("-"))
+        offset[first - 1 : last, levels < 0.5 if side == "below" else levels > 0.5] = d
+    if not offset.any():
+        return quantiles
+    middle = np.isclose(levels, 0.5)
+    if not middle.any():
+        raise ValueError(f"the model gave no 0.5 level to calibrate {series_id} around")
+    return quantiles + offset * (quantiles - quantiles[:, middle])
+
+
+def read_offsets(path: Path) -> pd.DataFrame:
+    """The calibration offsets in `path`, every row checked, so a bad table stops the import, never a forecast."""
+    table = pd.read_csv(path, dtype={"series_id": str, "bucket": str, "side": str})
+    known = {s.id for s in vars(series_module).values() if isinstance(s, Series)}
+    for row, (series_id, bucket, side, offset) in enumerate(
+        table.itertuples(index=False), start=1
+    ):
+        steps = re.fullmatch(r"([1-9]\d*)-([1-9]\d*)", bucket)
+        problem = (
+            f"series {series_id!r} is not one of aseri's"
+            if series_id not in known
+            else f"bucket {bucket!r} is not first-last, two steps in order"
+            if not steps or int(steps[1]) > int(steps[2])
+            else f"side {side!r} is neither below nor above"
+            if side not in ("below", "above")
+            # 1 + d scales a side: at -1 or below it would fold the side onto the median or across it.
+            else f"offset {offset} is not above -1"
+            if not offset > -1
+            else None
+        )
+        if problem:
+            raise ValueError(f"{path.name}, row {row}: {problem}")
+    return table
+
+
+# The calibration layer, by series, bucket of steps and side of the median: the sides ADR 0001's rule 2 keeps,
+# fitted on its two-year backtest and refitted on all origins. Version-controlled like the anomalies; a change is a new MODEL_ID.
+OFFSETS = read_offsets(Path(__file__).with_name("offsets.csv"))
 
 
 def load_model() -> TimestralForecaster:

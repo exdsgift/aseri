@@ -66,7 +66,7 @@
     "/series/{series_id}/replay.json": {
       "get": {
         "operationId": "getReplay",
-        "summary": "The forecasts of the last 120 days at seven levels, rounded as the page writes them.",
+        "summary": "The forecasts of the last 120 days at seven levels, rounded as the page writes them, each with the model that made it.",
         "parameters": [{"$ref": "#/components/parameters/series_id"}],
         "responses": {
           "200": {"description": "The replay.", "content": {"application/json": {"schema": {"$ref": "schemas/replay.schema.json"}}}},
@@ -129,7 +129,7 @@
       "get": {
         "operationId": "getModelMetadata",
         "summary": "The model's Hubverse model-metadata file.",
-        "parameters": [{"name": "model_id", "in": "path", "required": true, "schema": {"const": "aseri-timestral209m"}}],
+        "parameters": [{"name": "model_id", "in": "path", "required": true, "schema": {"enum": ["aseri-timestral209m", "aseri-timestral209m_c1"]}}],
         "responses": {
           "200": {"description": "Hubverse model metadata, YAML.", "content": {"text/yaml": {}}},
           "404": {"$ref": "#/components/responses/NotFound"}
