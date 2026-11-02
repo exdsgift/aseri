@@ -36,6 +36,7 @@ SCORED = {
     "reference_date": "datetime64[us]",
     "forecast_mode": "str",
     "horizon": "int64",
+    "target_end_date": "datetime64[us]",
     "bucket": "str",
     "observation": "float64",
     "observation_as_of": "datetime64[us]",
@@ -83,18 +84,24 @@ def scored(
     today: date,
     *,
     latest: bool = False,
+    model_id: str | None = None,
 ) -> pd.DataFrame:
-    """Every target of `archived` due by `today`, one row each: its forecast's reference date and mode, the observation and its `as_of`, and the scores.
+    """Every target of `archived` due by `today`, one row each: its forecast's reference date and mode, its day, the observation and its `as_of`, and the scores.
 
     A target is due from its scoring day, `scoring.scoreable_on`, and scored against the value known
     that day. The archive is append-only, so that value, and the score, are the same on every later
     run. `latest` scores the same targets against today's vintage instead: the sensitivity check of a
     series that revises. `vintages` are the archive's, as `archive.vintages` reads them.
-    A new MODEL_ID restarts the record: only the forecasts of the model in the code are scored.
+    A new MODEL_ID restarts the record: only the forecasts of the model in the code are scored, or
+    those of `model_id`, for the bulk scores.
     shortcut: every run rescores the whole archive, about 45 s for the launch backfill and growing with it;
     keep the scores of past runs outside the archive if a run ever spends minutes here.
     """
-    archived = archive.this_model(archived)
+    archived = (
+        archive.this_model(archived)
+        if model_id is None
+        else [a for a in archived if a.model_id == model_id]
+    )
     today = pd.Timestamp(today)
     vintages = vintages[vintages["as_of"] <= today]
     # A registered measurement error is blank in the model's input, and no observation to score against.
@@ -143,6 +150,7 @@ def scored(
         )
         rows.insert(0, "reference_date", forecast.reference_date)
         rows.insert(1, "forecast_mode", issued.provenance["forecast_mode"])
+        rows.insert(3, "target_end_date", targets[rows["horizon"] - 1])
         rows.insert(
             rows.columns.get_loc("observation") + 1,
             "observation_as_of",
