@@ -1,0 +1,152 @@
+name: scout
+
+# The covariate scout (spec 6.5, #139): once a month it re-tests candidate covariates against the univariate model
+# and proposes, in an issue, any that pass the keep rule in pipeline/aseri/scout.toml. A human decides. It reads the
+# archive and never writes it, the site or the daily forecasts; its only write is its report, under docs/research/scout/.
+on:
+  schedule:
+    # The 3rd of each month, after the daily run of 07:00 has archived the day.
+    - cron: "0 9 3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scout
+  cancel-in-progress: false
+
+jobs:
+  # Runs the tests, the model and third-party code, so it gets no write rights. actions: read only takes the
+  # forecast cache the last run left.
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      passed: ${{ steps.run.outputs.passed }}
+      report: ${{ steps.run.outputs.report }}
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          working-directory: pipeline
+      - run: uv sync --locked
+      - name: Test, so a broken scout never reports
+        run: uv run pytest
+      - name: Read the pinned weights revision from the code
+        id: weights
+        run: echo "revision=$(grep -oP 'WEIGHTS_REVISION = "\K[0-9a-f]+' aseri/forecast.py)" >> "$GITHUB_OUTPUT"
+      # Restore only: daily.yml saves this cache every day, and this workflow writes nothing to it.
+      - name: Restore the Timestral weights (837 MB) cached by their pinned revision
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cache/huggingface/hub
+          key: timestral-209m-${{ steps.weights.outputs.revision }}
+      - name: Check out the archive, read-only
+        uses: actions/checkout@v7
+        with:
+          ref: archive
+          path: archive
+          persist-credentials: false
+      # An Actions cache unused for 7 days is evicted, so a monthly run keeps its forecasts as an artifact instead.
+      - name: Take the forecasts the last run cached
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/scout-cache"
+          id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=scout-cache&per_page=20" \
+            --jq '[.artifacts[] | select(.expired | not)][0].id // empty')
+          if [ -z "$id" ]; then
+            echo "::notice::No cached forecasts: this run makes them all"
+            exit 0
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" > "$RUNNER_TEMP/scout-cache.zip"
+          unzip -q "$RUNNER_TEMP/scout-cache.zip" -d "$RUNNER_TEMP/scout-cache"
+      - name: Re-test the candidates
+        id: run
+        # Under the job's limit, so a cold run that overruns still keeps what it made, below, for the next run.
+        timeout-minutes: 150
+        run: uv run python -m aseri.scout ../archive "$RUNNER_TEMP/scout-report" "$RUNNER_TEMP/scout-cache"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: scout-report
+          path: ${{ runner.temp }}/scout-report
+          if-no-files-found: error
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: scout-cache
+          path: ${{ runner.temp }}/scout-cache
+          if-no-files-found: ignore
+          retention-days: 90
+
+  # Holds the write rights, so it runs only git and shell: no Python packages, no model.
+  report:
+    needs: scout
+    # Only master's runs report: a manual run on another branch tests the scout but commits nothing.
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: scout-report
+          path: ${{ runner.temp }}/scout-report
+      - name: Commit the report, if it is one dated Markdown file
+        env:
+          REPORT: ${{ needs.scout.outputs.report }}
+        run: |
+          # The scout job runs third-party code, so anything but its one dated report stops the run.
+          files=$(cd "$RUNNER_TEMP/scout-report" && find . ! -type d -printf '%y %p\n')
+          if [ "$files" != "f ./$REPORT" ] || ! [[ "$REPORT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$ ]]; then
+            echo "::error::The scout's output is not one dated report: $files"
+            exit 1
+          fi
+          mkdir -p docs/research/scout
+          cp "$RUNNER_TEMP/scout-report/$REPORT" docs/research/scout/
+          git add "docs/research/scout/$REPORT"
+          if git diff --cached --quiet; then
+            echo "The report is committed already"
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "docs: covariate scout report ${REPORT%.md} (#139)"
+          git push origin HEAD:master
+
+  # Opens an issue when a candidate passes the keep rule. It runs only gh, no third-party code, so it alone gets issues: write.
+  propose:
+    needs: [scout, report]
+    if: ${{ !cancelled() && needs.report.result == 'success' && needs.scout.outputs.passed != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open an issue proposing what passed, unless one is open already
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PASSED: ${{ needs.scout.outputs.passed }}
+          REPORT: ${{ needs.scout.outputs.report }}
+          SERVER: ${{ github.server_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Covariate scout: $PASSED passed the keep rule"
+          # A candidate that passes once tends to pass next month on mostly the same origins: one open issue is enough.
+          if [ "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq length)" -gt 0 ]; then
+            echo "An issue is open already"
+            exit 0
+          fi
+          gh issue create --title "$title" --body "The monthly covariate scout found candidates that pass the keep rule in pipeline/aseri/scout.toml, given as series:candidate: $PASSED.
+
+          Report: $SERVER/$GH_REPO/blob/master/docs/research/scout/$REPORT
+          Run: $RUN_URL
+
+          This is a proposal for a human decision; the daily forecasts have not changed. Before enabling one, read the report's caveats: monthly runs re-test mostly the same origins, so confirm the gain on origins the candidate has not been tested on. Enabling it means naming it under [enabled] in scout.toml, which gives the series a model ID of its own (scout.model_id) and restarts its live record, and wiring the daily job to feed the covariate and archive under that ID, which it does not do yet."
