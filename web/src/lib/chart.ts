@@ -221,31 +221,45 @@ function ring(plot: Plot, x: number, y: number, color: string) {
 }
 
 // `path`, the last daily value then one value a day ahead: one of the model's paths, never a
-// median line, which reads as an average.
+// median line, which reads as an average. Without `marks`, the frame and the origin alone,
+// for the marks to scan in over.
 export function paintChart(
   plot: Plot,
   chart: Layout,
   forecast: Forecast,
   color: Colors,
-  path: number[]
+  path: number[],
+  marks = true
 ) {
   const { left, right, top, bottom, x, y, first, origin } = chart
   const { values, averages, quantiles, actuals } = forecast
   const xo = x(origin)
   const last = values[origin]
+  // What happened's last known day gets a hollow ring, whose middle nothing lights, but not
+  // where it would touch the origin's filled square, as on a phone with a single day known:
+  // the two would read as one blot over the line between them.
+  const end = actuals.findLastIndex((value) => value !== null)
+  const ex = x(origin + 1 + end)
+  const ey = y(actuals[end]!)
+  const ringed =
+    end >= 0 && (Math.abs(ex - xo) > 3 || Math.abs(ey - y(last)) > 3)
+  const lit: Plot = (px, py, c) => {
+    if (!ringed || px !== ex || py !== ey) plot(px, py, c)
+  }
 
   // The forecast zone gets a diagonal hatch, like the empty slots in the game.
   for (let py = top; py <= bottom; py++)
     for (let px = xo + 1; px <= right; px++)
-      if ((px + py) % 4 === 0) plot(px, py, color.frame)
+      if ((px + py) % 4 === 0) lit(px, py, color.frame)
   for (const tick of valueTicks(chart.lo, chart.hi))
-    for (let px = left; px <= right; px += 2) plot(px, y(tick), color.frame)
-  for (let py = top; py <= bottom; py += 2) plot(xo, py, color.origin)
-  for (let px = left; px <= right; px++) plot(px, bottom + 1, color.frame)
+    for (let px = left; px <= right; px += 2) lit(px, y(tick), color.frame)
+  for (let py = top; py <= bottom; py += 2) lit(xo, py, color.origin)
+  for (let px = left; px <= right; px++) lit(px, bottom + 1, color.frame)
+  if (!marks) return
 
   // The lines and marks, laid out first so that the bands can keep clear of them.
-  const marks: [number, number, string][] = []
-  const mark: Plot = (px, py, markColor) => void marks.push([px, py, markColor])
+  const laid: [number, number, string][] = []
+  const mark: Plot = (px, py, markColor) => void laid.push([px, py, markColor])
   polyline(
     mark,
     path.map((value, k): Point => [x(origin + k), y(value)]),
@@ -267,24 +281,29 @@ export function paintChart(
     color.daily,
     2
   )
-  // What happened after the forecast was made, in white over the bands,
-  // as dots 2 art pixels wide when the days are far enough apart. Once the forecast's last
-  // day is known, a hollow ring marks it instead: in one white, a filled square
-  // would read as the daily values' mark at the origin.
-  const dot = (right - left) / chart.span >= 3 ? 2 : 1
-  // A day with no value (the drones' day without a report) has no dot.
-  const end = actuals[chart.ahead - 1]
-  const ended = actuals.length === chart.ahead && end !== null
-  actuals.forEach((value, k) => {
-    if (value !== null && (!ended || k < chart.ahead - 1))
-      square(mark, x(origin + 1 + k), y(value), dot, color.real)
-  })
   square(mark, xo - 1, y(last) - 1, 3, color.daily)
-  if (ended) ring(mark, right - 1, y(end!) - 1, color.real)
+
+  // What happened after the forecast was made: the daily values' line carried on over the
+  // bands, at their weight, to compare line with line against the path. A day with no value
+  // (the drones' day without a report) breaks it; a day alone between two gaps is a dot, 2 art
+  // pixels wide where the days are far enough apart. The ring sets its end apart by shape
+  // from the path's unmarked end and the filled square at the origin.
+  if (end >= 0) {
+    const dot = (right - left) / chart.span >= 3 ? 2 : 1
+    const runs: Point[][] = [[[xo, y(last)]]]
+    actuals.forEach((value, k) => {
+      if (value === null) runs.push([])
+      else runs.at(-1)!.push([x(origin + 1 + k), y(value)])
+    })
+    for (const run of runs)
+      if (run.length === 1) square(mark, ...run[0], dot, color.daily)
+      else polyline(mark, run, color.daily, 2)
+    if (ringed) ring(mark, ex - 1, ey - 1, color.real)
+  }
   // An art pixel of the ground round every mark: over the 50% band, the gold path would
   // average 2.2:1, and beside each band pixel it is 1.35:1.
   const keyline = new Set(
-    marks.flatMap(([px, py]) =>
+    laid.flatMap(([px, py]) =>
       [-1, 0, 1].flatMap((dx) =>
         [-1, 0, 1].map((dy) => `${px + dx},${py + dy}`)
       )
@@ -306,8 +325,8 @@ export function paintChart(
           bayer[(py % 4) * 4 + (px % 4)] < (inner ? 8 : 4)) &&
         !keyline.has(`${px},${py}`)
       )
-        plot(px, py, color.band)
+        lit(px, py, color.band)
     }
   }
-  for (const [px, py, markColor] of marks) plot(px, py, markColor)
+  for (const [px, py, markColor] of laid) lit(px, py, markColor)
 }
