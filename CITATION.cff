@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use aseri's forecasts or code, please cite it as below, and cite the data sources too: each series' attribution is in the API catalog, https://exdsgift.github.io/aseri/api/v1/series.json."
+title: "aseri: daily probabilistic forecasts of geopolitical risk"
+type: software
+authors:
+  - family-names: Durante
+    given-names: Gabriele
+repository-code: "https://github.com/exdsgift/aseri"
+url: "https://exdsgift.github.io/aseri/"
+license: MIT
+abstract: "Daily probabilistic forecasts of nine public signals of geopolitical risk, made with Mistral AI's Timestral-209M on CPU in GitHub Actions, archived append-only in the Hubverse quantile format, scored against what happened, and published as a static page and a JSON API. The forecasts are CC BY-NC 4.0; the code is MIT."
+keywords:
+  - geopolitical risk
+  - probabilistic forecasting
+  - time series
+  - Hubverse
+  - Timestral
