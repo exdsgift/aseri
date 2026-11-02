@@ -189,7 +189,8 @@ export function App() {
                       !!panelBox.current?.contains(relatedTarget)
                 })
               }
-              className="scroll-mt-[calc(16px+env(safe-area-inset-top))] px-4 pb-20 md:pb-32"
+              // A margin, not padding, clear of the line where the hero's art ends: a pick still lands on the panel's top.
+              className="mt-12 scroll-mt-[calc(16px+env(safe-area-inset-top))] px-4 pb-20 md:mt-20 md:pb-32"
             >
               {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
                 or on the past forecast a square of the record opened. */}
