@@ -219,7 +219,7 @@ export function label(
 // art shows only faintly through, dissolving in a dither over 48 px at its edge. Only as
 // big as that, within the hero, and drawn at its `left` and `top`. Kept while the hero's
 // size and the ground hold: today's value arriving changes neither.
-const calm = remember((size: Size, ground: string) => {
+export const calm = remember((size: Size, ground: string) => {
   const { width, height } = size
   const box = calmAround(size.text)
   const edge = 48
