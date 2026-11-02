@@ -240,11 +240,11 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `series/{series_id}/actuals.json` | Latest vintage of the observed series (`date[]`, `observation[]`, flags) with `as_of` | Daily |
 | `series/{series_id}/scores.json` | Track record for one series, live and retrospective forecasts apart, never combined. Per horizon bucket (1-7, 8-28): 50% and 80% coverage with an exact CI, WIS and its components, the median's absolute error and its ratio to each baseline with a block-bootstrap CI and a verdict, and MASE. Also `n`, `min_n_to_display`, the primary baseline, the weekly forecasts of the record's squares, the method (WIS convention, L, block length, resamples, seed) and the latest-vintage sensitivity check (see 4.4) | Daily |
 | `scores.json` | Cross-series summary for the site's record: each series' file without its sensitivity check | Daily |
-| `bulk/forecasts-{YYYY}.parquet`, `bulk/forecasts-{YYYY}.csv.gz` | Every forecast of a year in collected-hub shape: `model_id` plus the Hubverse columns. The current year is rebuilt daily; past years are frozen | Current year daily |
-| `bulk/time-series.parquet`, `bulk/time-series-{source}.csv` | Hubverse time series with columns `target, target_end_date, observation, as_of`, stored as a change-log (see 3.3). The CSVs are split by upstream source so each carries one licence | Daily |
-| `bulk/oracle-output.csv` | `target, target_end_date, oracle_value` used for scoring [HV-TD] | Daily |
-| `bulk/scores.parquet` | One row per (model, series, reference date, horizon) with each metric and the `observation_as_of` used | Daily |
-| `bulk/datapackage.json` | Frictionless descriptor for all bulk files, with `licenses` and `sources` per resource [DP] | Daily |
+| `bulk/forecasts-{YYYY}.parquet`, `bulk/forecasts-{YYYY}.csv.gz` | Every forecast of the year's runs (by `forecast_date`), every model's, in collected-hub shape: `model_id` plus the Hubverse columns, the rows as the archive's rounds hold them. The current year is rebuilt daily; a closed year's rounds never change, so its files come out byte for byte the same | Current year daily |
+| `bulk/time-series.parquet`, `bulk/time-series-{source}.csv` | Hubverse time series with columns `target, target_end_date, observation, as_of`, stored as a change-log (see 3.3): the archive's deltas. The CSVs are split by upstream source (`gpr`, `portwatch`, `wikimedia`, `fred`, `sirens`, `losses`, the adapters' names) so each carries one licence | Daily |
+| `bulk/oracle-output.csv` | `target, target_end_date, oracle_value, as_of`: the value each scored target was scored against, and the vintage it came from [HV-TD] | Daily |
+| `bulk/scores.parquet` | One row per (model, series, reference date, horizon) with each metric, the target's date and the `observation_as_of` used; every model's, while `scores.json` counts the model in use alone | Daily |
+| `bulk/datapackage.json` | Frictionless Data Package v2 for all bulk files: each one's columns and types, primary key, `licenses` (with the attribution) and `sources` [DP]. The catalog links it as `links.bulk` | Daily |
 | `openapi.json`, `schemas/*.schema.json` | Contract: OpenAPI 3.1.1, and a JSON Schema per file type (`catalog`, `forecast`, `forecast-index`, `actuals`, `replay`, `scores`, `scoreboard`) with the shared `defs` | Per release |
 | `licenses/*.txt` | Full texts that must travel with the data: `CC-BY-NC-4.0` (aseri's), `CC-BY-4.0` (GPR), `CC0-1.0` (pageviews), `MIT-Klymenko`, `MIT-Ivaniuk`, and the terms of the IMF and the EIA, quoted with their links (`IMF-terms`, `EIA-public-domain`). Each licence object names its file in `text`, a path under `/api/v1/` | Rarely |
 | `model-metadata/{model_id}.yml` | Hubverse model metadata, one file per model: `aseri-timestral209m_c1.yml`, the model in use, whose `methods` say the bands are calibrated per series on a two-year backtest and link ADR 0001, and `aseri-timestral209m.yml`, the one before. Its `license` is `other`, since no hub's list holds CC BY-NC 4.0, and `methods_long` states the licence | Per model |
@@ -313,7 +313,7 @@ Each forecast file and the per-run manifest on the archive branch carry this blo
 
 **Schemas (#135):**
 - One JSON Schema (Draft 2020-12) per file type, in `api/schemas/` at the repo root: `catalog` (`series.json`), `forecast` (`latest.json` and the dated files), `forecast-index`, `actuals`, `replay`, `scores` (a series') and `scoreboard` (the root `scores.json`), plus a shared `defs` for dates, IDs, levels and licence. Each schema's `$id` is its public URL, `https://exdsgift.github.io/aseri/api/v1/schemas/{name}.schema.json`.
-- `api/openapi.json` (OpenAPI 3.1.1, `jsonSchemaDialect` 2020-12) references these schemas by relative `$ref`. The 3.1 Schema Object is a superset of 2020-12, so one set of files serves both [OAS]. Every file served under `/api/v1/` has a path in it, the licence texts and the model metadata included; the bulk files join it with #136.
+- `api/openapi.json` (OpenAPI 3.1.1, `jsonSchemaDialect` 2020-12) references these schemas by relative `$ref`. The 3.1 Schema Object is a superset of 2020-12, so one set of files serves both [OAS]. Every file served under `/api/v1/` has a path in it, the licence texts, the model metadata and the bulk files included (#136).
 - OpenAPI 3.2.0 exists (19 Sept 2025) [OAS32]. Stay on 3.1.1 as asked, because tool support is wider. A test validates `openapi.json` against the OpenAPI 3.1 schema of 2022-10-07 and every schema against the 2020-12 meta-schema, with `jsonschema` alone rather than `openapi-spec-validator`.
 - Published schemas allow additional properties, so additive changes do not break clients that validate. The gate validates with every object closed instead, so every emitted key must be declared.
 - The daily run copies `api/` into the site's `api/v1/` (`publish.publish_contract`).
@@ -373,6 +373,18 @@ Caveats:
 - Ten years of archive: about 100 to 140 MB, well under the 1 GB recommendation [GH-LF].
 
 **Site:** about 12 MB a year of dated JSON, plus 7 MB of Parquet, 10 MB of CSV.gz and a few MB of files that are rewritten rather than accumulated. That is **about 30 MB a year**, against the 1 GB site limit [GH-LIM]. If it is ever needed, drop dated JSON for closed years from the site and keep only the yearly bulk files.
+
+**Corrected (#136), measured on the real archive** of 2026-11-02 (four runs, 1,057 forecasts, 381,612 rows of the model `aseri-timestral209m`), values to four decimals as archived:
+
+| Artefact | Measured | Per year (1.15 million rows, about 3,170 forecasts) |
+|---|---|---|
+| `forecasts-{YYYY}.parquet`, zstd level 9 | 1.70 MB, 4.45 bytes a row (2.29 MB at the default level) | about 5.1 MB |
+| `forecasts-{YYYY}.csv.gz`, gzip level 9 | 2.69 MB, 7.04 bytes a row | about 8.1 MB |
+| Dated JSON files | 5.9 MB, 5.6 KB a file | about 17.7 MB |
+| `scores.parquet` (every year in one file) | 0.92 MB, 14,903 rows | about 3.4 MB more |
+| `time-series.parquet` and the six CSVs | 0.26 MB and 1.85 MB, 43,376 rows | well under 1 MB more |
+
+That is **about 35 MB a year**: the bulk files keep within their estimate, and the dated JSON files run about 6 MB over theirs, since each carries its provenance and attribution: 5.6 KB a file against the 3.8 KB estimated. The 1 GB limit is about 28 years away. The plan to drop the dated JSON of closed years, if it is ever needed, is in the spec, 6.7.
 
 **Rules that prevent another 2.2 GB repository:**
 1. **`main` holds code, schemas and docs only.** The site is never committed; it is a Pages artifact built each run [GH-WF][GH-SRC].
@@ -696,45 +708,51 @@ Arrays and level sets are abridged. Real files carry all 21 levels and the full 
 
 `scores.json` at the root lists every series in this shape, without `latest_vintage`.
 
-`bulk/datapackage.json`, abridged:
+`bulk/datapackage.json`, abridged, as `pipeline/aseri/bulk.py` writes it (#136):
 
 ```json
 {
   "$schema": "https://datapackage.org/profiles/2.0/datapackage.json",
-  "name": "aseri-forecasts",
-  "title": "aseri daily probabilistic forecasts",
-  "version": "1.0.0",
-  "created": "2026-10-29T06:14:02Z",
-  "licenses": [{"name": "CC-BY-NC-4.0", "path": "https://creativecommons.org/licenses/by-nc/4.0/",
-                "title": "aseri-authored forecasts and scores; upstream terms apply per series (see series.json)"}],
+  "name": "aseri",
+  "title": "aseri: daily probabilistic forecasts of nine public risk signals",
+  "homepage": "https://exdsgift.github.io/aseri/api/",
+  "created": "2026-11-02T07:02:11Z",
   "resources": [
-    {"name": "forecasts-2026", "path": "forecasts-2026.csv.gz", "format": "csv", "compression": "gz",
+    {"name": "forecasts-2026-csv-gz", "path": "forecasts-2026.csv.gz", "type": "table",
+     "format": "csv", "mediatype": "text/csv", "encoding": "utf-8", "compression": "gz",
      "schema": {"fields": [
         {"name": "model_id", "type": "string"},
         {"name": "forecast_date", "type": "date"},
         {"name": "target", "type": "string"},
         {"name": "reference_date", "type": "date"},
-        {"name": "horizon", "type": "integer", "constraints": {"minimum": 1}},
+        {"name": "horizon", "type": "integer"},
         {"name": "target_end_date", "type": "date"},
-        {"name": "output_type", "type": "string", "constraints": {"enum": ["quantile"]}},
+        {"name": "output_type", "type": "string"},
         {"name": "output_type_id", "type": "number"},
         {"name": "value", "type": "number"}],
-      "primaryKey": ["model_id", "forecast_date", "target", "horizon", "output_type_id"]}},
-    {"name": "time-series-portwatch", "path": "time-series-portwatch.csv", "format": "csv",
-     "licenses": [{"name": "IMF-terms", "path": "https://www.imf.org/en/About/copyright-and-terms"}],
-     "sources": [{"title": "UN Global Platform; IMF PortWatch", "path": "https://portwatch.imf.org/"}]}
+      "primaryKey": ["model_id", "target", "reference_date", "horizon", "output_type_id"]},
+     "licenses": [{"title": "CC BY-NC 4.0", "path": "https://creativecommons.org/licenses/by-nc/4.0/",
+                   "attribution": "Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI)."}],
+     "sources": [{"title": "IMF PortWatch, Daily Chokepoints Data", "path": "https://portwatch.imf.org/"}, "..."]},
+    {"name": "time-series-portwatch-csv", "path": "time-series-portwatch.csv", "type": "table", "format": "csv", "...": "...",
+     "licenses": [{"title": "IMF Copyright and Usage", "path": "https://www.imf.org/en/About/copyright-and-terms",
+                   "attribution": "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org)."}],
+     "sources": [{"title": "IMF PortWatch, Daily Chokepoints Data", "path": "https://portwatch.imf.org/"}]}
   ]
 }
 ```
 
-`compression` is not in the profile, so it would be a custom property. Whether Frictionless tooling reads `.csv.gz` directly is **unverified**.
+- **No package-level licence.** Every resource names its own, and a package licence would read as covering the time series too, which are under their sources' terms.
+- **Licences carry no Open Definition `name`,** since the IMF's terms have none: `title` and `path` instead, which the profile allows, plus the catalog's `attribution` as an extra property.
+- **The primary key is (model, series, reference date, step, level),** not the run day: a run can forecast many reference dates (the backfill), and `(model_id, series_id, reference_date)` identifies a forecast.
+- `compression` is not in the profile, so it is a custom property. Whether Frictionless tooling reads `.csv.gz` directly is **unverified**. A test validates the file against the v2 profile, vendored in `pipeline/tests/fixtures/`; `frictionless validate` on the data is not run.
 
 ## Appendix C: OpenAPI and the schemas
 
 The research's skeleton is now the real document, `api/openapi.json` (#135): OpenAPI 3.1.1 with `jsonSchemaDialect` 2020-12, one GET path per file type, each 200 response referencing its schema in `api/schemas/` by relative `$ref`, and a shared `NotFound` response for Pages' HTML 404. It differs from the skeleton in four ways:
 - `series_id` gives the nine IDs as `examples`, not an `enum`, so a new series stays an additive change;
 - the contract's own files have paths too (`openapi.json`, `schemas/{name}.schema.json`, `licenses/{name}.txt`, `model-metadata/{model_id}.yml`), so every served file has one;
-- the bulk files wait for #136;
+- the bulk files have paths too (#136), with their media types, and `datapackage.json` a schema of its own, so the gate checks it like any JSON file, then each bulk file against it;
 - `info.license` is CC BY-NC 4.0.
 
 `format` is an annotation by default in 2020-12, so the gate turns on format checking (`date` from `jsonschema`, `uri` from `rfc3986-validator`, `date-time` its own, UTC to the second). Equal array lengths, monotone quantiles and step dates are checked in code (section 3.5).

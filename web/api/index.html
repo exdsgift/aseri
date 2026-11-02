@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta
       name="description"
-      content="aseri's daily forecasts of nine public risk signals as static JSON files: the catalog, each forecast at 21 quantile levels, the real values and the track record, with OpenAPI, JSON Schemas and licences."
+      content="aseri's daily forecasts of nine public risk signals as static JSON files: the catalog, each forecast at 21 quantile levels, the real values and the track record, with OpenAPI, JSON Schemas and licences, and all of it in bulk as Parquet and CSV."
     />
     <link rel="stylesheet" href="/src/index.css" />
     <script type="application/ld+json">
@@ -21,7 +21,7 @@
         "@context": "https://schema.org",
         "@type": "Dataset",
         "name": "aseri: daily probabilistic forecasts of nine public risk signals",
-        "description": "Daily quantile forecasts from Timestral-209M of nine public series: the Caldara and Iacoviello geopolitical risk index, Wikipedia views of World War III, the Brent oil price, ship transits through the Suez Canal, the Strait of Hormuz, Bab el-Mandeb and the Taiwan Strait, hours of air-raid alerts in Ukraine and the drones Ukraine's General Staff claims downed. Each forecast gives 21 quantile levels for each day ahead, in Hubverse model-output semantics, with the real values and a track record scored against naive baselines. Static JSON files, rebuilt daily.",
+        "description": "Daily quantile forecasts from Timestral-209M of nine public series: the Caldara and Iacoviello geopolitical risk index, Wikipedia views of World War III, the Brent oil price, ship transits through the Suez Canal, the Strait of Hormuz, Bab el-Mandeb and the Taiwan Strait, hours of air-raid alerts in Ukraine and the drones Ukraine's General Staff claims downed. Each forecast gives 21 quantile levels for each day ahead, in Hubverse model-output semantics, with the real values and a track record scored against naive baselines. Static JSON files, rebuilt daily, and every forecast, real value and score in bulk as Parquet and CSV.",
         "url": "https://exdsgift.github.io/aseri/api/",
         "sameAs": "https://github.com/exdsgift/aseri",
         "license": "https://creativecommons.org/licenses/by-nc/4.0/",
@@ -73,6 +73,12 @@
             "name": "OpenAPI description",
             "encodingFormat": "application/json",
             "contentUrl": "https://exdsgift.github.io/aseri/api/v1/openapi.json"
+          },
+          {
+            "@type": "DataDownload",
+            "name": "Bulk files, a Frictionless data package: every forecast, real value and score in Parquet and CSV",
+            "encodingFormat": "application/json",
+            "contentUrl": "https://exdsgift.github.io/aseri/api/v1/bulk/datapackage.json"
           }
         ]
       }
@@ -213,6 +219,23 @@
                 href="https://github.com/exdsgift/aseri/blob/master/docs/adr/0001-baselines-and-calibration-before-the-live-record.md"
                 >ADR 0001</a
               >.
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <a href="v1/bulk/datapackage.json"
+                ><code>bulk/<wbr />datapackage.json</code></a
+              >
+            </dt>
+            <dd class="text-muted-foreground">
+              Everything in bulk, as Hubverse tables: each year's forecasts of
+              every model, <code>forecasts-<wbr />{year}.parquet</code> and
+              <code>.csv.gz</code>; every real value as first seen,
+              <code>time-<wbr />series.parquet</code>, and one CSV per source so
+              that each file has one licence; the value each day was scored
+              against, <code>oracle-<wbr />output.csv</code>; and every score,
+              <code>scores.parquet</code>. The data package gives each file's
+              columns, licences and sources. A closed year never changes.
             </dd>
           </div>
         </dl>
