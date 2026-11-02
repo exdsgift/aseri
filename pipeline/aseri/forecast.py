@@ -13,8 +13,9 @@ from timestral import TimestralForecaster
 
 from aseri.series import Series
 
-# A change to any of these is a different model and needs a new MODEL_ID, so track records never mix.
-MODEL_ID = "aseri-timestral209m"
+# A change to any of these, or to OFFSETS, is a different model and needs a new MODEL_ID, so track records never mix.
+# Hubverse's team_abbr-model_abbr, so no hyphen in the model's part: "_cqr1" is the calibration layer of ADR 0001.
+MODEL_ID = "aseri-timestral209m_cqr1"
 WEIGHTS = "mistralai/Timestral-209M"
 WEIGHTS_REVISION = "9874d252ab0aae16f7f7c999f98f98d6ad7d8365"
 # The pin lives in pyproject.toml; this reads back the commit actually installed.

@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 from datetime import UTC, date, datetime
 
 import numpy as np
@@ -64,12 +65,12 @@ ATTRIBUTION = (
     'Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", '
     "American Economic Review 112(4), 1194-1225. "
     "Data: https://www.matteoiacoviello.com/gpr.htm "
-    "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)."
+    "Forecasts: aseri (model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)."
 )
 FORECAST_LICENSE = {
     "name": "CC BY-NC 4.0",
     "url": "https://creativecommons.org/licenses/by-nc/4.0/",
-    "attribution": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI).",
+    "attribution": "Forecasts: aseri (model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI).",
     "note": "Upstream terms still apply to the underlying data: see each series' license.",
     "text": "licenses/CC-BY-NC-4.0.txt",
 }
@@ -85,7 +86,7 @@ def archived(reference_date, forecast_mode, forecast_date="2026-10-29", dates=No
             # As the archive reads them back: already rounded, in float64.
             quantiles=np.array([QUANTILES[str(level)] for level in LEVELS]).T,
         ),
-        model_id="aseri-timestral209m",
+        model_id="aseri-timestral209m_cqr1",
         forecast_date=forecast_date,
         provenance=PROVENANCE | {"forecast_mode": forecast_mode},
         target_end_dates=dates
@@ -186,7 +187,7 @@ def test_a_forecast_keys_each_quantile_level_without_float_noise(api_dir):
 def test_a_forecast_carries_the_provenance_of_the_run_that_issued_it(api_dir):
     forecast = dated(api_dir, "2026-10-26")
 
-    assert forecast["model_id"] == "aseri-timestral209m"
+    assert forecast["model_id"] == "aseri-timestral209m_cqr1"
     assert forecast["provenance"] == PROVENANCE | {"forecast_mode": "live"}
     # Issued once, so republishing it never changes it.
     assert forecast["generated_at"] == "2026-10-29T07:03:12Z"
@@ -251,7 +252,7 @@ def test_replay_holds_the_forecasts_of_the_120_days_to_the_newest_at_the_page_le
     assert replay == {
         "schema_version": "1.0.0",
         "series_id": "gpr_daily",
-        "model_id": "aseri-timestral209m",
+        "model_id": "aseri-timestral209m_cqr1",
         "horizon": [1, 2],
         "quantile_levels": list(shown),
         "forecasts": [
@@ -306,6 +307,37 @@ def test_the_index_lists_every_forecast_oldest_first(api_dir):
     }
 
 
+def test_a_day_a_new_model_forecast_again_is_published_once_as_the_new_model_s(
+    tmp_path,
+):
+    # As the archive reads back a model change: the model before's forecasts, then the new model's
+    # forecasts of the same days, its replay window, from a later run.
+    before = [
+        replace(archived(day, mode), model_id="aseri-timestral209m")
+        for day, mode in (("2026-10-24", "retrospective"), ("2026-10-25", "live"))
+    ]
+    again = replace(
+        archived("2026-10-25", "retrospective", forecast_date="2026-10-31"),
+        model_id="aseri-timestral209m_cqr1",
+    )
+    publish_gpr(tmp_path, days_to("2026-10-27", range(200)), [*before, again])
+
+    index = read(tmp_path / "series" / "gpr_daily" / "forecasts.json")["forecasts"]
+    assert [(f["reference_date"], f["forecast_date"]) for f in index] == [
+        ("2026-10-24", "2026-10-29"),
+        ("2026-10-25", "2026-10-31"),
+    ]
+    assert dated(tmp_path, "2026-10-24")["model_id"] == "aseri-timestral209m"
+    assert dated(tmp_path, "2026-10-25")["model_id"] == "aseri-timestral209m_cqr1"
+    # Once each; a run forecasts the whole window again, so the replay holds one model (test_cli).
+    replay = read(tmp_path / "series" / "gpr_daily" / "replay.json")
+    assert replay["model_id"] == "aseri-timestral209m_cqr1"
+    assert [f["reference_date"] for f in replay["forecasts"]] == [
+        "2026-10-24",
+        "2026-10-25",
+    ]
+
+
 def test_actuals_list_the_observed_values_by_date_without_float_noise(tmp_path):
     publish_gpr(
         tmp_path,
@@ -345,7 +377,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
     assert catalog["schema_version"] == "1.0.0"
     assert catalog["generated_at"] == "2026-10-30T07:01:05Z"
     assert catalog["model"] == {
-        "model_id": "aseri-timestral209m",
+        "model_id": "aseri-timestral209m_cqr1",
         "hf_id": "mistralai/Timestral-209M",
         "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
     }
@@ -407,6 +439,7 @@ def test_the_contract_is_published_next_to_the_files_it_describes(tmp_path):
         "schemas/forecast.schema.json",
         "licenses/CC-BY-NC-4.0.txt",
         "model-metadata/aseri-timestral209m.yml",
+        "model-metadata/aseri-timestral209m_cqr1.yml",
     ):
         assert (tmp_path / name).read_bytes() == (CONTRACT / name).read_bytes()
 
@@ -517,7 +550,7 @@ def test_each_series_has_its_track_record_and_the_page_one_file_of_them_all(
     record = read(tmp_path / "series" / "gpr_daily" / "scores.json")
     assert {k: record[k] for k in RECORD} == RECORD
     assert record["schema_version"] == "1.0.0"
-    assert record["model_id"] == "aseri-timestral209m"
+    assert record["model_id"] == "aseri-timestral209m_cqr1"
     assert record["method"]["bootstrap"] == {
         "method": record["method"]["bootstrap"]["method"],
         "block_length": {"1-7": 7, "8-28": 28},

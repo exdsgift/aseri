@@ -60,7 +60,7 @@ def publish(
 ) -> dict:
     """Write every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
 
-    `archived` is oldest reference date first, as `archive.read` returns it. `first_seen` holds each
+    `archived` is oldest reference date first, then oldest run, as `archive.read` returns it. `first_seen` holds each
     day as first observed, which the day-to-day tie is scored against. A series the run skipped
     has a `stale_since` date; a `note` says why its latest forecast starts before its last observation.
     """
@@ -74,6 +74,9 @@ def publish(
     }
     # A day with no value (the drones' day without a report) is left out, as the archive leaves it.
     observed = observed.dropna()
+    # One forecast a day, the newest run's: a new MODEL_ID forecasts the replay window again, and its
+    # forecasts take those days' paths. The model before's stay in the archive under its own ID.
+    archived = list({a.forecast.reference_date: a for a in archived}.values())
     for forecast in archived:
         _write(
             api_dir / "series" / series.id / _dated(forecast),

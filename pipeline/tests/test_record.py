@@ -113,6 +113,37 @@ def test_a_record_with_nothing_due_yet_summarises_as_empty(tmp_path):
     assert record.calibration(SUEZ, rows) == {}
 
 
+def test_a_new_model_restarts_the_record_and_never_scores_the_model_before(
+    tmp_path, monkeypatch
+):
+    # The launch, under the model before: a backfilled forecast and a live one, both due by Nov 8.
+    with monkeypatch.context() as before:
+        before.setattr(archive, "MODEL_ID", "aseri-timestral209m")
+        before.setattr(archive, "ROUNDS", Path("model-output", "aseri-timestral209m"))
+        run(
+            tmp_path,
+            [around("2026-10-01", 42.0), around("2026-10-25", 42.0)],
+            ships("2026-10-25"),
+            date(2026, 10, 26),
+        )
+    run(tmp_path, [], ships("2026-10-30"), date(2026, 10, 31))
+
+    # The model in the code has no forecast yet: an empty record, as on a launch day.
+    rows = scored(tmp_path, "2026-11-08")
+    summary = record.summary(SUEZ, rows, scored(tmp_path, "2026-11-08", latest=True))
+    assert rows.empty
+    assert summary["live"]["n"] == summary["retrospective"]["n"] == 0
+
+    # Its first forecast, live: the only one its record scores.
+    run(tmp_path, [around("2026-10-31", 42.0)], ships("2026-10-31"), date(2026, 11, 1))
+    run(tmp_path, [], ships("2026-11-10"), date(2026, 11, 11))
+    rows = scored(tmp_path, "2026-11-20")
+    assert rows["reference_date"].unique().tolist() == [pd.Timestamp("2026-10-31")]
+    assert (rows["forecast_mode"] == "live").all()
+    # Nov 1 to 6 are due: 14 days to settle.
+    assert rows["horizon"].tolist() == list(range(1, 7))
+
+
 def test_a_rerun_on_a_later_day_scores_every_target_it_had_scored_byte_for_byte(
     first_run,
 ):

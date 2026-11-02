@@ -129,7 +129,7 @@
       "get": {
         "operationId": "getModelMetadata",
         "summary": "The model's Hubverse model-metadata file.",
-        "parameters": [{"name": "model_id", "in": "path", "required": true, "schema": {"const": "aseri-timestral209m"}}],
+        "parameters": [{"name": "model_id", "in": "path", "required": true, "schema": {"enum": ["aseri-timestral209m", "aseri-timestral209m_cqr1"]}}],
         "responses": {
           "200": {"description": "Hubverse model metadata, YAML.", "content": {"text/yaml": {}}},
           "404": {"$ref": "#/components/responses/NotFound"}

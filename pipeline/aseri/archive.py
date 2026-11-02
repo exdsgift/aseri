@@ -39,7 +39,7 @@ class Archived:
 
 
 def read(archive_dir: Path, series_id: str) -> list[Archived]:
-    """Every archived forecast of `series_id`, oldest reference date first."""
+    """Every archived forecast of `series_id`, of every model, oldest reference date first, then oldest run."""
     archived = []
     for path in sorted((archive_dir / RUNS).glob("*.json")):
         run = json.loads(path.read_text(encoding="utf-8"))

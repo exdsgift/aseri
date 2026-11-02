@@ -7,7 +7,7 @@ import pandas as pd
 
 from aseri import archive
 from aseri.archive import Archived
-from aseri.forecast import make_context, measurement_errors
+from aseri.forecast import MODEL_ID, make_context, measurement_errors
 from aseri.scoring import (
     BUCKETS,
     REPS,
@@ -72,10 +72,12 @@ def scored(
     that day. The archive is append-only, so that value, and the score, are the same on every later
     run. `latest` scores the same targets against today's vintage instead: the sensitivity check of a
     series that revises. `vintages` are the archive's, as `archive.vintages` reads them.
-    shortcut: every archived forecast is scored as one model's; split by `model_id` when MODEL_ID changes.
+    A new MODEL_ID restarts the record: only the forecasts of the model in the code are scored.
     shortcut: every run rescores the whole archive, about 45 s for the launch backfill and growing with it;
     keep the scores of past runs outside the archive if a run ever spends minutes here.
     """
+    # Until the model has a forecast, the newest of the model before keeps the empty table's columns.
+    archived = [a for a in archived if a.model_id == MODEL_ID] or archived[-1:]
     today = pd.Timestamp(today)
     vintages = vintages[vintages["as_of"] <= today]
     # A registered measurement error is blank in the model's input, and no observation to score against.
@@ -103,10 +105,12 @@ def scored(
                 observations[target] = known_on(vintages, target, today)
             else:
                 observations[target] = settled(vintages, target, series.score_lag)
-        # The steps no price has reached yet are not due.
+        # The steps no price has reached yet are not due, nor any of the model before's.
         seen = [observations[target] for target in targets] + [None] * (
             steps - len(targets)
         )
+        if issued.model_id != MODEL_ID:
+            seen = [None] * steps
         # Nothing due yet: skipped, which saves most of the work, but for one empty table that keeps the columns.
         if not any(seen) and (frames or issued is not archived[-1]):
             continue
