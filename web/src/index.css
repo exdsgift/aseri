@@ -7,6 +7,9 @@
 
 /* Tests hold no classes for the page, and their words would become utilities. */
 @source not "./**/*.test.*";
+/* Nor do the brand images' page and script (branding/README.md). */
+@source not "../brand";
+@source not "../scripts/brand.mjs";
 
 /* Only the two chunks of DotGothic16 that hold 焦, り, あ and せ: the full set adds
    31 KB of gzipped CSS. Chunk numbers belong to the pinned 5.3.1 release. */
