@@ -78,40 +78,39 @@
       }
     </script>
   </head>
-  <body>
+  <!-- Documentation reads in DotGothic16 at its 16 px grid; only the Press Start 2P
+       headings keep the drop, and code sits on the darker surface. -->
+  <body class="[&_:not(h1):not(h2)]:text-shadow-none">
     <main
-      class="mx-auto flex max-w-[72ch] flex-col gap-14 px-4 pt-24 pb-14 text-[12px]/[20px] [&_a]:underline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-2 [&_a]:focus-visible:outline-primary [&_a:hover]:text-primary [&_code]:font-sans [&_code]:wrap-anywhere [&_code]:text-primary"
+      class="mx-auto flex max-w-[72ch] flex-col gap-14 px-4 pt-24 pb-14 font-wordmark text-[16px]/[28px] [&_:is(section>p,dd,li)_code]:bg-accent [&_:is(section>p,dd,li)_code]:box-decoration-clone [&_:is(section>p,dd,li)_code]:px-1 [&_a]:underline [&_a]:underline-offset-4 [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-2 [&_a]:focus-visible:outline-primary [&_a:hover]:text-primary [&_code]:font-wordmark [&_code]:wrap-anywhere [&_code]:text-primary"
     >
       <header class="flex flex-col items-center gap-6 text-center">
-        <p class="text-[8px]/[12px] text-muted-foreground uppercase">
+        <p class="text-muted-foreground">
           <a href="../">aseri</a> · for programs and people
         </p>
-        <h1
-          class="font-display text-[96px]/none tracking-[0.04em] text-primary"
-        >
-          API
-        </h1>
+        <h1 class="font-sans text-[48px]/none text-primary">API</h1>
         <p class="text-balance">
           Every forecast on this site, as files: nine daily series, a forecast
           of each from its newest data, the real values, and how past forecasts
           did. Static JSON, read-only, rebuilt each day at about 07:00 UTC.
         </p>
-        <p class="flex flex-col gap-2 border-2 border-border px-3 py-2 chip">
-          <span class="text-[8px]/[12px] text-muted-foreground uppercase"
-            >Base URL</span
+        <p
+          class="flex max-w-full flex-col gap-2 border-2 border-border bg-accent px-3 py-2 chip"
+        >
+          <span class="text-muted-foreground">Base URL</span>
+          <code
+            >https://<wbr />exdsgift.github.io/<wbr />aseri/<wbr />api/<wbr />v1/</code
           >
-          <code>https://exdsgift.github.io/aseri/api/v1/</code>
         </p>
       </header>
 
       <section aria-labelledby="files" class="flex flex-col gap-6">
-        <h2
-          id="files"
-          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
-        >
+        <h2 id="files" class="font-sans text-[24px]/[32px] text-secondary">
           Files
         </h2>
-        <dl class="flex flex-col gap-4">
+        <dl
+          class="flex flex-col divide-y border-2 border-border bg-muted chip [&>div]:px-4 [&>div]:py-3"
+        >
           <div>
             <dt>
               <a href="v1/series.json"><code>series.json</code></a>
@@ -123,41 +122,53 @@
             </dd>
           </div>
           <div>
-            <dt><code>series/{series_id}/latest.json</code></dt>
+            <dt>
+              <code>series/<wbr />{series_id}/<wbr />latest.json</code>
+            </dt>
             <dd class="text-muted-foreground">
               The newest forecast, a copy of its dated file.
             </dd>
           </div>
           <div>
-            <dt><code>series/{series_id}/forecasts.json</code></dt>
+            <dt>
+              <code>series/<wbr />{series_id}/<wbr />forecasts.json</code>
+            </dt>
             <dd class="text-muted-foreground">
               Every forecast issued, oldest first, with its file.
             </dd>
           </div>
           <div>
             <dt>
-              <code>series/{series_id}/forecasts/{reference_date}.json</code>
+              <code
+                >series/<wbr />{series_id}/<wbr />forecasts/<wbr />{reference_date}.json</code
+              >
             </dt>
             <dd class="text-muted-foreground">
               One forecast. Written once, never changed.
             </dd>
           </div>
           <div>
-            <dt><code>series/{series_id}/actuals.json</code></dt>
+            <dt>
+              <code>series/<wbr />{series_id}/<wbr />actuals.json</code>
+            </dt>
             <dd class="text-muted-foreground">
               The real values of the last 400 days, as known on its
               <code>as_of</code> day.
             </dd>
           </div>
           <div>
-            <dt><code>series/{series_id}/replay.json</code></dt>
+            <dt>
+              <code>series/<wbr />{series_id}/<wbr />replay.json</code>
+            </dt>
             <dd class="text-muted-foreground">
               The forecasts of the last 120 days at seven levels, rounded as
               this site writes them.
             </dd>
           </div>
           <div>
-            <dt><code>series/{series_id}/scores.json</code></dt>
+            <dt>
+              <code>series/<wbr />{series_id}/<wbr />scores.json</code>
+            </dt>
             <dd class="text-muted-foreground">
               The track record: live forecasts and the backtest apart, never
               combined.
@@ -175,20 +186,24 @@
             <dt>
               <a href="v1/openapi.json"><code>openapi.json</code></a
               >,
-              <code>schemas/{name}.schema.json</code>
+              <code>schemas/<wbr />{name}.schema.json</code>
             </dt>
             <dd class="text-muted-foreground">
               The contract: OpenAPI 3.1 and JSON Schema 2020-12.
             </dd>
           </div>
           <div>
-            <dt><code>licenses/{name}.txt</code></dt>
+            <dt>
+              <code>licenses/<wbr />{name}.txt</code>
+            </dt>
             <dd class="text-muted-foreground">The full licence texts.</dd>
           </div>
           <div>
             <dt>
               <a href="v1/model-metadata/aseri-timestral209m_c1.yml"
-                ><code>model-metadata/aseri-timestral209m_c1.yml</code></a
+                ><code
+                  >model-metadata/<wbr />aseri-timestral209m_c1.yml</code
+                ></a
               >
             </dt>
             <dd class="text-muted-foreground">
@@ -213,10 +228,7 @@
       </section>
 
       <section aria-labelledby="forecast" class="flex flex-col gap-6">
-        <h2
-          id="forecast"
-          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
-        >
+        <h2 id="forecast" class="font-sans text-[24px]/[32px] text-secondary">
           A forecast
         </h2>
         <p>
@@ -240,17 +252,14 @@
           <code>"0.5"</code> splits the forecast in half.
         </p>
         <pre
-          class="overflow-x-auto border-2 border-border px-3 py-2 text-[8px]/[14px] chip"
+          class="overflow-x-auto border-2 border-border bg-accent p-4 text-[16px]/[24px] chip"
         ><code>fetch("https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/latest.json")
   .then((response) =&gt; response.json())
   .then((forecast) =&gt; forecast.quantiles["0.9"])</code></pre>
       </section>
 
       <section aria-labelledby="contract" class="flex flex-col gap-6">
-        <h2
-          id="contract"
-          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
-        >
+        <h2 id="contract" class="font-sans text-[24px]/[32px] text-secondary">
           Contract
         </h2>
         <p>
@@ -274,10 +283,7 @@
       </section>
 
       <section aria-labelledby="use" class="flex flex-col gap-6">
-        <h2
-          id="use"
-          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
-        >
+        <h2 id="use" class="font-sans text-[24px]/[32px] text-secondary">
           Use
         </h2>
         <ul class="flex list-['-_'] flex-col gap-3 pl-4">
@@ -303,10 +309,7 @@
       </section>
 
       <section aria-labelledby="licences" class="flex flex-col gap-6">
-        <h2
-          id="licences"
-          class="font-display text-[48px]/none tracking-[0.04em] text-secondary"
-        >
+        <h2 id="licences" class="font-sans text-[24px]/[32px] text-secondary">
           Licences
         </h2>
         <p>
@@ -363,7 +366,7 @@
       </section>
     </main>
     <footer
-      class="mx-auto max-w-[72ch] px-4 pb-14 text-center text-[8px]/[14px] text-muted-foreground uppercase"
+      class="mx-auto max-w-[72ch] px-4 pb-14 text-center font-wordmark text-[16px]/[28px] text-muted-foreground"
     >
       <p>
         <a
