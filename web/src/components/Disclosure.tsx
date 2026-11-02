@@ -1,8 +1,8 @@
 import { useId, useState, type ReactNode } from "react"
 
-// Flat blocks that turn white on hover, as the game's buttons do.
+// Flat blocks that turn white on hover, as the game's buttons do, a finger's size to tap.
 export const control =
-  "cursor-pointer bg-secondary px-2 py-1.5 text-background uppercase hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160"
+  "hit cursor-pointer bg-secondary px-2 py-1.5 text-background uppercase hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-safe:transition-colors motion-safe:duration-160"
 
 // The second layer, one labelled tap away: method, details and sources, out of the default view
 // until asked for. A button that says whether it is open, and the part it shows or hides. Open,
