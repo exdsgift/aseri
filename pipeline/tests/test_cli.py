@@ -1445,6 +1445,80 @@ def test_a_forecast_out_of_its_bounds_holds_only_its_own_series_and_names_it_for
     assert gate.contract(tmp_path / "day2") == []
 
 
+class LeapsFrom(StubModel):
+    """The stub, except on the one context of `days` values, from where its forecast leaps far above GPR's year."""
+
+    def __init__(self, days):
+        super().__init__()
+        self.days = days
+
+    def forecast(self, context, prediction_length):
+        result = super().forecast(context, prediction_length)
+        if len(context) == self.days:
+            result.quantiles += 10_000
+        return result
+
+
+def bounds_run(tmp_path, monkeypatch, days):
+    """A first run on the recorded GPR file, 60 days to 2026-10-26, with the forecast from its `days`-th day out of bounds."""
+    monkeypatch.setattr(cli, "load_model", lambda: LeapsFrom(days))
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "api",
+        tmp_path / "archive",
+    )
+    manifest = read(tmp_path / "archive" / "runs" / "2026-10-27.json")
+    issued = {f["reference_date"]: f["forecast_mode"] for f in manifest["forecasts"]}
+    return issued, output.read_text(encoding="utf-8")
+
+
+def test_a_retrospective_forecast_out_of_its_bounds_is_dropped_alone_and_named(
+    tmp_path, monkeypatch, summary
+):
+    # The 50th day, 2026-10-16, a day of the backfill.
+    issued, output = bounds_run(tmp_path, monkeypatch, days=50)
+
+    days = pd.date_range("2026-08-28", "2026-10-26").strftime("%Y-%m-%d").tolist()
+    assert list(issued) == [day for day in days if day != "2026-10-16"]
+    assert issued["2026-10-26"] == "live"
+    row = [line for line in summary().splitlines() if "gpr_daily" in line][-1]
+    assert row.startswith("| gpr_daily | ok | 2026-10-26 | days old: 1")
+    assert (
+        "; dropped, out of bounds: 2026-10-16: the median leaves the range of its 365 days"
+        in row
+    )
+    assert "bounds_hold=\n" in output
+    latest = read(tmp_path / "api" / "series" / "gpr_daily" / "latest.json")
+    assert (latest["reference_date"], latest["forecast_mode"]) == ("2026-10-26", "live")
+    assert gate.contract(tmp_path / "api") == []
+
+
+def test_a_live_forecast_out_of_its_bounds_holds_only_itself_and_names_its_series(
+    tmp_path, monkeypatch, summary
+):
+    # The 60th day, 2026-10-26, the newest: the live forecast.
+    issued, output = bounds_run(tmp_path, monkeypatch, days=60)
+
+    # The backfill is archived, and none of it passes for live: the run's newest day was held.
+    days = pd.date_range("2026-08-28", "2026-10-25").strftime("%Y-%m-%d").tolist()
+    assert issued == dict.fromkeys(days, "retrospective")
+    row = [line for line in summary().splitlines() if "gpr_daily" in line][-1]
+    assert row.startswith(
+        "| gpr_daily | out of bounds | 2026-10-26 | 2026-10-26: the median leaves the range"
+    )
+    assert "bounds_hold=gpr_daily\n" in output
+    entry = read(tmp_path / "api" / "series.json")["series"][0]
+    assert entry["note"] == (
+        "The newest forecasts are held for review, far outside the series' last 365 days: "
+        "the latest shown starts from 2026-10-25."
+    )
+    assert gate.contract(tmp_path / "api") == []
+
+
 def with_day(lanes, port, day, ships):
     lanes[port][pd.Timestamp(day)] = ships
     return lanes
