@@ -26,7 +26,8 @@ class Series:
     license: dict
     # The baseline the record's verdict is against, pre-registered: the one with the lowest error on the
     # backtest, "naive" (last value), "snaive7" (same weekday a week back) or "mean28". Picked on a local run
-    # of the 120-day backfill, scored as of 2026-10-31; #146 may revisit it before the live record reaches 30.
+    # of the 120-day backfill, scored as of 2026-10-31, and checked on ADR 0001's two-year backtest, which
+    # moved Hormuz and the "World War III" views; AutoETS stays out of the daily job (its decision 1).
     primary_baseline: str
     # The weekday of the record's weekly forecasts, Monday 0: the day its live forecasts start from,
     # so that each week has one live forecast for the squares and the calibration monitor.
@@ -196,9 +197,10 @@ HORMUZ_TRANSITS = chokepoint(
     "Strait of Hormuz",
     14,
     (3, 7, 14),
-    # Mean absolute error on the backfill as of 2026-10-31, 1,477 settled days: naive 3.59, seasonal
-    # naive 4.30, the 28-day mean 4.69 (Timestral 3.04).
-    primary_baseline="naive",
+    # Mean absolute error on ADR 0001's two-year backtest, 104 weekly origins: the 28-day mean 13.35, naive
+    # 13.81, seasonal naive 14.55 (Timestral 11.10). The 28-day mean to naive is 0.967 [0.801, 1.234], a tie,
+    # so the lowest error picks it; the 120-day backfill had picked naive (3.59 against 4.69).
+    primary_baseline="mean28",
 )
 # Edge check off: no day since 2019 lies more than 4 IQRs outside its 28 days before, so it would hold nothing.
 BAB_EL_MANDEB_TRANSITS = chokepoint(
@@ -247,9 +249,10 @@ WIKI_WW3_VIEWS = Series(
     edge_iqr=None,
     # On calm days of the last 3 years Saturday runs 9% under its 28-day median, and the weekday explains 8% of the swing.
     weekly=True,
-    # Mean absolute error on the backfill as of 2026-10-31, 1,519 settled days: naive 311.3, the 28-day
-    # mean 313.1, seasonal naive 346.4 (Timestral 232.4).
-    primary_baseline="naive",
+    # Mean absolute error on ADR 0001's two-year backtest, 104 weekly origins: seasonal naive 4,205, the
+    # 28-day mean 4,211, naive 4,445 (Timestral 2,314). Seasonal naive to naive is 0.946 [0.717, 1.470], a
+    # tie, so the lowest error picks it; the 120-day backfill had picked naive (311.3 against 346.4).
+    primary_baseline="snaive7",
     # Every day's views arrive the next day, so every weekday has a live forecast: Sunday, as for the
     # sea lanes and the war in Ukraine, so that the squares of the page line up.
     record_weekday=6,

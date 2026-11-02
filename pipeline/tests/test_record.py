@@ -1,7 +1,9 @@
 """The track record wired to the archive: which targets are scored, against which observation, and what the score files and the monitor say."""
 
+import json
 from dataclasses import replace
 from datetime import UTC, date, datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -19,6 +21,10 @@ LEVELS = (
 )  # fmt: skip
 # Suez: 28 days ahead, and a target waits 14 days for its observation to settle.
 SUEZ = SUEZ_TRANSITS
+# ADR 0001's backtest: every number of its tables.
+BACKTEST = (
+    Path(__file__).parents[2] / "docs" / "research" / "baselines-calibration.json"
+)
 
 
 def ships(last_day, days=400):
@@ -168,17 +174,24 @@ def test_live_and_retrospective_forecasts_are_summarised_apart(tmp_path):
 
 
 def test_each_series_is_compared_with_its_primary_baseline_chosen_on_the_backtest():
-    # Pre-registered for #146: the baseline with the lowest backtest error of each series.
-    assert {series.id: series.primary_baseline for series, _ in SOURCES} == {
+    # ADR 0001: of the registry's three baselines, the one with the lowest error on its two-year backtest.
+    picks = {series.id: series.primary_baseline for series, _ in SOURCES}
+    results = json.loads(BACKTEST.read_text(encoding="utf-8"))["series"]
+
+    assert picks == {
         "gpr_daily": "mean28",
         "suez_transits": "mean28",
-        "hormuz_transits": "naive",
+        "hormuz_transits": "mean28",
         "bab_el_mandeb_transits": "mean28",
         "taiwan_strait_transits": "mean28",
-        "wiki_ww3_views": "naive",
+        "wiki_ww3_views": "snaive7",
         "brent_spot": "naive",
         "ua_air_raid_hours": "mean28",
         "ua_drones_downed_claimed": "mean28",
+    }
+    assert picks == {
+        id: min(record.BASELINES, key=result["baselines"]["mae"].get)
+        for id, result in results.items()
     }
 
 
