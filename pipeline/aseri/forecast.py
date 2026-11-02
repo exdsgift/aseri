@@ -80,9 +80,14 @@ def under_review(series: Series, vintage: pd.Series) -> bool:
     return bool(reach > 0 and (last < q1 - reach or last > q3 + reach))
 
 
-def forecast(model, observed: pd.Series, series: Series) -> Forecast:
-    """Quantile forecast of `series`' horizon after the last observation, from the whole history, calibrated by its offsets, inside the range of its kind."""
-    result = model.forecast(observed.to_numpy(), prediction_length=series.horizon)
+def forecast(model, observed: pd.Series, series: Series, **covariates) -> Forecast:
+    """Quantile forecast of `series`' horizon after the last observation, from the whole history, calibrated by its offsets, inside the range of its kind.
+
+    `covariates` go to the model as they are: only the covariate scout passes any (spec 6.5).
+    """
+    result = model.forecast(
+        observed.to_numpy(), prediction_length=series.horizon, **covariates
+    )
     quantiles = result.quantiles[0, 0].numpy()
     if not np.isfinite(quantiles).all():
         raise ValueError("the model returned non-finite quantiles")
