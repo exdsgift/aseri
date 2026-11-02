@@ -39,27 +39,70 @@ export function nudgeApart(tops: number[], gap: number) {
   return out
 }
 
-type Day = { date: string; x: number }
-
 // Press Start 2P draws every character 8 px wide at the labels' 8 px size.
 export const textWidth = (text: string) => text.length * 8
 
-const dateWidth = textWidth("Mmm DD")
-
-// The dates under the chart, in CSS pixels: the origin centred on its day, and the
-// first and last days flush with the ends when their labels clear the origin's.
-export function dateTicks(first: Day, origin: Day, last: Day) {
-  const room = dateWidth * 1.5 + 8
-  return [
-    { ...origin, align: "center" as const },
-    ...(origin.x - first.x >= room
-      ? [{ ...first, align: "left" as const }]
-      : []),
-    ...(last.x - origin.x >= room
-      ? [{ ...last, align: "right" as const }]
-      : []),
-  ]
+// A label's size in CSS pixels: its longest line, a pixel of ground each side, 12 px a line.
+export const labelSize = (text: string) => {
+  const lines = text.split("\n")
+  return {
+    width: Math.max(...lines.map(textWidth)) + 2,
+    height: 12 * lines.length,
+  }
 }
+
+type Spot = { x: number; y: number; align?: "left" | "right" }
+type Box = { left: number; top: number; width: number; height: number }
+const overlap = (a: Box, b: Box) =>
+  a.left < b.left + b.width &&
+  b.left < a.left + a.width &&
+  a.top < b.top + b.height &&
+  b.top < a.top + a.height
+
+// Direct labels, in CSS pixels, each a line of text or two on a pixel of ground each side: each
+// takes the first of its spots that stays in `bounds` and clear of the labels placed before it,
+// and covers as few `points` of the lines as it can.
+export function placeLabels(
+  labels: { text: string; at: Spot[] }[],
+  bounds: { left: number; top: number; right: number; bottom: number },
+  points: Point[]
+) {
+  const placed: Box[] = []
+  for (const { text, at } of labels) {
+    const { width, height } = labelSize(text)
+    const cost = (box: Box) =>
+      (box.left < bounds.left ||
+      box.top < bounds.top ||
+      box.left + width > bounds.right ||
+      box.top + height > bounds.bottom
+        ? 1e4
+        : 0) +
+      1e3 * placed.filter((other) => overlap(box, other)).length +
+      points.filter(
+        ([x, y]) =>
+          x >= box.left &&
+          x <= box.left + width &&
+          y >= box.top &&
+          y <= box.top + height
+      ).length
+    const boxes = at.map(({ x, y, align }) => ({
+      left: Math.round(align === "right" ? x - width : x),
+      top: Math.round(y),
+      width,
+      height,
+    }))
+    placed.push(
+      boxes.reduce((best, box) => (cost(box) < cost(best) ? box : best))
+    )
+  }
+  return placed
+}
+
+// The normal joins the scale when it widens the data's span by half at most. Further off, the
+// chart leaves it out and marks it at the edge: Hormuz's 27 ships over a forecast of 0 to 6
+// would squash the chart into a fifth of its height.
+export const fitsNormal = (low: number, high: number, normal: number) =>
+  Math.max(high, normal) - Math.min(low, normal) <= 1.5 * (high - low)
 
 // Round values for an axis: the smallest step of 1, 2 or 5 times a power of ten
 // that splits the scale in `parts` at most.
@@ -136,18 +179,29 @@ function layout(
         first + Math.round(((artX - left) * span) / (right - left))
       )
     )
+  const data = [
+    ...forecast.values.slice(first),
+    ...forecast.averages.slice(first),
+    ...fitted.flatMap((level) => forecast.quantiles[level]),
+    // A day with no value has no place on the scale.
+    ...forecast.actuals.filter((value) => value !== null),
+  ]
+  const { normal } = forecast
   const scale = valueScale(
-    [
-      ...forecast.values.slice(first),
-      ...forecast.averages.slice(first),
-      ...fitted.flatMap((level) => forecast.quantiles[level]),
-      // A day with no value has no place on the scale.
-      ...forecast.actuals.filter((value) => value !== null),
-    ],
+    fitsNormal(Math.min(...data), Math.max(...data), normal)
+      ? [...data, normal]
+      : data,
     top,
     bottom
   )
   return {
+    // A line on the chart, or a mark at the edge it lies past.
+    normal:
+      normal > scale.hi
+        ? ("above" as const)
+        : normal < scale.lo
+          ? ("below" as const)
+          : ("inside" as const),
     ahead,
     origin,
     first,
@@ -166,7 +220,7 @@ function layout(
 export type ChartLayout = ReturnType<typeof chartLayout>
 export type Layout = ReturnType<typeof layout>
 type Plot = (x: number, y: number, color: string) => void
-type Point = [number, number]
+export type Point = [number, number]
 
 // The page's token behind each mark of the chart: the real values white, the model's path
 // in the one gold accent, the 7-day average and the bands dim.
@@ -177,6 +231,7 @@ export const chartTokens = {
   band: "--dim",
   frame: "--border",
   origin: "--secondary",
+  normal: "--secondary",
   real: "--white",
 }
 export type Colors = Record<keyof typeof chartTokens, string>
@@ -222,7 +277,7 @@ function ring(plot: Plot, x: number, y: number, color: string) {
 
 // `path`, the last daily value then one value a day ahead: one of the model's paths, never a
 // median line, which reads as an average. Without `marks`, the frame and the origin alone,
-// for the marks to scan in over.
+// for the marks to scan in over. Every line is solid: none is dashed or dotted.
 export function paintChart(
   plot: Plot,
   chart: Layout,
@@ -247,63 +302,59 @@ export function paintChart(
     if (!ringed || px !== ex || py !== ey) plot(px, py, c)
   }
 
-  // The forecast zone gets a diagonal hatch, like the empty slots in the game.
-  for (let py = top; py <= bottom; py++)
-    for (let px = xo + 1; px <= right; px++)
-      if ((px + py) % 4 === 0) lit(px, py, color.frame)
-  for (const tick of valueTicks(chart.lo, chart.hi))
-    for (let px = left; px <= right; px += 2) lit(px, y(tick), color.frame)
-  for (let py = top; py <= bottom; py += 2) lit(xo, py, color.origin)
-  for (let px = left; px <= right; px++) lit(px, bottom + 1, color.frame)
-  if (!marks) return
-
-  // The lines and marks, laid out first so that the bands can keep clear of them. Inside the
+  // The lines and marks, laid out first so that everything else keeps clear of them. Inside the
   // plot: a 2 art px line on its last column or row would cover the frame's.
   const laid: [number, number, string][] = []
   const lay: Plot = (px, py, markColor) => void laid.push([px, py, markColor])
   const mark: Plot = (px, py, markColor) => {
     if (px <= right && py <= bottom) lay(px, py, markColor)
   }
-  polyline(
-    mark,
-    path.map((value, k): Point => [x(origin + k), y(value)]),
-    color.path
-  )
-  // The 7-day average, dimmer: context only, since the forecast is of the daily value.
-  polyline(
-    mark,
-    averages
-      .slice(first)
-      .map((average, i): Point => [x(first + i), y(average)]),
-    color.average
-  )
-  // The daily values, the quantity forecast, so the forecast carries on from where they end.
-  // Twice the path's weight: the real values stand apart from it by weight as well as tint.
-  polyline(
-    mark,
-    values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
-    color.daily,
-    2
-  )
-  square(mark, xo - 1, y(last) - 1, 3, color.daily)
+  if (marks) {
+    // The normal first, under every line that crosses it.
+    if (chart.normal === "inside")
+      for (let px = left; px <= right; px++)
+        mark(px, y(forecast.normal), color.normal)
+    polyline(
+      mark,
+      path.map((value, k): Point => [x(origin + k), y(value)]),
+      color.path
+    )
+    // The 7-day average, dimmer: context only, since the forecast is of the daily value.
+    polyline(
+      mark,
+      averages
+        .slice(first)
+        .map((average, i): Point => [x(first + i), y(average)]),
+      color.average
+    )
+    // The daily values, the quantity forecast, so the forecast carries on from where they end.
+    // Twice the path's weight: the real values stand apart from it by weight as well as tint.
+    polyline(
+      mark,
+      values.slice(first).map((value, i): Point => [x(first + i), y(value)]),
+      color.daily,
+      2
+    )
+    square(mark, xo - 1, y(last) - 1, 3, color.daily)
 
-  // What happened after the forecast was made: the daily values' line carried on over the
-  // bands, at their weight, to compare line with line against the path. A day with no value
-  // (the drones' day without a report) breaks it; a day alone between two gaps is a dot, 2 art
-  // pixels wide where the days are far enough apart. The ring sets its end apart by shape
-  // from the path's unmarked end and the filled square at the origin.
-  if (end >= 0) {
-    const dot = (right - left) / chart.span >= 3 ? 2 : 1
-    const runs: Point[][] = [[[xo, y(last)]]]
-    actuals.forEach((value, k) => {
-      if (value === null) runs.push([])
-      else runs.at(-1)!.push([x(origin + 1 + k), y(value)])
-    })
-    for (const run of runs)
-      if (run.length === 1) square(mark, ...run[0], dot, color.daily)
-      else polyline(mark, run, color.daily, 2)
-    // Whole, in the margin kept for it: cut, it would no longer read as a ring.
-    if (ringed) ring(lay, ex - 1, ey - 1, color.real)
+    // What happened after the forecast was made: the daily values' line carried on over the
+    // bands, at their weight, to compare line with line against the path. A day with no value
+    // (the drones' day without a report) breaks it; a day alone between two gaps is a dot, 2 art
+    // pixels wide where the days are far enough apart. The ring sets its end apart by shape
+    // from the path's unmarked end and the filled square at the origin.
+    if (end >= 0) {
+      const dot = (right - left) / chart.span >= 3 ? 2 : 1
+      const runs: Point[][] = [[[xo, y(last)]]]
+      actuals.forEach((value, k) => {
+        if (value === null) runs.push([])
+        else runs.at(-1)!.push([x(origin + 1 + k), y(value)])
+      })
+      for (const run of runs)
+        if (run.length === 1) square(mark, ...run[0], dot, color.daily)
+        else polyline(mark, run, color.daily, 2)
+      // Whole, in the margin kept for it: cut, it would no longer read as a ring.
+      if (ringed) ring(lay, ex - 1, ey - 1, color.real)
+    }
   }
   // An art pixel of the ground round every mark: over the 50% band, the gold path would
   // average 2.2:1, and beside each band pixel it is 1.35:1. One cell per art pixel, as the
@@ -315,6 +366,20 @@ export function paintChart(
       for (let dx = -1; dx <= 1; dx++)
         if (px + dx >= 0 && px + dx < width && py + dy >= 0 && py + dy < height)
           keyline[(py + dy) * width + px + dx] = 1
+  const clear = (px: number, py: number) => !keyline[py * width + px]
+
+  // The forecast zone gets a diagonal hatch, like the empty slots in the game.
+  for (let py = top; py <= bottom; py++)
+    for (let px = xo + 1; px <= right; px++)
+      if ((px + py) % 4 === 0 && clear(px, py)) lit(px, py, color.frame)
+  // The value ticks, short, left of the plot where there is room for them.
+  if (left >= 3)
+    for (const tick of valueTicks(chart.lo, chart.hi))
+      for (const px of [left - 3, left - 2]) lit(px, y(tick), color.frame)
+  for (let py = top; py <= bottom; py++)
+    if (clear(xo, py)) lit(xo, py, color.origin)
+  for (let px = left; px <= right; px++) lit(px, bottom + 1, color.frame)
+  if (!marks) return
 
   // The bands, column by column: 5 in 10 at 50% of the dither, 8 in 10 at 25%, with solid edges.
   // From the first day ahead: the last value may still be revised, so no width-zero pinch.
@@ -329,7 +394,7 @@ export function paintChart(
         (py === y90 ||
           py === y10 ||
           bayer[(py % 4) * 4 + (px % 4)] < (inner ? 8 : 4)) &&
-        !keyline[py * width + px]
+        clear(px, py)
       )
         lit(px, py, color.band)
     }

@@ -6,10 +6,25 @@ const wholeNumber = new Intl.NumberFormat("en-US", {
 
 export const formatValue = (value: number) => wholeNumber.format(value)
 
-export function versusBaseline(value: number, baseline: number) {
-  const percent = Math.round((value / baseline - 1) * 100)
-  return `${Math.abs(percent)}% ${percent < 0 ? "below" : "above"}`
-}
+// How far a value sits from its normal, in whole percent: 81 above it, -88 below.
+export const percentFrom = (value: number, baseline: number) =>
+  Math.round((value / baseline - 1) * 100)
+
+export const awayFromNormal = (percent: number) =>
+  `${Math.abs(percent)}% ${percent < 0 ? "below" : "above"} normal`
+
+export const versusBaseline = (value: number, baseline: number) =>
+  awayFromNormal(percentFrom(value, baseline))
+
+// A range in the page's one word for it. The number always travels with the word: readers
+// give "likely" very different odds alone.
+export const likely = (low: number, high: number) =>
+  `likely ${formatValue(low)}-${formatValue(high)}`
+
+// A headline's values, to tens from 100 up: needless precision reads as false precision.
+// The chart and the numbers keep the exact values.
+export const roughly = (value: number) =>
+  Math.abs(value) >= 100 ? Math.round(value / 10) * 10 : value
 
 // API dates are calendar days: read them in UTC, so no time zone moves them to another day.
 const inUtc = (isoDate: string, options: Intl.DateTimeFormatOptions) =>

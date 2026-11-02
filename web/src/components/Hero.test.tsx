@@ -16,9 +16,10 @@ const today: Today = {
   referenceValue: 165,
   asOf: "2026-10-30",
   targetDate: "2026-11-23",
-  mostLikely: 168,
   low: 111,
   high: 251,
+  middleHalf: [136, 207],
+  chanceAbove: 0.55,
 }
 
 // The page reads the one list jsdom's stand-in gives for the query (see test-setup.ts).
@@ -157,7 +158,7 @@ describe.each(heroes)("%s", (hero) => {
     for (const text of [
       screen.getByRole("heading", { level: 1 }),
       screen.getByText("181"),
-      screen.getByText(/^Monday Nov 23/),
+      screen.getByText(/^Nov 23: likely/),
     ])
       expect(art.contains(text)).toBe(false)
   })

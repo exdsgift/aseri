@@ -1,19 +1,35 @@
 import { type Bucket } from "@/lib/api"
 import { dayWord } from "@/lib/format"
+import { coverage, skill } from "@/lib/takeaways"
 
-// The baselines as the page names them, by the pipeline's keys.
-const baselines: Record<string, string> = {
-  naive: "last value",
-  snaive7: "same weekday a week back",
-  mean28: "28-day mean",
-}
 const percent = (share: number) => Math.round(share * 100)
 const ratio = (value: number | null) =>
   value === null ? "-" : value.toFixed(2)
 const cell = "py-1 pr-2 align-top font-normal"
 
-// A row per bucket of days ahead: how many forecasts resolved, how often the 8 in 10 range
-// held the real value, and the most likely value's error against the series' baseline.
+// Ten blocks, filled for each tenth of the days that landed in range, with a tick after the 8th:
+// "78% · aim 80%" as a picture before it is a number. For the eye: the cell says it.
+function Tenths({ rate }: { rate: number }) {
+  return (
+    <span
+      aria-hidden
+      className="mr-1.5 inline-flex items-center gap-0.5 align-middle"
+    >
+      {Array.from({ length: 10 }, (_, i) => (
+        <span key={i} className="contents">
+          {i === 8 && <i className="mx-px h-3.5 w-0.5 bg-secondary" />}
+          <i
+            className={`size-2 ${i < Math.round(rate * 10) ? "bg-primary" : "border-2 border-primary"}`}
+          />
+        </span>
+      ))}
+    </span>
+  )
+}
+
+// A row per bucket of days ahead: how many forecasts resolved, how often the range held what
+// happened, and the middle estimate's misses against the series' own simple rule, in words, with
+// the 95% ranges in brackets.
 export function ScoreTable({
   label,
   buckets,
@@ -41,10 +57,10 @@ export function ScoreTable({
             Forecasts
           </th>
           <th scope="col" className={cell}>
-            Inside the 8 in 10 range
+            In range
           </th>
           <th scope="col" className={cell}>
-            Error vs {baselines[baseline]}
+            Misses
           </th>
         </tr>
       </thead>
@@ -63,19 +79,15 @@ export function ScoreTable({
                 <>
                   <td className={cell}>{bucket.n}</td>
                   <td className={cell}>
-                    {percent(held.rate)}% ({percent(held.ci[0])}-
+                    <Tenths rate={held.rate} />
+                    {coverage(held.rate)} ({percent(held.ci[0])}-
                     {percent(held.ci[1])})
                   </td>
                   <td className={cell}>
-                    {versus.verdict === null ? (
-                      // A baseline with no error leaves no ratio to read.
-                      "-"
-                    ) : (
-                      <>
-                        {versus.verdict} {ratio(versus.ratio)} (
-                        {ratio(versus.ci[0])}-{ratio(versus.ci[1])})
-                      </>
-                    )}
+                    {skill(versus, baseline)}
+                    {/* A baseline with no error leaves no ratio to read. */}
+                    {versus.verdict !== null &&
+                      ` (${ratio(versus.ratio)}, ${ratio(versus.ci[0])}-${ratio(versus.ci[1])})`}
                   </td>
                 </>
               ) : (

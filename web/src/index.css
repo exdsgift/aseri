@@ -95,9 +95,9 @@
   }
 }
 
-/* The replay slider, as on Timestral's page: its track is the dots drawn under it, and its
-   thumb a square handle with a vertical bar, white on hover and press. No transition, so the
-   handle stays under the pointer. */
+/* The replay slider, as on Timestral's page: its track is the solid line and week ticks drawn
+   under it, and its thumb a square handle with a vertical bar, white on hover and press. No
+   transition, so the handle stays under the pointer. */
 @utility pixel-range {
   appearance: none;
   background: transparent;

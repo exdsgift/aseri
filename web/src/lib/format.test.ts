@@ -4,6 +4,9 @@ import {
   dayLabel,
   daysAhead,
   formatValue,
+  likely,
+  percentFrom,
+  roughly,
   versusBaseline,
   weekday,
 } from "./format"
@@ -24,9 +27,23 @@ describe("formatValue", () => {
 })
 
 describe("versusBaseline", () => {
-  it("says how far above or below the baseline a value is, in whole percent", () => {
-    expect(versusBaseline(181.4155, 100)).toBe("81% above")
-    expect(versusBaseline(88.2, 100)).toBe("12% below")
+  it("says how far above or below normal a value is, in whole percent", () => {
+    expect(versusBaseline(181.4155, 100)).toBe("81% above normal")
+    expect(versusBaseline(88.2, 100)).toBe("12% below normal")
+    expect(percentFrom(3.2, 26.92)).toBe(-88)
+  })
+})
+
+describe("likely", () => {
+  it("says a range as likely, low to high", () => {
+    expect(likely(119.4, 243)).toBe("likely 119-243")
+  })
+
+  it("rounds a headline's values to tens from 100 up, and keeps smaller ones whole", () => {
+    expect(likely(roughly(111.2), roughly(251))).toBe("likely 110-250")
+    expect(likely(roughly(1455), roughly(5423))).toBe("likely 1,460-5,420")
+    expect(likely(roughly(33.4), roughly(99.4))).toBe("likely 33-99")
+    expect(roughly(-153)).toBe(-150)
   })
 })
 

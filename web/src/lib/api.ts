@@ -1,3 +1,5 @@
+import { chanceAbove } from "@/lib/paths"
+
 // Only the fields the page reads from the published API.
 export type CatalogEntry = {
   series_id: string
@@ -23,7 +25,6 @@ export type CatalogEntry = {
 }
 type Latest = {
   reference_date: string
-  forecast_date: string
   forecast_mode: string
   horizon: number[]
   target_end_date: string[]
@@ -54,15 +55,19 @@ export type Today = {
   // The day the data was read from its source, which may revise it later.
   asOf: string
   targetDate: string
-  mostLikely: number
+  // The target day's range, its middle half, and the chance it lands above `referenceValue`.
   low: number
   high: number
+  middleHalf: [number, number]
+  chanceAbove: number
 }
 
 export type Forecast = {
   series: string
   unit: string
   attribution: string
+  // The series' baseline: the chart draws it as "normal".
+  normal: number
   // The days up to the reference date, the forecast's origin, each with its 7-day average.
   dates: string[]
   values: number[]
@@ -83,7 +88,6 @@ export type Forecast = {
 // today's alone until the replay is loaded.
 // `steps` are the days ahead of the intervals block: 7, 14 and 28 for GPR.
 // `staleSince` is the day the data fell behind, while the pipeline cannot refresh it.
-// `madeOn` is the day today's forecast was made: GPR moves weekly, so often not today.
 // `weekly` says its values follow the week.
 // `rho` ties each day of a possible path to the day before.
 export type Series = {
@@ -92,7 +96,6 @@ export type Series = {
   forecasts: Forecast[]
   steps: number[]
   staleSince: string | null
-  madeOn: string
   note: string | null
   weekly: boolean
   rho: number
@@ -251,6 +254,7 @@ export async function loadSeries(
     series: entry.title,
     unit: entry.unit,
     attribution: latest.attribution,
+    normal: entry.baseline,
     dates: dates.slice(0, origin - first + 1),
     values: values.slice(0, origin - first + 1),
     averages: averages.slice(0, origin - first + 1),
@@ -272,9 +276,17 @@ export async function loadSeries(
       referenceValue: actuals.observation[reference],
       asOf: actuals.as_of,
       targetDate: latest.target_end_date[step],
-      mostLikely: latest.quantiles["0.5"][step],
       low: latest.quantiles["0.1"][step],
       high: latest.quantiles["0.9"][step],
+      middleHalf: [
+        latest.quantiles["0.25"][step],
+        latest.quantiles["0.75"][step],
+      ],
+      chanceAbove: chanceAbove(
+        latest.quantiles,
+        step,
+        actuals.observation[reference]
+      ),
     },
     forecasts: [
       ...past.map((f) =>
@@ -293,7 +305,6 @@ export async function loadSeries(
     ],
     steps: entry.interval_steps,
     staleSince: entry.stale_since ?? null,
-    madeOn: latest.forecast_date,
     note: entry.note ?? null,
     weekly: entry.weekly ?? false,
     // A catalog cached from before the tie was published draws independent days.

@@ -3,13 +3,14 @@ import { describe, expect, it } from "vitest"
 import latest from "@/fixtures/series/gpr_daily/latest.json"
 
 import { type Forecast } from "./api"
-import { path, ranked } from "./paths"
+import { chanceAbove, path, ranked } from "./paths"
 
 // Today's GPR forecast, at its 21 published levels, made from a last daily value of 165.
 const gpr: Forecast = {
   series: "Geopolitical risk",
   unit: "",
   attribution: "",
+  normal: 100,
   dates: ["2026-10-26"],
   values: [165],
   averages: [181],
@@ -151,5 +152,24 @@ describe("ranked", () => {
 
   it("starts every path on the last daily value", () => {
     for (const p of ranked(gpr, 0)) expect(p.values[0]).toBe(165)
+  })
+})
+
+describe("chanceAbove", () => {
+  it("reads the chance that a day lands above a value off its levels", () => {
+    expect(chanceAbove(standard.quantiles, 0, 0)).toBeCloseTo(0.5, 3)
+    expect(chanceAbove(standard.quantiles, 0, 1.282)).toBeCloseTo(0.1, 3)
+    expect(chanceAbove(standard.quantiles, 0, -1.282)).toBeCloseTo(0.9, 3)
+  })
+
+  it("is certain either way past the outermost levels", () => {
+    expect(chanceAbove(standard.quantiles, 0, 10)).toBeCloseTo(0, 6)
+    expect(chanceAbove(standard.quantiles, 0, -10)).toBeCloseTo(1, 6)
+  })
+
+  it("puts GPR's Nov 23 about evenly either side of last Monday's 165", () => {
+    const above = chanceAbove(gpr.quantiles, 27, 165)
+    expect(above).toBeGreaterThan(0.5)
+    expect(above).toBeLessThan(0.6)
   })
 })

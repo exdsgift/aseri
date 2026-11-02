@@ -1,12 +1,19 @@
 import { useId } from "react"
 
+import { Disclosure } from "@/components/Disclosure"
 import { RecordSquares } from "@/components/RecordSquares"
 import { ScoreTable } from "@/components/ScoreTable"
 import { daysAfter, type CatalogEntry, type ScoreRecord } from "@/lib/api"
-import { monthDay } from "@/lib/format"
+import { recordTitle } from "@/lib/takeaways"
 
-// How past forecasts did, per series. The live record shows once it has enough resolved
-// forecasts; until then the backtest shows under it, apart and labelled, never combined.
+// A series' live record once it has enough resolved forecasts; its backtest until then.
+const isLive = (record: ScoreRecord) => record.n >= record.min_n_to_display
+const scoredOf = (record: ScoreRecord) =>
+  isLive(record) ? record.live : record.retrospective
+
+// How past forecasts did, its verdict first: the squares of every series, counted in the title,
+// and how they are scored one tap away. Backtest and live never add up in one figure: the title
+// counts the live series once any has its record, the backtests while none has.
 export function TrackRecord({
   records,
   entries,
@@ -22,6 +29,12 @@ export function TrackRecord({
     const entry = entries.find((e) => e.series_id === record.series_id)
     return entry ? [{ record, entry }] : []
   })
+  const live = shown.filter(({ record }) => isLive(record))
+  const collecting = shown.filter(({ record }) => !isLive(record))
+  const counted = live.length ? live : shown
+  const squares = counted.flatMap(({ record }) =>
+    scoredOf(record).weekly.map((week) => week.inside_80)
+  )
 
   return (
     // Focused by R, so the next Tab goes on from here; a ring round the whole section would
@@ -30,103 +43,98 @@ export function TrackRecord({
       id="record"
       tabIndex={-1}
       aria-labelledby={title}
-      className="mx-auto flex max-w-[1040px] scroll-mt-4 flex-col gap-8 px-4 pb-14 outline-none"
+      className="mx-auto flex max-w-[1040px] scroll-mt-4 flex-col gap-6 px-4 pb-14 text-[8px]/[14px] uppercase outline-none"
     >
       <div className="flex flex-col items-center gap-4 text-center">
         <h2
           id={title}
-          className="font-display text-[48px]/none tracking-[0.04em] text-secondary"
+          className="font-display text-[48px]/none tracking-[0.04em] text-secondary normal-case"
         >
           Record
         </h2>
-        <p className="max-w-[52ch] text-[8px]/[14px] text-muted-foreground uppercase">
-          How past forecasts did against what happened. Pick a square to replay
-          its forecast above.
+        <p className="max-w-[52ch] text-[12px]/[18px] text-primary">
+          {recordTitle(squares, !live.length)}
         </p>
       </div>
+      {collecting.length > 0 && (
+        <p className="bg-muted px-2.5 py-2 text-secondary">
+          Live record starts after {collecting[0].record.min_n_to_display}{" "}
+          forecasts ({Math.min(...collecting.map(({ record }) => record.n))} so
+          far). Until then, backtests made after the fact.
+        </p>
+      )}
+      {/* The key, once, with how many should miss: 8 of 8 is no triumph, 6 of 8 no failure. */}
+      <p className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-secondary">
+        <span className="flex items-center gap-1.5">
+          <i aria-hidden className="size-2 bg-primary" /> landed in range
+        </span>{" "}
+        <span className="flex items-center gap-1.5">
+          <i aria-hidden className="size-2 border-2 border-primary" /> missed
+        </span>{" "}
+        <span>
+          About 2 in 10 squares should be hollow if the range is honest.
+        </span>
+      </p>
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(296px,1fr))] gap-2">
         {shown.map(({ record, entry }) => (
-          <RecordCard
+          <li
             key={record.series_id}
-            record={record}
-            entry={entry}
-            onOpen={(date) => onOpen(record.series_id, date)}
-          />
+            className="flex flex-col gap-2 border-2 border-border px-2.5 pt-2 pb-2.5 text-[8px]/[12px] chip"
+          >
+            <h3 className="text-secondary">
+              {entry.title}
+              {/* A backtest beside live records says so. */}
+              {live.length > 0 && !isLive(record) && ", backtest"}
+            </h3>
+            <RecordSquares
+              name={entry.title}
+              weekly={scoredOf(record).weekly}
+              horizonUnit={entry.horizon_unit}
+              // The replay's oldest forecast: the pipeline keeps 120 days before the newest one.
+              replayFrom={daysAfter(entry.latest_reference_date, -120)}
+              onOpen={(date) => onOpen(record.series_id, date)}
+            />
+          </li>
         ))}
       </ul>
-      <p className="mx-auto max-w-[72ch] text-[8px]/[14px] text-muted-foreground uppercase">
-        In brackets, 95% ranges. Those of the 8 in 10 coverage assume
-        independent days, which neighbouring forecasts are not: read them as too
-        narrow. Error: the most likely value&apos;s mean miss over the
-        baseline&apos;s. Beats only when its whole range is under 1, loses when
-        over 1, ties otherwise.
-      </p>
+      <div className="flex flex-wrap items-start gap-2">
+        <Disclosure label="How we score">
+          {shown.map(({ record, entry }) => {
+            const kind = isLive(record)
+              ? `live, ${record.live.n} forecasts`
+              : "backtest"
+            return (
+              <div key={record.series_id} className="flex flex-col gap-1">
+                <p className="text-primary">
+                  {entry.title}, {kind}
+                </p>
+                <ScoreTable
+                  label={`${entry.title}, ${kind}`}
+                  buckets={scoredOf(record).buckets}
+                  baseline={record.primary_baseline}
+                  horizon={entry.horizon_max}
+                  horizonUnit={entry.horizon_unit}
+                />
+              </div>
+            )
+          })}
+          <p>
+            Each square is one weekly forecast, scored 7 days ahead. Misses: how
+            far the middle estimate fell from what happened, on average, against
+            the series&apos; own simple rule. Better or worse only when the
+            whole 95% range of the comparison says so; about as good otherwise.
+          </p>
+          <p>
+            In brackets, 95% ranges, and the ratio of the misses. Those of the
+            share in range assume independent days, which neighbouring forecasts
+            are not: read them as too narrow.
+          </p>
+          <p>
+            Backtests are made after the fact, with data published later, so
+            they may flatter the model.
+          </p>
+        </Disclosure>
+      </div>
     </section>
-  )
-}
-
-function RecordCard({
-  record,
-  entry,
-  onOpen,
-}: {
-  record: ScoreRecord
-  entry: CatalogEntry
-  onOpen: (referenceDate: string) => void
-}) {
-  const backtest = useId()
-  const { live, retrospective, min_n_to_display: needed } = record
-  // The replay's oldest forecast: the pipeline keeps 120 days before the newest one.
-  const replayFrom = daysAfter(entry.latest_reference_date, -120)
-  const squares = (scored: ScoreRecord["live"]) => (
-    <RecordSquares
-      weekly={scored.weekly}
-      horizonUnit={entry.horizon_unit}
-      replayFrom={replayFrom}
-      onOpen={onOpen}
-    />
-  )
-  const table = (scored: ScoreRecord["live"], kind: string) => (
-    <ScoreTable
-      label={`${entry.title}, ${kind}`}
-      buckets={scored.buckets}
-      baseline={record.primary_baseline}
-      horizon={entry.horizon_max}
-      horizonUnit={entry.horizon_unit}
-    />
-  )
-
-  return (
-    <li className="flex flex-col gap-3 border-2 border-border px-2.5 pt-2 pb-2.5 text-[8px]/[12px] uppercase chip">
-      <h3 className="text-secondary">{entry.title}</h3>
-      {record.n >= needed ? (
-        <>
-          <p>
-            Live record: {live.n} forecasts since {monthDay(live.since!)}
-          </p>
-          {squares(live)}
-          {table(live, "live")}
-        </>
-      ) : (
-        <>
-          <p>
-            Collecting live record:{" "}
-            <b className="font-normal text-primary">{record.n}</b> of {needed}
-          </p>
-          {squares(live)}
-          <div
-            role="group"
-            aria-labelledby={backtest}
-            className="flex flex-col gap-2 bg-muted px-2 py-1.5"
-          >
-            <p id={backtest} className="text-secondary">
-              Backtest, not the live record
-            </p>
-            {squares(retrospective)}
-            {table(retrospective, "backtest")}
-          </div>
-        </>
-      )}
-    </li>
   )
 }

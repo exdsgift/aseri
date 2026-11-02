@@ -207,13 +207,13 @@ One workflow, `daily.yml`, on a cron.
   - WIS;
   - median absolute error and its ratio to each naive baseline.
 - **On the page:**
-  - **The forecast panel's replay** shows any forecast from the last 120 days, with the real daily values in white, whether the target day fell inside the range, and how many days so far landed inside.
-  - **The record section shows the dots:** the last 8 weekly forecasts, 7 days ahead, filled if inside the 8-in-10 range and hollow if not (#148). Tapping one opens it in the replay.
-  - **A small leaderboard-style table (my call):** per series, 8-in-10 coverage and error vs naive, live only.
+  - **The forecast panel's replay** shows any forecast from the last 120 days, with the real daily values in white, and in "Show the numbers" whether each step's day landed in range.
+  - **The record section shows the squares:** the last 8 weekly forecasts, 7 days ahead, filled if what happened landed in the 8-in-10 range and hollow if not (#148), under a title that counts them all (6.8). Tapping one opens it in the replay.
+  - **Per series, one tap away ("How we score", #152):** coverage and the misses against the series' own simple rule, in plain words, with the 95% ranges in brackets.
 - **Wording rules:**
-  - "most likely", never "will";
-  - "8 in 10 chance between", not "80% confidence interval";
-  - say plainly when the model ties or loses to the naive method (Brent does).
+  - "likely 33-51", never "will";
+  - a frequency, "8 in 10 days land here", not "80% confidence interval";
+  - say plainly when the model ties or loses to its simple rule (Brent does): "About as good as just repeating the last value".
 
 ### 6.5 Covariate scout
 
@@ -294,35 +294,40 @@ Follow `docs/research/public-api.md`. The essentials:
 
 The reference is the prototype `prototypes/forecast-chart/index.html`, in the "statement" style of about.dos-age.com: one idea per screen. Rewrite it properly; do not port it. Since #150 the whole site is white on electric blue (6.9).
 
+Since #152 the page says each thing once, on the mark it is about, after the prototype the owner chose on 2026-11-02: [`prototypes/less-text/index.html`](https://github.com/exdsgift/aseri/blob/prototype-less-text/prototypes/less-text/index.html) on the `prototype-less-text` branch, with its README, combination `#A-none-still-none` (stats wording A, no label on the path, the panel opening still on path 1, no replay verdict squares). The evidence is [Comunicare le previsioni con meno testo](../../research/reports/Comunicare%20le%20previsioni%20con%20meno%20testo.md), changes 1, 3, 4, 5, 8, 9, 11 and 12. Every block leads with a takeaway computed from the data (`web/src/lib/takeaways.ts`), never written by hand.
+
+**Two layers.** The default view holds the hero, the panel's title, chart, Play and replay, the cards and the record's verdict. Method, numbers and sources are one labelled tap away each: "About this data", "How to read this", "Show the numbers", "How we score" and "Sources", never "More". Each is a button that says whether it is open (`aria-expanded`) and the part it shows or hides (`Disclosure`). A number that qualifies a word stays inline. A test counts the default view's words (`web/src/words.test.tsx`): under 300 with the prototype's four series from the fixtures (GPR, Suez, Hormuz, Bab el-Mandeb), and at most 30 more for each further series, so all nine stay under 450 (275 and 411 at #152, from 1,271 before).
+
 1. **Hero:** three studies of the `prototype-hero-studies` branch take turns behind the text (#150, owner's choice), its layout and padding unchanged. Each stands beside the text when its margin has room (from about 1,050 px), else small in the 224 px band above the wordmark; never under the text, never past the hero's width, and on the left, clear of the side navigation:
    - **Messenger** (study A, #148): Hendrick Goltzius's engraved *Mercury* in his niche, a disc of radial ticks behind him, and a fan of fine rays from each of his winged hat, caduceus, hand, elbow and winged ankle;
    - **Signal** (study B): Goltzius's *Farnese Hercules* from behind on a failing screen (phosphor smear, every third line dark, noise, a band slipping now and then), light leaking in from above, and two labelled selection frames on his back (`selection` in `web/src/lib/signal.ts`): the small dotted one the baseline, the large dashed one the 7-day average, as many times as wide as the value is the baseline, up to 4 times, moved only as far as keeps it and its label inside the hero (`placed`). On a phone only his torso shows. The study's cloud and spectators are left out: the side navigation holds the right margin;
    - **Vortex** (study C): the head of the *Apollo Belvedere* at the eye of an op-art vortex of stripes and checker squares, a ring at 2.2 times the head with a tick every 10 points, longer on the quarters and longest, labelled, at the baseline 100, and a solid arm turning one degree per point of the 7-day average from the top of the head out to the ring (`armDegrees`, `armPoints` in `web/src/lib/vortex.ts`), labelled at its end, up to 400. The stripes inside the ring twist with it;
    - **the turns** (`web/src/lib/heroes.ts`): each page load shows the next hero in that order, its index kept in `localStorage`; where storage is refused, a random one. A small control at the foot of the page picks Messenger, Signal, Vortex or Rotate (the default), remembered per reader; a picked hero arrives afresh. Only the shown hero's engraving loads;
    - the wordmark 焦り, with "あせり · aseri" under it;
-   - the kicker "Geopolitical risk · today";
+   - the kicker "Geopolitical risk";
    - the GPR 7-day average as a giant number;
-   - the pitch: "{x}% above its 1985-2019 average", then the 4-week forecast for the same weekday as the last data, compared with that weekday (owner's choice): "{Weekday Mon DD}, 4 weeks from the last data: 8 in 10 between {lo} and {hi}, 2 in 10 outside. Most likely {m}. (Last {weekday}: {v})", the range first (6.9, copy). GPR has a strong weekday cycle, so a single day must never be compared with a day on a different weekday or with the 7-day average.
+   - like with like (#152): "{x}% above normal · 7-day average to {Mon DD}", then the 4-week forecast for the same weekday as the last data, compared with that weekday (owner's choice): "{Mon DD}: likely {lo}-{hi} (8 in 10), {direction}". The direction reads off the forecast's levels the chance that the target day lands above the like-for-like value, the last daily value (for GPR the same weekday): over 0.65 "likely higher than now", under 0.35 "likely lower than now", else "about where it is now" (`direction`, a design choice of the study, not a sourced rule). GPR has a strong weekday cycle, so a single day must never be compared with a day on a different weekday or with the 7-day average;
+   - a range bar under it, on one value scale: the target day's range in the bands' dither, its middle half denser, a solid tick at normal with "normal 100", and a pixel marker on the like-for-like day, "last Monday 165", the range's ends under it;
+   - "About this data", one tap away: the weekly cycle, what the big number averages and what the outlook compares, normal, and the data's "as of", preliminary for about 4 weeks.
 
    Messenger's rays encode GPR's 7-day average against its baseline, on a scale that starts full (`fan` in `web/src/lib/messenger.ts`): at the baseline and under it, 19 rays over 40 degrees, fuller than the study's fans at 181 (owner: a richer scale); each further baseline opens a fan 13 degrees, up to a cap at 4 times the baseline. The rays keep fixed slots 40/18 degrees apart, each with its own length, so an opening fan gains rays only at its edges and none ever jumps while the number counts up: 181 holds 23 rays over 48.9 degrees, 300 holds 29 over 62.2, denser than the study's 27 over 66, the cap 35 over 75.6. Two dashed rays in each fan mark the baseline, at the full fan's edges. With every hero the text sits on a calm area: the ground at 91% over the text column and a margin, dissolving in a 48 px dither, so the words read over the art everywhere. The art's labels stay clear of that edge.
-2. **The forecast panel,** a game-sheet frame with the title row `[F] {series} · forecast made today | {unit} · data to {date}`:
-   - a readout line;
-   - the pixel chart (6.9), opening on the most likely of the model's 20 paths;
-   - under it, Play or Pause, "Next path" and "Path N of 20" ("the most likely" on the first), then the line "The line ahead is one of 20 paths drawn from the model's forecast, the most likely first: each day of it falls in the band as often as the forecast says." One path at a time, in order, never several: overlapping paths read as nothing;
-   - a legend;
-   - the replay slider, in the look of Timestral's: a dotted track with one dot a week, a square handle with a vertical bar, and the day beside the handle ("Forecast" on today), on the side with room. 120 days, ←/→ for one day, T for today, "Back to today";
-   - the intervals block: a row for "today, that day", then one row per interval step with the 5-in-10 and 8-in-10 ranges, then the most likely value and, in replay, the real value with inside or outside, all on one value scale with the 1-year range and the GPR baseline;
-   - the source line, with attribution and the backtest/live note.
-3. **Signals:** nine cards in three groups: "Risk, attention and oil", "Sea lanes", "War in Ukraine". Each card shows:
-   - an icon, a name and a key hint `[n]`;
-   - the 7-day average and its unit;
-   - the change vs the baseline;
-   - a mini pixel chart with its forecast band;
-   - "In {h} days: {lo}-{hi}";
-   - "To {date}".
+2. **The forecast panel,** a game-sheet frame:
+   - its takeaway as the title: "Likely 110-250 by Nov 23, about where it is now" for today's forecast; in a replay "Backtest made Aug 27: likely 96-220 by Sep 24", or "Forecast made" for a live one. Under it "{series} · {unit}", and in a replay "· what happened as of {date}". The panel's landmark is named by the series, then the title. A stale series adds "data to {date}, stale since {date}" as a caution, and the catalog's note shows as "Note: …";
+   - the pixel chart (6.9), labelled on its marks, opening still on the most likely of the model's 20 paths;
+   - under it, Play or Pause, "Next path" and "Path N of 20" ("the most likely" on the first). One path at a time, in order, never several: overlapping paths read as nothing. No legend and no paragraph: the chart's direct labels say it;
+   - the replay slider, in the look of Timestral's: a solid track with a solid tick a week, a square handle with a vertical bar, and the day beside the handle ("Today" on today's), on the side with room. 120 days, ←/→ for one day, T for today, "Back to today". The keys show only while the slider is hovered or has the focus;
+   - "How to read this": the band ("The shaded range is where 8 in 10 days should land; 2 in 10 land outside. It is not a high and a low."), the paths, the weekly cycle where the catalog says the series follows the week, normal, and what happened in a replay;
+   - "Show the numbers": that day's value, then a row per interval step, "Nov 02 (7 days): likely 119-243 · middle half 143-207 · middle estimate 173", with "· what happened 36, outside" once known, then the 1-year range of the daily value. The intervals block's lanes are folded into the chart (study change 11);
+   - "Sources": the attribution, "Data as of {date}" (for GPR "preliminary for about 4 weeks") and, for a backtest, how it was made.
+3. **Signals:** nine cards in three groups: "Risk, attention and oil", "Sea lanes", "War in Ukraine". Over them the takeaway, the signal furthest from normal against the others of its kind ("Strait of Hormuz 88% below normal; other lanes within 20%"; "All signals within 15% of normal" when none is 25% off), and "Tap a card to open its forecast." Each card shows:
+   - an icon and a name, and its key hint `[n]` only while hovered or focused;
+   - the 7-day average and its unit, "41 ships a day · 7-day avg" (a parenthesis in the unit is left to the panel);
+   - a chip, a pixel arrow and the change from normal: "▼ 88% below normal";
+   - a mini pixel chart with its forecast band and a solid normal line, or, for a normal far off its scale, a marker at the edge with its value ("▲ normal 27" on Hormuz);
+   - one day's range: "Nov 22: likely 33-51 a day".
 
    Selecting a card (or pressing 1 to 9) opens that series in the panel with a dither transition. The hero stays on GPR.
-4. **The record:** the dots and the table from 6.4.
+4. **The record:** its verdict as the title, "Backtest: 56 of 72 forecasts landed in range, close to the 8 in 10 promised" ("close to" while the share stays within two standard errors of 8 in 10). Backtest and live never add up: the title counts the live series once any has its 30, the backtests while none has, and a backtest beside live records says so. One banner while any series collects: "Live record starts after 30 forecasts (0 so far). Until then, backtests made after the fact." The key once: "■ landed in range □ missed · About 2 in 10 squares should be hollow if the range is honest." Then the squares of 6.4 for each series, with "6 of 8 in range". "How we score", one tap away, holds per series and bucket "79% landed in range · aim 80%" on a ten-block bar with a tick after the 8th, and the misses in plain words against the series' own simple rule, named from its `primary_baseline`: "23% smaller misses than a simple 4-week average", "About as good as just repeating the last value", "5% bigger misses than the same weekday a week back", the 95% ranges in brackets.
 5. **Side navigation** on wide screens: icon plus two-line label, scroll-spy (`SideNav`). Inactive at 82% opacity, the lowest at which its label still reads at 4.5:1 on the blue ground (`contrast.test.ts`; the first spec's 30% fell far under); the lit one whole, with a 2 px bar on its outer edge, so it never rests on a shade alone. Down the right edge on the ground, from 1344 px, where the gutter beside the 1040 px sections holds it: the hero's art stands on the left. R jumps to the record on any screen, as its link does: the address says `#record`, and the focus moves to the record, so the next Tab goes on from there.
 6. **The foot of the page:** a thin rule, then "aseri", "© 2026 Gabriele Durante", "Code: MIT" (the repository's `LICENSE`) and "Forecasts and data: CC BY-NC 4.0", the source repository, the choice of hero, and each engraving's credit with its source and CC0, from the prototype's README: "Messenger: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art", "Signal: Hendrick Goltzius, The Farnese Hercules, c. 1592, published 1617, The Metropolitan Museum of Art", "Vortex: Apollo Belvedere (Apollo Pythius), engraving, Rijksmuseum", each linked to its Wikimedia Commons page.
 
@@ -340,7 +345,8 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
 - **Data loading (my call):** first load fetches `series.json`, `scores.json`, every `latest.json` and `actuals.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data, checked by `web/scripts/budget.js`: in CI on the fixtures, failing the build; in the daily run on the day's real data, as a warning only, since a heavier day must not take the site down.
 - **Accessibility:**
   - every control is a real button or input, with a visible focus (2 px white outline);
-  - the canvas charts have text equivalents (the readout and the intervals are real text);
+  - the canvas charts have text equivalents (the panel's chart its own label, with the range, what it counts and the path shown; a card's chart the card's words; "Show the numbers" in real text);
+  - the disclosures are buttons with `aria-expanded` and `aria-controls`, in the tab order;
   - the keyboard shortcuts never fire while an input is focused.
 
 ### 6.9 Design system
@@ -349,12 +355,13 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - ground `#1b1bf2` (`--background`), frame `#5454f5` (`--border`, decoration only), row `#1818d6` (`--muted`) and picked `#1616c3` (`--accent`), both darker than the ground;
   - white `#ffffff` for titles, body text and every number (`--primary`, `--foreground`), the daily values, the focus ring, the hero's art, what happened and a hovered control (`--white`), and caution (`--destructive`), always with its marker;
   - the second and last text tint `#dbdbfd` (`--secondary`, `--muted-foreground`: the wordmark's reading, labels and key hints, the origin and the baseline, the controls' blocks);
-  - the chart's dim marks `#adadfa` (`--dim`: the 7-day average, the bands, the lanes' 1-year range and the slider's weeks ahead);
-  - the one accent, gold `#ffc94a` (`--forecast`): the model's path, the lanes' most likely mark and its legend swatch. A mark colour, never text.
+  - the chart's dim marks `#adadfa` (`--dim`: the 7-day average, the bands, the hero bar's range and the slider's weeks ahead);
+  - the one accent, gold `#ffc94a` (`--forecast`): the model's path. A mark colour, never text.
 
   Map them to shadcn variables with `--radius: 0`. Beyond the two text tints, levels are carried by size, case, mark shape and dither density.
 - **States read without colour,** by shape and words (#148):
-  - inside and outside: the record's squares are filled or hollow, and the words say it ("inside", "outside", "6 of 8 inside the 8 in 10 range", "beats", "loses"). A hover only outlines a square, so a hollow one never fills;
+  - in range and missed: the record's squares are filled or hollow, and the words say it ("landed in range", "missed", "6 of 8 in range", "23% smaller misses"). A hover only outlines a square, so a hollow one never fills;
+  - above and below normal: a pixel arrow beside the words ("▼ 88% below normal");
   - picked: the card's darker surface, and an inner frame 2 px inside its border; a hover only lightens the border;
   - caution and stale: the `caution` utility, a "!" before the words in white, the marker kept out of the spoken text: a site not updated for 2 days, a stale series, a failed load.
 - **Contrast,** checked by `web/src/contrast.test.ts` from the tokens in `index.css`, as the study's test section asks:
@@ -379,15 +386,16 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - The forecast side: the most likely of the model's paths, a gold line 1 art pixel wide from the last daily value, apart from the real values' white by tint and weight, with no label at its end, on the panel and on the cards' mini charts alike; the bands keep theirs. Played, the panel draws the others in its place.
   - What happened after a replayed forecast was made: the daily values' line carried on from the origin through every known day, white and 2 art pixels heavy, so the replay compares line with line, the real one against the gold path (owner's choice: the replay is there to see how closely the forecast sticks to what happened, and dots did not show it). A day with no value breaks it, and a known day alone between two gaps is a dot, 2 art pixels wide when the days are 3 art pixels apart or more. Its last known day is a hollow 3x3 ring in white, whose middle no mark lights, apart by shape from the path's unmarked end and from the daily values' filled square at the origin. No ring where it would touch that square, as on a phone with one day known: the two would read as one blot over the line between them. The legend's swatch is the line ending on the ring.
   - Bands: 4x4 Bayer dither (50% inner for 5 in 10, 25% outer for 8 in 10) in the dim with solid edges, cleared 1 art pixel round every line and mark, so each keeps an edge of the ground: over the 50% band the gold path would average 2.2:1 (`chart.test.ts` checks the painted pixels).
-  - The forecast zone: diagonal hatch. The origin: dotted line in the second tint.
-  - Labels are real text over the canvas.
-  - The scale fits every daily value shown, so the main line is never clipped. The panel's also fits the published levels nearest 5% and 95%, and holds still as the paths turn. A path past them, about a day in ten, runs along the frame: fitting q0.01 to q0.99 squashed Hormuz's 0 to 8 ships into a fifth of the chart.
+  - No dashed or dotted line anywhere (owner's rule, #152). The forecast zone: diagonal hatch. The origin: a solid line in the second tint. The value ticks: short solid ticks left of the plot, with no grid across it. The normal: a solid line in the second tint, end to end. The hatch and the origin keep an art pixel of the ground round every mark, as the bands do.
+  - Labels are real text over the canvas, each on its mark instead of a legend: "daily" and "7-day avg" at the lines' ends, "normal 100" on its line, "data to Oct 26" over the origin, the first and last dates, the range's end values at the right, and in a replay "what happened" by its ring. The band says once, on itself, what it counts: "8 in 10 days land here" inside it and "↕ 2 in 10 outside" at its edge, in the first wording that fits the forecast side, on one line or broken over two or three. Each direct label takes the first of its spots that stays in its side of the chart and clear of the labels before it, covering as few points of the lines as it can (`placeLabels`); the forecast side's are placed against the most likely path, so they hold still while the others play.
+  - The scale fits every daily value shown, so the main line is never clipped. The panel's also fits the published levels nearest 5% and 95%, and holds still as the paths turn. A path past them, about a day in ten, runs along the frame: fitting q0.01 to q0.99 squashed Hormuz's 0 to 8 ships into a fifth of the chart. The normal joins the scale when it widens the data's span by half at most (Brent's 90 under prices of 97 to 153); further off, the chart leaves it out and marks it at the edge it lies past with its value, "▲ normal 27" on Hormuz's (`fitsNormal`).
+  - The history keeps its length: 4 weeks on a phone, 8 on a desktop.
 - **Copy** that prevents the known misreadings (a range read as a high and a low, a median read as a promise), checked by a text lint in `web/src/App.test.tsx`:
-  - a range always comes before "most likely", with a fixed denominator of 10: "8 in 10 between {lo} and {hi}, 2 in 10 outside". No median stands alone anywhere, a social preview included;
-  - beside the chart, what the line ahead is: "The line ahead is one possible path, not the forecast: no one knows which days turn out high". #147 asked for "which days will be high"; "turn out" keeps the rule below;
-  - beside the chart, what the band is and is not: "where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call"; for GPR alone, that daily values can follow the week, so a day compares with the same weekday ("compare Monday with Monday" in the hero). The sea lanes have no weekly cycle;
-  - "data as of {date}", from each `actuals.json`'s `as_of`; for GPR, "preliminary for about 4 weeks";
-  - never "will" and never "% confidence";
+  - the band is defined once, on the band, with its complement: "8 in 10 days land here", "2 in 10 outside". Headlines say "likely 110-250 (8 in 10)", rounded to tens from 100 up (`roughly`); everywhere else "likely 33-51", with exact values. No "5 in 10" and no median in the default view: "middle half" and "middle estimate" live in the tap readout and "Show the numbers", each after its range. No median stands alone anywhere, a social preview included;
+  - five terms, the same everywhere: range, middle estimate, what happened, normal, today. "Today" only for today; one date anchor ("data to Oct 26" on the chart, "Nov 23 (28 days)" in the rows); one "as of" per block;
+  - in "How to read this", what the line ahead is ("one of 20 possible paths drawn from the forecast … No one knows which days turn out high") and what the band is not ("It is not a high and a low"); for the series that follow the week, that a day compares with the same weekday;
+  - "data as of {date}", from each `actuals.json`'s `as_of`, in "Sources" and "About this data"; for GPR, "preliminary for about 4 weeks";
+  - never "will", never "% confidence" and never an em dash;
   - when the catalog's `generated_at` is more than 2 days old, the hero says "Site last updated {date}: the daily update may have stopped", computed in the browser.
 - **Other primitives:**
   - the hero's art is one canvas the size of the hero (`HeroArt`, with `Messenger`, `Signal` and `Vortex` laying out and drawing each), in the tokens' white, dim and ground. Each engraving ships as its own file, loaded only for the hero shown, and is never drawn past its own size:
@@ -396,7 +404,7 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
     - `web/src/assets/apollo.png`: the study's head crop box-averaged to a 208 px disc, dithered between 30% and 85% (6 KB, three colours), dithered again at any smaller size;
   - the icons are 8x12 pictograms knocked out of a solid block;
   - frames are 2 px with chipped corners;
-  - buttons are flat blocks with two-line labels that turn white on hover.
+  - buttons are flat blocks with two-line labels that turn white on hover; a disclosure's button stays white while open, with "+" or "-" after its label, kept out of its name.
 - **shadcn components** for the rest: Button, Card, Slider, Tabs or ToggleGroup where useful, Tooltip.
   - Add them with the shadcn CLI.
   - Restyle them through tokens, and turn off its fade and slide animations in favour of the dither.
