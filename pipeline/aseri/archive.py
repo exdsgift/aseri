@@ -80,9 +80,9 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
     return sorted(archived, key=lambda a: a.forecast.reference_date)
 
 
-def this_model(archived: list[Archived]) -> list[Archived]:
-    """The forecasts of `archived` that the model in the code made: a new MODEL_ID has a replay and a record of its own."""
-    return [a for a in archived if a.model_id == MODEL_ID]
+def this_model(archived: list[Archived], model_id: str | None = None) -> list[Archived]:
+    """The forecasts of `archived` that the model in the code made, or `model_id`: a new MODEL_ID has a replay and a record of its own."""
+    return [a for a in archived if a.model_id == (model_id or MODEL_ID)]
 
 
 def new_reference_dates(
@@ -369,8 +369,8 @@ def first_seen(archive_dir: Path, series_id: str) -> pd.Series:
     return _by_date(rows.drop_duplicates("target_end_date", keep="first"))
 
 
-def vintages(archive_dir: Path, series_id: str) -> pd.DataFrame:
-    """Every value the archive has seen of `series_id`, oldest vintage first: its `target_end_date`, `observation` and `as_of`, the day first seen."""
+def vintages(archive_dir: Path, series_id: str | None = None) -> pd.DataFrame:
+    """Every value the archive has seen of `series_id`, or of every series, oldest vintage first: its `target_end_date`, `observation` and `as_of`, the day first seen."""
     deltas = sorted((archive_dir / DELTAS).glob("*.csv"))
     if not deltas:
         empty = pd.DatetimeIndex([])
@@ -389,7 +389,9 @@ def vintages(archive_dir: Path, series_id: str) -> pd.DataFrame:
             "as_of": "datetime64[us]",
         }
     )
-    return rows[rows["target"] == series_id].sort_values("as_of", kind="stable")
+    if series_id is not None:
+        rows = rows[rows["target"] == series_id]
+    return rows.sort_values("as_of", kind="stable")
 
 
 def _by_date(rows: pd.DataFrame) -> pd.Series:

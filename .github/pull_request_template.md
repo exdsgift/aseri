@@ -32,3 +32,4 @@ Page, in `web/`:
 ## Data and licences
 
 - [ ] No new source; or its licence is checked, its text is in `api/licenses/`, and its attribution is in the registry.
+- [ ] The API and the data are unchanged; or `README.md`, `docs/research/public-api.md`, the API page and `api/` describe the change.

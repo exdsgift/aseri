@@ -230,19 +230,19 @@ The owner wants scripts that look for covariates that are actually accurate. The
     - the other aseri series as past-only covariates, held back by their real publication lag;
     - lagged versions of the above;
     - new public series only after they pass the data-source checks in 6.1.
-- **The keep rule, fixed in config before any run.** Use the rule from the covariates spike:
-  - WQL at least 2% better, with the 90% CI below zero, on both the 1-7 and 8-28 buckets;
+- **The keep rule, fixed in config before any run** (`pipeline/aseri/scout.toml`, #139). The spike's rule, sized to the series and to n:
+  - WQL on the 21 levels at least 2% better, with the 90% CI below zero, in every bucket the series has: 1-7 and 8-28, 8-14 for the 14-day series, 1-7 alone for the 7-day ones. The CI is a stationary block bootstrap over the weekly origins, mean block 8, since overlapping origins make an iid bootstrap far too narrow;
   - no worse MASE;
-  - 8-in-10 coverage within 0.70 to 0.90.
+  - 8-in-10 coverage inside the binomial acceptance region at 5% for n = the bucket's origins, not a fixed 0.70 to 0.90 (that window fits about 52).
 
-  Changing the rule is a code change with a reason in the commit.
+  Changing the rule is a code change with a reason in the commit. Each past-only covariate is held back by its stalest publication lag against the target's freshest, and the run reuses a cache of its forecasts, so a monthly run makes only the origins that are new or revised.
 - **What it produces:**
   - a Markdown report under `docs/research/scout/{date}.md`;
   - when a set passes, an issue or draft PR that proposes enabling it for that series.
 
-  **A human approves.** Enabling a covariate changes the model ID suffix, because the inference settings changed, so the live record restarts honestly for that series.
-- **The first known lead:** Lunar New Year for Taiwan. It cut the error 27% in the 2026 holiday week but rests on one holiday, so retest after the 2027 one.
-- **Cost:** covariates cost 3 to 4.5 times more inference. Monthly runs are minutes, not a constraint.
+  **A human approves.** Enabling a covariate changes the model ID suffix, because the inference settings changed, so the live record restarts honestly for that series. The model part of `aseri-timestral209m_c1` is at Hubverse's 16 characters already, so a series with covariates is `aseri-ts209m_c1_{tag}`, the tag being the candidate's name of at most 6 characters (`scout.model_id`).
+- **The first known lead:** Lunar New Year for Taiwan. It cut the error 27% in the 2026 holiday week but rests on one holiday in the spike; PortWatch holds 8 since 2019, so the scout tests it now, and 2027's is the clean confirmation.
+- **Cost:** covariates cost 2.6 to 4.5 times more inference. 26 weekly origins of all nine series with their 19 candidates are about 42 minutes of model time on a laptop's 4 threads, an estimated 65 to 85 on a runner, a third of it GPR; the cache then makes only what is new.
 
 ### 6.6 Public API
 

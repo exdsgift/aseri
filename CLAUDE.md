@@ -1,5 +1,9 @@
 # aseri
 
+## Keep the README in step
+
+Any change to the API or the data (a series, a file, a field, a format, a licence, a model) also updates `README.md`, `docs/research/public-api.md`, the API page `web/api/index.html` and the contract in `api/`, in the same change. See `CONTRIBUTING.md`.
+
 ## Agent skills
 
 ### Issue tracker

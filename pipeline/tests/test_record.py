@@ -170,6 +170,130 @@ def test_a_record_with_no_forecast_of_the_model_is_the_empty_table_itself(tmp_pa
     assert list(rows.columns) == list(record.SCORED)
 
 
+def shown(archive_dir, today):
+    """The model whose record the series shows on `today`, and its rows."""
+    return record.shown(
+        SUEZ,
+        archive.read(archive_dir, SUEZ.id),
+        archive.vintages(archive_dir, SUEZ.id),
+        pd.Timestamp(today),
+    )
+
+
+def under(monkeypatch, model_id, *run_args):
+    """A run archived under another model than the one in the code."""
+    with monkeypatch.context() as before:
+        before.setattr(archive, "MODEL_ID", model_id)
+        before.setattr(archive, "ROUNDS", Path("model-output", model_id))
+        run(*run_args)
+
+
+def two_models_before(tmp_path, monkeypatch):
+    """The first model launched on Oct 26; a second forecast the same day again on Oct 27, a ship higher."""
+    under(
+        monkeypatch,
+        "aseri-timestral209m",
+        tmp_path,
+        [around("2026-10-01", 42.0)],
+        ships("2026-10-25"),
+        date(2026, 10, 26),
+    )
+    under(
+        monkeypatch,
+        "aseri-timestral209m_c0",
+        tmp_path,
+        [around("2026-10-01", 43.0)],
+        ships("2026-10-25"),
+        date(2026, 10, 27),
+    )
+
+
+def test_until_this_model_has_a_record_to_show_the_record_is_the_newest_model_before_it(
+    tmp_path, monkeypatch
+):
+    two_models_before(tmp_path, monkeypatch)
+
+    # This model has no forecast yet: the record is the newest model's before it, that one alone.
+    model_id, rows = shown(tmp_path, "2026-11-08")
+    assert model_id == "aseri-timestral209m_c0"
+    assert rows["reference_date"].unique().tolist() == [pd.Timestamp("2026-10-01")]
+    assert (rows["ae_median"] == (rows["observation"] - 43.0).abs()).all()
+
+    # Its first forecast. A day scored 1 day ahead is nothing the page can show: no whole 1-7
+    # bucket, no square 7 days ahead. So the record stays the model before's until day 7 is scored.
+    run(tmp_path, [around("2026-10-28", 42.0)], ships("2026-10-28"), date(2026, 10, 29))
+    run(tmp_path, [], ships("2026-11-10"), date(2026, 11, 11))
+    assert scored(tmp_path, "2026-11-12")["horizon"].tolist() == [1]
+    assert shown(tmp_path, "2026-11-12")[0] == "aseri-timestral209m_c0"
+    # Nov 4, 7 days ahead, is scored on Nov 18: the record is this model's alone from then.
+    model_id, rows = shown(tmp_path, "2026-11-18")
+    assert model_id == forecast_module.MODEL_ID
+    assert rows["reference_date"].unique().tolist() == [pd.Timestamp("2026-10-28")]
+    assert rows["horizon"].tolist() == list(range(1, 8))
+
+
+def test_the_newest_model_before_is_the_one_whose_run_came_last_even_on_the_same_day(
+    tmp_path, monkeypatch
+):
+    two_models_before(tmp_path, monkeypatch)
+    archived = archive.read(tmp_path, SUEZ.id)
+    # Both models' forecasts dated the same day, the older one read first.
+    same_day = [replace(a, forecast_date="2026-10-27") for a in archived]
+    assert [a.model_id for a in same_day] == [
+        "aseri-timestral209m",
+        "aseri-timestral209m_c0",
+    ]
+
+    model_id, _ = record.shown(
+        SUEZ, same_day, archive.vintages(tmp_path, SUEZ.id), pd.Timestamp("2026-11-08")
+    )
+
+    assert model_id == "aseri-timestral209m_c0"
+
+
+def test_the_record_scores_this_model_and_the_one_it_falls_back_to_and_no_other(
+    tmp_path, monkeypatch
+):
+    # The first model has targets due; a newer one only a forecast from yesterday, none due.
+    under(
+        monkeypatch,
+        "aseri-timestral209m",
+        tmp_path,
+        [around("2026-10-01", 42.0)],
+        ships("2026-10-25"),
+        date(2026, 10, 26),
+    )
+    under(
+        monkeypatch,
+        "aseri-timestral209m_c0",
+        tmp_path,
+        [around("2026-11-07", 42.0)],
+        ships("2026-11-07"),
+        date(2026, 11, 8),
+    )
+    calls = []
+    scoring = record.scored
+    monkeypatch.setattr(
+        record,
+        "scored",
+        lambda *args, **kwargs: (
+            calls.append(kwargs.get("model_id")) or scoring(*args, **kwargs)
+        ),
+    )
+
+    model_id, _ = shown(tmp_path, "2026-11-08")
+
+    assert model_id == "aseri-timestral209m"
+    assert calls == [None, "aseri-timestral209m"]
+
+
+def test_an_archive_of_one_model_shows_its_record_as_before(first_run):
+    model_id, rows = shown(first_run, "2026-11-08")
+
+    assert model_id == forecast_module.MODEL_ID
+    assert rows.equals(scored(first_run, "2026-11-08"))
+
+
 def test_a_rerun_on_a_later_day_scores_every_target_it_had_scored_byte_for_byte(
     first_run,
 ):

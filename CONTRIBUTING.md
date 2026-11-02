@@ -36,7 +36,8 @@ CI runs the same commands on every push ([`ci.yml`](.github/workflows/ci.yml)). 
 6. **Register known measurement errors** in `pipeline/aseri/anomalies.csv`, one row per series and day, with the evidence. The model's context leaves those days blank; the actuals and the scores keep them.
 7. **Give it a card:** its group and pictogram in `web/src/components/Signals.tsx`. Each series may add at most 30 words to the default view.
 8. **Regenerate the fixtures through the pipeline's writers,** never by hand: run the pipeline and copy the series' files into `web/src/fixtures/`. The gate's tests check them against the API contract.
-9. **Mind the model ID.** Anything that changes published quantiles needs a new `MODEL_ID` in `pipeline/aseri/forecast.py` (ADR 0001, rule 4): a calibration offset in `offsets.csv`, the context, the inputs, an ensemble, or the weights or package pin. Regenerate the goldens with it, and only with it: `uv run python -m tests.test_real_model` in `pipeline/`. A primary baseline, the anomalies register and the page never change the model ID.
+9. **Update the README and the API docs:** the signals table in `README.md`, `docs/research/public-api.md` and the API page, `web/api/index.html` (see below).
+10. **Mind the model ID.** Anything that changes published quantiles needs a new `MODEL_ID` in `pipeline/aseri/forecast.py` (ADR 0001, rule 4): a calibration offset in `offsets.csv`, the context, the inputs, an ensemble, or the weights or package pin. Regenerate the goldens with it, and only with it: `uv run python -m tests.test_real_model` in `pipeline/`. A primary baseline, the anomalies register and the page never change the model ID.
 
 ## Add a chart or a visual
 
@@ -59,6 +60,15 @@ node scripts/brand.mjs                   # every image, the favicons and the scr
 ```
 
 [`branding/README.md`](branding/README.md) lists every format and how to redraw only some.
+
+## Change the API or the data
+
+Any change to what the API publishes or to the data behind it updates, in the same pull request, everything that describes it:
+- `README.md`: the signals table, the API section and its examples, the model card and the latest news;
+- `docs/research/public-api.md` and the API page, `web/api/index.html`;
+- the contract in `api/`: OpenAPI, the JSON Schemas and the licence texts.
+
+This covers a series added, removed or renamed; a file, a field or a format; a licence or a source; and a model change.
 
 ## Commits and pull requests
 

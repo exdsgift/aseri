@@ -710,11 +710,19 @@ def run_under_the_model_before(monkeypatch, moment, gpr_file, api_dir, archive_d
         run_on(before, moment, gpr_file, api_dir, archive_dir)
 
 
-def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_of_the_model_before(
-    tmp_path, monkeypatch, stub_model, short_backfill
+def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_and_record_of_the_model_before(
+    tmp_path, monkeypatch, stub_model
 ):
-    monkeypatch.setattr(publish, "REPLAY_DAYS", archive.REPLAY_DAYS)
+    # The smallest backfill with a record to show: GPR scores a day 35 days on, so a forecast's
+    # 7th day is due on the run of Oct 27 from Sep 15 back, 41 days before the newest.
+    monkeypatch.setattr(archive, "REPLAY_DAYS", 41)
     archive_dir = tmp_path / "archive"
+    # A monitor that finds every band far off, and the issue output it names them in.
+    monkeypatch.setattr(
+        record, "calibration", lambda series, rows: {("1-7", 0.8): "red"}
+    )
+    output = tmp_path / "output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
     # The morning's run, under the model before; then the new MODEL_ID lands the same day.
     run_under_the_model_before(
         monkeypatch,
@@ -734,6 +742,13 @@ def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_of_the_model_before(
         archive_dir,
     )
 
+    # The monitor watched the model in the code that morning; on a record of a retired model, it is silent.
+    morning_output, afternoon_output = output.read_text(encoding="utf-8").split(
+        "stale="
+    )[1:]
+    assert "calibration_red=gpr_daily\n" in morning_output
+    assert "calibration_red=\n" in afternoon_output
+
     # Nothing is archived under the new model today, so the replay is the morning's, day for day and
     # value for value, still credited to the model before.
     assert files(archive_dir) == archive_before
@@ -747,13 +762,20 @@ def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_of_the_model_before(
         morning["model_id"],
         morning["attribution"],
     )
-    # The record is the new model's: empty, and it says so.
-    scores = read(tmp_path / "afternoon" / "scores.json")
+    # The new model has nothing scored yet, so the record is the model before's, labelled with it,
+    # as it stood that morning; the files' own model_id stays the new one.
+    morning_scores, scores = (
+        read(tmp_path / run / "scores.json") for run in ("morning", "afternoon")
+    )
+    (gpr,) = scores["series"]
     assert scores["model_id"] == MODEL_ID
-    assert (
-        scores["series"][0]["live"]["n"]
-        == scores["series"][0]["retrospective"]["n"]
-        == 0
+    assert gpr["scored_model_id"] == "aseri-timestral209m"
+    assert gpr["retrospective"]["n"] > 0
+    assert gpr["retrospective"] == morning_scores["series"][0]["retrospective"]
+    own = read(tmp_path / "afternoon" / "series" / "gpr_daily" / "scores.json")
+    assert (own["model_id"], own["scored_model_id"]) == (
+        MODEL_ID,
+        "aseri-timestral209m",
     )
     assert gate.contract(tmp_path / "afternoon") == []
 
@@ -1724,7 +1746,8 @@ def test_the_bulk_scores_keep_the_model_before_which_the_record_leaves_out(
     # Due by Nov 16 with a 14-day wait: the sea lanes' days to Nov 2, from the forecasts to Oct 25.
     assert set(before["target"]) == set(PORTS)
     assert before["reference_date"].max() == date(2026, 10, 25)
-    assert read(api / "series" / "suez_transits" / "scores.json")["live"]["n"] == 0
+    suez = read(api / "series" / "suez_transits" / "scores.json")
+    assert (suez["scored_model_id"], suez["live"]["n"]) == (MODEL_ID, 0)
     assert gate.contract(api) == []
 
 

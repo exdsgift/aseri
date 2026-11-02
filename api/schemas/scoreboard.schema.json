@@ -15,6 +15,7 @@
         "required": ["series_id", "n", "min_n_to_display", "primary_baseline", "score_lag_days", "live", "retrospective", "links"],
         "properties": {
           "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+          "scored_model_id": {"$ref": "scores.schema.json#/$defs/scored_model_id"},
           "n": {"$ref": "scores.schema.json#/$defs/n"},
           "min_n_to_display": {"$ref": "scores.schema.json#/$defs/min_n_to_display"},
           "primary_baseline": {"$ref": "scores.schema.json#/$defs/primary_baseline"},

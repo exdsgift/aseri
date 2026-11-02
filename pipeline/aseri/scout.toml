@@ -1,0 +1,91 @@
+# The covariate scout (spec 6.5, #139): its keep rule, its bounds and its candidates, fixed before any run.
+# Changing the rule is a code change, with its reason in the commit message. aseri/scout.py checks every entry at import.
+
+[rule]
+# Against the univariate model on the same (origin, step) cells, in every bucket the series has (1-7, and 8 to
+# its horizon: 8-28, 8-14, or none for a 7-day series), a candidate needs all of:
+# WQL on the 21 levels at least 2% better, a ratio of at most 0.98. On the same cells WQL's sum of |y| cancels,
+# so its ratio is WIS's.
+wql_ratio = 0.98
+# The upper bound of that ratio's 90% interval below 1: a stationary block bootstrap over the weekly origins,
+# with a mean block of 8, as the covariate research's step 6 asks (an iid bootstrap over overlapping origins
+# rejects a true null 16 to 42% of the time).
+interval = 0.90
+block = 8
+# MASE no worse, on the point estimate.
+mase_ratio = 1.0
+# The 8 in 10 range's coverage inside the binomial acceptance region, two-sided at 5%, for n = the bucket's
+# origins (best-practice report, item 22). The cells of one origin share one future, so the origin is the unit.
+coverage = 0.8
+coverage_alpha = 0.05
+
+[run]
+# The newest weekly origins of each series, on its record weekday, whose every step is observed. One origin of
+# every series, univariate and with each candidate below, took 97 s of model time on a laptop's 4 threads on
+# 2026-11-02, a third of it GPR (3.3 s univariate, 14.8 s with a covariate on its 15,246 days). So a run with an
+# empty cache is about 42 minutes there, and an estimated 65 to 85 on a 4-vCPU runner; the cache then makes
+# only the origins that are new or whose data was revised.
+origins = 26
+# Each series tests at most this many candidates, each of at most this many members, so a run with an empty
+# cache fits in one GitHub Actions job.
+max_candidates = 3
+max_members = 3
+
+# How old a series' newest value can be at the 07:00 run at the freshest, in days; series.py's expected_lag is the
+# stalest. A past-only covariate is held back by its stalest lag less the target's freshest, unless one fetch brings both.
+[fewest_lag]
+gpr_daily = 1                 # 1 to 7 days old
+suez_transits = 3             # PortWatch: 3 to 10 days old
+hormuz_transits = 3
+bab_el_mandeb_transits = 3
+taiwan_strait_transits = 3
+wiki_ww3_views = 1            # yesterday's views
+brent_spot = 2                # 2 to 8 days old
+ua_air_raid_hours = 1         # the day before, complete
+ua_drones_downed_claimed = 1  # the day before's report
+
+# Per target series, each candidate and its members. A candidate's name is its tag in the model ID once enabled:
+# 1 to 6 lowercase letters or digits. A member is either a calendar row, known in advance (dow: day of week;
+# lny: Lunar New Year, eve to day +6; gw: Golden Week, 1 to 7 October; xmas: 24 December to 1 January), or another
+# series' id, past-only and held back by its publication lag. "@k" lags a member by k days.
+# The covariate research's shortlist first, the spike's sets as controls.
+[candidates.gpr_daily]
+xmas = ["xmas"]                          # few articles over the holidays make the share noisier
+ww3 = ["wiki_ww3_views"]                 # control: worse on 8-30 in the spike
+
+[candidates.suez_transits]
+lny28 = ["lny@28"]                       # factory shutdowns, 4 weeks' sailing from East Asia
+bem = ["bab_el_mandeb_transits"]         # the same corridor, a few days upstream
+
+[candidates.hormuz_transits]
+brent = ["brent_spot"]
+dow = ["dow"]                            # -1.3% on 8-30 in the spike, under the floor
+
+[candidates.bab_el_mandeb_transits]
+lny21 = ["lny@21"]                       # factory shutdowns, 3 weeks' sailing from East Asia
+suez = ["suez_transits"]
+
+[candidates.taiwan_strait_transits]
+lny = ["lny"]                            # -27% error in the 2026 holiday week; 8 holidays since 2019
+lnygw = ["lny", "gw"]
+dowlny = ["dow", "lny"]                  # the spike's set
+
+[candidates.wiki_ww3_views]
+gpr = ["gpr_daily"]
+dow = ["dow"]
+
+[candidates.brent_spot]
+hormuz = ["hormuz_transits"]             # a regime indicator: 78 transits a day to 3 as Brent rose from 71 to 104
+dow = ["dow"]
+
+[candidates.ua_air_raid_hours]
+drones = ["ua_drones_downed_claimed"]    # control: worse in the spike
+dow = ["dow"]
+
+[candidates.ua_drones_downed_claimed]
+alerts = ["ua_air_raid_hours"]           # the reverse of the spike's link, untested
+alert1 = ["ua_air_raid_hours@1"]         # the same, lagged a day
+
+# Covariates a human has approved, by series: the candidate's name. None: enabling one changes the series' model ID
+# (scout.model_id), so its live record restarts, and the daily job must feed it, which it does not yet.
+[enabled]

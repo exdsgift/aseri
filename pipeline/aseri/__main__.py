@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from aseri import archive, bulk, record
-from aseri.forecast import MODEL_ID, forecast, load_model, make_context, under_review
+from aseri.forecast import forecast, load_model, make_context, under_review
 from aseri.gate import annotate, check_forecasts
 from aseri.publish import publish, publish_catalog, publish_contract, publish_scores
 from aseri.series import (
@@ -249,18 +249,28 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         try:
             # shortcut: reads every delta file again, once per series; read them once per run if that gets slow.
             vintages = archive.vintages(archive_dir, series.id)
-            scored = record.scored(series, archived, vintages, today)
+            # The model in the code's record, or the model before's until it has a scored target.
+            model_id, scored = record.shown(series, archived, vintages, today)
             summary = record.summary(
                 series,
                 scored,
                 # shortcut: a second scoring of every due target; score only the revised ones if runs get slow.
-                record.scored(series, archived, vintages, today, latest=True),
+                record.scored(
+                    series, archived, vintages, today, latest=True, model_id=model_id
+                ),
+                model_id,
             )
-            zones = record.calibration(series, scored)
-            # The bulk scores keep every model's, which the record leaves out after a model change.
-            by_model = {MODEL_ID: scored} | {
+            # The monitor watches the model in the code: a retired model's record raises no alert.
+            zones = (
+                record.calibration(series, scored)
+                if model_id == archive.MODEL_ID
+                else {}
+            )
+            # The bulk scores keep every model's, where the record shows one: the shown model's rows as
+            # scored above, and each other model's.
+            by_model = {model_id: scored} | {
                 model: record.scored(series, archived, vintages, today, model_id=model)
-                for model in sorted({a.model_id for a in archived} - {MODEL_ID})
+                for model in sorted({a.model_id for a in archived} - {model_id})
             }
             # Kept only once all of it worked, so a series has its whole record or none.
             records.append(summary)

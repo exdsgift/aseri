@@ -46,6 +46,8 @@ export function App() {
   const [picked, setPicked] = useState(gprId)
   // How past forecasts did, for the record: the page goes on without it.
   const [records, setRecords] = useState<ScoreRecord[]>()
+  // The model in the code, which the record tells a record of the model before from.
+  const [model, setModel] = useState("")
   // The past forecast a square of the record opened in the panel's replay, and a count of
   // the taps, so that a second tap on the same square opens it again.
   const [opened, setOpened] = useState<string>()
@@ -93,7 +95,10 @@ export function App() {
         console.error(error)
         setFailed(true)
       })
-    loadScores().then(({ series }) => setRecords(series), console.error)
+    loadScores().then(({ model_id, series }) => {
+      setModel(model_id)
+      setRecords(series)
+    }, console.error)
   }, [])
 
   // Each pick brings the panel into view once its new series is drawn, not again when the
@@ -209,6 +214,7 @@ export function App() {
             />
             {recorded && (
               <TrackRecord
+                model={model}
                 records={records}
                 entries={signals.map((s) => s.entry)}
                 onOpen={(id, date) => {

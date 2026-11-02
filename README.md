@@ -116,7 +116,7 @@ At 07:00 UTC, [`daily.yml`](.github/workflows/daily.yml) runs the tests, then ch
 | **Model ID** | `aseri-timestral209m_c1`, the calibrated model merged in [#151](https://github.com/exdsgift/aseri/issues/151). Every forecast file names the model that made it in `model_id`; earlier forecasts keep `aseri-timestral209m` |
 | **Baselines** | Naive (the last value), seasonal naive (the same weekday a week back) and the 28-day mean; each series is judged against the one with the lowest error on its backtest |
 | **Horizons** | 28 days for GPR, Suez and Taiwan; 14 for Hormuz, Bab el-Mandeb, "World War III" and Brent (trading days); 7 for the air-raid alerts and the drones |
-| **Limits** | Mistral has not published the training cutoff, so backtests may be optimistic. Covariates were tested and none helped, so the daily forecasts use none |
+| **Limits** | Mistral has not published the training cutoff, so backtests may be optimistic. Covariates were tested and none helped, so the daily forecasts use none; a monthly scout ([`scout.yml`](.github/workflows/scout.yml)) re-tests them and proposes any that pass, for a human to decide |
 
 ## Quick Start
 
@@ -174,6 +174,7 @@ npm run dev                                       # on the published API
 - **What is scored.** Every forecast step, once its day's value has settled (35 days for GPR, which revises its last month), against that settled value.
 - **How.** The weighted interval score (WIS) on the 21 levels, the share of days inside the 5 in 10 and 8 in 10 ranges, and the error of the middle estimate against the series' own simple baseline, by horizon bucket (1-7 and 8-28 days), each ratio with its 95% interval.
 - **Live and backtest apart.** Live forecasts are issued by the daily run. Retrospective ones, the 120-day launch backfill and any day issued after the fact, are backtests. They are never added into one figure, and a series shows its live score only after 30 resolved forecasts.
+- **One model per record.** A record scores one model's forecasts, named in its `scored_model_id`. After a model change, a series shows the previous model's record until the new model has a forecast scored 7 days ahead, which takes weeks for GPR, and the page says so.
 - **Where.** [The Record on the live page](https://exdsgift.github.io/aseri/#record), and each series' `scores.json` in the API.
 
 ## Contributing

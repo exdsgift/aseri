@@ -138,8 +138,10 @@ def score(
     )
 
 
-def bootstrap(model, baseline=None, *, block: int) -> tuple[float, float, float]:
-    """mean(model) / mean(baseline), or mean(model) alone, with its 95% stationary block bootstrap interval.
+def bootstrap(
+    model, baseline=None, *, block: int, tail: float = TAIL
+) -> tuple[float, float, float]:
+    """mean(model) / mean(baseline), or mean(model) alone, with its stationary block bootstrap interval, 95% unless `tail` says otherwise.
 
     One value per origin, in date order: the origin's mean over its scored horizons in a bucket.
     Neighbouring origins share most of their future, so their scores move together; blocks of mean
@@ -159,7 +161,7 @@ def bootstrap(model, baseline=None, *, block: int) -> tuple[float, float, float]
     first = np.maximum.accumulate(np.where(new_block, step, 0), axis=1)
     index = (np.take_along_axis(starts, first, axis=1) + step - first) % n
     ratios = model[index].mean(axis=1) / baseline[index].mean(axis=1)
-    low, high = np.quantile(ratios, [TAIL, 1 - TAIL])
+    low, high = np.quantile(ratios, [tail, 1 - tail])
     return float(model.mean() / baseline.mean()), float(low), float(high)
 
 
