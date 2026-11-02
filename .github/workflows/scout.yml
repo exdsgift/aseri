@@ -5,8 +5,9 @@ name: scout
 # archive and never writes it, the site or the daily forecasts; its only write is its report, under docs/research/scout/.
 on:
   schedule:
-    # The 3rd of each month, after the daily run of 07:00 has archived the day.
-    - cron: "0 9 3 * *"
+    # The 3rd of each month, well after the daily run of 07:00 has archived the day, even a delayed one.
+    # The report names the vintage it read all the same.
+    - cron: "0 20 3 * *"
   workflow_dispatch:
 
 permissions:
@@ -55,13 +56,14 @@ jobs:
           path: archive
           persist-credentials: false
       # An Actions cache unused for 7 days is evicted, so a monthly run keeps its forecasts as an artifact instead.
-      - name: Take the forecasts the last run cached
+      - name: Take the forecasts the last master run cached
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p "$RUNNER_TEMP/scout-cache"
-          id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=scout-cache&per_page=20" \
-            --jq '[.artifacts[] | select(.expired | not)][0].id // empty')
+          # Only master's: a run on another branch may have made its forecasts with other code.
+          id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=scout-cache&per_page=50" \
+            --jq '[.artifacts[] | select(.expired | not) | select(.workflow_run.head_branch == "master")][0].id // empty')
           if [ -z "$id" ]; then
             echo "::notice::No cached forecasts: this run makes them all"
             exit 0
@@ -95,7 +97,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Master's tip now, not the commit the run started from: master may have moved in the hours the scout ran.
       - uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
       - uses: actions/download-artifact@v8
         with:
           name: scout-report
@@ -117,9 +123,25 @@ jobs:
             echo "The report is committed already"
             exit 0
           fi
-          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-            commit -q -m "docs: covariate scout report ${REPORT%.md} (#139)"
-          git push origin HEAD:master
+          if [ "$(git diff --cached --name-only)" != "docs/research/scout/$REPORT" ]; then
+            echo "::error::The commit would hold more than the report"
+            exit 1
+          fi
+          # Set for the repository, so the rebase below can replay the commit too.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "docs: covariate scout report ${REPORT%.md} (#139)"
+          # A push between the checkout and this one rejects it: replay the report on the new tip and try again.
+          for attempt in 1 2 3; do
+            git pull -q --rebase origin master
+            if git push -q origin HEAD:master; then
+              exit 0
+            fi
+            echo "Master moved; retrying ($attempt of 3)"
+            sleep $((attempt * 10))
+          done
+          echo "::error::Could not push the report to master"
+          exit 1
 
   # Opens an issue when a candidate passes the keep rule. It runs only gh, no third-party code, so it alone gets issues: write.
   propose:
@@ -129,7 +151,7 @@ jobs:
     permissions:
       issues: write
     steps:
-      - name: Open an issue proposing what passed, unless one is open already
+      - name: Open the proposals issue, or add this month's to the open one
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -138,15 +160,18 @@ jobs:
           SERVER: ${{ github.server_url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          title="Covariate scout: $PASSED passed the keep rule"
-          # A candidate that passes once tends to pass next month on mostly the same origins: one open issue is enough.
-          if [ "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq length)" -gt 0 ]; then
-            echo "An issue is open already"
-            exit 0
-          fi
-          gh issue create --title "$title" --body "The monthly covariate scout found candidates that pass the keep rule in pipeline/aseri/scout.toml, given as series:candidate: $PASSED.
+          # One stable title: a month whose list differs comments on the open issue rather than opening another.
+          title="Covariate scout: proposals"
+          news="The scout of ${REPORT%.md} found candidates that pass the keep rule in pipeline/aseri/scout.toml, as series:candidate: $PASSED.
 
           Report: $SERVER/$GH_REPO/blob/master/docs/research/scout/$REPORT
-          Run: $RUN_URL
+          Run: $RUN_URL"
+          open=$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
+            --jq 'map(select(.title == "Covariate scout: proposals")) | first | .number // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body "$news"
+            exit 0
+          fi
+          gh issue create --title "$title" --body "$news
 
-          This is a proposal for a human decision; the daily forecasts have not changed. Before enabling one, read the report's caveats: monthly runs re-test mostly the same origins, so confirm the gain on origins the candidate has not been tested on. Enabling it means naming it under [enabled] in scout.toml, which gives the series a model ID of its own (scout.model_id) and restarts its live record, and wiring the daily job to feed the covariate and archive under that ID, which it does not do yet."
+          This is a proposal for a human decision; the daily forecasts have not changed. Before enabling one, read the report's caveats: monthly runs re-test mostly the same origins, so confirm the gain on origins the candidate has not been tested on. Enabling it means naming it under [enabled] in scout.toml, which gives the series a model ID of its own (scout.model_id) and restarts its live record, and wiring the daily job to feed the covariate and archive under that ID, which it does not do yet. Later months that pass add a comment here."
