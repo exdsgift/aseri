@@ -85,7 +85,8 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             del fetched[series.id]
             skipped[series.id] = ("held", str(hold))
     ran_today = archive.ran_on(archive_dir, today)
-    model, runs, issued = None, [], {}
+    # Each series' new forecasts, and its retrospective ones dropped out of bounds, for the run summary.
+    model, runs, issued, dropped = None, [], {}, {}
     for series, observed, as_of, upstream in fetched.values():
         lag = (as_of - observed.index[-1].date()).days
         if lag >= series.expected_lag + STALE_DAYS:
@@ -105,7 +106,8 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             else archive.new_reference_dates(
                 # Only from a day with a value: the drones' day without a report starts none.
                 usable.dropna(),
-                [a.forecast.reference_date for a in archived],
+                # A new MODEL_ID forecasts the replay window again, for its replay and its record.
+                [a.forecast.reference_date for a in archive.this_model(archived)],
             )
         )
         forecasts = []
@@ -115,12 +117,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                     model = load_model()
                 # Each forecast sees only the data up to its own date.
                 forecasts.append(
-                    forecast(
-                        model,
-                        make_context(series, observed, day),
-                        series.horizon,
-                        series.kind,
-                    )
+                    forecast(model, make_context(series, observed, day), series)
                 )
                 # The launch backfill takes minutes, so the log shows it moving.
                 print(
@@ -135,22 +132,36 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 f"forecast: {type(error).__name__}: {error}",
             )
             forecasts = []
-        # Before anything is archived, for good: a new forecast far from its series' history holds that series
-        # alone, as a model error does, its data archived all the same. Why here and not in the gate: gate.py.
-        found = check_forecasts(
+        # Before anything is archived, for good: a new forecast far from its series' history is dropped alone and
+        # named. The live one, the run's newest when no archived forecast is as new, also holds its series for
+        # review, as a model error does; the others are archived all the same. Why here and not in the gate: gate.py.
+        errors, warnings = check_forecasts(
             series, forecasts, observed, [a.forecast for a in archived]
         )
-        for warning in found[1]:
+        for warning in warnings:
             annotate("warning", f"{series.id}: {warning}")
-        if found[0]:
-            skipped[series.id] = ("out of bounds", "; ".join(found[0]))
-            forecasts = []
+        newest = forecasts[-1].reference_date if forecasts else None
+        live = (
+            newest
+            if newest and all(a.forecast.reference_date < newest for a in archived)
+            else None
+        )
+        found = "; ".join(error for day in errors.values() for error in day)
+        if live in errors:
+            skipped[series.id] = ("out of bounds", found)
+        elif errors:
+            dropped[series.id] = found
+        forecasts = [f for f in forecasts if f.reference_date not in errors]
         issued[series.id] = len(forecasts)
         if not ran_today and (
             forecasts
             or archive.has_new_observations(archive_dir, series.id, observed, as_of)
         ):
-            runs.append(archive.SeriesRun(series, forecasts, observed, as_of, upstream))
+            runs.append(
+                archive.SeriesRun(
+                    series, forecasts, observed, as_of, upstream, tuple(errors)
+                )
+            )
     # One manifest, one round and one delta for the whole run.
     if runs:
         archive.write(
@@ -200,6 +211,11 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 f"{issued[series.id]} new forecasts, the latest from "
                 f"{archived[-1].forecast.reference_date:%Y-%m-%d}"
                 + (f". {note}" if note else "")
+                + (
+                    f"; dropped, out of bounds: {dropped[series.id]}"
+                    if series.id in dropped
+                    else ""
+                )
             )
         # A failed or stale series can have passed the check too; say whether this run archived what it saw.
         if series.id in deep_revised:

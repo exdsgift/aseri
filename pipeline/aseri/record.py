@@ -31,6 +31,24 @@ MIN_N = 30
 SQUARES, SQUARE_HORIZON = 8, 7
 # The baselines of the median's error, as `scoring.score` names its columns.
 BASELINES = ("naive", "snaive7", "mean28")
+# The columns of `scored` and their types: those of its empty table, before any target of the model is due.
+SCORED = {
+    "reference_date": "datetime64[us]",
+    "forecast_mode": "str",
+    "horizon": "int64",
+    "bucket": "str",
+    "observation": "float64",
+    "observation_as_of": "datetime64[us]",
+    **dict.fromkeys(
+        ("wis", "dispersion", "overprediction", "underprediction"), "float64"
+    ),
+    "interval_coverage_50": "bool",
+    "interval_coverage_80": "bool",
+    "ae_median": "float64",
+    "ase_median": "float64",
+    **{f"ae_{name}": "float64" for name in BASELINES},
+    "wis_naive": "float64",
+}
 # How every published score is computed, stated in the score files.
 METHOD = {
     "wis": "Bracher et al. (2021), as scoringutils computes it: on the 21 levels, (2/21) times the sum of their pinball losses, which is twice the plain pinball loss of scoringrules and utilsforecast. Components: dispersion, overprediction (observations below the band), underprediction.",
@@ -72,10 +90,11 @@ def scored(
     that day. The archive is append-only, so that value, and the score, are the same on every later
     run. `latest` scores the same targets against today's vintage instead: the sensitivity check of a
     series that revises. `vintages` are the archive's, as `archive.vintages` reads them.
-    shortcut: every archived forecast is scored as one model's; split by `model_id` when MODEL_ID changes.
+    A new MODEL_ID restarts the record: only the forecasts of the model in the code are scored.
     shortcut: every run rescores the whole archive, about 45 s for the launch backfill and growing with it;
     keep the scores of past runs outside the archive if a run ever spends minutes here.
     """
+    archived = archive.this_model(archived)
     today = pd.Timestamp(today)
     vintages = vintages[vintages["as_of"] <= today]
     # A registered measurement error is blank in the model's input, and no observation to score against.
@@ -107,8 +126,8 @@ def scored(
         seen = [observations[target] for target in targets] + [None] * (
             steps - len(targets)
         )
-        # Nothing due yet: skipped, which saves most of the work, but for one empty table that keeps the columns.
-        if not any(seen) and (frames or issued is not archived[-1]):
+        # Nothing due yet: skipped, which saves most of the work.
+        if not any(seen):
             continue
         # The vintage the forecast was made from, never today's: its baselines saw what it saw.
         as_of = issued.provenance["data"]["as_of"]
@@ -130,6 +149,10 @@ def scored(
             pd.DatetimeIndex([found[1] for found in seen if found is not None]),
         )
         frames.append(rows)
+    if not frames:
+        return pd.DataFrame(
+            {column: pd.Series(dtype=t) for column, t in SCORED.items()}
+        )
     return pd.concat(frames, ignore_index=True)
 
 

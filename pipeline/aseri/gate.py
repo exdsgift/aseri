@@ -5,10 +5,11 @@ Two checks, split by what a failure puts at risk:
   off its schema, files that disagree, or a file the catalog links to and the run did not write make the
   API unsafe for every client: the step fails the run, so nothing is archived or deployed.
 - The bounds, `check_forecasts`, which the daily run calls on each series' new forecasts before archiving
-  them. A forecast far from its series' history is that series' problem alone: the run holds the series,
-  as it does a failed download or a model error. Its last good files stay up, its data is still archived,
-  an issue says so, and the other series are archived and deployed. The gate step comes after the run has
-  written the day's archive files, one round for every series, never rewritten: too late to drop one.
+  them. A forecast far from its series' history is that forecast's problem alone: the run drops it, names
+  it in the summary, and archives the series' other forecasts. When it is the live one, the run also holds
+  the series, as it does a failed download or a model error: its last good forecast stays the latest, its
+  data is still archived, an issue says so, and the other series are archived and deployed. The gate step
+  comes after the run has written the day's archive files, never rewritten: too late to drop one.
 
 --subset checks a part of the API, such as the web fixtures: a file the catalog links to may be missing.
 It exits 1 on an error.
@@ -412,13 +413,13 @@ def check_forecasts(
     forecasts: list[Forecast],
     observed: pd.Series,
     archived: list[Forecast] = (),
-) -> tuple[list[str], list[str]]:
-    """The errors and warnings of a run's new `forecasts` of `series`, each by its reference date.
+) -> tuple[dict[pd.Timestamp, list[str]], list[str]]:
+    """The errors of a run's new `forecasts` of `series`, by the reference date of the forecast that fails, and the warnings.
 
     Each against `observed`, the series' vintage, up to its reference date, and against the forecast
-    before it, new or `archived`.
+    before it, new or `archived`. Every message starts with its forecast's day.
     """
-    errors, warnings = [], []
+    errors, warnings = {}, []
     trading = series.horizon_unit == "trading_day"
     every = sorted([*archived, *forecasts], key=lambda f: f.reference_date)
     for forecast in forecasts:
@@ -438,7 +439,8 @@ def check_forecasts(
             ),
             limits=BOUNDS[series.kind],
         )
-        errors += [f"{day}: {e}" for e in found[0]]
+        if found[0]:
+            errors[forecast.reference_date] = [f"{day}: {e}" for e in found[0]]
         warnings += [f"{day}: {w}" for w in found[1]]
     return errors, warnings
 

@@ -80,9 +80,8 @@ def test_the_goldens_are_of_the_model_and_the_input_in_the_code():
 def test_the_model_forecasts_the_golden_quantiles(model):
     golden = json.loads(GOLDEN.read_text(encoding="utf-8"))
 
-    result = forecast(
-        model, gpr.parse(RECORDED_GPR.read_bytes()), len(golden["quantiles"])
-    )
+    # Through GPR's calibration layer, as the daily run forecasts it.
+    result = forecast(model, gpr.parse(RECORDED_GPR.read_bytes()), GPR_DAILY)
 
     assert result.levels == tuple(golden["levels"]) == LEVELS
     np.testing.assert_allclose(result.quantiles, golden["quantiles"], rtol=1e-4)
@@ -117,7 +116,7 @@ def test_a_live_forecast_is_made_again_from_its_archived_vintage(live, model):
         "the archive no longer rebuilds the context this forecast was made from"
     )
 
-    result = forecast(model, context, len(live.forecast.quantiles))
+    result = forecast(model, context, GPR_DAILY)
 
     assert result.levels == live.forecast.levels
     # Measured float32 drift, Windows vs the Ubuntu runner that archived it: 2.4e-6 relative, 40x under rtol; atol covers the 4-decimal rounding.
@@ -139,7 +138,8 @@ def test_the_model_keeps_a_count_series_at_0_and_up(model):
         pd.Timestamp("2026-10-28T07:51:08"),
     )
 
-    result = forecast(model, context, HORMUZ_TRANSITS.horizon, HORMUZ_TRANSITS.kind)
+    # Calibrated, as its lower side widens by a fifth: still never below 0.
+    result = forecast(model, context, HORMUZ_TRANSITS)
 
     assert result.quantiles.shape == (HORMUZ_TRANSITS.horizon, len(LEVELS))
     assert_well_formed(result, HORMUZ_TRANSITS)
@@ -151,7 +151,7 @@ def test_the_model_forecasts_from_a_context_with_registered_errors_blanked(model
     context = gpr.parse(RECORDED_GPR.read_bytes())
     context.iloc[[20, 21, 22, -1]] = np.nan
 
-    assert_well_formed(forecast(model, context, GPR_DAILY.horizon), GPR_DAILY)
+    assert_well_formed(forecast(model, context, GPR_DAILY), GPR_DAILY)
 
 
 if __name__ == "__main__":
@@ -163,9 +163,7 @@ if __name__ == "__main__":
         raise SystemExit(
             f"{GOLDEN.name} holds {MODEL_ID} already: change MODEL_ID first"
         )
-    result = forecast(
-        load_model(), gpr.parse(RECORDED_GPR.read_bytes()), GPR_DAILY.horizon
-    )
+    result = forecast(load_model(), gpr.parse(RECORDED_GPR.read_bytes()), GPR_DAILY)
     with GOLDEN.open("w", encoding="utf-8", newline="\n") as file:
         json.dump(
             {
