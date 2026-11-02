@@ -88,17 +88,11 @@ The registry with every series' revision window, lag and evidence is [`pipeline/
 
 ```mermaid
 flowchart TB
-  subgraph build ["Build: no write rights"]
-    direction LR
-    golden["Golden check<br/>pinned model"] --> fetch["Fetch<br/>9 public series"]
-    fetch --> forecast["Forecast<br/>Timestral on CPU"]
-    forecast --> gate{"Gate<br/>API contract"}
-  end
-  subgraph ship ["Archive and deploy"]
-    direction LR
-    archive[("Archive<br/>append-only")] --> publish["Publish<br/>Pages and /api/v1"]
-  end
-  build --> ship
+  golden["Golden check<br/>the pinned model's quantiles"] --> fetch["Fetch<br/>9 public series"]
+  fetch --> forecast["Forecast<br/>Timestral-209M on CPU"]
+  forecast --> gate{"Gate<br/>API contract"}
+  gate --> archive[("Archive<br/>append-only Hubverse")]
+  archive --> publish["Publish<br/>GitHub Pages and /api/v1"]
 ```
 
 At 07:00 UTC, [`daily.yml`](.github/workflows/daily.yml) runs the tests, then checks that the pinned model still gives its golden quantiles, so a dependency change never moves the numbers under the same model ID. It fetches each series, checks it against its source's contract, and forecasts every new day of data from the last observed day. A series that fails, runs late, rewrites its history beyond a normal update, or forecasts far outside its range is held alone: its last good forecast stays up, labelled, and the run opens an issue. The gate checks every API file against its schema before the archive job appends the new files and the site deploys. A push that changes only the page deploys in about 2 minutes, on the last run's API files.
