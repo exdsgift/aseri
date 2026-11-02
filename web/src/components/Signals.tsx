@@ -3,16 +3,21 @@ import { useId } from "react"
 import { type PictogramName } from "@/components/Pictogram"
 import { SignalCard } from "@/components/SignalCard"
 import { type Series } from "@/lib/api"
+import { percentFrom } from "@/lib/format"
 import { useShortcuts } from "@/lib/keys"
+import { signalsTitle } from "@/lib/takeaways"
 
-// Spec 6.8's groups, each series with its pictogram, in the order of the cards.
-const groups: [string, Record<string, PictogramName>][] = [
+// Spec 6.8's groups, each series with its pictogram, in the order of the cards. A group of one
+// kind of series names it, so the title can compare a lane with the other lanes.
+const groups: [string, string | undefined, Record<string, PictogramName>][] = [
   [
     "Risk, attention and oil",
+    undefined,
     { gpr_daily: "risk", wiki_ww3_views: "eye", brent_spot: "drop" },
   ],
   [
     "Sea lanes",
+    "lanes",
     {
       suez_transits: "ship",
       hormuz_transits: "ship",
@@ -22,6 +27,7 @@ const groups: [string, Record<string, PictogramName>][] = [
   ],
   [
     "War in Ukraine",
+    undefined,
     { ua_air_raid_hours: "siren", ua_drones_downed_claimed: "drone" },
   ],
 ]
@@ -40,11 +46,11 @@ export function Signals({
   // The keys count the cards in the order they are drawn.
   let key = 0
   const drawn = groups
-    .map(([name, icons]) => ({
+    .map(([name, kind, icons]) => ({
       name,
       cards: Object.entries(icons).flatMap(([id, icon]) => {
         const found = series.find((s) => s.id === id)
-        return found ? [{ series: found, icon, hint: String(++key) }] : []
+        return found ? [{ series: found, kind, icon, hint: String(++key) }] : []
       }),
     }))
     .filter((group) => group.cards.length)
@@ -68,9 +74,20 @@ export function Signals({
         >
           Signals
         </h2>
+        {/* The takeaway: which signal is furthest from normal today. */}
+        {cards.length > 0 && (
+          <p className="max-w-[52ch] text-[12px]/[18px] text-primary uppercase">
+            {signalsTitle(
+              cards.map(({ series: s, kind }) => ({
+                name: s.forecasts.at(-1)!.series,
+                kind,
+                percent: percentFrom(s.today.sevenDayAverage, s.today.baseline),
+              }))
+            )}
+          </p>
+        )}
         <p className="max-w-[52ch] text-[8px]/[14px] text-muted-foreground uppercase">
-          Public series, each with its forecast. Pick one to open it above, with
-          its replay and intervals.
+          Tap a card to open its forecast.
         </p>
       </div>
       {drawn.map((group) => (

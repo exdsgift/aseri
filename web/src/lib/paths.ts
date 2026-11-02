@@ -47,6 +47,34 @@ function quantileAt(
   return at(levels.length - 1)
 }
 
+const sortedLevels = (quantiles: Record<string, number[]>) =>
+  Object.keys(quantiles).sort((a, b) => Number(a) - Number(b))
+
+// The chances that day `day` lands strictly above and strictly below `value`, read off the same
+// straight lines between the published levels. A count's forecast puts whole levels on one
+// value: a tie with `value` is neither, so the two add up to 1 only where there is none.
+export function chances(
+  quantiles: Record<string, number[]>,
+  day: number,
+  value: number
+) {
+  const levels = sortedLevels(quantiles)
+  // The highest level whose quantile is still under `value`, or at most `value`, by halving.
+  const share = (under: (quantile: number) => boolean) => {
+    let [low, high] = [0, 1]
+    for (let i = 0; i < 40; i++) {
+      const middle = (low + high) / 2
+      if (under(quantileAt(quantiles, levels, day, middle))) low = middle
+      else high = middle
+    }
+    return (low + high) / 2
+  }
+  return {
+    above: 1 - share((q) => q <= value),
+    below: share((q) => q < value),
+  }
+}
+
 // One possible path of the days ahead, after the last daily value it starts from. Day h is
 // that day's quantile at Phi(z_h), with z a Gaussian AR(1) of the series' day-to-day tie
 // `rho`: each day lands in its ranges as often as they say, and moves from the day before
@@ -78,9 +106,7 @@ function draw(forecast: Forecast, rho: number, index: number) {
   const uniform = seeded(
     hash(`${forecast.series} ${forecast.dates.at(-1)} ${index}`)
   )
-  const levels = Object.keys(forecast.quantiles).sort(
-    (a, b) => Number(a) - Number(b)
-  )
+  const levels = sortedLevels(forecast.quantiles)
   rho = tied(rho)
   const z: number[] = []
   for (let day = 0; day < forecast.targetDates.length; day++)

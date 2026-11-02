@@ -50,18 +50,19 @@ export function ReplaySlider({
   const at = (index: number) => `calc(10px + (100% - 20px) * ${index / last})`
 
   return (
-    <div className="flex flex-col gap-1.5 border-t-2 border-border pt-2.5">
+    <div className="group flex flex-col gap-1.5 border-t-2 border-border pt-2.5">
       <p className="text-muted-foreground">
         <label htmlFor={id}>Replay a past forecast</label>
       </p>
       <div className="relative">
-        {/* A dotted track, one dot a week counted back from today, and the handle's day beside it,
-            on the side with room. For the eye: the slider says the day itself. */}
+        {/* A solid track with a tick a week, counted back from today, and the handle's day beside
+            it, on the side with room. For the eye: the slider says the day itself. */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
+          <i className="absolute inset-x-2.5 top-1/2 -mt-px h-0.5 bg-border" />
           {Array.from({ length: Math.floor(last / 7) + 1 }, (_, week) => (
             <i
               key={week}
-              className={`absolute top-1/2 -mt-0.5 -ml-0.5 size-1 ${last - 7 * week <= shown ? "bg-muted-foreground" : "bg-border"}`}
+              className={`absolute top-1/2 -mt-1 -ml-px h-2 w-0.5 ${last - 7 * week <= shown ? "bg-muted-foreground" : "bg-dim"}`}
               style={{ left: at(last - 7 * week) }}
             />
           ))}
@@ -74,7 +75,7 @@ export function ReplaySlider({
               translate: shown > last / 2 ? "calc(-100% - 12px)" : "12px",
             }}
           >
-            {live ? "Forecast" : made(shown)}
+            {live ? "Today" : made(shown)}
           </span>
         </div>
         <input
@@ -94,13 +95,15 @@ export function ReplaySlider({
           className={`relative pixel-range block h-7 w-full ${focusRing}`}
         />
       </div>
+      {/* The keys only while the slider is hovered or has the focus; "Today" at the end only
+          when the handle does not say it. */}
       <p className="flex justify-between gap-2 text-muted-foreground">
         <span>{made(0)}</span>{" "}
-        <span>
+        <span className="invisible group-focus-within:visible group-hover:visible">
           <span className="text-secondary">[‹][›]</span> 1 day ·{" "}
           <span className="text-secondary">[T]</span> today
         </span>{" "}
-        <span>Today</span>
+        <span style={live ? { visibility: "hidden" } : undefined}>Today</span>
       </p>
       {/* Hidden today but holding its place, so nothing below moves as the replay starts. */}
       <button

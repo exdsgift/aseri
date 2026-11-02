@@ -75,5 +75,8 @@ it("shows one forecast a day: where the replay's newest day disagrees with lates
   )
   expect(that).toHaveLength(1)
   expect(that[0].quantiles).toEqual(latest.quantiles)
-  expect(drones.today.mostLikely).toBe(latest.quantiles["0.5"].at(-1))
+  expect([drones.today.low, drones.today.high]).toEqual([
+    latest.quantiles["0.1"].at(-1),
+    latest.quantiles["0.9"].at(-1),
+  ])
 })

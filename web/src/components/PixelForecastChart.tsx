@@ -1,4 +1,5 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -8,22 +9,24 @@ import {
   type ReactNode,
 } from "react"
 
+import { Glyph } from "@/components/Pictogram"
 import { type Forecast } from "@/lib/api"
 import {
   chartLayout,
   chartTokens,
-  dateTicks,
+  labelSize,
   miniChartLayout,
   nudgeApart,
   paintChart,
   pixel,
-  textWidth,
+  placeLabels,
   valueTicks,
   type ChartLayout,
   type Colors,
   type Layout,
+  type Point,
 } from "@/lib/chart"
-import { daysAhead, formatValue, monthDay } from "@/lib/format"
+import { formatValue, likely, monthDay } from "@/lib/format"
 import { countMs, countSteps, easeOut, useSteps } from "@/lib/motion"
 
 // The series each kind of chart, by its layout, has begun to scan in since the page loaded. A
@@ -148,8 +151,9 @@ function usePixelChart<L extends Layout>(
   return { box, canvas, width, chart, size }
 }
 
-// A card's chart: the same drawing, small and silent, since the card says it in words.
-// A span, as a button may hold only phrasing content.
+// A card's chart: the same drawing, small and silent, since the card says it in words. A normal
+// too far off its scale is marked at the edge it lies past, with its value.
+// Spans only, as a button may hold only phrasing content.
 export function MiniForecastChart({
   forecast,
   path,
@@ -157,26 +161,42 @@ export function MiniForecastChart({
   forecast: Forecast
   path: number[]
 }) {
-  const { box, canvas, size } = usePixelChart(forecast, miniChartLayout, path)
+  const { box, canvas, chart, size } = usePixelChart(
+    forecast,
+    miniChartLayout,
+    path
+  )
   return (
-    <span ref={box} className="block">
+    <span ref={box} className="relative block">
       <canvas
         ref={canvas}
         aria-hidden
         {...size}
         className="block [image-rendering:pixelated]"
       />
+      {chart && chart.normal !== "inside" && (
+        <span
+          aria-hidden
+          className={`absolute left-0.5 bg-background px-px text-secondary ${chart.normal === "above" ? "top-0.5" : "bottom-1"}`}
+        >
+          <Glyph name={chart.normal === "above" ? "up" : "down"} />
+          normal {formatValue(forecast.normal)}
+        </span>
+      )}
     </span>
   )
 }
 
+// `likeliest`, the first of the paths, places the labels, so they hold still as the others play.
 export function PixelForecastChart({
   forecast,
   path,
+  likeliest,
   summary,
 }: {
   forecast: Forecast
   path: number[]
+  likeliest: number[]
   summary: string
 }) {
   const { box, canvas, width, chart, size } = usePixelChart(
@@ -212,7 +232,9 @@ export function PixelForecastChart({
           event.pointerType !== "touch" && setHovered(undefined)
         }
       />
-      {chart && <ChartLabels chart={chart} forecast={forecast} />}
+      {chart && (
+        <ChartLabels chart={chart} forecast={forecast} likeliest={likeliest} />
+      )}
       {/* A narrower chart starts later than the day a tap may have left up. */}
       {chart &&
         hovered?.forecast === forecast &&
@@ -237,34 +259,61 @@ function Label({
 }: {
   x: number
   top: number
-  align?: "left" | "center" | "right"
+  align?: "left" | "right"
   className?: string
   children: ReactNode
 }) {
-  const shift = { left: undefined, center: "-50%", right: "-100%" }[align]
   return (
     <span
       className={`absolute whitespace-nowrap ${className}`}
-      style={{ left: x, top, translate: shift }}
+      style={{
+        left: x,
+        top,
+        translate: align === "right" ? "-100%" : undefined,
+      }}
     >
       {children}
     </span>
   )
 }
 
-// Real text over the canvas: the value ticks, the dates, the zone names and the end values.
-function ChartLabels({
+// A point every 3 px along a line, for the direct labels to keep off.
+const along = (points: Point[]) =>
+  points.flatMap(([x1, y1], i): Point[] => {
+    if (!i) return [[x1, y1]]
+    const [x0, y0] = points[i - 1]
+    const steps = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 3))
+    return Array.from({ length: steps }, (_, j) => [
+      x0 + ((x1 - x0) * (j + 1)) / steps,
+      y0 + ((y1 - y0) * (j + 1)) / steps,
+    ])
+  })
+
+// The first wording that fits `room`, on one line or broken over more.
+const fitting = (room: number, ...wordings: string[]) =>
+  wordings.find((text) => labelSize(text).width <= room) ?? wordings.at(-1)!
+
+// Real text over the canvas: the value ticks, the first and last days and the forecast's end
+// values, then the direct labels that stand in for a legend, each on its own mark and clear of
+// the lines. The band says once, on itself, what it counts. Laid out again only for another
+// chart, forecast or first path: never for a pointer's move or a path played.
+const ChartLabels = memo(function ChartLabels({
   chart,
   forecast,
+  likeliest,
 }: {
   chart: ChartLayout
   forecast: Forecast
+  likeliest: number[]
 }) {
-  const { left, right, bottom, x, y, first, origin, ahead } = chart
-  const xo = x(origin)
-  const end = (level: string) => forecast.quantiles[level][ahead - 1]
+  const { left, right, top, bottom, x, y, first, origin, ahead } = chart
+  const { values, averages, actuals, quantiles, normal } = forecast
+  const X = (day: number) => x(day) * pixel
+  const Y = (value: number) => y(value) * pixel
+  const xo = X(origin)
+  const end = (level: string) => quantiles[level][ahead - 1]
   // Undefined until observed, null on a day with no value.
-  const real = forecast.actuals[ahead - 1] ?? undefined
+  const real = actuals[ahead - 1] ?? undefined
   // Top to bottom, so that each label clears the one above. No label on the path's end:
   // it would read as the forecast.
   const ends = [
@@ -275,22 +324,147 @@ function ChartLabels({
       : [{ value: real, className: "text-[12px] text-white" }]),
   ].toSorted((a, b) => b.value - a.value)
   const tops = nudgeApart(
-    ends.map(({ value }) => y(value) * pixel - 6),
+    ends.map(({ value }) => Y(value) - 6),
     14
   )
-  const ticks = dateTicks(
-    { date: forecast.dates[first], x: left * pixel },
-    { date: forecast.dates[origin], x: xo * pixel },
-    { date: forecast.targetDates[ahead - 1], x: (right + 1) * pixel }
+  const known = actuals.findLastIndex((value) => value !== null)
+  const lines = [
+    ...along(values.slice(first).map((v, i): Point => [X(first + i), Y(v)])),
+    ...along(averages.slice(first).map((v, i): Point => [X(first + i), Y(v)])),
+    ...along(likeliest.map((v, k): Point => [X(origin + k), Y(v)])),
+    // What happened, the daily values' line carried on from the origin: the replay's main
+    // mark, which a label covers last.
+    ...along([
+      [xo, Y(values[origin])],
+      ...actuals.flatMap((v, k): Point[] =>
+        v === null ? [] : [[X(origin + 1 + k), Y(v)]]
+      ),
+    ]).map(([px, py]): [number, number, number] => [px, py, 10]),
+    ...(chart.normal === "inside"
+      ? along([
+          [left * pixel, Y(normal)],
+          [(right + 1) * pixel, Y(normal)],
+        ])
+      : []),
+  ]
+  const plot = {
+    left: left * pixel,
+    top: top * pixel,
+    right: (right + 1) * pixel,
+    bottom: bottom * pixel,
+  }
+
+  // The forecast side: the band's meaning inside it and its complement at its edge, where the
+  // first path crosses least, and in a replay what happened by its end.
+  const future = { ...plot, left: xo + 3 }
+  const room = future.right - future.left
+  const xr = plot.right - 2
+  const [y90, y10] = [Y(end("0.9")), Y(end("0.1"))]
+  const band = fitting(
+    room,
+    "8 in 10 days land here",
+    "8 in 10 days\nland here",
+    "8 in 10\ndays land\nhere"
   )
-  const past = chart.narrow ? "Daily · 7d avg" : "Daily values · 7-day avg"
-  // A forecast with days already known is a past one.
-  const days = daysAhead(ahead, forecast.horizonUnit ?? "day")
-  const future = forecast.actuals.length ? `${days} after` : `Next ${days}`
-  // The forecast zone's name, right-aligned, past the origin and clear of the label on the left.
-  const futureFits =
-    (right + 1) * pixel - textWidth(future) >=
-    Math.max(xo * pixel, left * pixel + textWidth(past) + 8)
+  // Two characters' room for the glyph before it.
+  const outside = fitting(room, "  2 in 10 outside", "  2 in 10\noutside")
+  const happened = fitting(room, "what happened", "what\nhappened")
+  // Every spot on the forecast side, 4 px apart down it, at its left, middle and right, the
+  // nearest to (x, y) first: the label finds the closest one clear of the lines, wherever the
+  // white line runs.
+  const nearest = (text: string, x: number, y: number) => {
+    const { width, height } = labelSize(text)
+    const spots = []
+    for (let top = future.top; top + height <= future.bottom; top += 4)
+      for (const left of [
+        future.left + 2,
+        (future.left + future.right - width) / 2,
+        future.right - 2 - width,
+      ])
+        spots.push({ x: left, y: top })
+    const away = ({ x: l, y: t }: { x: number; y: number }) =>
+      Math.hypot(l + width / 2 - x, t + height / 2 - y)
+    return spots.toSorted((a, b) => away(a) - away(b))
+  }
+  const [bandBox, outsideBox, happenedBox] = placeLabels(
+    [
+      {
+        text: band,
+        at: [0.5, 0.3, 0.7, 0.15, 0.85].map((share) => ({
+          x: xr,
+          y: y90 + (y10 - y90) * share - labelSize(band).height / 2,
+          align: "right" as const,
+        })),
+      },
+      {
+        text: outside,
+        at: [
+          { x: xr, y: y90 - labelSize(outside).height - 3, align: "right" },
+          { x: xr, y: y10 + 4, align: "right" },
+        ],
+      },
+      ...(known < 0
+        ? []
+        : [
+            {
+              text: happened,
+              at: nearest(happened, X(origin + 1 + known), Y(actuals[known]!)),
+            },
+          ]),
+    ],
+    future,
+    lines
+  )
+
+  // The history: each line named at its end, and the normal on its line, or at the edge it
+  // lies past when it is too far off the scale to draw.
+  const past = { ...plot, left: plot.left + 2, right: xo - 3 }
+  const atEnd = (value: number) =>
+    [0, 24, 48].flatMap((shift) => [
+      { x: xo - 6 - shift, y: Y(value) - 15, align: "right" as const },
+      { x: xo - 6 - shift, y: Y(value) + 4, align: "right" as const },
+    ])
+  const named = `normal ${formatValue(normal)}`
+  const onEdge = chart.normal === "above" ? plot.top + 2 : plot.bottom - 14
+  const [dailyBox, averageBox, normalBox] = placeLabels(
+    [
+      { text: "daily", at: atEnd(values[origin]) },
+      { text: "7-day avg", at: atEnd(averages[origin]) },
+      chart.normal === "inside"
+        ? {
+            text: named,
+            at: [
+              { x: past.left, y: Y(normal) - 14 },
+              { x: past.left, y: Y(normal) + 4 },
+              { x: xo - 6, y: Y(normal) - 14, align: "right" as const },
+              { x: xo - 6, y: Y(normal) + 4, align: "right" as const },
+            ],
+          }
+        : {
+            text: `  ${named}`,
+            at: [
+              { x: past.left, y: onEdge },
+              { x: xo - 6, y: onEdge, align: "right" as const },
+            ],
+          },
+    ],
+    past,
+    lines
+  )
+  const direct = (
+    box: { left: number; top: number },
+    className: string,
+    children: ReactNode
+  ) => (
+    <span
+      className={`absolute bg-background px-px whitespace-pre ${className}`}
+      style={{ left: box.left, top: box.top }}
+    >
+      {children}
+    </span>
+  )
+  const dataTo = `data to ${monthDay(forecast.dates[origin])}`
+
   return (
     <div
       aria-hidden
@@ -299,39 +473,23 @@ function ChartLabels({
       {valueTicks(chart.lo, chart.hi).map((tick) => (
         <Label
           key={tick}
-          x={(left - 3) * pixel}
-          top={y(tick) * pixel - 6}
+          x={(left - 4) * pixel}
+          top={Y(tick) - 6}
           align="right"
         >
           {formatValue(tick)}
         </Label>
       ))}
-      {ticks.map((tick) => (
-        <Label
-          key={tick.date}
-          x={tick.x}
-          top={(bottom + 3) * pixel}
-          align={tick.align}
-          className={
-            tick.date === forecast.dates[origin] ? "text-secondary" : ""
-          }
-        >
-          {monthDay(tick.date)}
-        </Label>
-      ))}
-      <Label x={left * pixel} top={0}>
-        {past}
+      <Label x={plot.left} top={(bottom + 3) * pixel}>
+        {monthDay(forecast.dates[first])}
       </Label>
-      {futureFits && (
-        <Label
-          x={(right + 1) * pixel}
-          top={0}
-          align="right"
-          className="text-primary"
-        >
-          {future}
-        </Label>
-      )}
+      <Label x={plot.right} top={(bottom + 3) * pixel} align="right">
+        {monthDay(forecast.targetDates[ahead - 1])}
+      </Label>
+      {/* The one date anchor, on the line where the data ends. */}
+      <Label x={xo - 3} top={2} align="right" className="text-secondary">
+        {dataTo}
+      </Label>
       {ends.map(({ value, className }, i) => (
         <Label
           key={i}
@@ -342,11 +500,36 @@ function ChartLabels({
           {formatValue(value)}
         </Label>
       ))}
+      {direct(bandBox, "text-secondary", band)}
+      {direct(
+        outsideBox,
+        "text-secondary",
+        <>
+          <Glyph name="out" />
+          {outside.trimStart()}
+        </>
+      )}
+      {happenedBox && direct(happenedBox, "text-white", happened)}
+      {direct(dailyBox, "text-primary", "daily")}
+      {direct(averageBox, "", "7-day avg")}
+      {direct(
+        normalBox,
+        "text-secondary",
+        chart.normal === "inside" ? (
+          named
+        ) : (
+          <>
+            <Glyph name={chart.normal === "above" ? "up" : "down"} />
+            {named}
+          </>
+        )
+      )}
     </div>
   )
-}
+})
 
-// The hover or tap readout for one day: its daily value and 7-day average, or the forecast.
+// The hover or tap readout for one day: its daily value and 7-day average, or the forecast, in
+// the page's words: the range first, then the middle estimate.
 function DayTip({
   chart,
   forecast,
@@ -360,7 +543,7 @@ function DayTip({
 }) {
   const x = chart.x(day) * pixel
   const step = day - chart.origin - 1
-  const at = (level: string) => formatValue(forecast.quantiles[level][step])
+  const at = (level: string) => forecast.quantiles[level][step]
   return (
     <div
       aria-hidden
@@ -376,7 +559,7 @@ function DayTip({
             {monthDay(forecast.dates[day])}
           </span>
           <span className="block">
-            Daily value {formatValue(forecast.values[day])}
+            daily {formatValue(forecast.values[day])}
           </span>
           <span className="block">
             7-day avg {formatValue(forecast.averages[day])}
@@ -387,10 +570,10 @@ function DayTip({
           <span className="block text-secondary">
             {monthDay(forecast.targetDates[step])}
           </span>
+          <span className="block">{likely(at("0.1"), at("0.9"))}</span>
           <span className="block">
-            8 in 10: {at("0.1")}-{at("0.9")}
+            middle estimate {formatValue(at("0.5"))}
           </span>
-          <span className="block">Most likely {at("0.5")}</span>
           {forecast.actuals[step] != null && (
             <span className="block text-white">
               What happened {formatValue(forecast.actuals[step]!)}

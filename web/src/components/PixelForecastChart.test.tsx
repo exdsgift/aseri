@@ -15,6 +15,7 @@ const drawn = (shown: Forecast, index = 0) => (
   <PixelForecastChart
     forecast={shown}
     path={path(shown, 0, index)}
+    likeliest={path(shown, 0, 0)}
     summary=""
   />
 )
@@ -140,7 +141,7 @@ it("scans its marks in from the left once in view, a step at a time with the her
   const { left, right } = chartLayout(forecast, 692)
 
   // The first frame reads at rest: the labels and the frame, and no mark yet.
-  expect(screen.queryByText("Next 28 days")).not.toBeNull()
+  expect(screen.queryByText("data to Oct 26")).not.toBeNull()
   expect(frame().length).toBeGreaterThan(0)
   expect(reach()).toBe(-Infinity)
   // Below the fold, it waits for the reader, asking for no frame.
@@ -242,12 +243,18 @@ it("labels what happened on the last day, and on any day of a replay", () => {
     parseFloat(screen.getByText(value).style.top)
   )
   expect(tops).toEqual(tops.toSorted((a, b) => a - b))
-  // Not the most likely value: the chart draws a possible path in its place.
+  // Not the middle estimate: the chart draws a possible path in its place.
   expect(screen.queryByText("104")).toBeNull()
-  expect(screen.queryByText("28 days after")).not.toBeNull()
-  // The last day ahead, at the right end.
+  expect(screen.queryByText("what happened")).not.toBeNull()
+  // The last day ahead, at the right end: the range first, then the middle estimate.
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
-  expect(screen.queryByText("What happened 168")).not.toBeNull()
+  const tip = screen.getByText("What happened 168").parentElement!
+  expect([...tip.children].map((line) => line.textContent)).toEqual([
+    "Jul 26",
+    "likely 59-167",
+    "middle estimate 104",
+    "What happened 168",
+  ])
 })
 
 it("has nothing to say about what happened ahead of today", () => {
@@ -255,24 +262,127 @@ it("has nothing to say about what happened ahead of today", () => {
   resize(692)
 
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
-  expect(screen.queryByText(/^What happened/)).toBeNull()
+  expect(screen.queryByText(/^What happened/i)).toBeNull()
 })
 
-it("names the forecast zone only where the name clears the label on the left", () => {
+// The direct labels, as the reader sees them: each box from its place and its text.
+const labels = () =>
+  [...document.querySelectorAll<HTMLElement>("span.bg-background")].map(
+    (label) => {
+      const lines = label.textContent!.split("\n")
+      return {
+        text: label.textContent!.trim(),
+        left: parseFloat(label.style.left),
+        top: parseFloat(label.style.top),
+        right:
+          parseFloat(label.style.left) +
+          Math.max(...lines.map((line) => line.length)) * 8 +
+          2,
+        bottom: parseFloat(label.style.top) + 12 * lines.length,
+      }
+    }
+  )
+
+it("says once, on the band, what it counts, and names each line on its mark: no legend", () => {
   render(drawn(forecast))
+  resize(692)
 
-  resize(440)
-  expect(screen.queryByText("Next 28 days")).not.toBeNull()
-  // A 340 px phone: the two names would overlap.
-  resize(280)
-  expect(screen.queryByText("Next 28 days")).toBeNull()
+  expect(labels().map(({ text }) => text)).toEqual([
+    "8 in 10 days land here",
+    "2 in 10 outside",
+    "daily",
+    "7-day avg",
+    "normal 100",
+  ])
+  // The one date anchor, on the line where the data ends.
+  expect(screen.getByText("data to Oct 26")).toBeTruthy()
 })
 
-it("counts Brent's zone in trading days", () => {
-  render(drawn({ ...forecast, horizonUnit: "trading_day" }))
+it.each([692, 440, 280])(
+  "keeps every label of a %i px chart inside it and clear of the others",
+  (width) => {
+    render(drawn(forecast))
+    resize(width)
 
+    const boxes = labels()
+    for (const box of boxes) {
+      expect(box.left, box.text).toBeGreaterThanOrEqual(0)
+      expect(box.right, box.text).toBeLessThanOrEqual(width)
+      for (const other of boxes.filter((b) => b !== box))
+        expect(
+          box.left < other.right &&
+            other.left < box.right &&
+            box.top < other.bottom &&
+            other.top < box.bottom,
+          `${box.text} over ${other.text}`
+        ).toBe(false)
+    }
+  }
+)
+
+// 330 px: the chart on a 390 px phone.
+it.each([692, 440, 330])(
+  "keeps a %i px replay's what happened label clear of the white line it names",
+  (width) => {
+    render(drawn(backtest))
+    resize(width)
+
+    const label = labels().find(({ text }) => /^what\s+happened$/.test(text))!
+    const { x, y, origin } = chartLayout(backtest, width)
+    // The line from the origin through every known day, a point every CSS pixel.
+    const days = [
+      [origin, backtest.values[origin]],
+      ...backtest.actuals.flatMap((v, k) =>
+        v === null ? [] : [[origin + 1 + k, v]]
+      ),
+    ].map(([day, v]) => [x(day) * 2, y(v) * 2])
+    const line = days.slice(1).flatMap(([x1, y1], i) => {
+      const [x0, y0] = days[i]
+      const steps = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0)))
+      return Array.from({ length: steps + 1 }, (_, j) => [
+        x0 + ((x1 - x0) * j) / steps,
+        y0 + ((y1 - y0) * j) / steps,
+      ])
+    })
+    expect(
+      line.filter(
+        ([px, py]) =>
+          px >= label.left &&
+          px <= label.right &&
+          py >= label.top &&
+          py <= label.bottom
+      )
+    ).toEqual([])
+  }
+)
+
+it("breaks the band's words over lines where the forecast side is narrow", () => {
+  render(drawn(forecast))
+  resize(280)
+
+  expect(labels().map(({ text }) => text)).toContain("8 in 10\ndays land\nhere")
+})
+
+// Hormuz: a normal of 27 ships over a forecast of 0 to 6 would squash the chart.
+it("marks a normal too far off the scale at the edge it lies past, with its value", () => {
+  render(drawn({ ...forecast, normal: 2000 }))
   resize(692)
-  expect(screen.queryByText("Next 28 trading days")).not.toBeNull()
+
+  const marker = screen.getByText("normal 2,000")
+  expect(marker.querySelector("svg")).not.toBeNull()
+  expect(parseFloat(marker.style.top)).toBeLessThan(
+    chartLayout(forecast, 692).top * 2 + 12
+  )
+  cleanup()
+
+  render(
+    <MiniForecastChart
+      forecast={{ ...forecast, normal: 2000 }}
+      path={path(forecast, 0, 0)}
+    />
+  )
+  resize(300)
+  expect(screen.getByText("normal 2,000").className).toContain("top-0.5")
 })
 
 it("drops the readout of a day the chart no longer shows", () => {
@@ -281,10 +391,10 @@ it("drops the readout of a day the chart no longer shows", () => {
 
   // The left end of the chart, the first day it shows.
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 40 })
-  expect(screen.queryByText(/^Daily value \d/)).not.toBeNull()
+  expect(screen.queryByText(/^daily \d/)).not.toBeNull()
   // Narrower, the chart starts 4 weeks later.
   resize(440)
-  expect(screen.queryByText(/^Daily value \d/)).toBeNull()
+  expect(screen.queryByText(/^daily \d/)).toBeNull()
 })
 
 it("drops a tap's readout past the end of an older forecast the replay moves to", () => {
@@ -293,9 +403,9 @@ it("drops a tap's readout past the end of an older forecast the replay moves to"
 
   // Today's last day ahead, months after the oldest forecast's.
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 692 })
-  expect(screen.queryByText(/^Most likely \d/)).not.toBeNull()
+  expect(screen.queryByText(/^middle estimate \d/)).not.toBeNull()
   rerender(drawn(backtest))
-  expect(screen.queryByText(/^Most likely \d/)).toBeNull()
+  expect(screen.queryByText(/^middle estimate \d/)).toBeNull()
 })
 
 it("drops a tap's readout once the replay moves to another forecast, even on a day both show", () => {
@@ -304,9 +414,9 @@ it("drops a tap's readout once the replay moves to another forecast, even on a d
 
   // A day of history in the middle of today's chart.
   fireEvent.pointerDown(screen.getByRole("img"), { clientX: 300 })
-  expect(screen.queryByText(/^Daily value \d/)).not.toBeNull()
+  expect(screen.queryByText(/^daily \d/)).not.toBeNull()
   rerender(drawn(older))
-  expect(screen.queryByText(/^Daily value \d/)).toBeNull()
+  expect(screen.queryByText(/^daily \d/)).toBeNull()
 })
 
 it("drops the readout when a mouse or a pen leaves, but keeps a tap's", () => {
@@ -321,6 +431,6 @@ it("drops the readout when a mouse or a pen leaves, but keeps a tap's", () => {
   ] as const) {
     fireEvent.pointerDown(chart, { clientX: 40, pointerType })
     fireEvent.pointerLeave(chart, { pointerType })
-    expect(screen.queryByText(/^Daily value \d/) !== null).toBe(kept)
+    expect(screen.queryByText(/^daily \d/) !== null).toBe(kept)
   }
 })

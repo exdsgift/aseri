@@ -3,13 +3,15 @@ import { describe, expect, it } from "vitest"
 import latest from "@/fixtures/series/gpr_daily/latest.json"
 
 import { type Forecast } from "./api"
-import { path, ranked } from "./paths"
+import { chances, path, ranked } from "./paths"
+import { direction } from "./takeaways"
 
 // Today's GPR forecast, at its 21 published levels, made from a last daily value of 165.
 const gpr: Forecast = {
   series: "Geopolitical risk",
   unit: "",
   attribution: "",
+  normal: 100,
   dates: ["2026-10-26"],
   values: [165],
   averages: [181],
@@ -151,5 +153,62 @@ describe("ranked", () => {
 
   it("starts every path on the last daily value", () => {
     for (const p of ranked(gpr, 0)) expect(p.values[0]).toBe(165)
+  })
+})
+
+describe("chances", () => {
+  const near = (
+    { above, below }: { above: number; below: number },
+    expected: [number, number]
+  ) => {
+    expect(above).toBeCloseTo(expected[0], 3)
+    expect(below).toBeCloseTo(expected[1], 3)
+  }
+
+  it("reads the chances that a day lands above and below a value off its levels", () => {
+    near(chances(standard.quantiles, 0, 0), [0.5, 0.5])
+    near(chances(standard.quantiles, 0, 1.282), [0.1, 0.9])
+    near(chances(standard.quantiles, 0, -1.282), [0.9, 0.1])
+  })
+
+  it("is certain either way past the outermost levels", () => {
+    near(chances(standard.quantiles, 0, 10), [0, 1])
+    near(chances(standard.quantiles, 0, -10), [1, 0])
+  })
+
+  // A count's forecast puts whole levels on one value: a tie with the value is neither above
+  // nor below it.
+  const counts = (at: Record<string, number>) =>
+    Object.fromEntries(Object.entries(at).map(([level, v]) => [level, [v]]))
+
+  it("leaves a tie with the value out of both", () => {
+    // Ties from the lowest level to the median: above half the time, below never.
+    const floor = counts({
+      "0.01": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 1,
+      "0.99": 4,
+    })
+    near(chances(floor, 0, 0), [0.5, 0])
+    expect(direction(chances(floor, 0, 0))).toBe("about where it is now")
+    // Hormuz on a closed day: every level at 0 ships, the last value 0.
+    const closed = counts({
+      "0.01": 0,
+      "0.1": 0,
+      "0.5": 0,
+      "0.9": 0,
+      "0.99": 0,
+    })
+    near(chances(closed, 0, 0), [0, 0])
+    expect(direction(chances(closed, 0, 0))).toBe("about where it is now")
+  })
+
+  it("puts GPR's Nov 23 about evenly either side of last Monday's 165", () => {
+    const { above, below } = chances(gpr.quantiles, 27, 165)
+    expect(above).toBeGreaterThan(0.5)
+    expect(above).toBeLessThan(0.6)
+    expect(above + below).toBeCloseTo(1, 6)
+    expect(direction({ above, below })).toBe("about where it is now")
   })
 })

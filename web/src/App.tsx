@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { Footer } from "@/components/Footer"
 import { ForecastPanel } from "@/components/ForecastPanel"
 import { Hero } from "@/components/Hero"
 import { SideNav, type Section } from "@/components/SideNav"
@@ -13,6 +14,7 @@ import {
   type ScoreRecord,
   type Series,
 } from "@/lib/api"
+import { useHero } from "@/lib/heroes"
 
 const gprId = "gpr_daily"
 // The side navigation's entry for each section of the page.
@@ -27,8 +29,6 @@ const nav = {
     shortcut: "R",
   },
 } satisfies Record<string, Section>
-const engravingSource =
-  "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg"
 
 export function App() {
   // Every series of the catalog that loaded, with its entry, to load its replay from.
@@ -45,6 +45,8 @@ export function App() {
   // the taps, so that a second tap on the same square opens it again.
   const [opened, setOpened] = useState<string>()
   const [taps, setTaps] = useState(0)
+  // The hero on show: the next in turn on each load, unless the reader picked one.
+  const { hero, choice, choose } = useHero()
   const panelBox = useRef<HTMLDivElement>(null)
   // The series whose replay was asked for: GPR's comes with the page.
   const replayed = useRef(new Set([gprId]))
@@ -112,7 +114,12 @@ export function App() {
     <>
       <SideNav sections={sections} />
       <main>
-        <Hero today={gpr?.today} updated={updated} failed={failed} />
+        <Hero
+          hero={hero}
+          today={gpr?.today}
+          updated={updated}
+          failed={failed}
+        />
         {drawn && (
           <>
             <div
@@ -149,27 +156,7 @@ export function App() {
           </>
         )}
       </main>
-      {/* The hero's engraving is in the public domain, cropped and dithered for the page. */}
-      <footer className="mx-auto flex max-w-[72ch] flex-col gap-3.5 px-4 pb-14 text-center text-[8px]/[14px] text-muted-foreground uppercase">
-        <p>
-          <a
-            href="api/"
-            className="underline hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            The data, as an API, and its licences
-          </a>
-        </p>
-        <p>
-          Engraving: Hendrick Goltzius after Polidoro da Caravaggio, Mercury,
-          probably 1592, National Gallery of Art, CC0.{" "}
-          <a
-            href={engravingSource}
-            className="wrap-anywhere underline hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            {engravingSource.slice(8)}
-          </a>
-        </p>
-      </footer>
+      <Footer choice={choice} onChoose={choose} />
     </>
   )
 }
