@@ -75,12 +75,14 @@ def publish(
     # A day with no value (the drones' day without a report) is left out, as the archive leaves it.
     observed = observed.dropna()
     # A day's dated file holds its first forecast, whatever its model, and never changes. A new MODEL_ID's
-    # forecasts of days already published are in the archive's round and in the replay, which prefers them.
+    # forecasts of days already published are in the archive's round and in the replay: each day's from
+    # the current model where it has one, else the newest run's, so a day it lacks keeps the model before's.
     first = {}
     for forecast in archived:
         first.setdefault(forecast.forecast.reference_date, forecast)
+    newest = {a.forecast.reference_date: a for a in archived}
     replayed = list(
-        (first | {a.forecast.reference_date: a for a in this_model(archived)}).values()
+        (newest | {a.forecast.reference_date: a for a in this_model(archived)}).values()
     )
     archived = list(first.values())
     for forecast in archived:

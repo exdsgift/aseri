@@ -693,6 +693,103 @@ def test_a_new_model_forecasts_the_replay_window_again_without_changing_a_dated_
     assert files(archive_dir) == after
 
 
+def run_under_the_model_before(monkeypatch, moment, gpr_file, api_dir, archive_dir):
+    """A run under the model before: its own ID, and no calibration layer."""
+    with monkeypatch.context() as before:
+        before.setattr(archive, "MODEL_ID", "aseri-timestral209m")
+        before.setattr(archive, "ROUNDS", Path("model-output", "aseri-timestral209m"))
+        before.setattr(forecast_module, "OFFSETS", forecast_module.OFFSETS[:0])
+        run_on(before, moment, gpr_file, api_dir, archive_dir)
+
+
+def test_a_rerun_the_day_of_a_model_change_keeps_the_replay_of_the_model_before(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    monkeypatch.setattr(publish, "REPLAY_DAYS", archive.REPLAY_DAYS)
+    archive_dir = tmp_path / "archive"
+    # The morning's run, under the model before; then the new MODEL_ID lands the same day.
+    run_under_the_model_before(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "morning",
+        archive_dir,
+    )
+    archive_before = files(archive_dir)
+    monkeypatch.setattr(cli, "load_model", no_model)
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 15, 0, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "afternoon",
+        archive_dir,
+    )
+
+    # Nothing is archived under the new model today, so the replay is the morning's, day for day and
+    # value for value, still credited to the model before.
+    assert files(archive_dir) == archive_before
+    morning, afternoon = (
+        read(tmp_path / run / "series" / "gpr_daily" / "replay.json")
+        for run in ("morning", "afternoon")
+    )
+    assert afternoon["forecasts"] == morning["forecasts"]
+    assert {f["model_id"] for f in afternoon["forecasts"]} == {"aseri-timestral209m"}
+    assert (afternoon["model_id"], afternoon["attribution"]) == (
+        morning["model_id"],
+        morning["attribution"],
+    )
+    # The record is the new model's: empty, and it says so.
+    scores = read(tmp_path / "afternoon" / "scores.json")
+    assert scores["model_id"] == MODEL_ID
+    assert (
+        scores["series"][0]["live"]["n"]
+        == scores["series"][0]["retrospective"]["n"]
+        == 0
+    )
+    assert gate.contract(tmp_path / "afternoon") == []
+
+
+def test_a_day_the_new_model_could_not_forecast_again_keeps_the_model_before_s(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    monkeypatch.setattr(publish, "REPLAY_DAYS", archive.REPLAY_DAYS)
+    archive_dir = tmp_path / "archive"
+    run_under_the_model_before(
+        monkeypatch,
+        datetime(2026, 10, 20, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-19"),
+        tmp_path / "day1",
+        archive_dir,
+    )
+    # The switch day: the new model's forecast from 2026-10-12, the 46th day, falls out of bounds.
+    monkeypatch.setattr(cli, "load_model", lambda: LeapsFrom(46))
+
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 21, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-19"),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    before, after = (
+        {
+            f["reference_date"]: f
+            for f in read(tmp_path / day / "series" / "gpr_daily" / "replay.json")[
+                "forecasts"
+            ]
+        }
+        for day in ("day1", "day2")
+    )
+    assert list(after) == list(before)
+    assert after["2026-10-12"] == before["2026-10-12"]
+    assert after["2026-10-12"]["model_id"] == "aseri-timestral209m"
+    assert {f["model_id"] for day, f in after.items() if day != "2026-10-12"} == {
+        MODEL_ID
+    }
+
+
 def test_a_revision_without_a_new_day_is_archived_as_it_is_seen(
     tmp_path, monkeypatch, stub_model
 ):

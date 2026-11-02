@@ -305,6 +305,39 @@ def test_a_replay_that_holds_two_models_names_the_model_of_each_forecast(tmp_pat
     assert list(gate.validator("replay.schema.json").iter_errors(replay)) == []
 
 
+def test_a_replay_day_the_current_model_lacks_takes_the_newest_model_before_it(
+    tmp_path,
+):
+    def by(model_id, a, forecast_date, shift):
+        return replace(
+            a,
+            model_id=model_id,
+            forecast_date=forecast_date,
+            forecast=replace(a.forecast, quantiles=a.forecast.quantiles + shift),
+        )
+
+    # Three models: the first issued both days, a second forecast both again, and the current
+    # model only the 25th.
+    first = [archived(day, "retrospective") for day in ("2026-10-24", "2026-10-25")]
+    first = [replace(a, model_id="aseri-timestral209m") for a in first]
+    second = [by("aseri-timestral209m_c0", a, "2026-10-30", 20) for a in first]
+    current = by(MODEL_ID, first[1], "2026-10-31", 40)
+    both = sorted([*first, *second, current], key=lambda a: a.forecast.reference_date)
+
+    publish_gpr(tmp_path, days_to("2026-10-27", range(200)), both)
+
+    replay = read(tmp_path / "series" / "gpr_daily" / "replay.json")
+    assert [
+        (f["reference_date"], f["model_id"], f["quantiles"]["0.5"][0])
+        for f in replay["forecasts"]
+    ] == [
+        ("2026-10-24", "aseri-timestral209m_c0", 120),
+        ("2026-10-25", MODEL_ID, 140),
+    ]
+    # The dated files keep the first forecast of each day.
+    assert dated(tmp_path, "2026-10-24")["model_id"] == "aseri-timestral209m"
+
+
 @pytest.mark.parametrize(
     ("value", "expected"),
     [(251.4, 251), (-12.6, -13), (10.0, 10), (9.96, 10.0), (2.74, 2.7), (0.0, 0.0)],
