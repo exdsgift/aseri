@@ -34,14 +34,15 @@ Key design decisions:
    - Catalog: `series.json`.
    - Per series: `latest.json`, a `forecasts.json` index, dated `forecasts/{reference_date}.json`, `actuals.json` and `scores.json`.
    - Bulk: yearly Parquet and CSV.gz in the collected-hub shape, plus a `datapackage.json` [DP].
-   - Contract: `openapi.json` and `schemas/`.
+   - Contract: `openapi.json` and `schemas/`, with the licence texts in `licenses/` and the Hubverse model metadata in `model-metadata/` (#135). Their source of truth is `api/` at the repo root.
 5. **Every file carries provenance and licensing.** That means the model ID and HF revision, the inference package commit, the code commit and workflow run [GH-VAR], the data fetch time and an input hash, `generated_at`, and live versus retrospective status. It also means each series' attribution text, built from the terms in section 3.7.
 6. **One contract, checked before every deploy.**
    - JSON Schema 2020-12 files are the single source of truth.
    - OpenAPI 3.1.1 references them, since its Schema Object is a superset of 2020-12 [OAS].
-   - CI checks every file against its schema, plus forecast-specific rules (arrays line up, quantiles never decrease), archive immutability and size budgets before deploying.
+   - A gate in `daily.yml` (`pipeline/aseri/gate.py`, #135) checks every file against its schema, the files against each other and forecast-specific rules (arrays line up, quantiles never decrease, each step's date) before the archive and the deploy, and fails the run on an error. The daily run checks each new forecast against its series' history before archiving it, and holds that series alone when one is far off (3.5).
 7. **Versioning:**
-   - The major version is in the path. Within v1, changes are additive only and tracked with a semver `schema_version`, as endoflife.date does [EOL].
+   - The major version is in the path. Within v1, changes are additive only, as endoflife.date does [EOL].
+   - **Corrected (#135):** `schema_version` stays `1.0.0` within v1 rather than counting minor versions. The dated forecast files carry it, and they never change.
    - A breaking change ships as `/api/v2/` alongside v1 for at least 6 months. Deprecation notices go in the response body, because GitHub Pages cannot send headers.
    - A change of model or inference settings gets a new `model_id`.
    - Dated forecast files never change.
@@ -228,11 +229,11 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 
 | Path | Purpose | Changes |
 |---|---|---|
-| `series.json` | Catalog. Per series: title, unit, `target_type`, horizon, day definition, source, licence and attribution text, cadence (ISO 8601 duration), last observation date, latest reference and forecast dates, the day-to-day tie (`day_to_day_tie`, below), links. Also global model info, quantile levels, `generated_at` and `errata` | Daily |
+| `series.json` | Catalog. Per series: title, unit, baseline, horizon and its unit, interval steps, last observation date, latest reference and forecast dates, `stale_since`, a note, `weekly`, the day-to-day tie (`day_to_day_tie`, below), source, licence with attribution text and the path of its full text, links. Also global model info, quantile levels, aseri's licence, `generated_at` and `errata` (3.5). Planned but not published: `target_type`, `day_definition`, cadence | Daily |
 | `series/{series_id}/latest.json` | Latest forecast. A copy of the newest dated file, with `links.canonical` pointing to that file | Daily |
 | `series/{series_id}/forecasts.json` | Index of every issued forecast: `reference_date`, `forecast_date`, mode, URL. Needed because static hosts cannot list directories | Daily, grows about 100 bytes per forecast |
 | `series/{series_id}/forecasts/{reference_date}.json` | One forecast | **Never** |
-| `series/{series_id}/replay.json` | The forecasts of the 120 days to the latest, for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
+| `series/{series_id}/replay.json` | With `schema_version`, licence and attribution, the forecasts of the 120 days to the latest, for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
 | `series/{series_id}/actuals.json` | Latest vintage of the observed series (`date[]`, `observation[]`, flags) with `as_of` | Daily |
 | `series/{series_id}/scores.json` | Track record for one series, live and retrospective forecasts apart, never combined. Per horizon bucket (1-7, 8-28): 50% and 80% coverage with an exact CI, WIS and its components, the median's absolute error and its ratio to each baseline with a block-bootstrap CI and a verdict, and MASE. Also `n`, `min_n_to_display`, the primary baseline, the weekly forecasts of the record's squares, the method (WIS convention, L, block length, resamples, seed) and the latest-vintage sensitivity check (see 4.4) | Daily |
 | `scores.json` | Cross-series summary for the site's record: each series' file without its sensitivity check | Daily |
@@ -241,10 +242,11 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `bulk/oracle-output.csv` | `target, target_end_date, oracle_value` used for scoring [HV-TD] | Daily |
 | `bulk/scores.parquet` | One row per (model, series, reference date, horizon) with each metric and the `observation_as_of` used | Daily |
 | `bulk/datapackage.json` | Frictionless descriptor for all bulk files, with `licenses` and `sources` per resource [DP] | Daily |
-| `openapi.json`, `schemas/*.schema.json` | Contract | Per release |
-| `licenses/*.txt` | Full texts that must travel with the data: the two MIT notices, CC BY 4.0 and the IMF terms link | Rarely |
+| `openapi.json`, `schemas/*.schema.json` | Contract: OpenAPI 3.1.1, and a JSON Schema per file type (`catalog`, `forecast`, `forecast-index`, `actuals`, `replay`, `scores`, `scoreboard`) with the shared `defs` | Per release |
+| `licenses/*.txt` | Full texts that must travel with the data: `CC-BY-NC-4.0` (aseri's), `CC-BY-4.0` (GPR), `CC0-1.0` (pageviews), `MIT-Klymenko`, `MIT-Ivaniuk`, and the terms of the IMF and the EIA, quoted with their links (`IMF-terms`, `EIA-public-domain`). Each licence object names its file in `text`, a path under `/api/v1/` | Rarely |
+| `model-metadata/aseri-timestral209m.yml` | Hubverse model metadata. Its `license` is `other`, since no hub's list holds CC BY-NC 4.0, and `methods_long` states the licence | Per model |
 
-The HTML page at `/api/` holds the human docs and a schema.org `Dataset` JSON-LD block [SO].
+The HTML page at `/api/` holds the human docs and a schema.org `Dataset` JSON-LD block [SO]. It is `web/api/index.html`, a second page of the Vite build on the site's styles, with no script.
 
 **The day-to-day tie** (additive to v1, #147). Each catalog entry's `day_to_day_tie` says how the real days moved together within a forecast; the page draws its possible paths with it:
 - `rho`: the lag-1 correlation, across consecutive horizons of the same forecast, of the normal scores of where each real day fell. Where a day fell is its PIT, read off the 21 archived quantiles by straight lines and clipped to [0.005, 0.995]; a value on tied quantiles takes the middle of their levels. Over the resolved forecasts of the 120 days to the latest, scored against the first vintage that resolved each day. Rounded to 2 decimals, and 0 below 100 pairs.
@@ -306,35 +308,43 @@ Each forecast file and the per-run manifest on the archive branch carry this blo
 
 ### 3.5 Contract, versioning and validation
 
-**Schemas:**
-- Write one JSON Schema (Draft 2020-12) per file type, in `api/schemas/` on `main`: catalog, forecast, forecast-index, actuals, scores, plus a shared `defs` for date, provenance and licence. Each schema's `$id` is its public URL.
-- `openapi.json` (OpenAPI 3.1.1, `jsonSchemaDialect` 2020-12) references these schemas by relative `$ref`. The 3.1 Schema Object is a superset of 2020-12, so one set of files serves both [OAS]. A skeleton is in [Appendix C](#appendix-c-openapi-skeleton).
-- OpenAPI 3.2.0 exists (19 Sept 2025) [OAS32]. Stay on 3.1.1 as asked, because tool support is wider.
-- Published schemas allow additional properties, so additive changes do not break clients that validate. CI also runs a strict check that every emitted key is declared.
+**Schemas (#135):**
+- One JSON Schema (Draft 2020-12) per file type, in `api/schemas/` at the repo root: `catalog` (`series.json`), `forecast` (`latest.json` and the dated files), `forecast-index`, `actuals`, `replay`, `scores` (a series') and `scoreboard` (the root `scores.json`), plus a shared `defs` for dates, IDs, levels and licence. Each schema's `$id` is its public URL, `https://exdsgift.github.io/aseri/api/v1/schemas/{name}.schema.json`.
+- `api/openapi.json` (OpenAPI 3.1.1, `jsonSchemaDialect` 2020-12) references these schemas by relative `$ref`. The 3.1 Schema Object is a superset of 2020-12, so one set of files serves both [OAS]. Every file served under `/api/v1/` has a path in it, the licence texts and the model metadata included; the bulk files join it with #136.
+- OpenAPI 3.2.0 exists (19 Sept 2025) [OAS32]. Stay on 3.1.1 as asked, because tool support is wider. A test validates `openapi.json` against the OpenAPI 3.1 schema of 2022-10-07 and every schema against the 2020-12 meta-schema, with `jsonschema` alone rather than `openapi-spec-validator`.
+- Published schemas allow additional properties, so additive changes do not break clients that validate. The gate validates with every object closed instead, so every emitted key must be declared.
+- The daily run copies `api/` into the site's `api/v1/` (`publish.publish_contract`).
 
 **Versioning and deprecation:**
-- **Within `/api/v1/`, additive changes only:** new fields, new series, new endpoints, new enum values. Each bumps the minor `schema_version` and gets a `CHANGELOG_API.md` entry, following endoflife.date's published policy [EOL]. Clients must ignore unknown fields.
+- **Within `/api/v1/`, additive changes only:** new fields, new series, new endpoints, new enum values, following endoflife.date's published policy [EOL]. Clients must ignore unknown fields. **Corrected (#135):** `schema_version` stays `1.0.0`, since the dated forecast files carry it and never change; the additions so far (`stale_since`, `note`, `weekly`, `day_to_day_tie`, `replay.json`, the score files, `errata`, a licence's `text`) are recorded here and in the commits.
+- **Errata.** `series.json` carries `errata`, a list, oldest first, empty so far. Each erratum has `date` (when it was published), `series_id` (or null for all), `reference_date` (the forecast concerned, or null) and `description`. The list lives in `publish.ERRATA`: appended by hand, never edited.
 - **A breaking change is published as `/api/v2/` next to v1.** v1 keeps being generated for at least 6 months. Every v1 body gains `"deprecation": {"deprecated_at": "...", "sunset_at": "...", "successor": ".../api/v2/..."}`, and v1 operations get `deprecated: true` in OpenAPI [OAS].
 - Pages cannot send RFC 9745 `Deprecation` or RFC 8594 `Sunset` headers [RFC9745][RFC8594][OBS], so the notice has to live in the body.
 - **After sunset, v1 files are frozen, not deleted.**
 - **A discontinued series** stays in the catalog with `"status": "discontinued"`.
 - **A new model or new inference settings** get a new `model_id`. **A new quantile set or horizon** gets a new `schema_version` major.
 
-**CI before deploy** (Python `jsonschema` [TOOLS] and `openapi-spec-validator` [TOOLS], which supports 3.1, plus plain asserts):
-1. Every generated JSON file validates against its schema. `openapi.json` is valid. Every file path matches an OpenAPI path template, and every template has at least one file.
-2. Rules the schema cannot express:
-   - array lengths match;
-   - exactly the 21 levels;
-   - finite numbers, `null` for missing values (`NaN` is not valid JSON);
-   - values non-decreasing across levels;
-   - values ≥ 0 when the catalog says non-negative;
-   - `reference_date` ≤ `forecast_date`;
-   - `target_end_date` matches the horizon rule;
-   - `latest.json` equals the newest dated file.
-3. **Immutability:** the archive commit only adds files (`git diff --name-status` shows `A` only), and today's round did not exist before.
-4. **Budgets:** round file under 1 MB, site artifact under 500 MB, archive branch pack under 300 MB.
-5. **Smoke test after deploy:** check that `latest.json` returns 200 with `application/json`, `Access-Control-Allow-Origin: *`, and a `generated_at` less than 36 hours old.
-6. **Optional:** an R job that runs `hubValidations` on the round CSV [HV-MO], and `frictionless validate` on the CSV resources.
+**Two checks, split by what a failure puts at risk (#135, `pipeline/aseri/gate.py`).** It uses `jsonschema` [TOOLS], `referencing` and `rfc3986-validator`, nothing else new.
+- **The contract** makes the whole API safe or not, so it fails the run. `python -m aseri.gate ../site/api/v1` is a step of `daily.yml` right after the run writes the site; an error fails the build job, so nothing is archived or deployed. `--subset` checks a part of the API, the web fixtures, where a linked file may be missing; a test runs it on them, so the page's fixtures cannot drift from the contract.
+- **The bounds** are one series' problem, so they hold that series alone. The daily run checks each new forecast before archiving it, where nothing is ever rewritten. A forecast past a failing bound holds its series as a failed download or a model error does: none of its new forecasts is archived or published, its data is archived all the same, its last good files stay up with a catalog `note` saying so, the run summary gives the forecast and the bound, `bounds_hold` names it for an issue (`bounds-alert`), and every other series is archived and deployed. The model is deterministic, so the next runs hold it again until the data moves or the code changes.
+
+The contract:
+1. Every file under `api/v1/` matches a path of `openapi.json`, and every fixed path (`series.json`, `scores.json`, `openapi.json`) has a file; a templated path needs a file only where another file links to it, so a day whose scores all fail, which drops their links, still passes. Every JSON file parses with finite numbers only (`NaN` and `Infinity` are refused) and validates against its schema, closed, with a format checker: `date` is an ISO calendar day, `date-time` RFC 3339 in UTC to the second, and `uri` RFC 3986.
+2. Of the dated forecast files, only those issued on the catalog's day are read, with the one each `latest.json` copies. An older one was checked the day it was issued and never changes: reading it again would grow the work every day, and a check tightened later would hold for good a file that can no longer be fixed. The index must still list every dated file, and every file it lists must exist.
+3. The files agree with each other: the catalog's IDs are unique and every `series/{id}/` is one of them; its links and licence texts exist; `latest.json`, `actuals.json`, `replay.json` and `forecasts.json` hold the reference date, forecast date, last observation, unit and horizon the catalog gives; each file names its own series; the index is in order and lists each new file as the file says it is; `latest.json` is a copy of the newest dated file; the scoreboard lists exactly the series the catalog links to scores.
+4. Rules the schema cannot express, for every forecast file read: `horizon` counts 1, 2, 3 and on; every level has a value per step (the schema holds exactly the 21 levels); values never decrease from level to level; `reference_date` ≤ `forecast_date`; `target_end_date` is `reference_date` plus h days, or for `trading_day` weekdays in order that skip at most two in a row (the archive's holiday calendar needs 7 years of prices, more than the API holds). The replay's forecasts get the same level checks.
+
+The bounds, each new forecast against the 365 days of its series' vintage up to its reference date, calibrated on the 120-day backfill (1,054 forecasts, as published on 2026-10-30 and 2026-10-31):
+
+| Check | Backfill | Warns | Holds the series |
+|---|---|---|---|
+| The median outside the range of the 365 days, in that range | never outside (0.00001 at most, a rounding) | over 0.05 | over 0.5 |
+| The 8 in 10 band (q0.9 - q0.1), in mean daily moves of the 365 days | 0.131 (Wikipedia's views) to 23.6 (Brent at 14 trading days) | outside 0.12 to 24 | outside 0.06 to 48 |
+| The median's move from the forecast before (new or archived), on the same days, in that forecast's band widths; a day it gave no band is skipped | 1.43 at most (Brent) | over 1.5 | never |
+
+Fewer than 28 days in the window leave a forecast unbounded, with a warning. A band clipped at its series' floor or ceiling (counts held at 0) is never judged too narrow. A test holds every forecast of the fixtures' backfill inside the warning bounds.
+
+Elsewhere: the archive job keeps the archive append-only and under 50 MB (6.7 of the spec), and a test reruns the daily run on a later day and finds every earlier dated file byte-identical. **Not done:** budgets on the round file and the site artifact, a smoke test after deploy, values ≥ 0 per series (the catalog does not publish the series' kind; `forecast.py` clips them), an R job that runs `hubValidations` on the round CSV [HV-MO], and `frictionless validate` on the CSV resources.
 
 ### 3.6 Storage growth and keeping the repository small
 
@@ -374,20 +384,24 @@ Caveats:
 Each catalog entry carries a `license` object:
 - `name` and `url`;
 - `attribution`, a ready-to-paste string;
+- `text`, the path of the full licence or terms under `/api/v1/` (#135);
 - `modifications`, saying what aseri changed (CC BY and the IMF terms require this);
-- `commercial_use`.
+- `commercial_use`, where the terms limit it.
 
-Every per-series file repeats `attribution`, and `bulk/datapackage.json` carries the same information as `licenses` and `sources` per resource [DP]. Splitting the bulk actuals by source lets each resource have exactly one licence.
+The catalog's own `license`, and that of `replay.json` and the score files, is aseri's. The forecast and actuals files repeat the source's `attribution` (a forecast file adds the model's), and `bulk/datapackage.json` is to carry the same information as `licenses` and `sources` per resource [DP]. Splitting the bulk actuals by source lets each resource have exactly one licence. An `attribution` string is never edited: the dated forecast files carry it, and they never change.
+
+Checked on 2026-10-31 (#135): the GPR page's "Creative Commons BY license" links to CC BY 4.0; Wikimedia's access policy says "CC0 1.0"; EIA's page still says "public domain" and asks for "Source: U.S. Energy Information Administration (date)"; the IMF's data terms still allow derivative works with attribution and a stated transformation, and still say "For any potential commercial reuse of IMF Data, email copyright@imf.org to request permission"; both MIT notices are unchanged.
 
 | Series | Upstream terms | What must travel | Commercial reuse |
 |---|---|---|---|
-| `gpr_daily` | "open access under the Creative Commons BY license" (version not stated) [GPR] | Credit Caldara and Iacoviello. Citation: Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", *AER* 112(4), 1194-1225. Link to the source page and the licence, give the download date (requested by the authors), and say that forecasts are derived and recent values preliminary [GPR][CCBY] | Allowed under CC BY |
+| `gpr_daily` | "open access under the Creative Commons BY license", which links to CC BY 4.0 [GPR] | Credit Caldara and Iacoviello. Citation: Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", *AER* 112(4), 1194-1225. Link to the source page and the licence, give the download date (requested by the authors), and say that forecasts are derived and recent values preliminary [GPR][CCBY] | Allowed under CC BY |
 | `wiki_ww3_views` | Pageviews data "available under the CC0 1.0 license" [WMF] | Nothing required. Courtesy credit: "Wikimedia Foundation, Analytics API (pageviews)" | Allowed |
 | `brent_spot` | EIA: "U.S. government publications are in the public domain". EIA lists Refinitiv (LSEG) as the price source [EIA]. Retrieved through FRED `DCOILBRENTEU` [FRED] | Requested citation: "Source: U.S. Energy Information Administration (Oct 29, 2026)". Name FRED as the retrieval route and flag the Refinitiv origin | Likely fine. Third-party origin noted (**unverified**) |
 | `suez_transits`, `hormuz_transits`, `bab_el_mandeb_transits`, `taiwan_strait_transits` | IMF terms: may "download, extract, copy, create derivative works, publish, distribute"; must attribute the IMF; "If material transformation occurs, it must be stated explicitly"; "For any potential commercial reuse of IMF Data, email copyright@imf.org" [IMF] | "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org)" [data-sources.md], plus an explicit transformation note: "aseri forecasts are model output derived from IMF PortWatch daily transit counts; they are not IMF data" | **Needs IMF permission.** `commercial_use: "permission required (copyright@imf.org)"`. Whether this extends to derived forecasts is **unverified** (conservative reading) |
 | `ua_air_raid_hours` | Repository under MIT, "Copyright (c) 2022 Vadym Klymenko" [MIT-S]. The underlying records come from official alert channels and a volunteer channel with no stated licence [data-sources.md] | The copyright line, plus the MIT permission notice (full text in `licenses/`). Whether daily aggregates are a "substantial portion" is unclear, so include it anyway | MIT allows it. Residual upstream risk |
 | `ua_drones_downed_claimed` | MIT, "Copyright (c) 2022 Petro Ivaniuk" [MIT-L] | Same MIT notice, plus the label "claims by the General Staff of the Armed Forces of Ukraine, not independently verified" | MIT allows it |
-| aseri forecasts and scores | Owner's choice. Suggest **CC BY 4.0** for aseri's own contribution, an option the Hubverse metadata enum includes [HV-MM] | "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)". State that upstream terms still apply to underlying data, and that PortWatch-derived series carry the IMF condition | As above, per series |
+| aseri forecasts, scores and API | **CC BY-NC 4.0** (owner's choice; this research had suggested CC BY 4.0). The Hubverse model-metadata lists (the example hubs, FluSight, the CDC COVID-19 hub, checked 2026-10-31) hold neither CC BY-NC 4.0 nor `other`; the model metadata says `other` as the spec asks and states the licence in `methods_long` [HV-MM] | "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)". State that upstream terms still apply to underlying data, and that PortWatch-derived series carry the IMF condition | Not without permission, and per series as above |
+| aseri's code | MIT, `LICENSE` at the repo root | The copyright notice | Allowed |
 
 ## 4. Pitfalls
 
@@ -480,13 +494,14 @@ Every per-series file repeats `attribution`, and `bulk/datapackage.json` carries
 ```text
 https://<owner>.github.io/aseri/
 ├── api/
-│   ├── index.html                      human docs + schema.org Dataset JSON-LD
+│   ├── index.html                      human docs + schema.org Dataset JSON-LD (web/api/index.html)
 │   └── v1/
 │       ├── series.json                 catalog + global model info + errata
 │       ├── scores.json                 cross-series scoreboard
-│       ├── openapi.json
-│       ├── schemas/{catalog,forecast,forecast-index,actuals,scores,defs}.schema.json
-│       ├── licenses/{MIT-Klymenko,MIT-Ivaniuk,CC-BY-4.0}.txt
+│       ├── openapi.json                these four from the repo's api/, copied by the daily run
+│       ├── schemas/{defs,catalog,forecast,forecast-index,actuals,replay,scores,scoreboard}.schema.json
+│       ├── licenses/{CC-BY-NC-4.0,CC-BY-4.0,CC0-1.0,MIT-Klymenko,MIT-Ivaniuk,IMF-terms,EIA-public-domain}.txt
+│       ├── model-metadata/aseri-timestral209m.yml      Hubverse model metadata
 │       ├── series/{series_id}/
 │       │   ├── latest.json
 │       │   ├── forecasts.json          index of issued forecasts
@@ -506,58 +521,68 @@ archive branch (orphan, append-only, never deployed as-is)
 ├── README.md                           licences + how to read
 ├── model-output/aseri-timestral209m/{forecast_date}-aseri-timestral209m.csv
 ├── target-data/deltas/{forecast_date}.csv      target,target_end_date,observation,as_of
-├── runs/{forecast_date}.json           manifest: provenance, input hashes, file sha256s
-└── model-metadata/aseri-timestral209m.yml      Hubverse model metadata
+└── runs/{forecast_date}.json           manifest: provenance, input hashes, file sha256s
 ```
+
+The archive job admits rounds, deltas and manifests only, so the model metadata is served from the site, not kept on the archive branch.
 
 ## Appendix B: Example files
 
 Arrays and level sets are abridged. Real files carry all 21 levels and the full horizon.
 
-`series.json`, one entry shown:
+**The published shapes are the schemas in `api/schemas/` (#135).** The catalog below is real. The other examples are the research's sketches, kept for their reasoning; where they differ, the schemas win. The forecast files have no `quality_flags`, and relative `links` (`catalog`, plus `canonical` and `replay` in `latest.json`); the actuals have no `flags` or `last_observation_date`; the index entries have no `model_id`.
+
+`series.json`, one entry shown, from a local run of 2026-10-31 (#135):
 
 ```json
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-10-29T06:14:02Z",
+  "generated_at": "2026-10-31T09:17:10Z",
   "model": {"model_id": "aseri-timestral209m", "hf_id": "mistralai/Timestral-209M",
             "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365"},
   "quantile_levels": [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
                       0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99],
-  "point_forecast": "quantile 0.5",
+  "license": {"name": "CC BY-NC 4.0", "url": "https://creativecommons.org/licenses/by-nc/4.0/",
+              "attribution": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI).",
+              "note": "Upstream terms still apply to the underlying data: see each series' license.",
+              "text": "licenses/CC-BY-NC-4.0.txt"},
+  "errata": [],
   "series": [
     {
       "series_id": "suez_transits",
-      "title": "Daily ship transits through the Suez Canal",
-      "unit": "transits per day",
-      "target_type": "discrete",
-      "non_negative": true,
+      "title": "Suez Canal",
+      "unit": "ships a day",
+      "baseline": 40.989,
+      "baseline_label": "its 365-day mean",
       "horizon_unit": "day",
-      "horizon_max": 30,
-      "day_definition": "PortWatch daily rows (one transit per ship per 48 h)",
-      "source_cadence": "P1D (upstream about 4 days behind)",
+      "horizon_max": 28,
+      "interval_steps": [7, 14, 28],
       "last_observation_date": "2026-10-25",
       "latest_reference_date": "2026-10-25",
-      "latest_forecast_date": "2026-10-29",
+      "latest_forecast_date": "2026-10-31",
+      "stale_since": null,
+      "note": null,
+      "weekly": false,
       "day_to_day_tie": {"rho": -0.26, "n": 2862},
-      "status": "active",
       "source": {"title": "IMF PortWatch, Daily Chokepoints Data",
                  "url": "https://portwatch.imf.org/",
-                 "field": "n_total", "filter": "portname = 'Suez Canal'"},
+                 "data_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+                 "field": "n_total"},
       "license": {
         "name": "IMF Copyright and Usage",
         "url": "https://www.imf.org/en/About/copyright-and-terms",
         "attribution": "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org).",
         "modifications": "aseri forecasts are model output derived from IMF PortWatch daily transit counts; they are not IMF data.",
-        "commercial_use": "permission required from the IMF (copyright@imf.org)"
+        "commercial_use": "permission required from the IMF (copyright@imf.org)",
+        "text": "licenses/IMF-terms.txt"
       },
       "links": {"latest": "series/suez_transits/latest.json",
                 "forecasts": "series/suez_transits/forecasts.json",
+                "replay": "series/suez_transits/replay.json",
                 "actuals": "series/suez_transits/actuals.json",
                 "scores": "series/suez_transits/scores.json"}
     }
-  ],
-  "errata": []
+  ]
 }
 ```
 
@@ -677,7 +702,7 @@ Arrays and level sets are abridged. Real files carry all 21 levels and the full 
   "title": "aseri daily probabilistic forecasts",
   "version": "1.0.0",
   "created": "2026-10-29T06:14:02Z",
-  "licenses": [{"name": "CC-BY-4.0", "path": "https://creativecommons.org/licenses/by/4.0/",
+  "licenses": [{"name": "CC-BY-NC-4.0", "path": "https://creativecommons.org/licenses/by-nc/4.0/",
                 "title": "aseri-authored forecasts and scores; upstream terms apply per series (see series.json)"}],
   "resources": [
     {"name": "forecasts-2026", "path": "forecasts-2026.csv.gz", "format": "csv", "compression": "gz",
@@ -701,133 +726,15 @@ Arrays and level sets are abridged. Real files carry all 21 levels and the full 
 
 `compression` is not in the profile, so it would be a custom property. Whether Frictionless tooling reads `.csv.gz` directly is **unverified**.
 
-## Appendix C: OpenAPI skeleton
+## Appendix C: OpenAPI and the schemas
 
-Write it as JSON (`openapi.json`). It is shown in YAML here for readability.
+The research's skeleton is now the real document, `api/openapi.json` (#135): OpenAPI 3.1.1 with `jsonSchemaDialect` 2020-12, one GET path per file type, each 200 response referencing its schema in `api/schemas/` by relative `$ref`, and a shared `NotFound` response for Pages' HTML 404. It differs from the skeleton in four ways:
+- `series_id` gives the nine IDs as `examples`, not an `enum`, so a new series stays an additive change;
+- the contract's own files have paths too (`openapi.json`, `schemas/{name}.schema.json`, `licenses/{name}.txt`, `model-metadata/{model_id}.yml`), so every served file has one;
+- the bulk files wait for #136;
+- `info.license` is CC BY-NC 4.0.
 
-```yaml
-openapi: 3.1.1
-jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
-info:
-  title: aseri forecasts API
-  version: 1.0.0            # equals schema_version in every file
-  summary: Static, read-only daily probabilistic forecasts (Hubverse quantile semantics).
-  description: |
-    Files on GitHub Pages. GET only, no query parameters, no custom request headers
-    (CORS preflight is rejected). Cache: max-age 600. Dated forecast files are immutable.
-    Breaking changes ship under /api/v2 with at least 6 months of overlap; see CHANGELOG_API.md.
-  license: {name: CC BY 4.0 (aseri content; upstream terms per series), identifier: CC-BY-4.0}
-servers:
-  - url: https://<owner>.github.io/aseri/api/v1
-paths:
-  /series.json:
-    get:
-      operationId: getCatalog
-      responses:
-        '200': {description: Series catalog, content: {application/json: {schema: {$ref: 'schemas/catalog.schema.json'}}}}
-  /series/{series_id}/latest.json:
-    get:
-      operationId: getLatestForecast
-      parameters: [{$ref: '#/components/parameters/series_id'}]
-      responses:
-        '200': {description: Latest forecast, content: {application/json: {schema: {$ref: 'schemas/forecast.schema.json'}}}}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /series/{series_id}/forecasts.json:
-    get:
-      operationId: listForecasts
-      parameters: [{$ref: '#/components/parameters/series_id'}]
-      responses:
-        '200': {description: Issued forecasts, content: {application/json: {schema: {$ref: 'schemas/forecast-index.schema.json'}}}}
-  /series/{series_id}/forecasts/{reference_date}.json:
-    get:
-      operationId: getForecast
-      parameters:
-        - {$ref: '#/components/parameters/series_id'}
-        - {name: reference_date, in: path, required: true, schema: {type: string, format: date}}
-      responses:
-        '200': {description: One immutable forecast, content: {application/json: {schema: {$ref: 'schemas/forecast.schema.json'}}}}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /series/{series_id}/actuals.json:
-    get:
-      operationId: getActuals
-      parameters: [{$ref: '#/components/parameters/series_id'}]
-      responses:
-        '200': {description: Observations, latest vintage, content: {application/json: {schema: {$ref: 'schemas/actuals.schema.json'}}}}
-  /series/{series_id}/scores.json:
-    get:
-      operationId: getSeriesScores
-      parameters: [{$ref: '#/components/parameters/series_id'}]
-      responses:
-        '200': {description: Track record, content: {application/json: {schema: {$ref: 'schemas/scores.schema.json'}}}}
-  /scores.json:
-    get:
-      operationId: getScoreboard
-      responses:
-        '200': {description: Cross-series summary, content: {application/json: {schema: {$ref: 'schemas/scores.schema.json'}}}}
-  /bulk/forecasts-{year}.parquet:
-    get:
-      operationId: getBulkParquet
-      parameters: [{$ref: '#/components/parameters/year'}]
-      responses:
-        '200': {description: 'Hubverse model-output, collected shape. Served as application/octet-stream by Pages.',
-                content: {application/octet-stream: {}}}
-  /bulk/forecasts-{year}.csv.gz:
-    get:
-      operationId: getBulkCsv
-      parameters: [{$ref: '#/components/parameters/year'}]
-      responses:
-        '200': {description: Same rows as the Parquet file, gzip-compressed CSV, content: {application/gzip: {}}}
-  /bulk/datapackage.json:
-    get:
-      operationId: getDataPackage
-      responses:
-        '200': {description: Frictionless Data Package v2 descriptor, content: {application/json: {}}}
-components:
-  parameters:
-    series_id:
-      name: series_id
-      in: path
-      required: true
-      schema:
-        type: string
-        enum: [gpr_daily, wiki_ww3_views, brent_spot, suez_transits, hormuz_transits,
-               bab_el_mandeb_transits, taiwan_strait_transits, ua_air_raid_hours, ua_drones_downed_claimed]
-    year: {name: year, in: path, required: true, schema: {type: integer, minimum: 2026}}
-  responses:
-    NotFound: {description: GitHub Pages 404 page (HTML body), content: {text/html: {}}}
-```
-
-Forecast schema core (`schemas/forecast.schema.json`), abridged:
-
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://<owner>.github.io/aseri/api/v1/schemas/forecast.schema.json",
-  "type": "object",
-  "required": ["schema_version", "series_id", "model_id", "forecast_date", "reference_date",
-               "forecast_mode", "horizon", "target_end_date", "quantiles", "attribution", "provenance", "generated_at"],
-  "properties": {
-    "schema_version": {"type": "string", "pattern": "^1\\.\\d+\\.\\d+$"},
-    "series_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
-    "model_id": {"type": "string", "pattern": "^[A-Za-z0-9_]+-[A-Za-z0-9_]+$"},
-    "forecast_date": {"type": "string", "format": "date"},
-    "reference_date": {"type": "string", "format": "date"},
-    "forecast_mode": {"enum": ["live", "retrospective"]},
-    "horizon": {"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 1},
-    "target_end_date": {"type": "array", "items": {"type": "string", "format": "date"}},
-    "quantiles": {
-      "type": "object",
-      "propertyNames": {"enum": ["0.01","0.05","0.1","0.15","0.2","0.25","0.3","0.35","0.4","0.45","0.5",
-                                  "0.55","0.6","0.65","0.7","0.75","0.8","0.85","0.9","0.95","0.99"]},
-      "minProperties": 21,
-      "additionalProperties": {"type": "array", "items": {"type": "number"}}
-    },
-    "generated_at": {"type": "string", "format": "date-time"}
-  }
-}
-```
-
-`format` is an annotation by default in 2020-12, so turn on format checking in the validator. Equal array lengths and monotone quantiles are checked in code (section 3.5).
+`format` is an annotation by default in 2020-12, so the gate turns on format checking (`date` from `jsonschema`, `uri` from `rfc3986-validator`, `date-time` its own, UTC to the second). Equal array lengths, monotone quantiles and step dates are checked in code (section 3.5).
 
 ## Sources
 
@@ -836,7 +743,7 @@ Forecast schema core (`schemas/forecast.schema.json`), abridged:
 - [HV-TASKS] Hubverse, Defining modeling tasks: https://docs.hubverse.io/en/latest/user-guide/tasks.html
 - [HV-TD] Hubverse, Target data: https://docs.hubverse.io/en/latest/user-guide/target-data.html
 - [HV-CFG] Hubverse, Hub configuration files: https://docs.hubverse.io/en/latest/user-guide/hub-config.html ; schemas: https://github.com/hubverse-org/schemas
-- [HV-MM] Hubverse, Model metadata: https://docs.hubverse.io/en/latest/user-guide/model-metadata.html ; template schema: https://github.com/hubverse-org/example-complex-forecast-hub/blob/main/hub-config/model-metadata-schema.json
+- [HV-MM] Hubverse, Model metadata: https://docs.hubverse.io/en/latest/user-guide/model-metadata.html ; template schema: https://github.com/hubverse-org/example-complex-forecast-hub/blob/main/hub-config/model-metadata-schema.json ; the licence lists checked on 2026-10-31: https://github.com/hubverse-org/hubTemplate/blob/main/hub-config/model-metadata-schema.json , https://github.com/cdcepi/FluSight-forecast-hub/blob/main/hub-config/model-metadata-schema.json , https://github.com/CDCgov/covid19-forecast-hub/blob/main/hub-config/model-metadata-schema.json
 - [HV-EX] Example complex forecast hub `tasks.json`: https://github.com/hubverse-org/example-complex-forecast-hub/blob/main/hub-config/tasks.json
 - [HV-STORE] Hubverse, Data storage: https://docs.hubverse.io/en/latest/user-guide/data-storage.html
 - [HV-CLOUD] Hubverse, AWS onboarding: https://docs.hubverse.io/en/latest/developer/cloud-onboarding.html
@@ -873,7 +780,7 @@ Forecast schema core (`schemas/forecast.schema.json`), abridged:
 - [SO] Google Dataset structured data: https://developers.google.com/search/docs/appearance/structured-data/dataset ; https://schema.org/Dataset
 - [ISO] ISO 8601: https://www.iso.org/iso-8601-date-and-time-format.html
 - [RFC3339] https://www.rfc-editor.org/rfc/rfc3339
-- [OAS] OpenAPI 3.1.1: https://spec.openapis.org/oas/v3.1.1.html
+- [OAS] OpenAPI 3.1.1: https://spec.openapis.org/oas/v3.1.1.html ; its JSON Schema: https://spec.openapis.org/oas/3.1/schema/2022-10-07
 - [OAS32] OpenAPI 3.2.0 (published 2025-09-19): https://spec.openapis.org/oas/v3.2.0.html
 - [RFC9745] Deprecation header: https://www.rfc-editor.org/rfc/rfc9745.html
 - [RFC8594] Sunset header: https://www.rfc-editor.org/rfc/rfc8594.html

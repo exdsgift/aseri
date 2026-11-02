@@ -79,9 +79,9 @@ const prefers = (reduce: boolean) =>
     matches: reduce,
   })
 
-// latest.json's forecast was made on 2026-10-30: that day, the page calls it today.
+// latest.json's forecast was made on 2026-10-31: that day, the page calls it today.
 beforeEach(() => {
-  vi.useFakeTimers({ now: new Date("2026-10-30T12:00:00Z"), toFake: ["Date"] })
+  vi.useFakeTimers({ now: new Date("2026-10-31T12:00:00Z"), toFake: ["Date"] })
 })
 
 const title = () => screen.getByRole("heading", { level: 2 }).textContent
@@ -102,7 +102,7 @@ const source = () => screen.getByText(/^Source:/).textContent
 it("names the day today's forecast was made, unless it is today", () => {
   vi.setSystemTime(new Date("2026-11-02T12:00:00Z"))
   render(<ForecastPanel series={gpr} />)
-  expect(title()).toBe("[F] Geopolitical risk · forecast made Oct 30")
+  expect(title()).toBe("[F] Geopolitical risk · forecast made Oct 31")
 })
 
 it("replays the forecast of the day before with ←, then today's with → or T", () => {
@@ -378,7 +378,7 @@ it("labels the drones as one side's claims wherever their unit shows", async () 
 // The possible paths turn on an interval, which these tests advance by hand.
 const turning = () =>
   vi.useFakeTimers({
-    now: new Date("2026-10-30T12:00:00Z"),
+    now: new Date("2026-10-31T12:00:00Z"),
     toFake: ["Date", "setInterval", "clearInterval"],
   })
 const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))

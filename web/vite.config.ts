@@ -16,7 +16,7 @@ export default defineConfig({
   // `npm run dev` has no API of its own, so it reads the published one.
   server: {
     proxy: {
-      "/api": {
+      "/api/v1": {
         target: "https://exdsgift.github.io/aseri",
         changeOrigin: true,
       },
@@ -26,6 +26,13 @@ export default defineConfig({
     outDir: "../site",
     // The pipeline writes the API into site/api/v1, which a build must not wipe.
     emptyOutDir: false,
+    // The page, and the API's page for people at /api/, a static page on the page's styles.
+    rolldownOptions: {
+      input: [
+        resolve(import.meta.dirname, "index.html"),
+        resolve(import.meta.dirname, "api/index.html"),
+      ],
+    },
   },
   test: {
     environment: "jsdom",

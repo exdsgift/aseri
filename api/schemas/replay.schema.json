@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/replay.schema.json",
+  "title": "series/{series_id}/replay.json: the forecasts of the last 120 days, for the page",
+  "description": "Every forecast from the 120 days to the newest reference date, oldest first, at seven levels and rounded as the page writes values: whole from 10 up, one decimal below. The dated files keep all 21 levels to four decimals.",
+  "type": "object",
+  "required": ["schema_version", "series_id", "model_id", "horizon", "quantile_levels", "forecasts", "license", "attribution"],
+  "properties": {
+    "schema_version": {"$ref": "defs.schema.json#/$defs/schema_version"},
+    "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+    "model_id": {"$ref": "defs.schema.json#/$defs/model_id"},
+    "horizon": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1}},
+    "quantile_levels": {
+      "description": "The page's 8 in 10 and 5 in 10 ranges and its most likely value, and the 5% and 95% a possible path reaches before the chart's frame.",
+      "const": ["0.05", "0.1", "0.25", "0.5", "0.75", "0.9", "0.95"]
+    },
+    "forecasts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["reference_date", "forecast_mode", "quantiles"],
+        "properties": {
+          "reference_date": {"$ref": "defs.schema.json#/$defs/date"},
+          "forecast_mode": {"$ref": "defs.schema.json#/$defs/forecast_mode"},
+          "quantiles": {
+            "type": "object",
+            "propertyNames": {"enum": ["0.05", "0.1", "0.25", "0.5", "0.75", "0.9", "0.95"]},
+            "minProperties": 7,
+            "additionalProperties": {"type": "array", "minItems": 1, "items": {"type": "number"}}
+          },
+          "testdata_leakage": {"const": "unknown"},
+          "pseudo_real_time_note": {"type": "string"}
+        }
+      }
+    },
+    "license": {"$ref": "defs.schema.json#/$defs/license"},
+    "attribution": {"type": "string"}
+  }
+}

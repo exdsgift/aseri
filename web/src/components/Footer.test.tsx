@@ -21,6 +21,7 @@ it("signs the page, with its licences, its source and each hero's engraving", ()
     "aseri",
     "© 2026 Gabriele Durante",
     "Code: MIT · Forecasts and data: CC BY-NC 4.0",
+    "The data, as an API, and its licences",
     "Source: github.com/exdsgift/aseri",
     "Messenger: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art, CC0, from Wikimedia Commons",
     "Signal: Hendrick Goltzius, The Farnese Hercules, c. 1592, published 1617, The Metropolitan Museum of Art, CC0, from Wikimedia Commons",
@@ -33,6 +34,7 @@ it("signs the page, with its licences, its source and each hero's engraving", ()
   ).toEqual([
     "https://github.com/exdsgift/aseri/blob/master/LICENSE",
     "https://creativecommons.org/licenses/by-nc/4.0/",
+    "api/",
     "https://github.com/exdsgift/aseri",
     "https://commons.wikimedia.org/wiki/File:Hendrik_Goltzius_after_Polidoro_da_Caravaggio,_Mercury,_probably_1592,_NGA_60693.jpg",
     "https://commons.wikimedia.org/wiki/File:Farnese_Hercules_MET_DP102198.jpg",

@@ -6,7 +6,7 @@ Every decision below was either made by the owner during brainstorming or is mar
 
 ## 1. What it is and why
 
-焦り (_aseri_, "impatience, restlessness") is a small, self-maintaining website that answers one question in the first ten seconds: **how unstable is the world right now, and where is it heading?**
+焦り (*aseri*, "impatience, restlessness") is a small, self-maintaining website that answers one question in the first ten seconds: **how unstable is the world right now, and where is it heading?**
 
 - **The headline:** one geopolitical-risk number, the Caldara-Iacoviello GPR index, with its trend and a forecast for the next 4 weeks, written in plain words.
 - **Nine public signals around it**, each with its own forecast: risk, public attention, oil, four sea lanes, and the air war in Ukraine.
@@ -76,7 +76,6 @@ Even if everything works, the project fails if:
   - 1 GB site limit.
 
   Details are in `docs/research/public-api.md` section 2.
-
 - **Compute is a public-repo `ubuntu-latest` runner:** 4 vCPU, 16 GB RAM, CPU only.
   - Timestral-209M takes 0.7 to 3.4 s per forecast on a laptop. One daily run is about 20 s of inference across nine series. The whole job is estimated at 2 to 3 minutes, mostly setup.
   - **This has not been measured on a runner yet.**
@@ -94,7 +93,6 @@ Even if everything works, the project fails if:
   - Wikipedia lags about 1 day.
 
   Horizons are counted from the last observed date (`reference_date`), not the run date.
-
 - **Licences and attribution must travel with the data** on the page and in the API (6.1, 6.6).
 - **The UI copy is in English (my call).** It matches the reference and the public repository.
 - **Storage is bounded.** The `master` branch holds code and docs only (6.7).
@@ -105,20 +103,19 @@ Even if everything works, the project fails if:
 
 Each series is a daily value. The page shows the daily values, their 7-day average as context, and Timestral's forecast of the daily values.
 
-| id                         | Name on page      | Source and access                                                                             | Transform                                                                                                                           | Unit                           | Horizon | Interval steps | Attribution / licence                                                                                   |
-| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------- | -------------- | ------------------------------------------------------------------------------------------------------- |
-| `gpr_daily`                | Geopolitical risk | Caldara & Iacoviello GPR daily, `data_gpr_daily_recent.dta` (or `.xls`), column `GPRD`        | none; baseline 100 = 1985-2019 average (verified: mean 100.0)                                                                       | index                          | 28      | 7, 14, 28      | CC BY; cite Caldara and Iacoviello (2022, AER)                                                          |
-| `wiki_ww3_views`           | "World War III"   | Wikimedia pageviews REST API, en.wikipedia, `user` agent type, User-Agent header required     | none                                                                                                                                | Wikipedia views a day          | 14      | 3, 7, 14       | CC0                                                                                                     |
-| `brent_spot`               | Brent oil         | FRED `DCOILBRENTEU` (EIA)                                                                     | trading days only; see note                                                                                                         | $ a barrel                     | 14      | 3, 7, 14       | EIA public domain, source FRED/EIA                                                                      |
-| `suez_transits`            | Suez Canal        | IMF PortWatch ArcGIS `Daily_Chokepoints_Data`, `n_total`                                      | none                                                                                                                                | ships a day                    | 28      | 7, 14, 28      | "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org)"; commercial reuse needs IMF permission |
-| `hormuz_transits`          | Strait of Hormuz  | same, `portname='Strait of Hormuz'`                                                           | none                                                                                                                                | ships a day                    | 14      | 3, 7, 14       | same                                                                                                    |
-| `bab_el_mandeb_transits`   | Bab el-Mandeb     | same, `portname='Bab el-Mandeb Strait'`                                                       | none                                                                                                                                | ships a day                    | 14      | 3, 7, 14       | same                                                                                                    |
-| `taiwan_strait_transits`   | Taiwan Strait     | same, `portname='Taiwan Strait'`                                                              | none; known AIS tracking dropouts, label them                                                                                       | ships a day                    | 28      | 7, 14, 28      | same                                                                                                    |
-| `ua_air_raid_hours`        | Air-raid alerts   | `Vadimkin/ukrainian-air-raid-sirens-dataset`, `volunteer_data_en.csv`                         | hours of alert per UTC day, summed over regions, alerts split at UTC midnight, today dropped (partial)                              | alert hours a day, all regions | 7       | 1, 3, 7        | MIT (repo); volunteer data                                                                              |
-| `ua_drones_downed_claimed` | Drones downed     | `PetroIvaniuk/2022-Ukraine-Russia-War-Dataset`, `russia_losses_equipment.json`, field `drone` | daily difference of the cumulative count; a negative difference is the source correcting itself, flagged as a revision, not clipped | a day, as claimed by Ukraine   | 7       | 1, 3, 7        | MIT (repo); **always labelled "claimed by Ukraine's General Staff, one side's figures"**                |
+| id | Name on page | Source and access | Transform | Unit | Horizon | Interval steps | Attribution / licence |
+|---|---|---|---|---|---|---|---|
+| `gpr_daily` | Geopolitical risk | Caldara & Iacoviello GPR daily, `data_gpr_daily_recent.dta` (or `.xls`), column `GPRD` | none; baseline 100 = 1985-2019 average (verified: mean 100.0) | index | 28 | 7, 14, 28 | CC BY 4.0; cite Caldara and Iacoviello (2022, AER) |
+| `wiki_ww3_views` | "World War III" | Wikimedia pageviews REST API, en.wikipedia, `user` agent type, User-Agent header required | none | Wikipedia views a day | 14 | 3, 7, 14 | CC0 |
+| `brent_spot` | Brent oil | FRED `DCOILBRENTEU` (EIA) | trading days only; see note | $ a barrel | 14 | 3, 7, 14 | EIA public domain, source FRED/EIA |
+| `suez_transits` | Suez Canal | IMF PortWatch ArcGIS `Daily_Chokepoints_Data`, `n_total` | none | ships a day | 28 | 7, 14, 28 | "Sources: UN Global Platform; IMF PortWatch (portwatch.imf.org)"; commercial reuse needs IMF permission |
+| `hormuz_transits` | Strait of Hormuz | same, `portname='Strait of Hormuz'` | none | ships a day | 14 | 3, 7, 14 | same |
+| `bab_el_mandeb_transits` | Bab el-Mandeb | same, `portname='Bab el-Mandeb Strait'` | none | ships a day | 14 | 3, 7, 14 | same |
+| `taiwan_strait_transits` | Taiwan Strait | same, `portname='Taiwan Strait'` | none; known AIS tracking dropouts, label them | ships a day | 28 | 7, 14, 28 | same |
+| `ua_air_raid_hours` | Air-raid alerts | `Vadimkin/ukrainian-air-raid-sirens-dataset`, `volunteer_data_en.csv` | hours of alert per UTC day, summed over regions, alerts split at UTC midnight, today dropped (partial) | alert hours a day, all regions | 7 | 1, 3, 7 | MIT (repo); volunteer data |
+| `ua_drones_downed_claimed` | Drones downed | `PetroIvaniuk/2022-Ukraine-Russia-War-Dataset`, `russia_losses_equipment.json`, field `drone` | daily difference of the cumulative count; a negative difference is the source correcting itself, flagged as a revision, not clipped | a day, as claimed by Ukraine | 7 | 1, 3, 7 | MIT (repo); **always labelled "claimed by Ukraine's General Staff, one side's figures"** |
 
 Notes:
-
 - **The `id` column holds the public IDs (my call).** They are the API path segment and the Hubverse `target` value, so they can never be renamed. They are taken from `docs/research/public-api.md`. Short names are only display labels.
 - **Horizons:** GPR, Suez, Taiwan and Hormuz come from the backtest spike, which validated 30, 30, 30 and 7 to 14 days. The 30-day horizons are set to 28 so that every horizon is a whole number of weeks (owner's choice, see 6.8). The others are conservative until the live record says otherwise.
 - **Brent's calendar.** The prototype carried Friday's close over the weekend. The API research recommends forecasting trading days and counting the horizon in trading days (`public-api.md` 4.3).
@@ -144,7 +141,6 @@ Notes:
   - 20 paths, seeded by series, reference date and index, so a path always looks the same.
 
   On the backtest of 2026-10-30 rho was 0.45 for GPR, -0.26 for Suez, 0.30 for Bab el-Mandeb, 0.14 for Taiwan and 0.08 for Hormuz.
-
 - **One forecast per series per new `reference_date`.** If a source has not moved forward (GPR during the week, for example), no new forecast is issued for that series that day. `(model_id, series_id, reference_date)` identifies a forecast; it is written once and never edited.
 - **Batches and missed runs (my call).** When a source jumps several days at once (GPR and Brent weekly, or any source after a missed run), the job issues one forecast for every new date.
   - Each one uses only the data up to its own date.
@@ -163,7 +159,6 @@ Notes:
 ### 6.3 Daily pipeline
 
 One workflow, `daily.yml`, on a cron.
-
 - **Schedule (my call):** 07:00 UTC, plus manual dispatch.
 - **Stages:** each is a separate module with a clear input and output.
 
@@ -179,7 +174,6 @@ One workflow, `daily.yml`, on a cron.
    - plausible ranges and finite values.
 
    A failing or stale series is skipped for the day. It keeps its last good forecast and data, labelled "stale since {date}" in the catalog. The rest still publish.
-
 3. **Forecast:** run Timestral on each series whose `reference_date` moved.
    - Clamp count quantiles at 0 and the alert hours at 600 (25 regions times 24 hours). Sort the quantiles after any offset (none crossed in testing), and stop on a non-finite value.
    - Write the Hubverse round file.
@@ -191,8 +185,7 @@ One workflow, `daily.yml`, on a cron.
    - absolute error of the median vs naive (last value), seasonal naive (7 days) and the 28-day mean, plus MASE.
 
    Score against a stated observation vintage, because GPR revises its recent values.
-
-6. **Publish:** build the API files and the page data, validate every JSON file against its schema, build the web app, and deploy one Pages artifact.
+6. **Publish:** build the API files and the page data, build the web app, check every API file against the contract (the gate, 6.6), and deploy one Pages artifact.
 
 **Weights cache.** Use `actions/cache` keyed by the model revision. Cold start downloads the 837 MB weights once.
 
@@ -205,7 +198,6 @@ One workflow, `daily.yml`, on a cron.
   - **Retrospective:** the launch backfill.
 
   The headline record uses live forecasts only, and the page states how many there are ("based on N live forecasts since {date}").
-
 - **Minimum sample (my call):** a series shows live scores once 30 of its live forecasts have resolved at the scored horizon (`min_n_to_display: 30` in `scores.json`, next to `n`).
   - Before that, the record shows "Collecting live record: N of 30".
   - Under it, visually separate and labelled "Backtest, not the live record", the retrospective scores.
@@ -241,13 +233,11 @@ The owner wants scripts that look for covariates that are actually accurate. The
   - 8-in-10 coverage within 0.70 to 0.90.
 
   Changing the rule is a code change with a reason in the commit.
-
 - **What it produces:**
   - a Markdown report under `docs/research/scout/{date}.md`;
   - when a set passes, an issue or draft PR that proposes enabling it for that series.
 
   **A human approves.** Enabling a covariate changes the model ID suffix, because the inference settings changed, so the live record restarts honestly for that series.
-
 - **The first known lead:** Lunar New Year for Taiwan. It cut the error 27% in the 2026 holiday week but rests on one holiday, so retest after the 2027 one.
 - **Cost:** covariates cost 3 to 4.5 times more inference. Monthly runs are minutes, not a constraint.
 
@@ -257,7 +247,7 @@ Follow `docs/research/public-api.md`. The essentials:
 
 - **The format is Hubverse model output:** `reference_date`, `target`, `horizon`, `target_end_date`, `output_type = quantile`, `output_type_id`, `value`. The model ID is `aseri-timestral209m`.
 - **Base URL:** `https://<owner>.github.io/aseri/api/v1/`, every path ending in a file name:
-  - `series.json`: catalog, with unit, horizon, cadence, last observation, source, licence, attribution text and day-to-day tie per series, model info, quantile levels, errata;
+  - `series.json`: catalog, with unit, horizon, last observation, source, licence, attribution text and day-to-day tie per series, model info, quantile levels, aseri's licence, errata;
   - `series/{id}/latest.json`;
   - `series/{id}/forecasts.json`: the index;
   - `series/{id}/forecasts/{reference_date}.json`: immutable;
@@ -265,28 +255,29 @@ Follow `docs/research/public-api.md`. The essentials:
   - `series/{id}/actuals.json`;
   - `series/{id}/scores.json`;
   - `scores.json`;
-  - `bulk/forecasts-{YYYY}.parquet` and `.csv.gz`, `bulk/time-series.parquet`, `bulk/oracle-output.csv`, `bulk/scores.parquet`, `bulk/datapackage.json`;
-  - `openapi.json`, `schemas/*.schema.json`, `licenses/*.txt`.
+  - `bulk/forecasts-{YYYY}.parquet` and `.csv.gz`, `bulk/time-series.parquet`, `bulk/oracle-output.csv`, `bulk/scores.parquet`, `bulk/datapackage.json` (#136);
+  - `openapi.json`, `schemas/*.schema.json`, `licenses/*.txt` and `model-metadata/aseri-timestral209m.yml`, the Hubverse model metadata (#135).
 
-  A human docs page at `/api/` carries a schema.org `Dataset` block.
-
+  A human docs page at `/api/` carries a schema.org `Dataset` block: `web/api/index.html`, a second page of the Vite build on the site's tokens and fonts, with no script, and under the copy lint (#135). The page's footer links to it.
 - **Provenance in every forecast file:**
   - model ID, weights revision and package commit;
   - `reference_date`, `forecast_date`, `generated_at`;
   - code version (git SHA);
   - `forecast_mode`;
   - input `as_of` per source.
-- **The contract:**
-  - OpenAPI 3.1 plus JSON Schemas, kept in the repo as the source of truth;
-  - CI validates every published file against them;
-  - `v1` only changes in additive ways, and anything breaking goes to `v2`;
-  - corrections go to `errata`, the original forecast stays published.
-- **Licences:** each resource carries its own licence and attribution. The bulk CSVs are split by source so that each file has one licence.
+- **The contract (#135):**
+  - OpenAPI 3.1.1 plus JSON Schemas (Draft 2020-12), kept in `api/` at the repo root as the source of truth (`api/openapi.json`, `api/schemas/`), with the licence texts and the model metadata; the daily run copies them into the site's `api/v1/`;
+  - a gate, `python -m aseri.gate` (`pipeline/aseri/gate.py`), runs in `daily.yml` after the run writes the site and before the archive and the deploy. It fails the run when a file is off its schema (closed to undeclared keys, with dates and URIs checked), when the files disagree with each other or with the catalog, or when a step's `target_end_date` is not the reference date plus its horizon (calendar days, or trading days for Brent). Of the dated files it reads only the day's: the others never change;
+  - the bounds are one series' problem, not the API's: the daily run checks each new forecast against its series' last 365 days before archiving it, and a median or an 8 in 10 band far off holds that series alone, as a failed download does. Its last good files stay up with a note, its data is archived, `bounds-alert` opens an issue, and the other series publish. A large change from the forecast before only warns. The bounds are calibrated on the 120-day backfill (`public-api.md` 3.5);
+  - dated forecast files stay byte-identical across reruns, which a test checks;
+  - `v1` only changes in additive ways, and anything breaking goes to `v2`. `schema_version` stays `1.0.0` within v1, since the dated files carry it and never change;
+  - corrections go to `errata` in `series.json` (date, series, reference date, description), empty so far; the original forecast stays published.
+- **Licences:** each resource carries its own licence and attribution: the catalog per series, with `text`, the path of the full licence under `/api/v1/licenses/`. The bulk CSVs are split by source so that each file has one licence. An `attribution` string is never edited, since the dated files carry it.
 - **aseri's own licences (owner's choice):**
   - forecasts, scores and the API: **CC BY-NC 4.0**, attributed as "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)", with a note that upstream terms still apply to the underlying data;
   - code: **MIT**, in `LICENSE` at the root.
 
-  If the Hubverse model-metadata licence list has no CC BY-NC 4.0 value, use its `other` option and state the licence in the text.
+  The Hubverse model-metadata licence lists (the example hubs, FluSight, the CDC COVID-19 hub, checked 2026-10-31) have no CC BY-NC 4.0 value, nor an `other` one: the model metadata says `other` as asked and states the licence in `methods_long`.
 
 ### 6.7 Storage and repository rules
 
@@ -304,9 +295,9 @@ Follow `docs/research/public-api.md`. The essentials:
 The reference is the prototype `prototypes/forecast-chart/index.html`, in the "statement" style of about.dos-age.com: one idea per screen. Rewrite it properly; do not port it. Since #150 the whole site is white on electric blue (6.9).
 
 1. **Hero:** three studies of the `prototype-hero-studies` branch take turns behind the text (#150, owner's choice), its layout and padding unchanged. Each stands beside the text when its margin has room (from about 1,050 px), else small in the 224 px band above the wordmark; never under the text, never past the hero's width, and on the left, clear of the side navigation:
-   - **Messenger** (study A, #148): Hendrick Goltzius's engraved _Mercury_ in his niche, a disc of radial ticks behind him, and a fan of fine rays from each of his winged hat, caduceus, hand, elbow and winged ankle;
-   - **Signal** (study B): Goltzius's _Farnese Hercules_ from behind on a failing screen (phosphor smear, every third line dark, noise, a band slipping now and then), light leaking in from above, and two labelled selection frames on his back (`selection` in `web/src/lib/signal.ts`): the small dotted one the baseline, the large dashed one the 7-day average, as many times as wide as the value is the baseline, up to 4 times, moved only as far as keeps it and its label inside the hero (`placed`). On a phone only his torso shows. The study's cloud and spectators are left out: the side navigation holds the right margin;
-   - **Vortex** (study C): the head of the _Apollo Belvedere_ at the eye of an op-art vortex of stripes and checker squares, a ring at 2.2 times the head with a tick every 10 points, longer on the quarters and longest, labelled, at the baseline 100, and a solid arm turning one degree per point of the 7-day average from the top of the head out to the ring (`armDegrees`, `armPoints` in `web/src/lib/vortex.ts`), labelled at its end, up to 400. The stripes inside the ring twist with it;
+   - **Messenger** (study A, #148): Hendrick Goltzius's engraved *Mercury* in his niche, a disc of radial ticks behind him, and a fan of fine rays from each of his winged hat, caduceus, hand, elbow and winged ankle;
+   - **Signal** (study B): Goltzius's *Farnese Hercules* from behind on a failing screen (phosphor smear, every third line dark, noise, a band slipping now and then), light leaking in from above, and two labelled selection frames on his back (`selection` in `web/src/lib/signal.ts`): the small dotted one the baseline, the large dashed one the 7-day average, as many times as wide as the value is the baseline, up to 4 times, moved only as far as keeps it and its label inside the hero (`placed`). On a phone only his torso shows. The study's cloud and spectators are left out: the side navigation holds the right margin;
+   - **Vortex** (study C): the head of the *Apollo Belvedere* at the eye of an op-art vortex of stripes and checker squares, a ring at 2.2 times the head with a tick every 10 points, longer on the quarters and longest, labelled, at the baseline 100, and a solid arm turning one degree per point of the 7-day average from the top of the head out to the ring (`armDegrees`, `armPoints` in `web/src/lib/vortex.ts`), labelled at its end, up to 400. The stripes inside the ring twist with it;
    - **the turns** (`web/src/lib/heroes.ts`): each page load shows the next hero in that order, its index kept in `localStorage`; where storage is refused, a random one. A small control at the foot of the page picks Messenger, Signal, Vortex or Rotate (the default), remembered per reader; a picked hero arrives afresh. Only the shown hero's engraving loads;
    - the wordmark 焦り, with "あせり · aseri" under it;
    - the kicker "Geopolitical risk · today";
@@ -314,7 +305,6 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
    - the pitch: "{x}% above its 1985-2019 average", then the 4-week forecast for the same weekday as the last data, compared with that weekday (owner's choice): "{Weekday Mon DD}, 4 weeks from the last data: 8 in 10 between {lo} and {hi}, 2 in 10 outside. Most likely {m}. (Last {weekday}: {v})", the range first (6.9, copy). GPR has a strong weekday cycle, so a single day must never be compared with a day on a different weekday or with the 7-day average.
 
    Messenger's rays encode GPR's 7-day average against its baseline, on a scale that starts full (`fan` in `web/src/lib/messenger.ts`): at the baseline and under it, 19 rays over 40 degrees, fuller than the study's fans at 181 (owner: a richer scale); each further baseline opens a fan 13 degrees, up to a cap at 4 times the baseline. The rays keep fixed slots 40/18 degrees apart, each with its own length, so an opening fan gains rays only at its edges and none ever jumps while the number counts up: 181 holds 23 rays over 48.9 degrees, 300 holds 29 over 62.2, denser than the study's 27 over 66, the cap 35 over 75.6. Two dashed rays in each fan mark the baseline, at the full fan's edges. With every hero the text sits on a calm area: the ground at 91% over the text column and a margin, dissolving in a 48 px dither, so the words read over the art everywhere. The art's labels stay clear of that edge.
-
 2. **The forecast panel,** a game-sheet frame with the title row `[F] {series} · forecast made today | {unit} · data to {date}`:
    - a readout line;
    - the pixel chart (6.9), opening on the most likely of the model's 20 paths;
@@ -332,13 +322,11 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
    - "To {date}".
 
    Selecting a card (or pressing 1 to 9) opens that series in the panel with a dither transition. The hero stays on GPR.
-
 4. **The record:** the dots and the table from 6.4.
 5. **Side navigation** on wide screens: icon plus two-line label, scroll-spy (`SideNav`). Inactive at 82% opacity, the lowest at which its label still reads at 4.5:1 on the blue ground (`contrast.test.ts`; the first spec's 30% fell far under); the lit one whole, with a 2 px bar on its outer edge, so it never rests on a shade alone. Down the right edge on the ground, from 1344 px, where the gutter beside the 1040 px sections holds it: the hero's art stands on the left. R jumps to the record on any screen, as its link does: the address says `#record`, and the focus moves to the record, so the next Tab goes on from there.
 6. **The foot of the page:** a thin rule, then "aseri", "© 2026 Gabriele Durante", "Code: MIT" (the repository's `LICENSE`) and "Forecasts and data: CC BY-NC 4.0", the source repository, the choice of hero, and each engraving's credit with its source and CC0, from the prototype's README: "Messenger: Hendrick Goltzius after Polidoro da Caravaggio, Mercury, probably 1592, National Gallery of Art", "Signal: Hendrick Goltzius, The Farnese Hercules, c. 1592, published 1617, The Metropolitan Museum of Art", "Vortex: Apollo Belvedere (Apollo Pythius), engraving, Rijksmuseum", each linked to its Wikimedia Commons page.
 
 **Behaviour:**
-
 - **The first frame is readable at rest.** Then the load sequence runs: the wordmark dithers in, the number counts up, the chart scans in from left to right. With the count-up, over 1.1 s, the hero's art follows the number step for step (`counted` and `easeOut` in `web/src/lib/motion.ts`): Messenger's disc draws in and his fans grow and open; Signal's screen comes on, a line opening into the picture that warms up through three noisier ones, 600 ms each, and the value's frame grows with its label; Vortex's ticks sweep round as its arm and stripes wind up to the value. The charts, the panel's and the cards' alike, scan in on the count-up's steps the first time each comes into view, if only in part, so the cards under the fold scan as they arrive: their marks appear from the left in 16 steps of 40 ms, fast and then a pixel column at a time into the right end, whole after 640 ms. The frame, the hatch, the origin and the labels are there from the first frame. The chart is painted once, whole and as its frame alone, and each step only reveals more of the whole. A series scans in once a page load in each view: a path turning, a replay step, a resize, or the panel mounted again for the same series (its replay arriving, a square of the record) draws it whole.
 - **Ambient motion,** slow, as in the studies:
   - Messenger's disc turns, about once in 10 minutes, and each ray sways by 0.3 degrees, out of step with the others (about 14 s a cycle);
@@ -347,7 +335,6 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - once asked, the panel draws the next possible path every 1.2 s.
 
   Every hero's art (`HeroArt`, one canvas the size of the hero) draws about 30 frames a second while it arrives (1.1 s), then a frame every 200 ms: the slow motion after it is a fraction of a pixel a frame. It and the paths stop while the tab is hidden or they are off screen (`tickWhileShown`).
-
 - **UI transitions** take 160 ms. Panel changes use the 8-step Bayer dither (30 ms per step).
 - **`prefers-reduced-motion`** turns all of it off: the hero's art still and whole (Messenger's disc, figure and fans at their full width; Signal's settled screen and both frames; Vortex's arm at the value), no count-up, no scan, no dither transitions, and the paths step only on "Next path".
 - **Data loading (my call):** first load fetches `series.json`, `scores.json`, every `latest.json` and `actuals.json` and GPR's replay data. Other series' replay data loads on selection. Budget: under 150 KB gzipped of JS and CSS, under 100 KB gzipped of initial data, checked by `web/scripts/budget.js`: in CI on the fixtures, failing the build; in the daily run on the day's real data, as a warning only, since a heavier day must not take the site down.
@@ -366,7 +353,6 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - the one accent, gold `#ffc94a` (`--forecast`): the model's path, the lanes' most likely mark and its legend swatch. A mark colour, never text.
 
   Map them to shadcn variables with `--radius: 0`. Beyond the two text tints, levels are carried by size, case, mark shape and dither density.
-
 - **States read without colour,** by shape and words (#148):
   - inside and outside: the record's squares are filled or hollow, and the words say it ("inside", "outside", "6 of 8 inside the 8 in 10 range", "beats", "loses"). A hover only outlines a square, so a hollow one never fills;
   - picked: the card's darker surface, and an inner frame 2 px inside its border; a hover only lightens the border;
@@ -386,7 +372,6 @@ The reference is the prototype `prototypes/forecast-chart/index.html`, in the "s
   - Press Start 2P for all UI text, at whole-pixel sizes (8, 12, 16, 24).
 
   Use ASCII "-" for negative numbers, because Press Start 2P has no U+2212. The original dos-age fonts have no licence and must not be used.
-
 - **Charts are custom canvas components,** not Recharts.
   - Draw at 2 CSS px per art pixel with `image-rendering: pixelated`, and Bresenham lines.
   - Daily values: a white line 2 art pixels heavy, the history's main mark, with a 3x3 square on the last one, where the forecast starts.
@@ -437,7 +422,8 @@ pipeline/                 Python project (uv)
   aseri/forecast.py       Timestral wrapper (pinned model, quantile selection, clamping)
   aseri/archive.py        Hubverse round files, manifests, append-only writes
   aseri/score.py          coverage, WIS, MASE, baselines
-  aseri/publish.py        API files + page data, schema validation
+  aseri/publish.py        API files + page data
+  aseri/gate.py           the pre-publish gate: schemas, agreement, bounds
   aseri/scout.py          covariate scout (6.5)
   tests/
 web/                      Vite + React + TypeScript + Tailwind + shadcn (static build)

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/scoreboard.schema.json",
+  "title": "scores.json: every series' track record, for the page",
+  "description": "Each series' scores.json without its latest-vintage sensitivity check, with the method once.",
+  "type": "object",
+  "required": ["schema_version", "model_id", "series", "method", "license", "generated_at"],
+  "properties": {
+    "schema_version": {"$ref": "defs.schema.json#/$defs/schema_version"},
+    "model_id": {"$ref": "defs.schema.json#/$defs/model_id"},
+    "series": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["series_id", "n", "min_n_to_display", "primary_baseline", "score_lag_days", "live", "retrospective", "links"],
+        "properties": {
+          "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+          "n": {"$ref": "scores.schema.json#/$defs/n"},
+          "min_n_to_display": {"$ref": "scores.schema.json#/$defs/min_n_to_display"},
+          "primary_baseline": {"$ref": "scores.schema.json#/$defs/primary_baseline"},
+          "score_lag_days": {"$ref": "scores.schema.json#/$defs/score_lag_days"},
+          "live": {"$ref": "scores.schema.json#/$defs/mode"},
+          "retrospective": {"$ref": "scores.schema.json#/$defs/mode"},
+          "links": {
+            "type": "object",
+            "required": ["scores"],
+            "properties": {"scores": {"$ref": "defs.schema.json#/$defs/path"}}
+          }
+        }
+      }
+    },
+    "method": {"$ref": "scores.schema.json#/$defs/method"},
+    "license": {"$ref": "defs.schema.json#/$defs/license"},
+    "generated_at": {"$ref": "defs.schema.json#/$defs/timestamp"}
+  }
+}

@@ -36,6 +36,11 @@ export function Footer({
           </a>
         </p>
         <p>
+          <a href="api/" className={link}>
+            The data, as an API, and its licences
+          </a>
+        </p>
+        <p>
           Source:{" "}
           <a href={repository} className={link}>
             {repository.slice(8)}

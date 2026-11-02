@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/forecast.schema.json",
+  "title": "A forecast: series/{series_id}/forecasts/{reference_date}.json and latest.json",
+  "description": "One forecast of one series, in Hubverse quantile semantics: for each step h of horizon, the value at each of the 21 levels, for the day target_end_date[h-1]. A dated file is written once and never changes; latest.json is a copy of the newest, with links to it.",
+  "type": "object",
+  "required": [
+    "schema_version", "series_id", "model_id", "forecast_date", "reference_date", "forecast_mode", "unit", "horizon_unit",
+    "horizon", "target_end_date", "output_type", "quantiles", "attribution", "provenance", "links", "generated_at"
+  ],
+  "properties": {
+    "schema_version": {"$ref": "defs.schema.json#/$defs/schema_version"},
+    "series_id": {"$ref": "defs.schema.json#/$defs/series_id"},
+    "model_id": {"$ref": "defs.schema.json#/$defs/model_id"},
+    "forecast_date": {"$ref": "defs.schema.json#/$defs/date", "description": "The UTC day of the run that issued it: the Hubverse round."},
+    "reference_date": {"$ref": "defs.schema.json#/$defs/date", "description": "The last observed day it read: the data cutoff and the forecast's origin."},
+    "forecast_mode": {"$ref": "defs.schema.json#/$defs/forecast_mode"},
+    "unit": {"type": "string"},
+    "horizon_unit": {"$ref": "defs.schema.json#/$defs/horizon_unit"},
+    "horizon": {"description": "The steps after reference_date, 1 to horizon_max.", "type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1}},
+    "target_end_date": {
+      "description": "The day of each step: reference_date plus h days, or the h-th trading day after it for horizon_unit trading_day.",
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "defs.schema.json#/$defs/date"}
+    },
+    "output_type": {"const": "quantile"},
+    "quantiles": {
+      "description": "One array per level, aligned with horizon. Values never decrease from level to level. 0.5 is the point forecast; 0.1 to 0.9 is the 8 in 10 range.",
+      "type": "object",
+      "propertyNames": {"$ref": "defs.schema.json#/$defs/level"},
+      "minProperties": 21,
+      "additionalProperties": {"type": "array", "minItems": 1, "items": {"type": "number"}}
+    },
+    "attribution": {"description": "The source's credit, then the model's.", "type": "string"},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "links": {
+      "type": "object",
+      "required": ["catalog"],
+      "properties": {
+        "catalog": {"$ref": "defs.schema.json#/$defs/path"},
+        "canonical": {"$ref": "defs.schema.json#/$defs/path", "description": "latest.json only: its dated file."},
+        "replay": {"$ref": "defs.schema.json#/$defs/path", "description": "latest.json only."}
+      }
+    },
+    "generated_at": {"$ref": "defs.schema.json#/$defs/timestamp", "description": "When the run that issued it wrote it, not today."}
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "required": ["model", "inference", "code", "data", "generated_at", "forecast_mode", "leakage_note"],
+      "properties": {
+        "model": {
+          "type": "object",
+          "required": ["id", "revision", "url"],
+          "properties": {
+            "id": {"type": "string"},
+            "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "url": {"type": "string", "format": "uri"}
+          }
+        },
+        "inference": {
+          "type": "object",
+          "required": ["package", "package_commit"],
+          "properties": {
+            "package": {"type": "string"},
+            "package_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+          }
+        },
+        "code": {
+          "type": "object",
+          "required": ["commit", "run"],
+          "properties": {
+            "commit": {"description": "The git commit of aseri's code.", "type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+            "run": {"description": "The GitHub Actions run, or null for a run outside Actions.", "type": ["string", "null"], "format": "uri"}
+          }
+        },
+        "data": {
+          "type": "object",
+          "required": ["source_url", "as_of", "input_sha256"],
+          "properties": {
+            "source_url": {"type": "string", "format": "uri"},
+            "as_of": {"$ref": "defs.schema.json#/$defs/date", "description": "The day the data was fetched."},
+            "input_sha256": {"description": "SHA-256 of the exact context the model read.", "type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "generated_at": {"$ref": "defs.schema.json#/$defs/timestamp"},
+        "forecast_mode": {"$ref": "defs.schema.json#/$defs/forecast_mode"},
+        "leakage_note": {"type": "string"},
+        "testdata_leakage": {"description": "Retrospective forecasts only: the model may have trained on the days they forecast.", "const": "unknown"},
+        "pseudo_real_time_note": {"description": "Retrospective forecasts only.", "type": "string"}
+      }
+    }
+  }
+}
