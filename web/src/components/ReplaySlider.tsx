@@ -93,8 +93,9 @@ export function ReplaySlider({
           }
           onChange={(event) => setShown(event.target.valueAsNumber)}
           // 44 px tall and 12 px past each end, for the handle's 44 px touch target, over the
-          // same 28 px of the page and the same travel; a drag never scrolls the page.
-          className="relative -mx-3 -my-2 pixel-range block h-11 w-[calc(100%+24px)] touch-none focus-visible:outline-2 focus-visible:-outline-offset-6 focus-visible:outline-primary"
+          // same 28 px of the page and the same travel. A sideways drag moves the handle, an
+          // upward or downward swipe still scrolls the page.
+          className="relative -mx-3 -my-2 pixel-range block h-11 w-[calc(100%+24px)] touch-pan-y focus-visible:outline-2 focus-visible:-outline-offset-6 focus-visible:outline-primary"
         />
       </div>
       {/* The keys only while the slider is hovered or has the focus; "Today" at the end only

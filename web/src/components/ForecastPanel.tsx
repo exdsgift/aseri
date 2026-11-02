@@ -127,7 +127,8 @@ export function ForecastPanel({
       {last > 0 && (
         <ReplaySlider forecasts={forecasts} shown={shown} setShown={show} />
       )}
-      <div className="flex flex-wrap items-start gap-2">
+      {/* Wrapped, the rows 20 px apart, so their 44 px targets never overlap. */}
+      <div className="flex flex-wrap items-start gap-x-2 gap-y-5">
         {/* What the band is and is not, and what the line ahead is: the misreadings the band's
             own words cannot stop. */}
         <Disclosure label="How to read this">

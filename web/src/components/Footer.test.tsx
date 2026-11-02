@@ -66,6 +66,29 @@ it("links the author elsewhere by three marks, each named, a 44 px target, in a 
   )
 })
 
+// jsdom lays nothing out: in a browser, no two of the footer's hit areas overlap, at 320, 375,
+// 393, 768, 1344 and 1440 px. Here, the classes that keep them apart.
+it("keeps its targets apart: the links in the text 24 px tall, the hero's choices 44 px with room round them", () => {
+  const { container } = render(<Footer choice="rotate" onChoose={() => {}} />)
+
+  const words = [...container.querySelectorAll("a")].filter(
+    (link) => !link.querySelector("svg")
+  )
+  expect(words).toHaveLength(7)
+  for (const link of words) {
+    // 8 px of padding above and below its 8 px of type, which move no line: no 44 px area
+    // reaching over the lines round it.
+    expect(link.className.split(" ")).toContain("py-2")
+    expect(link.className.split(" ")).not.toContain("hit")
+  }
+  // The credits 24 px apart, line to line.
+  expect(container.querySelector("ul")!.className).toContain("gap-2.5")
+  const choices = screen.getByRole("group", { name: "Hero" })
+  expect(choices.className).toMatch(/\bmy-1\b.*\bgap-y-\[22px\]/)
+  for (const button of within(choices).getAllByRole("button"))
+    expect(button.className.split(" ")).toContain("hit")
+})
+
 it("offers each hero or the turns, the reader's choice pressed, each a button with a focus ring", () => {
   const onChoose = vi.fn()
   render(<Footer choice="signal" onChoose={onChoose} />)

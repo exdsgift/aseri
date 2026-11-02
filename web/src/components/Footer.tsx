@@ -7,7 +7,9 @@ const choices: Choice[] = [...heroes, "rotate"]
 const named = (choice: Choice) => choice[0].toUpperCase() + choice.slice(1)
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-const link = `hit underline hover:text-primary ${focusRing}`
+// A link in the text: 24 px tall to tap (WCAG 2.5.8), its 8 px of type and 8 px of padding
+// above and below that move no line, the lines spaced so no two such targets overlap.
+const link = `py-2 underline hover:text-primary ${focusRing}`
 // The author elsewhere: the owner's profiles, not the repository, which "Source" links.
 const elsewhere = [
   ["GitHub", "github", "https://github.com/exdsgift"],
@@ -25,7 +27,8 @@ export function Footer({
   onChoose: (choice: Choice) => void
 }) {
   return (
-    <footer className="px-4 pb-14 text-center text-[8px]/[14px] text-muted-foreground uppercase">
+    // The bottom inset (a home indicator) under the last line.
+    <footer className="px-4 pb-[calc(56px+env(safe-area-inset-bottom))] text-center text-[8px]/[14px] text-muted-foreground uppercase">
       <div className="mx-auto flex max-w-[72ch] flex-col items-center gap-3 border-t-2 border-border pt-6">
         <p className="text-secondary">aseri</p>
         <p>© 2026 Gabriele Durante</p>
@@ -69,11 +72,12 @@ export function Footer({
             {repository.slice(8)}
           </a>
         </p>
-        {/* The page shows the heroes in turn, unless the reader picks one. */}
+        {/* The page shows the heroes in turn, unless the reader picks one. Each choice a 44 px
+            target round its 22 px block: rows and neighbours set apart so none overlap. */}
         <div
           role="group"
           aria-labelledby="hero-choice"
-          className="flex flex-wrap items-center justify-center gap-1"
+          className="my-1 flex flex-wrap items-center justify-center gap-x-1 gap-y-[22px]"
         >
           <span id="hero-choice" className="mr-1">
             Hero
@@ -91,7 +95,7 @@ export function Footer({
           ))}
         </div>
         {/* The engravings, all in the public domain, cropped and dithered for the page. */}
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-2.5">
           {heroes.map((hero) => (
             <li key={hero}>
               {named(hero)}: {arts[hero].credit.work}, CC0, from{" "}
