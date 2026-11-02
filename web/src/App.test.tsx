@@ -613,19 +613,29 @@ it("opens a picked card's series in the panel and brings it into view, then load
   )
   expect(fetch).toHaveBeenCalledWith("api/v1/series/suez_transits/replay.json")
   // The replay's 120 past forecasts, then today's.
-  expect((await screen.findByRole("slider")).getAttribute("max")).toBe("120")
+  const slider = await screen.findByRole("slider")
+  expect(slider.getAttribute("max")).toBe("120")
+  // A sideways drag moves its handle; a swipe up or down still scrolls the page.
+  expect(slider.className.split(" ")).toContain("touch-pan-y")
   expect(screen.getByText("181", { selector: "p" })).toBeTruthy()
 })
 
-// A smooth scroll asked from the click began while the panel still showed GPR, and the panel
-// changing height above the card cut it short on a phone.
-it("scrolls to the panel once it shows the picked series, focuses its heading, and stays put when the replay arrives", async () => {
+// Suez's replay, held back until the test lets it through.
+function holdReplay() {
   let release!: () => void
   const held = new Promise<void>((resolve) => (release = resolve))
   vi.stubGlobal("fetch", async (url: string) => {
     if (url === "api/v1/series/suez_transits/replay.json") await held
     return Response.json(published[url])
   })
+  return release
+}
+const anchoring = () => document.documentElement.style.overflowAnchor
+
+// A smooth scroll asked from the click began while the panel still showed GPR, and scroll
+// anchoring, keeping the card still as the panel above it changed height, cut it short.
+it("scrolls to the panel once it shows the picked series, focuses its heading, and scrolls no more when the replay arrives", async () => {
+  const release = holdReplay()
   const focus = vi.spyOn(HTMLElement.prototype, "focus")
   // What the panel showed when it was scrolled to.
   const shown: string[] = []
@@ -635,6 +645,8 @@ it("scrolls to the panel once it shows the picked series, focuses its heading, a
 
   fireEvent.click(card(/^Suez Canal/))
 
+  // Anchoring off from the pick, before the panel changes height.
+  expect(anchoring()).toBe("none")
   expect(scrollIntoView).not.toHaveBeenCalled()
   await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1))
   expect(scrollIntoView.mock.contexts[0]).toBe(
@@ -643,14 +655,58 @@ it("scrolls to the panel once it shows the picked series, focuses its heading, a
   expect(shown).toEqual([expect.stringMatching(/^Suez Canal · Likely/)])
   expect(document.activeElement).toBe(document.querySelector("#forecast h2"))
   expect(focus).toHaveBeenLastCalledWith({ preventScroll: true })
+  // On again once the scroll has ended, for the reader's own scrolling.
+  window.dispatchEvent(new Event("scrollend"))
+  expect(anchoring()).toBe("")
 
-  // The replay draws the panel anew: no second scroll, and the focus back on its heading.
   release()
   await screen.findByRole("slider")
+  expect(scrollIntoView).toHaveBeenCalledTimes(1)
+})
+
+it("turns scroll anchoring back on where there is no scrollend, once the page is still", async () => {
+  serve(published)
+  render(<App />)
+  await signals(9)
+
+  fireEvent.click(card(/^Brent oil/))
+
+  expect(anchoring()).toBe("none")
+  await waitFor(() => expect(anchoring()).toBe(""), { timeout: 1000 })
+})
+
+// Drawn anew, the panel drops the focus it held, and only that.
+it.each([
+  [
+    "back on the panel's heading, where it was",
+    () => {},
+    () => document.querySelector("#forecast h2"),
+  ],
+  [
+    "on the page, where the reader left it",
+    () => (document.activeElement as HTMLElement).blur(),
+    () => document.body,
+  ],
+  [
+    "on a card, where the reader moved it",
+    () => card(/^Brent oil/).focus(),
+    () => card(/^Brent oil/),
+  ],
+])("leaves the focus %s when the replay arrives", async (_, move, focused) => {
+  const release = holdReplay()
+  render(<App />)
+  await signals(9)
+  fireEvent.click(card(/^Suez Canal/))
   await waitFor(() =>
     expect(document.activeElement).toBe(document.querySelector("#forecast h2"))
   )
-  expect(scrollIntoView).toHaveBeenCalledTimes(1)
+  move()
+
+  release()
+  await screen.findByRole("slider")
+  await act(async () => {})
+
+  expect(document.activeElement).toBe(focused())
 })
 
 it("asks for a series' replay once, however often its card is picked, even when the replay is missing", async () => {

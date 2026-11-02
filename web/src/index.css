@@ -272,9 +272,6 @@
   }
   html {
     @apply font-sans;
-    /* No scroll anchoring: keeping a tapped card still while the panel above it changed
-       height, it cut short the scroll up to the panel. */
-    overflow-anchor: none;
   }
   /* A picked card brings the panel into view: smoothly, unless the reader asks for less motion. */
   @media (prefers-reduced-motion: no-preference) {

@@ -31,6 +31,10 @@ const nav = {
   },
 } satisfies Record<string, Section>
 
+// The panel's heading, focused so screen readers land on the panel, with no second jump.
+const focusHeading = (box: HTMLElement | null) =>
+  box?.querySelector("h2")?.focus({ preventScroll: true })
+
 export function App() {
   // Every series of the catalog that loaded, with its entry, to load its replay from.
   const [signals, setSignals] =
@@ -92,28 +96,55 @@ export function App() {
     loadScores().then(({ series }) => setRecords(series), console.error)
   }, [])
 
-  // Each pick brings the panel into view once its new series is drawn. Asked from the click,
-  // the scroll began before the panel changed height above the card, and the browser's scroll
-  // anchoring, keeping the card still, cut it short. Not again when the replay arrives.
+  // Each pick brings the panel into view once its new series is drawn, not again when the
+  // replay arrives. Asked from the click, the scroll began before the panel changed height
+  // above the card, and scroll anchoring, keeping the card still, cut it short: anchoring is
+  // off from the pick until the page settles, and only then.
   const [asked, setAsked] = useState(0)
   useEffect(() => {
     if (!asked) return
+    let quiet: ReturnType<typeof setTimeout> | undefined
+    const stop = () => {
+      clearTimeout(quiet)
+      removeEventListener("scroll", wait)
+      removeEventListener("scrollend", settle)
+    }
+    const settle = () => {
+      stop()
+      document.documentElement.style.overflowAnchor = ""
+    }
+    // Where there is no scrollend: 300 ms after the last scroll.
+    const wait = () => {
+      clearTimeout(quiet)
+      quiet = setTimeout(settle, 300)
+    }
     const frame = requestAnimationFrame(() => {
       // Smooth unless the reader asks for less motion: see index.css.
       panelBox.current!.scrollIntoView({ block: "start" })
-      // Screen readers land on the panel too, with no second jump.
-      panelBox.current!.querySelector("h2")!.focus({ preventScroll: true })
+      focusHeading(panelBox.current)
+      addEventListener("scroll", wait)
+      addEventListener("scrollend", settle)
+      wait()
     })
-    return () => cancelAnimationFrame(frame)
+    return () => {
+      cancelAnimationFrame(frame)
+      stop()
+    }
   }, [asked])
-  // The replay arriving draws the panel anew, which drops the focus: back on its heading.
+  // Whether the focus is in the panel. The replay arriving draws the panel anew, which drops
+  // it: then it goes back on the heading, and only then.
+  const focusInPanel = useRef(false)
   const length = panel?.forecasts.length
   useEffect(() => {
-    if (asked && document.activeElement === document.body)
-      panelBox.current!.querySelector("h2")!.focus({ preventScroll: true })
-  }, [asked, length])
+    if (
+      focusInPanel.current &&
+      !panelBox.current?.contains(document.activeElement)
+    )
+      focusHeading(panelBox.current)
+  }, [length])
 
   const pick = (id: string) => {
+    document.documentElement.style.overflowAnchor = "none"
     setPicked(id)
     setOpened(undefined)
     setAsked((count) => count + 1)
@@ -147,6 +178,17 @@ export function App() {
             <div
               id="forecast"
               ref={panelBox}
+              onFocus={() => {
+                focusInPanel.current = true
+              }}
+              // A blur as the panel is drawn anew leaves it so: the element is gone by then.
+              onBlur={({ target, relatedTarget }) =>
+                queueMicrotask(() => {
+                  if (target.isConnected)
+                    focusInPanel.current =
+                      !!panelBox.current?.contains(relatedTarget)
+                })
+              }
               className="scroll-mt-[calc(16px+env(safe-area-inset-top))] px-4 pb-20 md:pb-32"
             >
               {/* A new series dithers in. Its replay, arriving later, starts the panel again on today,
