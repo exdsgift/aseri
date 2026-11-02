@@ -1,0 +1,499 @@
+<title>aseri favicons</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Jacquard+24&family=Press+Start+2P&display=swap">
+<style>
+  /* Layout: the site's API page on its electric blue, a pinned-tab strip of all eight, then one
+     numbered card per option: its name and read, its real sizes, its zooms, its contexts. */
+  :root {
+    --ground: #1b1bf2;
+    --row: #1818d6;
+    --ink: #ffffff;
+    --ink-2: #dbdbfd;
+    --dim: #adadfa;
+    --frame: #5454f5;
+    --gold: #ffc94a;
+    --grid-line: rgb(255 255 255 / 0.16);
+    /* The mock browser and phone: someone else's chrome, the same in either theme. */
+    --chrome-l-frame: #dde3ea;
+    --chrome-l-tab: #ffffff;
+    --chrome-l-ink: #1f1f1f;
+    --chrome-l-dim: #5f6368;
+    --chrome-d-frame: #1f1f1f;
+    --chrome-d-tab: #3c3c3c;
+    --chrome-d-ink: #e8eaed;
+    --chrome-d-dim: #9aa0a6;
+    --wall-a: #2e3440;
+    --wall-b: #6b7383;
+    --app-1: #e9e9ee;
+    --app-2: #a7adba;
+    --app-ink: #ffffff;
+    --font-label: "Press Start 2P", "DotGothic16", ui-monospace, monospace;
+    --font-text: "DotGothic16", "Press Start 2P", ui-monospace, monospace;
+    --font-number: "Jacquard 24", "Press Start 2P", serif;
+    --font-ui: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #1b1bf2;
+      --row: #1818d6;
+      --ink: #ffffff;
+      --ink-2: #dbdbfd;
+      --dim: #adadfa;
+      --frame: #5454f5;
+      --gold: #ffc94a;
+      --grid-line: rgb(255 255 255 / 0.16);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1b1bf2;
+    --row: #1818d6;
+    --ink: #ffffff;
+    --ink-2: #dbdbfd;
+    --dim: #adadfa;
+    --frame: #5454f5;
+    --gold: #ffc94a;
+    --grid-line: rgb(255 255 255 / 0.16);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 16px/24px var(--font-text);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 56px 48px;
+  }
+  main {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+  canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .label {
+    font: 8px/12px var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+  }
+
+  /* The masthead, as on the API page. */
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+  }
+  .masthead h1 {
+    margin: 0;
+    font: 96px/1 var(--font-number);
+    letter-spacing: 0.04em;
+    text-wrap: balance;
+  }
+  .masthead p {
+    margin: 0;
+    max-width: 62ch;
+    text-wrap: balance;
+  }
+  .masthead .label a {
+    color: inherit;
+  }
+
+  /* The site's frames: 2 px, chipped corners. */
+  .chip {
+    border: 2px solid var(--frame);
+    clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+  }
+
+  /* All eight as pinned tabs. */
+  .pinned {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .pinned-strips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+  .pin-row {
+    display: flex;
+    gap: 2px;
+    padding: 6px 6px 0;
+  }
+  .pin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  a.pin {
+    color: inherit;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+  a.pin:focus-visible {
+    outline: 2px solid var(--frame);
+    outline-offset: 1px;
+  }
+  .pin .tab {
+    width: 34px;
+    justify-content: center;
+    padding: 0;
+  }
+  .pin .label {
+    color: inherit;
+    padding-bottom: 6px;
+  }
+
+  /* An option. */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .option {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) auto minmax(0, 17rem);
+    justify-content: space-between;
+    gap: 24px 32px;
+    padding: 24px;
+    scroll-margin-top: 16px;
+  }
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+  .num {
+    margin: 0;
+    font: 72px/0.8 var(--font-number);
+  }
+  .name {
+    margin: 0;
+    font: 16px/24px var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .read {
+    margin: 0;
+    color: var(--ink-2);
+  }
+  .read .label {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .specimens {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 20px 12px;
+  }
+  figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .zoom {
+    position: relative;
+    width: 128px;
+    height: 128px;
+  }
+  .zoom canvas {
+    width: 100%;
+    height: 100%;
+  }
+  .zoom::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px) 0 0 / var(--cell) var(--cell),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px) 0 0 / var(--cell) var(--cell);
+    pointer-events: none;
+  }
+
+  /* Context: a tab in someone's browser, a tile on someone's phone. */
+  .context {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+  .strip {
+    font: 12px/16px var(--font-ui);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .strip.light {
+    background: var(--chrome-l-frame);
+    color: var(--chrome-l-dim);
+    --tab: var(--chrome-l-tab);
+    --tab-ink: var(--chrome-l-ink);
+  }
+  .strip.dark {
+    background: var(--chrome-d-frame);
+    color: var(--chrome-d-dim);
+    --tab: var(--chrome-d-tab);
+    --tab-ink: var(--chrome-d-ink);
+  }
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 6px 8px 0;
+  }
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 30px;
+    width: 116px;
+    min-width: 0;
+    padding: 0 10px;
+    border-radius: 8px 8px 0 0;
+  }
+  .tab.on {
+    background: var(--tab);
+    color: var(--tab-ink);
+  }
+  .tab span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .tab .x {
+    margin-left: auto;
+    opacity: 0.7;
+  }
+  .tab .blank {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    opacity: 0.6;
+  }
+  .fav {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+  .toolbar {
+    height: 10px;
+    background: var(--tab);
+  }
+  .home {
+    display: flex;
+    gap: 16px;
+    padding: 16px 20px 12px;
+    border-radius: 12px;
+    background: linear-gradient(160deg, var(--wall-a), var(--wall-b));
+    font: 11px/14px var(--font-ui);
+    color: var(--app-ink);
+  }
+  .app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .tile {
+    width: 60px;
+    height: 60px;
+    border-radius: 13.5px;
+    overflow: hidden;
+  }
+  .tile canvas {
+    width: 100%;
+    height: 100%;
+    image-rendering: auto;
+  }
+  .tile.p1 {
+    background: var(--app-1);
+  }
+  .tile.p2 {
+    background: var(--app-2);
+  }
+
+  footer {
+    text-align: center;
+  }
+
+  @media (max-width: 1000px) {
+    .option {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 16px;
+    }
+    .masthead h1 {
+      font-size: 72px;
+    }
+  }
+</style>
+
+<main>
+  <header class="masthead">
+    <p class="label">aseri · eight favicons to choose from</p>
+    <h1>Favicons</h1>
+    <p>Eight marks for the tab, the bookmarks and the home screen, each drawn pixel by pixel in the site's own palette. Every size is shown at 1x, then zoomed with its pixel grid. In the tabs a 2x screen gets the 32 px file, as browsers do. Reply with a number.</p>
+  </header>
+
+  <section class="pinned" aria-labelledby="pinned-title">
+    <h2 class="label" id="pinned-title">All eight as pinned tabs, light and dark</h2>
+    <div class="pinned-strips">
+      <div class="strip light"><div class="pin-row" data-pins></div></div>
+      <div class="strip dark"><div class="pin-row" data-pins></div></div>
+    </div>
+  </section>
+
+  <section class="options" id="options" aria-label="The options"></section>
+
+  <footer class="label">
+    <p>A throwaway prototype on the branch prototype-favicons. Each option's 16, 32 and 180 px PNGs and its SVG are in prototypes/favicons/.</p>
+  </footer>
+</main>
+
+<script>
+  const DATA = /*GRIDS*/{"palette":{"-":"#1b1bf2","W":"#ffffff","s":"#dbdbfd","d":"#adadfa","f":"#5454f5","G":"#ffc94a",".":null},"options":[{"n":1,"slug":"kanji","name":"Kanji","read":"Reads as 焦 to anyone who knows it and as a dense white crest to the rest: it is DotGothic16's own 16-dot glyph, one font dot to a pixel, so nothing is resampled.","g16":[".--------------.","---W-----W------","---W----W-------","--WWWWWWWWWWWW--","--W----W--------","-WWWWWWWWWWWW---","-WW----W--------","W-W----W--------","--WWWWWWWWWWW---","--W----W--------","--W----W--------","--WWWWWWWWWWWW--","----------------","--W--W--W---W---","-W----W--W---W--",".-----W--W----W."],"g32":["..----------------------------..",".------------------------------.","------WW----------WW------------","------WW----------WW------------","------WW--------WW--------------","------WW--------WW--------------","----WWWWWWWWWWWWWWWWWWWWWWWW----","----WWWWWWWWWWWWWWWWWWWWWWWW----","----WW--------WW----------------","----WW--------WW----------------","--WWWWWWWWWWWWWWWWWWWWWWWW------","--WWWWWWWWWWWWWWWWWWWWWWWW------","--WWWW--------WW----------------","--WWWW--------WW----------------","WW--WW--------WW----------------","WW--WW--------WW----------------","----WWWWWWWWWWWWWWWWWWWWWW------","----WWWWWWWWWWWWWWWWWWWWWW------","----WW--------WW----------------","----WW--------WW----------------","----WW--------WW----------------","----WW--------WW----------------","----WWWWWWWWWWWWWWWWWWWWWWWW----","----WWWWWWWWWWWWWWWWWWWWWWWW----","--------------------------------","--------------------------------","----WW----WW----WW------WW------","----WW----WW----WW------WW------","--WW--------WW----WW------WW----","--WW--------WW----WW------WW----",".W----------WW----WW--------WW-.","..----------WW----WW--------WW.."],"g36":["------------------------------------","------------------------------------","------------------------------------","---------WW----------WW-------------","---------WW----------WW-------------","---------WW--------WW---------------","---------WW--------WW---------------","-------WWWWWWWWWWWWWWWWWWWWWWWW-----","-------WWWWWWWWWWWWWWWWWWWWWWWW-----","-------WW--------WW-----------------","-------WW--------WW-----------------","-----WWWWWWWWWWWWWWWWWWWWWWWW-------","-----WWWWWWWWWWWWWWWWWWWWWWWW-------","-----WWWW--------WW-----------------","-----WWWW--------WW-----------------","---WW--WW--------WW-----------------","---WW--WW--------WW-----------------","-------WWWWWWWWWWWWWWWWWWWWWW-------","-------WWWWWWWWWWWWWWWWWWWWWW-------","-------WW--------WW-----------------","-------WW--------WW-----------------","-------WW--------WW-----------------","-------WW--------WW-----------------","-------WWWWWWWWWWWWWWWWWWWWWWWW-----","-------WWWWWWWWWWWWWWWWWWWWWWWW-----","------------------------------------","------------------------------------","-------WW----WW----WW------WW-------","-------WW----WW----WW------WW-------","-----WW--------WW----WW------WW-----","-----WW--------WW----WW------WW-----","---WW----------WW----WW--------WW---","---WW----------WW----WW--------WW---","------------------------------------","------------------------------------","------------------------------------"]},{"n":2,"slug":"fan","name":"Fan","read":"Reads as rays from a corner: three white rays on whole-pixel slopes step evenly, and the two dashed dim rays at the edges are the site's baseline.","g16":[".--------------.","----------------","----d--W--------","-------W--------","----d-W----W----","------W---W-----","---d-W---W------","-----W--W-------","---dW--W----WW--","----W-W---WW----","--dW-W--WW------","---WW-WW---d-d--","--WWWW-d-d------","--WW-d----------","-W--------------",".--------------."],"g32":["..----------------------------..",".------------------------------.","--------------------------------","--------------------------------","--------------------------------","--------d-----------------------","--------------------------------","-------------W------------------","-------d-----W--W---------------","-------d----W--W----------------","------------W--W-----W----------","-----------W--W-----W-----------","------d----W-W-----W------------","------d---W--W----W-------------","----------W-W----W--------------","---------W-W----W------W--------","-----d---W-W---W-----WW---------","-----d--W-W---W-----W-----------","--------WW---W----WW---WW-------","-------W-W--W----W---WW---------","----d--WW--W---WW--WW-----------","----d-WW--W---W--WW-------------","------WW-W--WW-WW---------------","-----WW-W--W-WW-----------d-----","---d-W-W-WWWW---------dd--------","---dWWW-WWW-------dd------------","----WWWWW-----dd----------------","---WWWW---dd--------------------","-WWWW-dd------------------------","-WWd----------------------------",".------------------------------.","..----------------------------.."],"g36":["------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------d-----------------------","------------------------------------","-----------------W------------------","-----------d-----W--W---------------","-----------d----W--W----------------","----------------W--W-----W----------","---------------W--W-----W-----------","----------d----W-W-----W------------","----------d---W--W----W-------------","--------------W-W----W--------------","-------------W-W----W------W--------","---------d---W-W---W-----WW---------","---------d--W-W---W-----W-----------","------------WW---W----WW---WW-------","-----------W-W--W----W---WW---------","--------d--WW--W---WW--WW-----------","--------d-WW--W---W--WW-------------","----------WW-W--WW-WW---------------","---------WW-W--W-WW-----------d-----","-------d-W-W-WWWW---------dd--------","-------dWWW-WWW-------dd------------","--------WWWWW-----dd----------------","-------WWWW---dd--------------------","-----WWWW-dd------------------------","-----WWd----------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------"]},{"n":3,"slug":"path","name":"Path","read":"Reads as a line going up: the gold diagonal is the only warm pixel in a tab strip, and the dither behind it stays a texture.","g16":[".--------------.","-------------d--","------------d---","--------------G-","----------d--G--","------------G---","-----------G--d-","----------G--d--","---------G--d-d-","--------G-------","----W-WW--d-d-d-","-W-W-W----------","--W-------------","----------------","----------------",".--------------."],"g32":["..----------------------------..",".------------------------------.","--------------------------dd----","--------------------------dd----","------------------------dd------","------------------------dd------","----------------------------GG--","----------------------------GG--","--------------------dd----GG----","--------------------dd----GG----","------------------------GG------","------------------------GG------","----------------------GG----dd--","----------------------GG----dd--","--------------------GG----dd----","--------------------GG----dd----","------------------GG----dd--dd--","------------------GG----dd--dd--","----------------GG--------------","----------------GG--------------","--------WW--WWWW----dd--dd--dd--","--------WW--WWWW----dd--dd--dd--","--WW--WW--WW--------------------","--WW--WW--WW--------------------","----WW--------------------------","----WW--------------------------","--------------------------------","--------------------------------","--------------------------------","--------------------------------",".------------------------------.","..----------------------------.."],"g36":["------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","----------------------------dd------","----------------------------dd------","--------------------------dd--------","--------------------------dd--------","------------------------------GG----","------------------------------GG----","----------------------dd----GG------","----------------------dd----GG------","--------------------------GG--------","--------------------------GG--------","------------------------GG----dd----","------------------------GG----dd----","----------------------GG----dd------","----------------------GG----dd------","--------------------GG----dd--dd----","--------------------GG----dd--dd----","------------------GG----------------","------------------GG----------------","----------WW--WWWW----dd--dd--dd----","----------WW--WWWW----dd--dd--dd----","----WW--WW--WW----------------------","----WW--WW--WW----------------------","------WW----------------------------","------WW----------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------"]},{"n":4,"slug":"hat","name":"Winged hat","read":"Reads as a winged helmet: the dome and brim are solid blocks, and a one-pixel gap keeps each wing apart from the dome.","g16":[".--------------.","----------------","----------------","W--------------W","WW------------WW","WWW----------WWW","-WWW--WWWW--WWW-","WWWW-WWWWWW-WWWW","-WWW-WWWWWW-WWW-","--WW-WWWWWW-WW--","----ssssssss----","-WWWWWWWWWWWWWW-","--WWWWWWWWWWWW--","----------------","----------------",".--------------."],"g32":["..----------------------------..",".------------------------------.","--------------------------------","--------------------------------","--------------------------------","--------------------------------","WW----------------------------WW","WW----------------------------WW","WWWW------------------------WWWW","WWWW------------------------WWWW","WWWWWW--------------------WWWWWW","WWWWWW--------------------WWWWWW","--WWWWWW----WWWWWWWW----WWWWWW--","--WWWWWW----WWWWWWWW----WWWWWW--","WWWWWWWW--WWWWWWWWWWWW--WWWWWWWW","WWWWWWWW--WWWWWWWWWWWW--WWWWWWWW","--WWWWWW--WWWWWWWWWWWW--WWWWWW--","--WWWWWW--WWWWWWWWWWWW--WWWWWW--","----WWWW--WWWWWWWWWWWW--WWWW----","----WWWW--WWWWWWWWWWWW--WWWW----","--------ssssssssssssssss--------","--------ssssssssssssssss--------","--WWWWWWWWWWWWWWWWWWWWWWWWWWWW--","--WWWWWWWWWWWWWWWWWWWWWWWWWWWW--","----WWWWWWWWWWWWWWWWWWWWWWWW----","----WWWWWWWWWWWWWWWWWWWWWWWW----","--------------------------------","--------------------------------","--------------------------------","--------------------------------",".------------------------------.","..----------------------------.."],"g36":["------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","--WW----------------------------WW--","--WW----------------------------WW--","--WWWW------------------------WWWW--","--WWWW------------------------WWWW--","--WWWWWW--------------------WWWWWW--","--WWWWWW--------------------WWWWWW--","----WWWWWW----WWWWWWWW----WWWWWW----","----WWWWWW----WWWWWWWW----WWWWWW----","--WWWWWWWW--WWWWWWWWWWWW--WWWWWWWW--","--WWWWWWWW--WWWWWWWWWWWW--WWWWWWWW--","----WWWWWW--WWWWWWWWWWWW--WWWWWW----","----WWWWWW--WWWWWWWWWWWW--WWWWWW----","------WWWW--WWWWWWWWWWWW--WWWW------","------WWWW--WWWWWWWWWWWW--WWWW------","----------ssssssssssssssss----------","----------ssssssssssssssss----------","----WWWWWWWWWWWWWWWWWWWWWWWWWWWW----","----WWWWWWWWWWWWWWWWWWWWWWWWWWWW----","------WWWWWWWWWWWWWWWWWWWWWWWW------","------WWWWWWWWWWWWWWWWWWWWWWWW------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------"]},{"n":5,"slug":"monogram","name":"Monogram","read":"Reads as \"as\": two letters six pixels tall with two-pixel stems, over the chart's dither at 50% and then 25%.","g16":[".--------------.","----------------","----------------","--WWWW---WWWWW--","-----WW-WW------","--WWWWW--WWWW---","-WW--WW-----WW--","-WW--WW-----WW--","--WWWWW-WWWWW---","----------------","----------------","-d-d-d-d-d-d-d--","--d-d-d-d-d-d-d-","----------------","--d-d-d-d-d-d-d-",".--------------."],"g32":["..----------------------------..",".------------------------------.","--------------------------------","--------------------------------","--------------------------------","--------------------------------","----WWWWWWWW------WWWWWWWWWW----","----WWWWWWWW------WWWWWWWWWW----","----------WWWW--WWWW------------","----------WWWW--WWWW------------","----WWWWWWWWWW----WWWWWWWW------","----WWWWWWWWWW----WWWWWWWW------","--WWWW----WWWW----------WWWW----","--WWWW----WWWW----------WWWW----","--WWWW----WWWW----------WWWW----","--WWWW----WWWW----------WWWW----","----WWWWWWWWWW--WWWWWWWWWW------","----WWWWWWWWWW--WWWWWWWWWW------","--------------------------------","--------------------------------","--------------------------------","--------------------------------","--dd--dd--dd--dd--dd--dd--dd----","--dd--dd--dd--dd--dd--dd--dd----","----dd--dd--dd--dd--dd--dd--dd--","----dd--dd--dd--dd--dd--dd--dd--","--------------------------------","--------------------------------","----dd--dd--dd--dd--dd--dd--dd--","----dd--dd--dd--dd--dd--dd--dd--",".------------------------------.","..----------------------------.."],"g36":["------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------WWWWWWWW------WWWWWWWWWW------","------WWWWWWWW------WWWWWWWWWW------","------------WWWW--WWWW--------------","------------WWWW--WWWW--------------","------WWWWWWWWWW----WWWWWWWW--------","------WWWWWWWWWW----WWWWWWWW--------","----WWWW----WWWW----------WWWW------","----WWWW----WWWW----------WWWW------","----WWWW----WWWW----------WWWW------","----WWWW----WWWW----------WWWW------","------WWWWWWWWWW--WWWWWWWWWW--------","------WWWWWWWWWW--WWWWWWWWWW--------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","----dd--dd--dd--dd--dd--dd--dd------","----dd--dd--dd--dd--dd--dd--dd------","------dd--dd--dd--dd--dd--dd--dd----","------dd--dd--dd--dd--dd--dd--dd----","------------------------------------","------------------------------------","------dd--dd--dd--dd--dd--dd--dd----","------dd--dd--dd--dd--dd--dd--dd----","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------"]},{"n":6,"slug":"gauge","name":"Gauge","read":"Reads as a dial pushed high: a two-pixel half ring, white up to a 45-degree arm and frame blue past it, a shape people know at any size.","g16":[".--------------.","----------------","----------------","----------------","----------------","-----WWWWWW-----","---WWWWWWWWWW---","--WWWW----WWWf--","--WW--------ff--","-WWW------W-fff-","-WW------W---ff-","-WW----WW----ff-","-------WW-------","----------------","----------------",".--------------."],"g32":["..----------------------------..",".------------------------------.","--------------------------------","--------------------------------","--------------------------------","--------------------------------","--------------------------------","--------------------------------","--------------------------------","--------------W-WW--------------","----------WWWWW-WWWWW-----------","--------WW-WWWW-WWWW-WWW--------","-------WWWWWWWW-WWWW-WWWW-------","------WWWWW-WWW-WWWWWWWWW-------","------WWWWW-W-------WWWWWWf-----","----WWWWWWW----------WWWWfff----","---WWWWWW--------------Wfffff---","---WWWWW----------------fffff---","---WWWWW-------------WW-ffff-f--","--W--WW-------------WW-----fff--","--WWWW-------------WW----fffff--","--WWWW------------WW------ffff--","-WWWWW--------WWWWW-------fffff-","-WWWWW--------WWWW--------------","--------------WWWW--------------","--------------WWWW--------------","--------------------------------","--------------------------------","--------------------------------","--------------------------------",".------------------------------.","..----------------------------.."],"g36":["------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","----------------W-WW----------------","------------WWWWW-WWWWW-------------","----------WW-WWWW-WWWW-WWW----------","---------WWWWWWWW-WWWW-WWWW---------","--------WWWWW-WWW-WWWWWWWWW---------","--------WWWWW-W-------WWWWWWf-------","------WWWWWWW----------WWWWfff------","-----WWWWWW--------------Wfffff-----","-----WWWWW----------------fffff-----","-----WWWWW-------------WW-ffff-f----","----W--WW-------------WW-----fff----","----WWWW-------------WW----fffff----","----WWWW------------WW------ffff----","---WWWWW--------WWWWW-------fffff---","---WWWWW--------WWWW----------------","----------------WWWW----------------","----------------WWWW----------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------"]},{"n":7,"slug":"kana","name":"Kana","read":"Reads as two bold strokes: り drawn two pixels wide is the lightest mark here, though only readers of Japanese will see a letter.","g16":[".--------------.","----------------","---WW----WWW----","---WW---WW-WW---","---WW--WW---WW--","---WW-WW----WW--","---WWWW-----WW--","---WWW------WW--","---WW-------WW--","------------WW--","-----------WW---","----------WWW---","---------WWW----","------WWWW------","-----WWW--------",".--------------."],"g32":["..----------------------------..",".------------------------------.","--------------------------------","--------------------------------","------WWWW--------WWWWWW--------","------WWWW--------WWWWWW--------","------WWWW------WWWW--WWWW------","------WWWW------WWWW--WWWW------","------WWWW----WWWW------WWWW----","------WWWW----WWWW------WWWW----","------WWWW--WWWW--------WWWW----","------WWWW--WWWW--------WWWW----","------WWWWWWWW----------WWWW----","------WWWWWWWW----------WWWW----","------WWWWWW------------WWWW----","------WWWWWW------------WWWW----","------WWWW--------------WWWW----","------WWWW--------------WWWW----","------------------------WWWW----","------------------------WWWW----","----------------------WWWW------","----------------------WWWW------","--------------------WWWWWW------","--------------------WWWWWW------","------------------WWWWWW--------","------------------WWWWWW--------","------------WWWWWWWW------------","------------WWWWWWWW------------","----------WWWWWW----------------","----------WWWWWW----------------",".------------------------------.","..----------------------------.."],"g36":["------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","-------WWWW--------WWWWWW-----------","-------WWWW--------WWWWWW-----------","-------WWWW------WWWW--WWWW---------","-------WWWW------WWWW--WWWW---------","-------WWWW----WWWW------WWWW-------","-------WWWW----WWWW------WWWW-------","-------WWWW--WWWW--------WWWW-------","-------WWWW--WWWW--------WWWW-------","-------WWWWWWWW----------WWWW-------","-------WWWWWWWW----------WWWW-------","-------WWWWWW------------WWWW-------","-------WWWWWW------------WWWW-------","-------WWWW--------------WWWW-------","-------WWWW--------------WWWW-------","-------------------------WWWW-------","-------------------------WWWW-------","-----------------------WWWW---------","-----------------------WWWW---------","---------------------WWWWWW---------","---------------------WWWWWW---------","-------------------WWWWWW-----------","-------------------WWWWWW-----------","-------------WWWWWWWW---------------","-------------WWWWWWWW---------------","-----------WWWWWW-------------------","-----------WWWWWW-------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------","------------------------------------"]},{"n":8,"slug":"frame","name":"Frame","read":"Reads as something picked out: four corner brackets round one white block whose middle row has slipped a pixel, Signal's failing screen.","g16":[".--------------.","-WWWW------WWWW-","-W------------W-","-W------------W-","-W------------W-","----------------","------WWWW------","------WWWW------","-------WWWW-d---","------WWWW------","----------------","-W------------W-","-W------------W-","-W------------W-","-WWWW------WWWW-",".--------------."],"g32":["..----------------------------..",".------------------------------.","--WWWWWWWW------------WWWWWWWW--","--WWWWWWWW------------WWWWWWWW--","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--------------------------------","--------------------------------","------------WWWWWWWW------------","------------WWWWWWWW------------","------------WWWWWWWW------------","------------WWWWWWWW------------","--------------WWWWWWWW--dd------","--------------WWWWWWWW--dd------","------------WWWWWWWW------------","------------WWWWWWWW------------","--------------------------------","--------------------------------","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--WW------------------------WW--","--WWWWWWWW------------WWWWWWWW--","--WWWWWWWW------------WWWWWWWW--",".------------------------------.","..----------------------------.."],"g36":["------------------------------------","------------------------------------","------------------------------------","------------------------------------","----WWWWWWWW------------WWWWWWWW----","----WWWWWWWW------------WWWWWWWW----","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","------------------------------------","------------------------------------","--------------WWWWWWWW--------------","--------------WWWWWWWW--------------","--------------WWWWWWWW--------------","--------------WWWWWWWW--------------","----------------WWWWWWWW--dd--------","----------------WWWWWWWW--dd--------","--------------WWWWWWWW--------------","--------------WWWWWWWW--------------","------------------------------------","------------------------------------","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","----WW------------------------WW----","----WWWWWWWW------------WWWWWWWW----","----WWWWWWWW------------WWWWWWWW----","------------------------------------","------------------------------------","------------------------------------","------------------------------------"]}]}/*END*/;
+
+  const rgba = {};
+  for (const [key, hex] of Object.entries(DATA.palette)) {
+    rgba[key] = hex ? [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).concat(255) : [0, 0, 0, 0];
+  }
+
+  // One canvas pixel per grid cell, `scale` canvas pixels a cell: the browser never smooths it.
+  function paint(grid, scale = 1, label = "") {
+    const n = grid.length;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = n * scale;
+    const ctx = canvas.getContext("2d");
+    const image = ctx.createImageData(n * scale, n * scale);
+    for (let y = 0; y < n * scale; y++) {
+      for (let x = 0; x < n * scale; x++) {
+        image.data.set(rgba[grid[Math.floor(y / scale)][Math.floor(x / scale)]], (y * n * scale + x) * 4);
+      }
+    }
+    ctx.putImageData(image, 0, 0);
+    if (label) {
+      canvas.setAttribute("role", "img");
+      canvas.setAttribute("aria-label", label);
+    } else {
+      canvas.setAttribute("aria-hidden", "true");
+    }
+    return canvas;
+  }
+
+  function sized(canvas, px, cls) {
+    canvas.style.width = canvas.style.height = px + "px";
+    if (cls) canvas.className = cls;
+    return canvas;
+  }
+
+  // What a browser puts in a 16 px tab slot: the 16 px file, or the 32 px one on a 2x screen.
+  const tabGrid = (option) => (window.devicePixelRatio >= 1.5 ? option.g32 : option.g16);
+
+  function tabStrip(option, theme) {
+    const strip = document.createElement("div");
+    strip.className = "strip " + theme;
+    strip.innerHTML = `<div class="tabs"><div class="tab on"><span data-fav></span><span>aseri</span><span class="x" aria-hidden="true">×</span></div><div class="tab"><span class="blank" aria-hidden="true"></span><span>New Tab</span></div></div><div class="toolbar"></div>`;
+    strip.querySelector("[data-fav]").replaceWith(sized(paint(tabGrid(option)), 16, "fav"));
+    strip.setAttribute("role", "img");
+    strip.setAttribute("aria-label", `Option ${option.n} in a ${theme} browser tab titled aseri`);
+    return strip;
+  }
+
+  const list = document.getElementById("options");
+  for (const option of DATA.options) {
+    const card = document.createElement("article");
+    card.className = "option chip";
+    card.id = "option-" + option.n;
+    card.innerHTML = `
+      <header class="head">
+        <p class="num">${option.n}</p>
+        <h2 class="name">${option.name}</h2>
+        <p class="read"><span class="label">At 16 px</span>${option.read}</p>
+      </header>
+      <div class="specimens">
+        <div class="row" data-sizes></div>
+        <div class="row" data-zooms></div>
+      </div>
+      <div class="context">
+        <p class="label">In a tab, light and dark</p>
+        <div data-tabs></div>
+        <p class="label">On a home screen</p>
+        <div class="home" role="img" aria-label="Option ${option.n} as a home screen icon labelled aseri">
+          <div class="app"><div class="tile p1"></div><span>Notes</span></div>
+          <div class="app"><div class="tile" data-tile></div><span>aseri</span></div>
+          <div class="app"><div class="tile p2"></div><span>Photos</span></div>
+        </div>
+      </div>`;
+
+    const sizes = card.querySelector("[data-sizes]");
+    for (const [grid, px, caption] of [
+      [option.g16, 16, "16"],
+      [option.g32, 32, "32"],
+      [option.g16, 48, "48"],
+      [option.g36, 180, "180 touch"],
+    ]) {
+      const figure = document.createElement("figure");
+      figure.append(sized(paint(grid, 1, `Option ${option.n} at ${px} px`), px));
+      figure.insertAdjacentHTML("beforeend", `<figcaption class="label">${caption}</figcaption>`);
+      sizes.append(figure);
+    }
+
+    const zooms = card.querySelector("[data-zooms]");
+    for (const [grid, cell, caption] of [
+      [option.g16, 8, "16 at 8x"],
+      [option.g32, 4, "32 at 4x"],
+    ]) {
+      const figure = document.createElement("figure");
+      const box = document.createElement("div");
+      box.className = "zoom";
+      box.style.setProperty("--cell", cell + "px");
+      box.append(paint(grid, 1, `Option ${option.n}, ${caption}`));
+      figure.append(box);
+      figure.insertAdjacentHTML("beforeend", `<figcaption class="label">${caption}</figcaption>`);
+      zooms.append(figure);
+    }
+
+    const tabs = card.querySelector("[data-tabs]");
+    tabs.style.cssText = "display:flex;flex-direction:column;gap:8px";
+    tabs.append(tabStrip(option, "light"), tabStrip(option, "dark"));
+
+    // iOS scales the 180 px file down to the tile itself, smoothly: so does this one.
+    card.querySelector("[data-tile]").append(paint(option.g36, 5));
+    list.append(card);
+  }
+
+  for (const row of document.querySelectorAll("[data-pins]")) {
+    for (const option of DATA.options) {
+      const pin = document.createElement("a");
+      pin.className = "pin";
+      pin.href = "#option-" + option.n;
+      pin.setAttribute("aria-label", `Option ${option.n}, ${option.name}`);
+      pin.innerHTML = `<div class="tab"></div><span class="label">${option.n}</span>`;
+      pin.querySelector(".tab").append(sized(paint(tabGrid(option)), 16, "fav"));
+      row.append(pin);
+    }
+  }
+</script>
