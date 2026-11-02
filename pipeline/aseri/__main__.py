@@ -247,14 +247,23 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         try:
             # shortcut: reads every delta file again, once per series; read them once per run if that gets slow.
             vintages = archive.vintages(archive_dir, series.id)
-            scored = record.scored(series, archived, vintages, today)
+            # The model in the code's record, or the model before's until it has a scored target.
+            model_id, scored = record.shown(series, archived, vintages, today)
             summary = record.summary(
                 series,
                 scored,
                 # shortcut: a second scoring of every due target; score only the revised ones if runs get slow.
-                record.scored(series, archived, vintages, today, latest=True),
+                record.scored(
+                    series, archived, vintages, today, latest=True, model_id=model_id
+                ),
+                model_id,
             )
-            zones = record.calibration(series, scored)
+            # The monitor watches the model in the code: a retired model's record raises no alert.
+            zones = (
+                record.calibration(series, scored)
+                if model_id == archive.MODEL_ID
+                else {}
+            )
             # Kept only once all of it worked, so a series has its whole record or none.
             records.append(summary)
             if "red" in zones.values():

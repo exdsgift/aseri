@@ -80,9 +80,9 @@ def read(archive_dir: Path, series_id: str) -> list[Archived]:
     return sorted(archived, key=lambda a: a.forecast.reference_date)
 
 
-def this_model(archived: list[Archived]) -> list[Archived]:
-    """The forecasts of `archived` that the model in the code made: a new MODEL_ID has a replay and a record of its own."""
-    return [a for a in archived if a.model_id == MODEL_ID]
+def this_model(archived: list[Archived], model_id: str | None = None) -> list[Archived]:
+    """The forecasts of `archived` that the model in the code made, or `model_id`: a new MODEL_ID has a replay and a record of its own."""
+    return [a for a in archived if a.model_id == (model_id or MODEL_ID)]
 
 
 def new_reference_dates(

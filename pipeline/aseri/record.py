@@ -83,6 +83,7 @@ def scored(
     today: date,
     *,
     latest: bool = False,
+    model_id: str | None = None,
 ) -> pd.DataFrame:
     """Every target of `archived` due by `today`, one row each: its forecast's reference date and mode, the observation and its `as_of`, and the scores.
 
@@ -90,11 +91,11 @@ def scored(
     that day. The archive is append-only, so that value, and the score, are the same on every later
     run. `latest` scores the same targets against today's vintage instead: the sensitivity check of a
     series that revises. `vintages` are the archive's, as `archive.vintages` reads them.
-    A new MODEL_ID restarts the record: only the forecasts of the model in the code are scored.
+    Only one model's forecasts are scored, the model in the code's or `model_id`'s: a record never mixes two.
     shortcut: every run rescores the whole archive, about 45 s for the launch backfill and growing with it;
     keep the scores of past runs outside the archive if a run ever spends minutes here.
     """
-    archived = archive.this_model(archived)
+    archived = archive.this_model(archived, model_id)
     today = pd.Timestamp(today)
     vintages = vintages[vintages["as_of"] <= today]
     # A registered measurement error is blank in the model's input, and no observation to score against.
@@ -172,14 +173,69 @@ def settled(
     return found
 
 
-def summary(series: Series, rows: pd.DataFrame, latest: pd.DataFrame) -> dict:
+def shown(
+    series: Series, archived: list[Archived], vintages: pd.DataFrame, today: date
+) -> tuple[str, pd.DataFrame]:
+    """The model whose record `series` shows on `today`, and its rows as `scored` gives them.
+
+    The model in the code's, once its record has something the page can show. Until then, after a
+    MODEL_ID change, the newest model before it, by its last run, with such a forecast due. For GPR,
+    whose days are scored 35 days late, that lasts weeks. Each record is one model's alone, and only
+    the model in the code and the one chosen are scored.
+    """
+    today = pd.Timestamp(today)
+    rows = scored(series, archived, vintages, today)
+    if _shows(rows):
+        return archive.MODEL_ID, rows
+    runs = sorted(archived, key=lambda a: a.provenance["generated_at"], reverse=True)
+    before = dict.fromkeys(a.model_id for a in runs if a.model_id != archive.MODEL_ID)
+    chosen = next(
+        (m for m in before if _due(series, archive.this_model(archived, m), today)),
+        None,
+    )
+    if chosen:
+        earlier = scored(series, archived, vintages, today, model_id=chosen)
+        if _shows(earlier):
+            return chosen, earlier
+    return archive.MODEL_ID, rows
+
+
+def _shows(rows: pd.DataFrame) -> bool:
+    """Whether a record of `rows` has something the page shows: a forecast scored 7 steps ahead.
+
+    That step completes its 1-7 bucket and is the step of the record's squares; every horizon is 7 or more.
+    """
+    return bool((rows["horizon"] == SQUARE_HORIZON).any())
+
+
+def _due(series: Series, archived: list[Archived], today: pd.Timestamp) -> bool:
+    """Whether a forecast of `archived` has its 7th step due by `today`, without scoring it."""
+    return any(
+        scoreable_on(
+            pd.Timestamp(a.target_end_dates[SQUARE_HORIZON - 1]), series.score_lag
+        )
+        <= today
+        for a in archived
+    )
+
+
+def summary(
+    series: Series,
+    rows: pd.DataFrame,
+    latest: pd.DataFrame,
+    model_id: str | None = None,
+) -> dict:
     """The record of `series` for its score file: the live and the retrospective forecasts, never combined, then the same against the latest vintage.
 
-    `rows` and `latest` are what `scored` returns for the same day, without and with `latest`.
+    `rows` and `latest` are what `scored` returns for the same day and `model_id`, the model in the
+    code's by default, without and with `latest`.
     """
     live = _mode(series, rows, "live")
     return {
         "series_id": series.id,
+        # Additive to v1: the model whose forecasts this record scores. It is the file's own model_id,
+        # except after a model change, until the new model has a record the page can show (`shown`).
+        "scored_model_id": model_id or archive.MODEL_ID,
         # The live forecasts resolved 7 days ahead: the page shows the live scores from MIN_N.
         "n": live["n"],
         "min_n_to_display": MIN_N,

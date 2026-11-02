@@ -147,9 +147,11 @@ type Scored = {
   weekly: { reference_date: string; inside_80: boolean }[]
 }
 // One series' track record: `n` live forecasts resolved 7 days ahead, shown from
-// `min_n_to_display`; its errors compare with `primary_baseline`.
+// `min_n_to_display`; its errors compare with `primary_baseline`. `scored_model_id` is the model
+// it scores, absent in a file from before the label, which scores the file's own.
 export type ScoreRecord = {
   series_id: string
+  scored_model_id?: string
   n: number
   min_n_to_display: number
   primary_baseline: string
@@ -157,7 +159,9 @@ export type ScoreRecord = {
   retrospective: Scored
 }
 
-export const loadScores = () => read<{ series: ScoreRecord[] }>("scores.json")
+// `model_id` is the model in the code: a record whose `scored_model_id` differs scores the one before.
+export const loadScores = () =>
+  read<{ model_id: string; series: ScoreRecord[] }>("scores.json")
 
 // A series' forecast and daily values, and the replay's past forecasts when asked for:
 // a card needs only today's.
