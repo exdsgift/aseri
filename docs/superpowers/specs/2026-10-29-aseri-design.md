@@ -2,7 +2,7 @@
 
 Status: draft for review, 2026-10-29. Owner: exdsgift. Repository: `exdsgift/aseri` (reset to an empty `master` on 2026-10-29).
 
-Every decision below was either made by the owner during brainstorming or is marked **(my call)**: a sensible default the owner has not confirmed. Section 7 lists the calls. Evidence lives in `docs/research/`, and the visual reference is the working prototype in `prototypes/forecast-chart/` (published as https://claude.ai/artifact/TkkbS85exVYBRZ1fDALZKb).
+Every decision below was either made by the owner during brainstorming or is marked **(my call)**: a sensible default the owner has not confirmed. Section 7 lists the calls. Evidence lives in `docs/research/`, and the visual reference is the working prototype in [`forecast-chart/`](https://github.com/exdsgift/aseri/tree/prototypes/forecast-chart) on the `prototypes` branch (published as https://claude.ai/artifact/TkkbS85exVYBRZ1fDALZKb).
 
 ## 1. What it is and why
 
@@ -304,11 +304,11 @@ Follow `docs/research/public-api.md`. The essentials:
    - when: the Pages artifact passes 500 MB, half the limit;
    - how: removing files is not additive, so it ships as `/api/v2/`, beside v1 for 6 months (6.6). v2 publishes the dated files of the current year and the replay window only; its `forecasts.json` still lists every forecast, and gives a closed year's the bulk file that holds it. The page moves to v2, then v1 goes;
    - what it saves: about 18 MB a year, so the site then grows about 17 MB a year.
-6. **The throwaway prototypes** (`prototypes/`) move to a `prototypes` branch once the real code covers them **(my call)**, so that `master` stays clean.
+6. **The throwaway prototypes** moved to the [`prototypes`](https://github.com/exdsgift/aseri/tree/prototypes) branch once the real code covered them (#141) **(my call)**, so that `master` stays clean.
 
 ### 6.8 Website: structure and behaviour
 
-The reference is the prototype `prototypes/forecast-chart/index.html`, in the "statement" style of about.dos-age.com: one idea per screen. Rewrite it properly; do not port it. Since #150 the whole site is white on electric blue (6.9).
+The reference is the prototype [`forecast-chart/index.html`](https://github.com/exdsgift/aseri/blob/prototypes/forecast-chart/index.html) on the `prototypes` branch, in the "statement" style of about.dos-age.com: one idea per screen. Rewrite it properly; do not port it. Since #150 the whole site is white on electric blue (6.9).
 
 Since #152 the page says each thing once, on the mark it is about, after the prototype the owner chose on 2026-11-02: [`prototypes/less-text/index.html`](https://github.com/exdsgift/aseri/blob/prototype-less-text/prototypes/less-text/index.html) on the `prototype-less-text` branch, with its README, combination `#A-none-still-none` (stats wording A, no label on the path, the panel opening still on path 1, no replay verdict squares). The evidence is [Comunicare le previsioni con meno testo](../../research/reports/Comunicare%20le%20previsioni%20con%20meno%20testo.md), changes 1, 3, 4, 5, 8, 9, 11 and 12. Every block leads with a takeaway computed from the data (`web/src/lib/takeaways.ts`), never written by hand.
 
@@ -513,7 +513,7 @@ docs/                     research, specs
   - `docs/research/spike-covariates.md`
   - `docs/research/public-api.md`
   - `docs/research/design-dos-age.md`
-- **Prototypes:**
-  - `prototypes/forecast-chart/`: the reference page, with `build/forecasts.py` showing how to run Timestral over replay origins;
-  - `prototypes/style-variants/`: the style exploration;
-  - `prototypes/timestral-backtest/` and `prototypes/timestral-covariates/`: the spikes.
+- **Prototypes**, on the [`prototypes`](https://github.com/exdsgift/aseri/tree/prototypes) branch:
+  - [`forecast-chart/`](https://github.com/exdsgift/aseri/tree/prototypes/forecast-chart): the reference page, with `build/forecasts.py` showing how to run Timestral over replay origins;
+  - [`style-variants/`](https://github.com/exdsgift/aseri/tree/prototypes/style-variants): the style exploration;
+  - [`timestral-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-backtest) and [`timestral-covariates/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-covariates): the spikes.

@@ -2,7 +2,7 @@
 
 Researched 2026-10-29. The question: how should aseri publish its daily Timestral forecasts as a public API, following the standard for this kind of model output? The constraints are static files only, a lean setup, bounded repository growth and honest provenance. Builds on [timestral-model.md](timestral-model.md), [data-sources.md](data-sources.md), [spike-timestral-backtest.md](spike-timestral-backtest.md), [forecast-horizons.md](forecast-horizons.md) and [prior-art-and-gaps.md](prior-art-and-gaps.md).
 
-Each claim cites a source ID from [Sources](#sources). "Observed" means one or more read-only HTTP requests I made on 2026-10-29, listed under [OBS]. "Measured" means a local calculation on real Timestral-209M quantiles from `prototypes/timestral-backtest/data/fc_Timestral-209M.npz`. Anything marked **unverified** is my inference or was not checked. The licensing notes are not legal advice.
+Each claim cites a source ID from [Sources](#sources). "Observed" means one or more read-only HTTP requests I made on 2026-10-29, listed under [OBS]. "Measured" means a local calculation on real Timestral-209M quantiles from `data/fc_Timestral-209M.npz` of [`timestral-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-backtest) on the `prototypes` branch. Anything marked **unverified** is my inference or was not checked. The licensing notes are not legal advice.
 
 ## TL;DR
 
@@ -848,4 +848,4 @@ The research's skeleton is now the real document, `api/openapi.json` (#135): Ope
 - https://latest.currency-api.pages.dev/v1/currencies/eur.json
 - https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json
 
-**Internal:** [timestral-model.md](timestral-model.md), [data-sources.md](data-sources.md), [spike-timestral-backtest.md](spike-timestral-backtest.md), [forecast-horizons.md](forecast-horizons.md), [prior-art-and-gaps.md](prior-art-and-gaps.md). The size measurements read `prototypes/timestral-backtest/data/fc_Timestral-209M.npz`. They were built with pandas 2.2.3 and pyarrow 24.0.0 (CSV, gzip level 9, Parquet zstd) and were not committed.
+**Internal:** [timestral-model.md](timestral-model.md), [data-sources.md](data-sources.md), [spike-timestral-backtest.md](spike-timestral-backtest.md), [forecast-horizons.md](forecast-horizons.md), [prior-art-and-gaps.md](prior-art-and-gaps.md). The size measurements read `data/fc_Timestral-209M.npz` of [`timestral-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-backtest) on the `prototypes` branch. They were built with pandas 2.2.3 and pyarrow 24.0.0 (CSV, gzip level 9, Parquet zstd) and were not committed.

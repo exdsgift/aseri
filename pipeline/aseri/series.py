@@ -80,7 +80,8 @@ GPR_DAILY = Series(
     # both. The fix holds by design: a rewrite of years is for a human to review. A uniform shift of the whole
     # history above 1%, as a rebase would make, holds too. One old day revised ended at 0.636 to 1.571 times
     # its archived value (the fix: 0.627 to 1.414), so a day past 3-fold, 1.9 times farther, is a unit or
-    # scale error. Calibration: prototypes/gpr-realtime-backtest/revisions.py, and
+    # scale error. Calibration:
+    # https://github.com/exdsgift/aseri/blob/prototypes/gpr-realtime-backtest/revisions.py, and
     # docs/research/gpr-realtime-backtest.md, "The deep-revision rule".
     revision_window=90,
     deep_revision_tolerance=0.01,
