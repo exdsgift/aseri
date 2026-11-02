@@ -105,7 +105,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             else archive.new_reference_dates(
                 # Only from a day with a value: the drones' day without a report starts none.
                 usable.dropna(),
-                # A new MODEL_ID forecasts the replay window again, so the page never shows two models.
+                # A new MODEL_ID forecasts the replay window again, for its replay and its record.
                 [a.forecast.reference_date for a in archived if a.model_id == MODEL_ID],
             )
         )

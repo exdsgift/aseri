@@ -46,7 +46,7 @@ Key design decisions:
    - **Corrected (#135):** `schema_version` stays `1.0.0` within v1 rather than counting minor versions. The dated forecast files carry it, and they never change.
    - A breaking change ships as `/api/v2/` alongside v1 for at least 6 months. Deprecation notices go in the response body, because GitHub Pages cannot send headers.
    - A change of model or inference settings gets a new `model_id`.
-   - Dated forecast files never change, except at a model change: a new `model_id` forecasts the 120-day replay window again, and its forecasts take those days' dated paths, so the page never shows two models (#151). The model before's forecasts stay in the archive under `model-output/<its model_id>/`, and its dated files older than the window stay as they are.
+   - Dated forecast files never change. Each holds the first forecast issued for its day, whatever its model: a new `model_id`'s forecasts of days already published are in the archive's round and in `replay.json`, never in a dated file (#151).
 8. **Track record uses the Hubverse metrics.**
    - Score with WIS, absolute error of the median, and coverage at 50, 80, 90 and 98% [SU-Q][WIS], plus a WIS ratio against a probabilistic seasonal-naive baseline.
    - Break scores down by horizon, count live forecasts only, and score against a declared data vintage.
@@ -222,7 +222,8 @@ It is also used across institutions [HV-HOME]. Follow it for the archive and bul
 **Rules:**
 - A series gets a new forecast only when its `reference_date` moves forward.
 - `(model_id, series_id, reference_date)` identifies a forecast. It is written once and never edited.
-- **A new `model_id` restarts the record (#151).** It forecasts the replay window again, retrospective, so the slider never mixes two models; the API publishes one forecast per reference date, the newest model's, at its dated path. `scores.json` scores only the forecasts of its `model_id`, and the live record starts again at 0.
+- **A dated file holds the first forecast issued for its day (#151),** whatever its model, and `latest.json` copies the newest dated file.
+- **A new `model_id` restarts the record (#151).** It forecasts the replay window again, retrospective. Those forecasts are in the archive's round under its own `model_id`, and `replay.json` shows the current model's forecast of each day it has one for; the dated files, and so `latest.json`, keep the first forecast of each day. On the switch day, a series without new data keeps the model before's live forecast as its latest; the new model's first live forecast comes with the series' next new day. The page takes the newest day from `latest.json`, so it never shows two forecasts of one day. `scores.json` scores only the forecasts of its `model_id`, and the live record starts again at 0.
 - Corrections go into an `errata` list in `series.json`. The original forecast stays published and scored.
 
 ### 3.2 URL layout and endpoints
@@ -235,7 +236,7 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `series/{series_id}/latest.json` | Latest forecast. A copy of the newest dated file, with `links.canonical` pointing to that file | Daily |
 | `series/{series_id}/forecasts.json` | Index of every issued forecast: `reference_date`, `forecast_date`, mode, URL. Needed because static hosts cannot list directories | Daily, grows about 100 bytes per forecast |
 | `series/{series_id}/forecasts/{reference_date}.json` | One forecast | **Never** |
-| `series/{series_id}/replay.json` | With `schema_version`, licence and attribution, the forecasts of the 120 days to the latest, for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
+| `series/{series_id}/replay.json` | With `schema_version`, licence and attribution, the forecasts of the 120 days to the latest, the current model's where it has one (#151), for the page's replay slider, as the page writes them (whole numbers from 10 up, one decimal below) and at seven levels: 0.05, 0.1, 0.25, 0.5, 0.75, 0.9 and 0.95, the page's ranges and most likely value and the 5% and 95% a possible path reaches before the chart's frame. About 33 KB gzipped for GPR. The dated files keep all 21 levels to four decimals | Daily |
 | `series/{series_id}/actuals.json` | Latest vintage of the observed series (`date[]`, `observation[]`, flags) with `as_of` | Daily |
 | `series/{series_id}/scores.json` | Track record for one series, live and retrospective forecasts apart, never combined. Per horizon bucket (1-7, 8-28): 50% and 80% coverage with an exact CI, WIS and its components, the median's absolute error and its ratio to each baseline with a block-bootstrap CI and a verdict, and MASE. Also `n`, `min_n_to_display`, the primary baseline, the weekly forecasts of the record's squares, the method (WIS convention, L, block length, resamples, seed) and the latest-vintage sensitivity check (see 4.4) | Daily |
 | `scores.json` | Cross-series summary for the site's record: each series' file without its sensitivity check | Daily |
@@ -507,7 +508,7 @@ https://<owner>.github.io/aseri/
 │       ├── series/{series_id}/
 │       │   ├── latest.json
 │       │   ├── forecasts.json          index of issued forecasts
-│       │   ├── forecasts/{reference_date}.json   immutable, except at a model change (#151)
+│       │   ├── forecasts/{reference_date}.json   immutable: the first forecast of the day
 │       │   ├── replay.json             the last 120 days at seven levels
 │       │   ├── actuals.json
 │       │   └── scores.json

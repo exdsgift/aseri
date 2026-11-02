@@ -36,11 +36,12 @@ methods_long: >-
   (https://github.com/exdsgift/aseri/blob/master/docs/adr/0001-baselines-and-calibration-before-the-live-record.md).
   aseri then sorts the quantiles, clips counts at 0 and air-raid hours at 0 to 600, and publishes them
   to four decimals. There is no correlation between series. Known measurement errors are left blank in
-  the model's input. A forecast is issued once per model, series and reference date and never changed;
-  those issued after the fact, such as this model's 120-day replay window, forecast again when it
+  the model's input. A forecast is issued once per model, series and reference date and never changed.
+  Those issued after the fact, such as the 120-day replay window this model forecast again when it
   replaced aseri-timestral209m, are labelled retrospective and kept out of the live record, which
-  restarted with this model. Timestral's training-data cutoff is not published, so backtests may be
-  optimistic. Licence of the model output: CC BY-NC 4.0
+  restarted with this model. A day's dated forecast file keeps the first forecast issued for it, so
+  this model's forecasts of days published before it are in the archive and the replay. Timestral's
+  training-data cutoff is not published, so backtests may be optimistic. Licence of the model output: CC BY-NC 4.0
   (https://creativecommons.org/licenses/by-nc/4.0/), attributed as "Forecasts: aseri (model
   aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)"; upstream terms still apply to the
   underlying data, per series (https://exdsgift.github.io/aseri/api/v1/series.json).

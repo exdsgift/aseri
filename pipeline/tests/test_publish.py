@@ -307,35 +307,54 @@ def test_the_index_lists_every_forecast_oldest_first(api_dir):
     }
 
 
-def test_a_day_a_new_model_forecast_again_is_published_once_as_the_new_model_s(
+def test_a_day_a_new_model_forecasts_again_keeps_its_first_forecast_in_its_dated_file(
     tmp_path,
 ):
-    # As the archive reads back a model change: the model before's forecasts, then the new model's
-    # forecasts of the same days, its replay window, from a later run.
+    observed = days_to("2026-10-27", range(200))
+    series = tmp_path / "series" / "gpr_daily"
+    # The model before's forecasts, published.
     before = [
         replace(archived(day, mode), model_id="aseri-timestral209m")
         for day, mode in (("2026-10-24", "retrospective"), ("2026-10-25", "live"))
     ]
-    again = replace(
-        archived("2026-10-25", "retrospective", forecast_date="2026-10-31"),
-        model_id="aseri-timestral209m_cqr1",
-    )
-    publish_gpr(tmp_path, days_to("2026-10-27", range(200)), [*before, again])
+    publish_gpr(tmp_path, observed, before)
+    published = {p: p.read_bytes() for p in series.rglob("*.json")}
+    # From a later run, the new model's forecasts of the same days, its replay window: one higher.
+    again = [
+        replace(
+            a,
+            model_id="aseri-timestral209m_cqr1",
+            forecast_date="2026-10-31",
+            provenance=a.provenance | {"forecast_mode": "retrospective"},
+            forecast=replace(a.forecast, quantiles=a.forecast.quantiles + 1),
+        )
+        for a in before
+    ]
+    # As the archive reads both back: by reference date, then by run.
+    both = sorted([*before, *again], key=lambda a: a.forecast.reference_date)
 
-    index = read(tmp_path / "series" / "gpr_daily" / "forecasts.json")["forecasts"]
-    assert [(f["reference_date"], f["forecast_date"]) for f in index] == [
-        ("2026-10-24", "2026-10-29"),
-        ("2026-10-25", "2026-10-31"),
-    ]
-    assert dated(tmp_path, "2026-10-24")["model_id"] == "aseri-timestral209m"
-    assert dated(tmp_path, "2026-10-25")["model_id"] == "aseri-timestral209m_cqr1"
-    # Once each; a run forecasts the whole window again, so the replay holds one model (test_cli).
-    replay = read(tmp_path / "series" / "gpr_daily" / "replay.json")
+    publish_gpr(tmp_path, observed, both)
+
+    # Each day's dated file is its first forecast, whatever its model, and never changes; so are
+    # the index, which lists them, and latest.json, which copies the newest.
+    for path in ("forecasts/2026-10-24.json", "forecasts/2026-10-25.json"):
+        assert (series / path).read_bytes() == published[series / path]
+    assert dated(tmp_path, "2026-10-25")["model_id"] == "aseri-timestral209m"
+    for path in ("forecasts.json", "latest.json"):
+        assert (series / path).read_bytes() == published[series / path]
+    # The new model's forecasts of those days are in the replay, and in the archive's round.
+    replay = read(series / "replay.json")
     assert replay["model_id"] == "aseri-timestral209m_cqr1"
-    assert [f["reference_date"] for f in replay["forecasts"]] == [
-        "2026-10-24",
-        "2026-10-25",
+    assert [
+        (f["reference_date"], f["forecast_mode"], f["quantiles"]["0.5"])
+        for f in replay["forecasts"]
+    ] == [
+        ("2026-10-24", "retrospective", [101, 102]),
+        ("2026-10-25", "retrospective", [101, 102]),
     ]
+    assert replay["attribution"].endswith(
+        "(model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)."
+    )
 
 
 def test_actuals_list_the_observed_values_by_date_without_float_noise(tmp_path):

@@ -568,7 +568,7 @@ def test_a_second_run_the_same_day_with_new_data_waits_for_tomorrow(
     assert latest["reference_date"] == "2026-10-25"
 
 
-def test_a_new_model_forecasts_the_replay_window_again_so_the_page_shows_it_alone(
+def test_a_new_model_forecasts_the_replay_window_again_without_changing_a_dated_file(
     tmp_path, monkeypatch, stub_model, short_backfill
 ):
     archive_dir = tmp_path / "archive"
@@ -587,12 +587,36 @@ def test_a_new_model_forecasts_the_replay_window_again_so_the_page_shows_it_alon
             archive_dir,
         )
     archive_before = files(archive_dir)
+    day1 = tmp_path / "day1" / "series" / "gpr_daily"
+    published = {p.relative_to(day1): p.read_bytes() for p in day1.glob("forecasts/*")}
+    days = pd.date_range("2026-10-05", "2026-10-26").strftime("%Y-%m-%d").tolist()
 
-    # Day 2, under the model in the code, after GPR's weekly update.
+    def ours(day):
+        """The replay's forecasts as this model archived them, at the replay's levels, as the page writes them."""
+        forecasts = {
+            f"{a.forecast.reference_date:%Y-%m-%d}": a.forecast
+            for a in archive.read(archive_dir, "gpr_daily")
+            if a.model_id == MODEL_ID
+        }
+        replay = read(day / "series" / "gpr_daily" / "replay.json")
+        return replay, [
+            {
+                level: [
+                    shown(v)
+                    for v in forecasts[f["reference_date"]].quantiles[
+                        :, forecasts[f["reference_date"]].levels.index(float(level))
+                    ]
+                ]
+                for level in replay["quantile_levels"]
+            }
+            for f in replay["forecasts"]
+        ]
+
+    # Day 2, the switch, under the model in the code: no new data, so its replay window alone.
     run_on(
         monkeypatch,
-        datetime(2026, 10, 27, 7, 4, tzinfo=UTC),
-        RECORDED_GPR.read_bytes(),
+        datetime(2026, 10, 21, 7, 2, tzinfo=UTC),
+        recorded_gpr_until("2026-10-19"),
         tmp_path / "day2",
         archive_dir,
     )
@@ -600,54 +624,70 @@ def test_a_new_model_forecasts_the_replay_window_again_so_the_page_shows_it_alon
     # The archive only grows: the model before's files untouched, the new model's round beside them.
     after = files(archive_dir)
     assert {p: after[p] for p in archive_before} == archive_before
-    days = pd.date_range("2026-10-05", "2026-10-26").strftime("%Y-%m-%d").tolist()
-    window, older = days[7:], days[:7]
-    rounds = pd.read_csv(archive_dir / archive.ROUNDS / f"2026-10-27-{MODEL_ID}.csv")
-    assert rounds["reference_date"].unique().tolist() == window
-    # One forecast a day: the days before the window keep the model before's files, byte for byte.
-    day1 = tmp_path / "day1" / "series" / "gpr_daily"
+    rounds = pd.read_csv(archive_dir / archive.ROUNDS / f"2026-10-21-{MODEL_ID}.csv")
+    assert rounds["reference_date"].unique().tolist() == days[:15]
+    # Each dated file keeps the first forecast of its day, and latest.json, which copies the newest,
+    # keeps the model before's live forecast until the next new day.
     series = tmp_path / "day2" / "series" / "gpr_daily"
+    assert {
+        p.relative_to(series): p.read_bytes() for p in series.glob("forecasts/*")
+    } == published
+    assert (series / "latest.json").read_bytes() == (day1 / "latest.json").read_bytes()
+    latest = read(series / "latest.json")
+    assert (latest["model_id"], latest["forecast_mode"]) == (
+        "aseri-timestral209m",
+        "live",
+    )
+    # The new model's forecasts of those days are in the replay, the newest included, which the
+    # page takes from latest.json instead; and the record is the new model's.
+    replay, expected = ours(tmp_path / "day2")
+    assert replay["model_id"] == MODEL_ID
+    assert [f["reference_date"] for f in replay["forecasts"]] == days[:15]
+    assert [f["quantiles"] for f in replay["forecasts"]] == expected
+    assert expected[-1]["0.9"] != [shown(v) for v in latest["quantiles"]["0.9"]]
+    assert read(tmp_path / "day2" / "scores.json")["model_id"] == MODEL_ID
+    assert gate.contract(tmp_path / "day2") == []
+
+    # Day 3, after GPR's weekly update: the new days are the new model's, the newest live.
+    run_on(
+        monkeypatch,
+        datetime(2026, 10, 27, 7, 4, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day3",
+        archive_dir,
+    )
+
+    series = tmp_path / "day3" / "series" / "gpr_daily"
     index = read(series / "forecasts.json")["forecasts"]
     assert [f["reference_date"] for f in index] == days
     for f in index:
-        model = read(series / f["url"])["model_id"]
-        assert model == (
-            MODEL_ID if f["reference_date"] in window else "aseri-timestral209m"
+        assert read(series / f["url"])["model_id"] == (
+            MODEL_ID if f["reference_date"] > "2026-10-19" else "aseri-timestral209m"
         )
-    for day in older:
-        assert (series / "forecasts" / f"{day}.json").read_bytes() == (
-            day1 / "forecasts" / f"{day}.json"
-        ).read_bytes()
-    assert (
-        read(series / "forecasts" / "2026-10-12.json")["quantiles"]["0.9"]
-        != read(day1 / "forecasts" / "2026-10-12.json")["quantiles"]["0.9"]
-    )
-    # What the page reads is the new model's alone: the latest, the whole replay and the record.
+    assert {
+        p.relative_to(series): p.read_bytes()
+        for p in series.glob("forecasts/*")
+        if p.relative_to(series) in published
+    } == published
     latest = read(series / "latest.json")
     assert (latest["model_id"], latest["reference_date"], latest["forecast_mode"]) == (
         MODEL_ID,
         "2026-10-26",
         "live",
     )
-    replay = read(series / "replay.json")
-    assert replay["model_id"] == MODEL_ID
-    assert [f["reference_date"] for f in replay["forecasts"]] == window
-    for forecast in replay["forecasts"]:
-        dated = read(series / "forecasts" / f"{forecast['reference_date']}.json")
-        assert forecast["quantiles"] == {
-            level: [shown(v) for v in dated["quantiles"][level]]
-            for level in replay["quantile_levels"]
-        }
-    assert read(tmp_path / "day2" / "scores.json")["model_id"] == MODEL_ID
-    assert gate.contract(tmp_path / "day2") == []
+    replay, expected = ours(tmp_path / "day3")
+    assert [f["reference_date"] for f in replay["forecasts"]] == days[7:]
+    assert [f["quantiles"] for f in replay["forecasts"]] == expected
+    assert gate.contract(tmp_path / "day3") == []
 
-    # The next day, the same data: the window is the new model's already, nothing is forecast.
+    # The next day, the same data: nothing is forecast, and the archive does not change.
+    after = files(archive_dir)
     monkeypatch.setattr(cli, "load_model", no_model)
     run_on(
         monkeypatch,
         datetime(2026, 10, 28, 7, 2, tzinfo=UTC),
         RECORDED_GPR.read_bytes(),
-        tmp_path / "day3",
+        tmp_path / "day4",
         archive_dir,
     )
     assert files(archive_dir) == after

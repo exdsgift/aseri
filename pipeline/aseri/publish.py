@@ -58,7 +58,7 @@ def publish(
     stale_since: date | None = None,
     note: str | None = None,
 ) -> dict:
-    """Write every archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
+    """Write each day's first archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
 
     `archived` is oldest reference date first, then oldest run, as `archive.read` returns it. `first_seen` holds each
     day as first observed, which the day-to-day tie is scored against. A series the run skipped
@@ -74,9 +74,18 @@ def publish(
     }
     # A day with no value (the drones' day without a report) is left out, as the archive leaves it.
     observed = observed.dropna()
-    # One forecast a day, the newest run's: a new MODEL_ID forecasts the replay window again, and its
-    # forecasts take those days' paths. The model before's stay in the archive under its own ID.
-    archived = list({a.forecast.reference_date: a for a in archived}.values())
+    # A day's dated file holds its first forecast, whatever its model, and never changes. A new MODEL_ID's
+    # forecasts of days already published are in the archive's round and in the replay, which prefers them.
+    first = {}
+    for forecast in archived:
+        first.setdefault(forecast.forecast.reference_date, forecast)
+    replayed = list(
+        (
+            first
+            | {a.forecast.reference_date: a for a in archived if a.model_id == MODEL_ID}
+        ).values()
+    )
+    archived = list(first.values())
     for forecast in archived:
         _write(
             api_dir / "series" / series.id / _dated(forecast),
@@ -96,10 +105,13 @@ def publish(
         },
     )
     _write(api_dir / links["forecasts"], _index(series, archived, generated_at))
-    _write(api_dir / links["replay"], _replay(series, archived, latest["attribution"]))
+    _write(
+        api_dir / links["replay"],
+        _replay(series, replayed, _forecast(series, replayed[-1])["attribution"]),
+    )
     _write(api_dir / links["actuals"], _actuals(series, observed, as_of, generated_at))
     tie = day_to_day_tie(
-        [a.forecast for a in archived],
+        [a.forecast for a in replayed],
         first_seen,
         trading=series.horizon_unit == "trading_day",
     )
