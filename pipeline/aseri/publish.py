@@ -135,6 +135,8 @@ def publish_catalog(
             "license": FORECAST_LICENSE,
             "errata": ERRATA,
             "series": entries,
+            # Additive to v1 (#136): written by bulk.write.
+            "links": {"bulk": "bulk/datapackage.json"},
         },
     )
 
@@ -286,7 +288,7 @@ def _replay(series, archived, attribution) -> dict:
 
 
 def _actuals(series, observed, as_of, generated_at) -> dict:
-    # shortcut: the last 400 days, enough for the page; the full history comes with the bulk files (#136).
+    # The last 400 days, enough for the page; the full history is in bulk/time-series.parquet (#136).
     observed = observed.iloc[-400:]
     return {
         "schema_version": SCHEMA_VERSION,

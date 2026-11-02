@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exdsgift.github.io/aseri/api/v1/schemas/datapackage.schema.json",
+  "title": "bulk/datapackage.json: the bulk files",
+  "description": "A Frictionless Data Package (v2) of the bulk files: each one's columns and types, primary key, licences and sources. It also validates against https://datapackage.org/profiles/2.0/datapackage.json.",
+  "type": "object",
+  "required": ["$schema", "name", "title", "description", "homepage", "created", "resources"],
+  "properties": {
+    "$schema": {"const": "https://datapackage.org/profiles/2.0/datapackage.json"},
+    "name": {"type": "string"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "homepage": {"type": "string", "format": "uri"},
+    "created": {"$ref": "defs.schema.json#/$defs/timestamp", "description": "When the daily run wrote the files."},
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/resource"}
+    }
+  },
+  "$defs": {
+    "resource": {
+      "description": "One bulk file, next to this one.",
+      "type": "object",
+      "required": ["name", "path", "type", "description", "format", "mediatype", "schema", "licenses", "sources"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z0-9._-]+$"},
+        "path": {"$ref": "defs.schema.json#/$defs/path"},
+        "type": {"const": "table"},
+        "description": {"type": "string"},
+        "format": {"enum": ["csv", "parquet"]},
+        "mediatype": {"enum": ["text/csv", "application/vnd.apache.parquet"]},
+        "encoding": {"const": "utf-8"},
+        "compression": {"description": "Not in the profile: the CSV is gzipped, as its .gz says.", "const": "gz"},
+        "schema": {
+          "description": "Its Table Schema: the columns in order.",
+          "type": "object",
+          "required": ["fields", "primaryKey"],
+          "properties": {
+            "fields": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["name", "type"],
+                "properties": {
+                  "name": {"type": "string"},
+                  "type": {"enum": ["string", "date", "integer", "number", "boolean"]}
+                }
+              }
+            },
+            "primaryKey": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+          }
+        },
+        "licenses": {
+          "description": "aseri's licence for its forecasts and scores; each source's terms for its values, one per file where the file holds one source.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["title", "path", "attribution"],
+            "properties": {
+              "title": {"type": "string"},
+              "path": {"type": "string", "format": "uri"},
+              "attribution": {"description": "A ready-to-paste credit line, as in the catalog.", "type": "string"}
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["title", "path"],
+            "properties": {
+              "title": {"type": "string"},
+              "path": {"type": "string", "format": "uri"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

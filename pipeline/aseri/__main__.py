@@ -4,11 +4,12 @@ import json
 import os
 import subprocess
 import sys
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from aseri import archive, record
-from aseri.forecast import forecast, load_model, make_context, under_review
+from aseri import archive, bulk, record
+from aseri.forecast import MODEL_ID, forecast, load_model, make_context, under_review
 from aseri.gate import annotate, check_forecasts
 from aseri.publish import publish, publish_catalog, publish_contract, publish_scores
 from aseri.series import (
@@ -172,7 +173,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             generated_at=generated_at,
         )
     # After the archive: a target due today is scored against the values this run has just archived.
-    entries, rows, levels, records, red = [], [], None, [], []
+    entries, rows, levels, records, red, scores = [], [], None, [], [], []
     for series, _ in SOURCES:
         archived = archive.read(archive_dir, series.id)
         # A fresh series with no archive waits for tomorrow: today's run was archived before it had data.
@@ -255,8 +256,17 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 record.scored(series, archived, vintages, today, latest=True),
             )
             zones = record.calibration(series, scored)
+            # The bulk scores keep every model's, which the record leaves out after a model change.
+            by_model = {MODEL_ID: scored} | {
+                model: record.scored(series, archived, vintages, today, model_id=model)
+                for model in sorted({a.model_id for a in archived} - {MODEL_ID})
+            }
             # Kept only once all of it worked, so a series has its whole record or none.
             records.append(summary)
+            scores += [
+                frame.assign(model_id=model, target=series.id)
+                for model, frame in by_model.items()
+            ]
             if "red" in zones.values():
                 red.append(series.id)
         # Whatever breaks its scores costs the series its scores only: it still publishes, as do the others.
@@ -270,6 +280,10 @@ def main(api_dir: Path, archive_dir: Path) -> None:
     publish_catalog(api_dir, entries, levels, generated_at)
     publish_scores(api_dir, records, generated_at)
     publish_contract(api_dir)
+    # Under api/v1, so the page job's copy of the last deploy's api/v1 carries them too.
+    started = time.monotonic()
+    bulk.write(api_dir / "bulk", archive_dir, SOURCES, scores, generated_at)
+    print(f"Bulk files written in {time.monotonic() - started:.1f} s", flush=True)
     # The series the page now shows as late, read from what it reads, the held ones, and those whose live
     # ranges the monitor finds far off, for daily.yml's issues.
     if "GITHUB_OUTPUT" in os.environ:

@@ -5,7 +5,7 @@ import io
 import json
 import re
 from dataclasses import replace
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from urllib.error import URLError
@@ -13,6 +13,7 @@ from urllib.parse import parse_qs, urlsplit
 
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 import pytest
 import torch
 
@@ -646,6 +647,9 @@ def test_a_new_model_forecasts_the_replay_window_again_without_changing_a_dated_
     assert [f["quantiles"] for f in replay["forecasts"]] == expected
     assert expected[-1]["0.9"] != [shown(v) for v in latest["quantiles"]["0.9"]]
     assert read(tmp_path / "day2" / "scores.json")["model_id"] == MODEL_ID
+    # The bulk forecasts keep both models', told apart (#136).
+    bulk = pd.read_csv(tmp_path / "day2" / "bulk" / "forecasts-2026.csv.gz")
+    assert sorted(bulk["model_id"].unique()) == ["aseri-timestral209m", MODEL_ID]
     assert gate.contract(tmp_path / "day2") == []
 
     # Day 3, after GPR's weekly update: the new days are the new model's, the newest live.
@@ -1673,6 +1677,50 @@ def test_the_record_scores_each_series_from_the_archive_and_names_a_red_band_for
     assert "calibration_red=taiwan_strait_transits\n" in output.read_text(
         encoding="utf-8"
     )
+    # The bulk scores hold the record's rows, one per day scored (#136).
+    bulk = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
+    live = bulk[
+        (bulk["target"] == "taiwan_strait_transits") & (bulk["forecast_mode"] == "live")
+    ]
+    assert live["target_end_date"].tolist() == [
+        date(2026, 10, 26) + timedelta(days=h) for h in range(8)
+    ]
+    assert live["interval_coverage_80"].tolist()[6] is False
+    assert set(bulk["model_id"]) == {MODEL_ID}
+
+
+def test_the_bulk_scores_keep_the_model_before_which_the_record_leaves_out(
+    tmp_path, monkeypatch, stub_model, short_backfill
+):
+    archive_dir = tmp_path / "archive"
+    serve(monkeypatch, sea_lanes())
+    with monkeypatch.context() as before:
+        before.setattr(archive, "MODEL_ID", "aseri-timestral209m")
+        before.setattr(archive, "ROUNDS", Path("model-output", "aseri-timestral209m"))
+        run_on(
+            before,
+            datetime(2026, 10, 30, 7, 2, tzinfo=UTC),
+            RECORDED_GPR.read_bytes(),
+            tmp_path / "day1",
+            archive_dir,
+        )
+    serve(monkeypatch, sea_lanes("2026-11-15"), edited=NEXT_EDIT)
+    run_on(
+        monkeypatch,
+        datetime(2026, 11, 16, 7, 2, tzinfo=UTC),
+        RECORDED_GPR.read_bytes(),
+        tmp_path / "day2",
+        archive_dir,
+    )
+
+    api = tmp_path / "day2"
+    bulk = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
+    before = bulk[bulk["model_id"] == "aseri-timestral209m"]
+    # Due by Nov 16 with a 14-day wait: the sea lanes' days to Nov 2, from the forecasts to Oct 25.
+    assert set(before["target"]) == set(PORTS)
+    assert before["reference_date"].max() == date(2026, 10, 25)
+    assert read(api / "series" / "suez_transits" / "scores.json")["live"]["n"] == 0
+    assert gate.contract(api) == []
 
 
 def test_a_scoring_error_in_one_series_costs_only_its_scores(
@@ -1711,6 +1759,8 @@ def test_a_scoring_error_in_one_series_costs_only_its_scores(
         "taiwan_strait_transits",
     ]
     assert (api / "series" / "taiwan_strait_transits" / "scores.json").exists()
+    bulk = pq.read_table(api / "bulk" / "scores.parquet").to_pandas()
+    assert "suez_transits" not in set(bulk["target"])
     row = [line for line in summary().splitlines() if "suez" in line][-1]
     assert row.startswith("| suez_transits | ok | 2026-10-25 |")
     assert "scores failed: ValueError: a broken vintage" in row

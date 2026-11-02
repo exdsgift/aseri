@@ -40,6 +40,14 @@
       "type": "array",
       "minItems": 1,
       "items": {"$ref": "#/$defs/entry"}
+    },
+    "links": {
+      "description": "Additive to v1: the API's other files, relative to series.json.",
+      "type": "object",
+      "required": ["bulk"],
+      "properties": {
+        "bulk": {"$ref": "defs.schema.json#/$defs/path", "description": "The data package of the bulk files: every forecast, observation and score in Parquet and CSV."}
+      }
     }
   },
   "$defs": {

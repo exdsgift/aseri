@@ -2,8 +2,9 @@
 
 Two checks, split by what a failure puts at risk:
 - The contract, `python -m aseri.gate API_DIR`, a step of daily.yml after the run writes the site. A file
-  off its schema, files that disagree, or a file the catalog links to and the run did not write make the
-  API unsafe for every client: the step fails the run, so nothing is archived or deployed.
+  off its schema, files that disagree, a bulk file off the columns its data package lists, or a file the
+  catalog or the data package links to and the run did not write make the API unsafe for every client:
+  the step fails the run, so nothing is archived or deployed.
 - The bounds, `check_forecasts`, which the daily run calls on each series' new forecasts before archiving
   them. A forecast far from its series' history is that forecast's problem alone: the run drops it, names
   it in the summary, and archives the series' other forecasts. When it is the live one, the run also holds
@@ -15,6 +16,7 @@ Two checks, split by what a failure puts at risk:
 It exits 1 on an error.
 """
 
+import gzip
 import json
 import math
 import os
@@ -26,9 +28,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
+from aseri.bulk import ARROW
 from aseri.forecast import BOUNDS, Forecast
 from aseri.publish import CONTRACT
 from aseri.series import Series
@@ -49,6 +53,8 @@ CHANGE = 1.5
 MIN_DAYS = 28
 # The dated forecast files, which never change: the contract reads only those issued on the day.
 DATED = "/series/{series_id}/forecasts/{reference_date}.json"
+# What lists the bulk files, their columns and types.
+PACKAGE = "bulk/datapackage.json"
 
 # With the uri and uri-reference checkers rfc3986-validator brings.
 FORMATS = FormatChecker()
@@ -207,6 +213,9 @@ def _agreement(
     if catalog is None:
         return ["series.json: missing"]
     published(catalog["license"]["text"], "series.json")
+    if "links" in catalog:
+        published(catalog["links"]["bulk"], "series.json")
+    errors += _bulk(documents.get(PACKAGE), api_dir, published)
     ids = [entry["series_id"] for entry in catalog["series"]]
     if len(set(ids)) < len(ids):
         errors.append("series.json: lists a series twice")
@@ -239,6 +248,54 @@ def _agreement(
             if r["links"]["scores"] != f"series/{r['series_id']}/scores.json"
         ]
     return errors
+
+
+def _bulk(package: dict | None, api_dir: Path, published) -> list[str]:
+    """The bulk files against their data package: each one it lists published, each one published listed, with its columns."""
+    if package is None:
+        return []
+    listed = {f"bulk/{resource['path']}": resource for resource in package["resources"]}
+    errors = [
+        f"{path}: not in {PACKAGE}"
+        for path in sorted(
+            p.relative_to(api_dir).as_posix() for p in (api_dir / "bulk").iterdir()
+        )
+        if path not in listed and path != PACKAGE
+    ]
+    for path, resource in listed.items():
+        published(path, PACKAGE)
+        if (api_dir / path).is_file():
+            errors += [
+                f"{path}: {e}"
+                for e in _columns(api_dir / path, resource["schema"]["fields"])
+            ]
+    return errors
+
+
+def _columns(path: Path, fields: list[dict]) -> list[str]:
+    """What a bulk file's columns, and a Parquet file's types, get wrong against its data package's `fields`."""
+    names = [field["name"] for field in fields]
+    if path.suffix == ".parquet":
+        schema = pq.read_schema(path)
+        found = schema.names
+    else:
+        with (
+            gzip.open(path, "rt", encoding="utf-8")
+            if path.suffix == ".gz"
+            else path.open(encoding="utf-8")
+        ) as file:
+            found = file.readline().rstrip("\n").split(",")
+    if found != names:
+        return [
+            f"its columns are {', '.join(found)}, not {', '.join(names)} as {PACKAGE} lists them"
+        ]
+    if path.suffix != ".parquet":
+        return []
+    return [
+        f"{f['name']} is {schema.field(f['name']).type}, not {ARROW[f['type']]} as {PACKAGE}'s {f['type']}"
+        for f in fields
+        if schema.field(f["name"]).type != ARROW[f["type"]]
+    ]
 
 
 def _series(entry: dict, documents: dict, dated: list[str], published) -> list[str]:
