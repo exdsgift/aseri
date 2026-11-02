@@ -10,7 +10,7 @@ aseri
 [![daily](https://github.com/exdsgift/aseri/actions/workflows/daily.yml/badge.svg)](https://github.com/exdsgift/aseri/actions/workflows/daily.yml)
 [![code: MIT](https://img.shields.io/badge/code-MIT-1b1bf2)](LICENSE)
 [![forecasts and data: CC BY-NC 4.0](https://img.shields.io/badge/forecasts%20%26%20data-CC%20BY--NC%204.0-1b1bf2)](https://creativecommons.org/licenses/by-nc/4.0/)
-[![model: Timestral-209M](https://img.shields.io/badge/model-Timestral--209M-ffc94a)](https://huggingface.co/mistralai/Timestral-209M)
+[![model: Timestral-209M](https://img.shields.io/badge/model-Timestral--209M-ffc94a)](https://huggingface.co/mistralai/Timestral-209M)<br>
 [![format: Hubverse quantiles](https://img.shields.io/badge/format-Hubverse%20quantiles-1b1bf2)](https://docs.hubverse.io/en/latest/user-guide/model-output.html)
 [![live: exdsgift.github.io/aseri](https://img.shields.io/badge/live-exdsgift.github.io%2Faseri-ffc94a)](https://exdsgift.github.io/aseri/)
 [![API: v1 JSON](https://img.shields.io/badge/API-v1%20JSON-1b1bf2)](https://exdsgift.github.io/aseri/api/)
@@ -87,19 +87,25 @@ The registry with every series' revision window, lag and evidence is [`pipeline/
 ## How It Works
 
 ```mermaid
-flowchart LR
-  golden["Golden check<br/>pinned model"] --> fetch["Fetch<br/>9 public series"]
-  fetch --> forecast["Forecast<br/>Timestral-209M, CPU"]
-  forecast --> gate{"Gate<br/>API contract"}
-  gate --> archive[("Archive<br/>append-only")]
-  archive --> publish["Publish<br/>Pages and /api/v1"]
+flowchart TB
+  subgraph run ["Build, with no write rights"]
+    direction LR
+    golden["Golden check<br/>pinned model"] --> fetch["Fetch<br/>9 public series"]
+    fetch --> forecast["Forecast<br/>Timestral on CPU"]
+    forecast --> gate{"Gate<br/>API contract"}
+  end
+  subgraph ship ["Archive and deploy"]
+    direction LR
+    store[("Archive<br/>append-only")] --> publish["Publish<br/>Pages and /api/v1"]
+  end
+  run --> ship
 ```
 
 At 07:00 UTC, [`daily.yml`](.github/workflows/daily.yml) runs the tests, then checks that the pinned model still gives its golden quantiles, so a dependency change never moves the numbers under the same model ID. It fetches each series, checks it against its source's contract, and forecasts every new day of data from the last observed day. A series that fails, runs late, rewrites its history beyond a normal update, or forecasts far outside its range is held alone: its last good forecast stays up, labelled, and the run opens an issue. The gate checks every API file against its schema before the archive job appends the new files and the site deploys. A push that changes only the page deploys in about 2 minutes, on the last run's API files.
 
 ## Model
 
-| | |
+| Property | Details |
 |---|---|
 | **Base model** | [Timestral-209M](https://huggingface.co/mistralai/Timestral-209M) by Mistral AI, a zero-shot time-series foundation model, revision `9874d25`, through the [`timestral`](https://github.com/mistralai/timestral) package at `a534bdb` |
 | **Parameters** | 209,312,256 (837 MB of weights in fp32) |
@@ -118,9 +124,10 @@ At 07:00 UTC, [`daily.yml`](.github/workflows/daily.yml) runs the tests, then ch
 Static JSON on GitHub Pages, updated once a day: poll at most once an hour.
 
 ```sh
-curl -s https://exdsgift.github.io/aseri/api/v1/series.json | jq -r '.series[].series_id'
-curl -s https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/latest.json | jq '{model_id, reference_date, target_end_date}'
-curl -s https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/scores.json | jq '{live: .live.n, needed: .min_n_to_display}'
+API=https://exdsgift.github.io/aseri/api/v1
+curl -s $API/series.json | jq -r '.series[].series_id'
+curl -s $API/series/gpr_daily/latest.json | jq '{model_id, reference_date, target_end_date}'
+curl -s $API/series/gpr_daily/scores.json | jq '{live: .live.n, needed: .min_n_to_display}'
 ```
 
 ```python
@@ -138,19 +145,19 @@ The [API page](https://exdsgift.github.io/aseri/api/) documents every file, the 
 
 ### Running locally
 
-Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22 with npm.
+Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22 with npm. The first full run downloads 837 MB of weights and forecasts a 120-day backfill for every series, about a thousand forecasts, so give it a while on a laptop.
 
 ```sh
 git clone https://github.com/exdsgift/aseri && cd aseri
 
 # The pipeline
 cd pipeline && uv sync
-uv run pytest                                      # the tests
-uv run python -m aseri ../site/api/v1 ../archive   # a full daily run; the first downloads 837 MB of weights
+uv run pytest                                     # the tests
+uv run python -m aseri ../site/api/v1 ../archive  # a full daily run
 
 # The page
 cd ../web && npm ci
-npm run dev                                        # the page, on the published API
+npm run dev                                       # on the published API
 ```
 
 ## Track Record and Evaluation
@@ -166,7 +173,7 @@ New series, new charts and fixes are welcome: start with [CONTRIBUTING.md](CONTR
 
 ## License
 
-| | |
+| Part | Licence |
 |---|---|
 | **Code** | [MIT](LICENSE) |
 | **Forecasts, scores and the API** | [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), credited as each file's `license.attribution` says |
