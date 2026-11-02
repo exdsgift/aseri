@@ -1,0 +1,423 @@
+<title>aseri API typography</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180' shape-rendering='crispEdges'%3E%3Crect width='180' height='180' fill='%231b1bf2'/%3E%3Cpath fill='%23ffffff' d='M35 56h7v7h-7zM140 56h7v7h-7zM35 63h14v7h-14zM133 63h14v7h-14zM35 70h21v7h-21zM126 70h21v7h-21zM42 77h21v7h-21zM77 77h28v7h-28zM119 77h21v7h-21zM35 84h28v7h-28zM70 84h42v7h-42zM119 84h28v7h-28zM42 91h21v7h-21zM70 91h42v7h-42zM119 91h21v7h-21zM49 98h14v7h-14zM70 98h42v7h-42zM119 98h14v7h-14zM42 112h98v7h-98zM49 119h84v7h-84z'/%3E%3Cpath fill='%23000000' d='M147 63h7v7h-7zM147 70h7v7h-7zM140 77h14v7h-14zM63 84h7v7h-7zM63 91h7v7h-7zM112 91h7v7h-7zM140 91h14v7h-14zM63 98h7v7h-7zM112 98h7v7h-7zM133 98h14v7h-14zM56 105h7v7h-7zM126 105h14v7h-14zM133 119h14v7h-14zM56 126h84v7h-84z'/%3E%3Cpath fill='%23dbdbfd' d='M63 105h56v7h-56z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;700&family=DotGothic16&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Jacquard+24&family=JetBrains+Mono:wght@400;600&family=Press+Start+2P&display=swap">
+<style>
+/* Layout: the live page's single column (centred header, stacked sections) and a floating
+   switch bar at the foot. Each variant only re-points the type tokens below. */
+:root {
+  /* One look in both themes: the electric blue ground is the brand. */
+  color-scheme: dark;
+  --ground: #1b1bf2;
+  --text: #ffffff;      /* 8.4:1 on the ground */
+  --second: #dbdbfd;    /* 6.3:1 on the ground */
+  --dim: #adadfa;       /* 4.1:1 on the ground: never text there */
+  --frame: #5454f5;     /* decoration only */
+  --surface: #1818d6;
+  --surface-2: #1616c3;
+  --gold: #ffc94a;      /* the one accent, 5.5:1 on the ground */
+  --black: #000000;
+  --drop: 1px 1px 0 var(--black);
+  --chip: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+
+  --f-wordmark: "Jacquard 24", serif;
+  --f-pixel: "Press Start 2P", "DotGothic16", monospace;
+  --f-dot: "DotGothic16", monospace;
+  --f-jet: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --f-plex: "IBM Plex Sans", system-ui, sans-serif;
+  --f-plex-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --f-atk: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --f-atk-mono: "Atkinson Hyperlegible Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Roles, as live (variant A). */
+  --col: calc(72ch - 2rem);
+  --body: var(--f-pixel); --body-size: 12px; --body-lh: 20px;
+  --title: var(--f-wordmark); --title-size: 96px; --title-lh: 1; --title-track: .04em;
+  --head: var(--f-wordmark); --head-size: 48px; --head-lh: 1; --head-track: .04em; --head-case: none; --head-weight: 400;
+  --label: var(--f-pixel); --label-size: 8px; --label-lh: 12px; --label-case: uppercase; --label-track: 0;
+  --code: var(--f-pixel); --code-size: 1em; --code-bg: transparent; --code-pad: 0;
+  --pre-size: 8px; --pre-lh: 14px; --pre-bg: transparent; --pre-pad: 8px 12px;
+  --text-drop: var(--drop);
+  --var-color: inherit;
+  --ul-offset: auto;
+  --rows-bg: transparent; --rows-border: none; --rows-clip: none; --rows-gap: 16px; --row-pad: 0; --row-rule: none;
+}
+
+/* B to F share the surfaces; the drop stays on the pixel headings only. */
+[data-v]:not([data-v="a"]) {
+  --text-drop: none;
+  --label-case: none;
+  --code-bg: var(--surface-2); --code-pad: .1em .3em;
+  --pre-bg: var(--surface-2); --pre-pad: 16px; --pre-lh: 1.6;
+  --ul-offset: .2em;
+  --rows-bg: var(--surface); --rows-border: 2px solid var(--frame); --rows-clip: var(--chip);
+  --rows-gap: 0; --row-pad: 12px 16px; --row-rule: 1px solid var(--frame);
+}
+:root[data-v="b"] {
+  --col: 70ch;
+  --body: var(--f-jet); --body-size: 15px; --body-lh: 1.6;
+  --label: var(--f-jet); --label-size: 13px; --label-lh: 1.5;
+  --code: var(--f-jet);
+  --pre-size: 14px;
+}
+:root[data-v="c"] {
+  --col: 34rem;
+  --body: var(--f-plex); --body-size: 16px; --body-lh: 1.6;
+  --label: var(--f-plex); --label-size: 14px; --label-lh: 1.5;
+  --code: var(--f-plex-mono); --code-size: .875em;
+  --pre-size: 14px;
+}
+:root[data-v="d"] {
+  --col: 70ch;
+  --body: var(--f-dot); --body-size: 16px; --body-lh: 1.75;
+  --title: var(--f-pixel); --title-size: 48px; --title-track: 0;
+  --head: var(--f-pixel); --head-size: 24px; --head-lh: 1.35; --head-track: 0;
+  --label: var(--f-dot); --label-size: 16px; --label-lh: 1.5;
+  --code: var(--f-dot);
+  --pre-size: 16px; --pre-lh: 1.5;
+}
+:root[data-v="e"] {
+  --col: 70ch;
+  --body: var(--f-plex-mono); --body-size: 15px; --body-lh: 1.6;
+  --head: var(--f-plex-mono); --head-size: 15px; --head-lh: 1.6; --head-track: .08em; --head-case: uppercase; --head-weight: 600;
+  --label: var(--f-plex-mono); --label-size: 12px; --label-lh: 1.5; --label-case: uppercase; --label-track: .08em;
+  --code: var(--f-plex-mono);
+  --pre-size: 14px;
+}
+:root[data-v="f"] {
+  --col: 36rem;
+  --body: var(--f-atk); --body-size: 17px; --body-lh: 1.6;
+  --label: var(--f-pixel); --label-size: 8px; --label-lh: 16px; --label-case: uppercase;
+  --code: var(--f-atk-mono); --code-size: .9em;
+  --pre-size: 15px;
+  --var-color: var(--gold);
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font: var(--body-size)/var(--body-lh) var(--body);
+  text-shadow: var(--text-drop);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 200px; /* room for the switch bar */
+  -webkit-text-size-adjust: 100%;
+}
+p, h1, h2, dl, dd, ul, pre { margin: 0; }
+a { color: inherit; text-decoration: underline; text-underline-offset: var(--ul-offset); }
+a:hover { color: var(--text); }
+a:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+code {
+  font-family: var(--code);
+  font-size: var(--code-size);
+  color: var(--text);
+  background: var(--code-bg);
+  padding: var(--code-pad);
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+var { font-style: normal; color: var(--var-color); }
+
+main {
+  max-width: var(--col);
+  margin-inline: auto;
+  padding-block: 96px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+header { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+h1 {
+  font: 400 var(--title-size)/var(--title-lh) var(--title);
+  letter-spacing: var(--title-track);
+  text-shadow: var(--drop);
+}
+.intro { text-wrap: balance; }
+.eyebrow, .label, footer {
+  font: var(--label-size)/var(--label-lh) var(--label);
+  text-transform: var(--label-case);
+  letter-spacing: var(--label-track);
+  color: var(--second);
+}
+.base {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 2px solid var(--frame);
+  padding: 8px 12px;
+  background: var(--pre-bg);
+  clip-path: var(--chip);
+}
+.base code { background: none; padding: 0; }
+
+section { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+h2 {
+  font: var(--head-weight) var(--head-size)/var(--head-lh) var(--head);
+  letter-spacing: var(--head-track);
+  text-transform: var(--head-case);
+  color: var(--second);
+  text-shadow: var(--drop);
+  text-wrap: balance;
+}
+/* E: section heads as inverse blocks, a terminal's function keys. */
+:root[data-v="e"] h2 {
+  width: fit-content;
+  padding: 2px 10px;
+  background: var(--text);
+  color: var(--ground);
+  text-shadow: none;
+  clip-path: var(--chip);
+}
+.muted, dd { color: var(--second); }
+.files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rows-gap);
+  background: var(--rows-bg);
+  border: var(--rows-border);
+  clip-path: var(--rows-clip);
+}
+.files > div { padding: var(--row-pad); }
+.files > div + div { border-top: var(--row-rule); }
+dt code { background: none; padding: 0; }
+ul { display: flex; flex-direction: column; gap: 12px; padding-left: 16px; list-style-type: "- "; }
+pre {
+  overflow-x: auto;
+  border: 2px solid var(--frame);
+  padding: var(--pre-pad);
+  font-size: var(--pre-size);
+  line-height: var(--pre-lh);
+  background: var(--pre-bg);
+  clip-path: var(--chip);
+}
+pre:focus-visible { outline: 2px solid var(--text); outline-offset: -6px; }
+pre code { font-size: 1em; background: none; padding: 0; }
+
+footer { max-width: var(--col); margin-inline: auto; padding-bottom: 56px; text-align: center; }
+
+/* The switch bar is the prototype's tool, not the page: one face whatever the variant. */
+.bar {
+  position: fixed;
+  z-index: 10;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  max-width: 760px;
+  margin-inline: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 2px solid var(--frame);
+  clip-path: var(--chip);
+  font: 400 13px/1.45 var(--f-plex-mono);
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: none;
+  color: var(--text);
+}
+.bar-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.bar a {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+  border: 2px solid var(--frame);
+  font-weight: 600;
+  text-decoration: none;
+}
+.bar a:hover { border-color: var(--text); }
+.bar a[aria-current="true"] { background: var(--gold); border-color: var(--gold); color: var(--ground); }
+.bar-note { margin: 0; color: var(--second); }
+.bar-note b { color: var(--text); font-weight: 600; }
+</style>
+
+<main>
+  <header>
+    <p class="eyebrow"><a href="https://exdsgift.github.io/aseri/">aseri</a> · for programs and people</p>
+    <h1>API</h1>
+    <p class="intro">Every forecast on this site, as files: nine daily series, a forecast of each from its newest data, the real values, and how past forecasts did. Static JSON, read-only, rebuilt each day at about 07:00 UTC.</p>
+    <p class="base">
+      <span class="label">Base URL</span>
+      <code>https://<wbr>exdsgift.github.io/<wbr>aseri/<wbr>api/<wbr>v1/</code>
+    </p>
+  </header>
+
+  <section aria-labelledby="files">
+    <h2 id="files">Files</h2>
+    <dl class="files">
+      <div>
+        <dt><a href="https://exdsgift.github.io/aseri/api/v1/series.json"><code>series.json</code></a></dt>
+        <dd>The catalog: each series' unit, horizon, newest data and forecast, source, licence and links, the model, the 21 quantile levels and the errata.</dd>
+      </div>
+      <div>
+        <dt><code>series/<wbr><var>{series_id}</var>/<wbr>latest.json</code></dt>
+        <dd>The newest forecast, a copy of its dated file.</dd>
+      </div>
+      <div>
+        <dt><code>series/<wbr><var>{series_id}</var>/<wbr>forecasts.json</code></dt>
+        <dd>Every forecast issued, oldest first, with its file.</dd>
+      </div>
+      <div>
+        <dt><code>series/<wbr><var>{series_id}</var>/<wbr>forecasts/<wbr><var>{reference_date}</var>.json</code></dt>
+        <dd>One forecast. Written once, never changed.</dd>
+      </div>
+      <div>
+        <dt><code>series/<wbr><var>{series_id}</var>/<wbr>actuals.json</code></dt>
+        <dd>The real values of the last 400 days, as known on its <code>as_of</code> day.</dd>
+      </div>
+      <div>
+        <dt><code>series/<wbr><var>{series_id}</var>/<wbr>replay.json</code></dt>
+        <dd>The forecasts of the last 120 days at seven levels, rounded as this site writes them.</dd>
+      </div>
+      <div>
+        <dt><code>series/<wbr><var>{series_id}</var>/<wbr>scores.json</code></dt>
+        <dd>The track record: live forecasts and the backtest apart, never combined.</dd>
+      </div>
+      <div>
+        <dt><a href="https://exdsgift.github.io/aseri/api/v1/scores.json"><code>scores.json</code></a></dt>
+        <dd>Every series' track record, as this site shows it.</dd>
+      </div>
+      <div>
+        <dt><a href="https://exdsgift.github.io/aseri/api/v1/openapi.json"><code>openapi.json</code></a>, <code>schemas/<wbr><var>{name}</var>.schema.json</code></dt>
+        <dd>The contract: OpenAPI 3.1 and JSON Schema 2020-12.</dd>
+      </div>
+      <div>
+        <dt><code>licenses/<wbr><var>{name}</var>.txt</code></dt>
+        <dd>The full licence texts.</dd>
+      </div>
+      <div>
+        <dt><a href="https://exdsgift.github.io/aseri/api/v1/model-metadata/aseri-timestral209m_c1.yml"><code>model-metadata/<wbr>aseri-timestral209m_c1.yml</code></a></dt>
+        <dd>The model, in Hubverse model metadata. Its bands are calibrated per series on a two-year backtest: <a href="https://github.com/exdsgift/aseri/blob/master/docs/adr/0001-baselines-and-calibration-before-the-live-record.md">ADR 0001</a>.</dd>
+      </div>
+    </dl>
+    <p class="muted">The series: <code>gpr_daily</code>, <code>wiki_ww3_views</code>, <code>brent_spot</code>, <code>suez_transits</code>, <code>hormuz_transits</code>, <code>bab_el_mandeb_transits</code>, <code>taiwan_strait_transits</code>, <code>ua_air_raid_hours</code> and <code>ua_drones_downed_claimed</code>.</p>
+  </section>
+
+  <section aria-labelledby="forecast">
+    <h2 id="forecast">A forecast</h2>
+    <p>A forecast reads its series up to <code>reference_date</code>, its last observed day, and gives each step <code>h</code> of <code>horizon</code> a day, <code>target_end_date</code>: <code>reference_date</code> plus <code>h</code> days, or for <code>brent_spot</code> the <code>h</code>-th trading day after it. <code>forecast_date</code> is the UTC day of the run that made it. <code>forecast_mode</code> is <code>live</code>, or <code>retrospective</code> for one made after the fact, such as the 120-day backfill at launch; the live record counts live forecasts only.</p>
+    <p><code>quantiles</code> holds an array per level, from <code>"0.01"</code> to <code>"0.99"</code>, aligned with <code>horizon</code>. From <code>"0.1"</code> to <code>"0.9"</code> is the 8 in 10 range: the daily value should land inside it 8 days in 10, outside it about 2 in 10. It is not a high and a low. <code>"0.5"</code> splits the forecast in half.</p>
+    <pre tabindex="0" aria-label="Example: read the 0.9 quantile of the newest gpr_daily forecast"><code>fetch("https://exdsgift.github.io/aseri/api/v1/series/gpr_daily/latest.json")
+  .then((response) =&gt; response.json())
+  .then((forecast) =&gt; forecast.quantiles["0.9"])</code></pre>
+  </section>
+
+  <section aria-labelledby="contract">
+    <h2 id="contract">Contract</h2>
+    <p id="sample"><code>openapi.json</code> and the JSON Schemas are the contract, kept in the repository's <code>api/</code> folder. Before each deploy the daily run checks every file against its schema, dates included, and that the files agree with each other and each step's day follows from its reference date. It holds each newest forecast to bounds drawn from its series' last 365 days. A file that fails stops the deploy.</p>
+    <p><code>v1</code> only grows: new fields, files, series and values. Ignore what you do not know. Anything else goes to <code>/api/v2/</code>, next to <code>v1</code> for 6 months at least. A dated forecast never changes: a correction goes to <code>errata</code> in <code>series.json</code>, each with its <code>date</code>, <code>series_id</code>, <code>reference_date</code> and <code>description</code>, and the original stays published and scored. None so far.</p>
+  </section>
+
+  <section aria-labelledby="use">
+    <h2 id="use">Use</h2>
+    <ul>
+      <li>GET only, no query strings. Send no custom headers: GitHub Pages refuses the CORS preflight they cause.</li>
+      <li>Pages caches for 10 minutes, so poll once an hour at most. Right after a deploy <code>series.json</code> and <code>latest.json</code> can disagree for a moment: both carry <code>forecast_date</code>.</li>
+      <li>A missing file answers 404 with an HTML page: check the status before parsing.</li>
+      <li>Days are ISO 8601 dates with no time zone. Timestamps are UTC, to the second.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="licences">
+    <h2 id="licences">Licences</h2>
+    <p>aseri's forecasts, scores and this API are under <a href="https://exdsgift.github.io/aseri/api/v1/licenses/CC-BY-NC-4.0.txt">CC BY-NC 4.0</a>. Credit them as: Forecasts: aseri (model aseri-timestral209m_c1, Timestral-209M by Mistral AI). The terms of the data underneath still apply, series by series. Each catalog entry's <code>license</code> gives the credit line to paste, and its <code>text</code> the full terms.</p>
+    <ul>
+      <li><code>gpr_daily</code>: <a href="https://exdsgift.github.io/aseri/api/v1/licenses/CC-BY-4.0.txt">CC BY 4.0</a>. Caldara, D. and M. Iacoviello (2022), "Measuring Geopolitical Risk", American Economic Review.</li>
+      <li><code>wiki_ww3_views</code>: <a href="https://exdsgift.github.io/aseri/api/v1/licenses/CC0-1.0.txt">CC0 1.0</a>. Wikimedia Foundation, Analytics API.</li>
+      <li><code>brent_spot</code>: <a href="https://exdsgift.github.io/aseri/api/v1/licenses/EIA-public-domain.txt">public domain</a>. U.S. Energy Information Administration, through FRED; its price source is Refinitiv, an LSEG business.</li>
+      <li><code>suez_transits</code>, <code>hormuz_transits</code>, <code>bab_el_mandeb_transits</code> and <code>taiwan_strait_transits</code>: <a href="https://exdsgift.github.io/aseri/api/v1/licenses/IMF-terms.txt">the IMF's terms</a>. Sources: UN Global Platform; IMF PortWatch. Reuse for profit needs the IMF's permission.</li>
+      <li><code>ua_air_raid_hours</code>: <a href="https://exdsgift.github.io/aseri/api/v1/licenses/MIT-Klymenko.txt">MIT</a>. Vadym Klymenko's Ukrainian air raid sirens dataset.</li>
+      <li><code>ua_drones_downed_claimed</code>: <a href="https://exdsgift.github.io/aseri/api/v1/licenses/MIT-Ivaniuk.txt">MIT</a>. Petro Ivaniuk's 2022 Ukraine Russia War Dataset: claimed by Ukraine's General Staff, one side's figures.</li>
+    </ul>
+    <p>The code is <a href="https://github.com/exdsgift/aseri/blob/master/LICENSE">MIT</a>.</p>
+  </section>
+</main>
+
+<footer>
+  <p><a href="https://exdsgift.github.io/aseri/">Back to aseri</a> · <a href="https://github.com/exdsgift/aseri">Source on GitHub</a></p>
+</footer>
+
+<nav class="bar" aria-label="Typography variants">
+  <div class="bar-btns">
+    <a href="#a" title="A, today">A</a>
+    <a href="#b" title="B, pixel headings, mono body">B</a>
+    <a href="#c" title="C, pixel headings, sans body">C</a>
+    <a href="#d" title="D, DotGothic16 body">D</a>
+    <a href="#e" title="E, all mono, pixel title">E</a>
+    <a href="#f" title="F, hyperlegible body">F</a>
+  </div>
+  <p class="bar-note" aria-live="polite"><b></b><span></span></p>
+</nav>
+
+<script>
+const VARIANTS = {
+  a: ["A, today", "Headings Jacquard 24. Labels and footer Press Start 2P 8 px, uppercase."],
+  b: ["B, pixel headings, mono body", "Headings Jacquard 24. Sentence case."],
+  c: ["C, pixel headings, sans body", "Headings Jacquard 24. Sentence case."],
+  d: ["D, DotGothic16 body", "Title and headings Press Start 2P. DotGothic16 at its native 16 px grid."],
+  e: ["E, all mono, pixel title", "Title Jacquard 24, everything else IBM Plex Mono. Heads as inverse blocks."],
+  f: ["F, hyperlegible body", "Headings Jacquard 24, labels Press Start 2P 8 px. Path variables in gold."],
+};
+const root = document.documentElement;
+const links = [...document.querySelectorAll(".bar a")];
+const blocks = [...document.querySelectorAll("header, h2, section > p, .files > div, li, pre, footer")];
+const sample = document.getElementById("sample");
+const preCode = document.querySelector("pre code");
+const [noteName, noteText] = document.querySelector(".bar-note").children;
+const ctx = document.createElement("canvas").getContext("2d");
+const family = cs => cs.fontFamily.split(",")[0].replace(/["']/g, "").trim();
+const round = n => Math.round(n * 10) / 10;
+
+function current() {
+  const v = location.hash.slice(1).toLowerCase();
+  return Object.hasOwn(VARIANTS, v) ? v : "a";
+}
+
+// Measure: the sample paragraph's width over its average glyph width, in its own font.
+function measure() {
+  const v = current(), cs = getComputedStyle(sample), cc = getComputedStyle(preCode);
+  const text = sample.textContent.replace(/\s+/g, " ").trim();
+  ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const cpl = Math.round(sample.clientWidth / (ctx.measureText(text).width / text.length));
+  console.assert(Number.isFinite(cpl) && cpl > 0, "characters per line", cpl);
+  const size = parseFloat(cs.fontSize);
+  const lh = cs.lineHeight.endsWith("px") ? parseFloat(cs.lineHeight) : parseFloat(cs.lineHeight) * size;
+  noteName.textContent = VARIANTS[v][0] + ". ";
+  noteText.textContent = `Body ${family(cs)} ${round(size)} px, line height ${round(lh)} px (${(lh / size).toFixed(2)}), about ${cpl} characters per line. Code ${family(cc)} ${round(parseFloat(cc.fontSize))} px. ${VARIANTS[v][1]}`;
+}
+
+// Switch, keeping the block at the top of the screen in place so variants compare at one spot.
+function show(keepPlace) {
+  const v = current();
+  const anchor = keepPlace && blocks.find(el => el.getBoundingClientRect().bottom > 0);
+  const top = anchor && anchor.getBoundingClientRect().top;
+  root.dataset.v = v;
+  if (anchor) window.scrollBy(0, anchor.getBoundingClientRect().top - top);
+  links.forEach(a => a.setAttribute("aria-current", a.hash === "#" + v ? "true" : "false"));
+  measure();
+}
+
+addEventListener("hashchange", () => show(true));
+addEventListener("resize", measure);
+addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && Object.hasOwn(VARIANTS, k)) location.hash = k;
+});
+// Load every face up front, so a switch never waits on a download.
+Promise.allSettled([
+  "16px 'Jacquard 24'", "12px 'Press Start 2P'", "16px DotGothic16", "15px 'JetBrains Mono'",
+  "16px 'IBM Plex Sans'", "15px 'IBM Plex Mono'", "600 15px 'IBM Plex Mono'",
+  "17px 'Atkinson Hyperlegible Next'", "15px 'Atkinson Hyperlegible Mono'",
+].map(f => document.fonts.load(f))).then(measure);
+show(false);
+</script>
