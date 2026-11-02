@@ -10,12 +10,12 @@ import { arts } from "@/components/Hero"
 import { calm, type Inks } from "@/components/HeroArt"
 import { loadCatalog, loadSeries } from "@/lib/api"
 import { pixel } from "@/lib/chart"
+import { stripes, type Scene } from "@/lib/margins"
 import { messengerLayout } from "@/lib/messenger"
 import { signalLayout } from "@/lib/signal"
 import { vortexLayout } from "@/lib/vortex"
 
 import { formats, lines, url, type Hero, type Plan } from "./formats"
-import { stripes, type Scene } from "./margins"
 
 const query = new URLSearchParams(location.search)
 const sans = '"Press Start 2P", "DotGothic16", monospace'
@@ -101,7 +101,8 @@ function place(hero: Hero, { art }: Plan, width: number, height: number) {
   return { size: { width: wide, height: tall, text }, dx, dy }
 }
 
-// The op-art margins at each side, `margin` of their pixels wide, in the frame colour.
+// The op-art margins at each side, `margin` of their pixels wide, in the frame colour: the
+// site's stripes, in a scene of the image's own, as `scene` sizes it for the site's column.
 function margins(
   context: CanvasRenderingContext2D,
   width: number,
@@ -117,9 +118,9 @@ function margins(
     left: margin,
     right: columns - margin,
     margin,
-    // The whole height: no hero's foot to start below.
+    // The whole height: no hero's foot to fade in below.
     top: -Infinity,
-    nav: undefined,
+    fade: margin,
     drift: 0,
     pitch: 10,
     swing: 8,

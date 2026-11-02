@@ -17,20 +17,20 @@ Every file is the platform's exact size. `@2x` files are the same image at twice
 pixels, for a screen that has them. An art pixel is 1 image pixel in the LinkedIn banner
 and 2 everywhere else: a card shown at half its size keeps its pixels.
 
-| Folder | Files | Size | Used for | Keep clear |
-| --- | --- | --- | --- | --- |
-| `linkedin-banner/` | `linkedin-banner-<hero>.png`, `@2x` | 1584 x 396 | LinkedIn profile background | The left 40% of the lower half: LinkedIn's round profile photo covers it. The words and figures stay right of it, with only the ground, rays and stripes inside; Vortex's dial reaches about 90 px into its right edge. |
-| `linkedin-banner/` | `linkedin-banner-<hero>-art.png`, `@2x` | 1584 x 396 | The same, without words | As above. |
-| `linkedin-banner/` | `linkedin-banner-messenger-line2.png`, `-line3.png` | 1584 x 396 | The banner with the alternative lines | As above. |
-| `linkedin-post/` | `linkedin-post-<hero>.png` | 1200 x 627 | A link or image post in the LinkedIn feed | About 24 px at each edge. |
-| `linkedin-post/` | `linkedin-post-messenger-line2.png`, `-line3.png` | 1200 x 627 | The post with the alternative lines | As above. |
-| `linkedin-post/` | `linkedin-post-square-<hero>.png` | 1080 x 1080 | A square image post | About 40 px at each edge. |
-| `linkedin-post/` | `linkedin-post-portrait-<hero>.png` | 1080 x 1350 | A portrait image post, the tallest the feed shows | About 40 px at each edge. |
-| `og/` | `og-<hero>.png` | 1200 x 630 | The site's Open Graph preview (`og:image`) | About 40 px at each edge. A few apps show only a centred square, which cuts the words. |
-| `x-header/` | `x-header-<hero>.png` | 1500 x 500 | X profile header | The lower left, under X's round profile photo, and about 60 px at the top and bottom, which some screens crop. |
-| `github-social/` | `github-social-<hero>.png` | 1280 x 640 | GitHub's social preview (repository Settings, Social preview) | About 40 px at each edge. |
-| `avatar/` | `avatar-hat-400.png`, `avatar-hat-1024.png` | 400 x 400, 1024 x 1024 | Profile picture or app icon: the favicon's winged hat | The circle a platform crops to: the mark fills about 63% of the side, inside it. |
-| `avatar/` | `avatar-kanji-400.png`, `avatar-kanji-1024.png` | 400 x 400, 1024 x 1024 | The same with 焦 | As above. |
+| Folder             | Files                                               | Size                   | Used for                                                      | Keep clear                                                                                                                                                                                                              |
+| ------------------ | --------------------------------------------------- | ---------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `linkedin-banner/` | `linkedin-banner-<hero>.png`, `@2x`                 | 1584 x 396             | LinkedIn profile background                                   | The left 40% of the lower half: LinkedIn's round profile photo covers it. The words and figures stay right of it, with only the ground, rays and stripes inside; Vortex's dial reaches about 90 px into its right edge. |
+| `linkedin-banner/` | `linkedin-banner-<hero>-art.png`, `@2x`             | 1584 x 396             | The same, without words                                       | As above.                                                                                                                                                                                                               |
+| `linkedin-banner/` | `linkedin-banner-messenger-line2.png`, `-line3.png` | 1584 x 396             | The banner with the alternative lines                         | As above.                                                                                                                                                                                                               |
+| `linkedin-post/`   | `linkedin-post-<hero>.png`                          | 1200 x 627             | A link or image post in the LinkedIn feed                     | About 24 px at each edge.                                                                                                                                                                                               |
+| `linkedin-post/`   | `linkedin-post-messenger-line2.png`, `-line3.png`   | 1200 x 627             | The post with the alternative lines                           | As above.                                                                                                                                                                                                               |
+| `linkedin-post/`   | `linkedin-post-square-<hero>.png`                   | 1080 x 1080            | A square image post                                           | About 40 px at each edge.                                                                                                                                                                                               |
+| `linkedin-post/`   | `linkedin-post-portrait-<hero>.png`                 | 1080 x 1350            | A portrait image post, the tallest the feed shows             | About 40 px at each edge.                                                                                                                                                                                               |
+| `og/`              | `og-<hero>.png`                                     | 1200 x 630             | The site's Open Graph preview (`og:image`)                    | About 40 px at each edge. A few apps show only a centred square, which cuts the words.                                                                                                                                  |
+| `x-header/`        | `x-header-<hero>.png`                               | 1500 x 500             | X profile header                                              | The lower left, under X's round profile photo, and about 60 px at the top and bottom, which some screens crop.                                                                                                          |
+| `github-social/`   | `github-social-<hero>.png`                          | 1280 x 640             | GitHub's social preview (repository Settings, Social preview) | About 40 px at each edge.                                                                                                                                                                                               |
+| `avatar/`          | `avatar-hat-400.png`, `avatar-hat-1024.png`         | 400 x 400, 1024 x 1024 | Profile picture or app icon: the favicon's winged hat         | The circle a platform crops to: the mark fills about 63% of the side, inside it.                                                                                                                                        |
+| `avatar/`          | `avatar-kanji-400.png`, `avatar-kanji-1024.png`     | 400 x 400, 1024 x 1024 | The same with 焦                                              | As above.                                                                                                                                                                                                               |
 
 `<hero>` is `messenger`, `signal` or `vortex`. The line is "Geopolitical risk, forecast
 daily"; `line2` is "Daily forecasts of geopolitical risk, with an honest track record" and
@@ -62,9 +62,10 @@ without changing a pixel; without it, the files are about 40% larger.
   behind the words as the hero does. Open it while `npm run dev` runs, at
   `/brand/index.html?format=og&hero=vortex` (or `&bare=1`, `&line=1`), or
   `/brand/index.html?avatar=hat&size=25`.
-- `web/brand/margins.ts`: the op-art margins, borrowed from the branch
-  `ticket-154-shadow-opart`; import `src/lib/margins.ts` instead once it is on master.
 - `web/scripts/brand.mjs`: the script.
+
+The op-art margins are the site's own, `stripes` from `web/src/lib/margins.ts`, in a
+scene sized for each image rather than for the site's column.
 
 None of it is in the site's build: `vite.config.ts` builds only `index.html` and
 `api/index.html`, and `web/src/index.css` keeps Tailwind from reading `web/brand` and
