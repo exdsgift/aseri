@@ -18,7 +18,7 @@
         "url": "https://exdsgift.github.io/aseri/api/",
         "sameAs": "https://github.com/exdsgift/aseri",
         "license": "https://creativecommons.org/licenses/by-nc/4.0/",
-        "creditText": "Forecasts: aseri (model aseri-timestral209m, Timestral-209M by Mistral AI)",
+        "creditText": "Forecasts: aseri (model aseri-timestral209m_cqr1, Timestral-209M by Mistral AI)",
         "isAccessibleForFree": true,
         "creator": {
           "@type": "Organization",
@@ -34,7 +34,7 @@
           "oil price",
           "Ukraine"
         ],
-        "measurementTechnique": "Zero-shot quantile forecasts of Timestral-209M (Mistral AI), univariate, scored with WIS and interval coverage",
+        "measurementTechnique": "Zero-shot quantile forecasts of Timestral-209M (Mistral AI), univariate, their bands calibrated per series on a two-year backtest (ADR 0001), scored with WIS and interval coverage",
         "variableMeasured": [
           "Geopolitical risk index (GPR daily)",
           "Wikipedia views of World War III",
@@ -180,12 +180,17 @@
           </div>
           <div>
             <dt>
-              <a href="v1/model-metadata/aseri-timestral209m.yml"
-                ><code>model-metadata/aseri-timestral209m.yml</code></a
+              <a href="v1/model-metadata/aseri-timestral209m_cqr1.yml"
+                ><code>model-metadata/aseri-timestral209m_cqr1.yml</code></a
               >
             </dt>
             <dd class="text-muted-foreground">
-              The model, in Hubverse model metadata.
+              The model, in Hubverse model metadata. Its bands are calibrated
+              per series on a two-year backtest:
+              <a
+                href="https://github.com/exdsgift/aseri/blob/master/docs/adr/0001-baselines-and-calibration-before-the-live-record.md"
+                >ADR 0001</a
+              >.
             </dd>
           </div>
         </dl>
@@ -300,9 +305,9 @@
         <p>
           aseri's forecasts, scores and this API are under
           <a href="v1/licenses/CC-BY-NC-4.0.txt">CC BY-NC 4.0</a>. Credit them
-          as: Forecasts: aseri (model aseri-timestral209m, Timestral-209M by
-          Mistral AI). The terms of the data underneath still apply, series by
-          series. Each catalog entry's <code>license</code> gives the credit
+          as: Forecasts: aseri (model aseri-timestral209m_cqr1, Timestral-209M
+          by Mistral AI). The terms of the data underneath still apply, series
+          by series. Each catalog entry's <code>license</code> gives the credit
           line to paste, and its <code>text</code> the full terms.
         </p>
         <ul class="flex list-['-_'] flex-col gap-3 pl-4">

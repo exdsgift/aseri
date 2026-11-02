@@ -19,7 +19,8 @@ Key design decisions:
 
 1. **Canonical format is Hubverse model-output.** One run writes these columns: `forecast_date, target, reference_date, horizon, target_end_date, output_type, output_type_id, value`.
    - All 21 Timestral quantile levels are kept.
-   - The model ID is `aseri-timestral209m`, following the `team_abbr-model_abbr` naming [HV-MO].
+   - The model ID is `aseri-timestral209m_cqr1`, following the `team_abbr-model_abbr` naming [HV-MO], whose two parts hold no hyphen. It replaced `aseri-timestral209m` with #151.
+   - **The bands are calibrated per series on a two-year backtest** ([ADR 0001](../adr/0001-baselines-and-calibration-before-the-live-record.md)). For each series, bucket of steps and side of the median that the ADR keeps, an offset `d` scales every quantile's distance to the median by `1 + d`, before the sort and the clip, so that the 80% band holds about 8 days in 10. The table is `pipeline/aseri/offsets.csv`; Bab el-Mandeb has none.
    - `target` is the series ID.
 2. **The clock is explicit.** These definitions follow [forecast-horizons.md](forecast-horizons.md) and the Hubverse standard task IDs [HV-TASKS]:
    - `reference_date` is the last observed date, which is the data cutoff.
@@ -45,7 +46,7 @@ Key design decisions:
    - **Corrected (#135):** `schema_version` stays `1.0.0` within v1 rather than counting minor versions. The dated forecast files carry it, and they never change.
    - A breaking change ships as `/api/v2/` alongside v1 for at least 6 months. Deprecation notices go in the response body, because GitHub Pages cannot send headers.
    - A change of model or inference settings gets a new `model_id`.
-   - Dated forecast files never change.
+   - Dated forecast files never change, except at a model change: a new `model_id` forecasts the 120-day replay window again, and its forecasts take those days' dated paths, so the page never shows two models (#151). The model before's forecasts stay in the archive under `model-output/<its model_id>/`, and its dated files older than the window stay as they are.
 8. **Track record uses the Hubverse metrics.**
    - Score with WIS, absolute error of the median, and coverage at 50, 80, 90 and 98% [SU-Q][WIS], plus a WIS ratio against a probabilistic seasonal-naive baseline.
    - Break scores down by horizon, count live forecasts only, and score against a declared data vintage.
@@ -210,7 +211,7 @@ It is also used across institutions [HV-HOME]. Follow it for the archive and bul
 | Name | Meaning | Example |
 |---|---|---|
 | `series_id` (JSON) = `target` (Hubverse) | Stable snake_case ID, never reused | `suez_transits` |
-| `model_id` | `team_abbr-model_abbr` [HV-MO]. New ID if the weights, revision or inference settings change | `aseri-timestral209m` |
+| `model_id` | `team_abbr-model_abbr` [HV-MO]. New ID if the weights, revision or inference settings change, the calibration offsets included | `aseri-timestral209m_cqr1` |
 | `forecast_date` | UTC calendar date of the run. Round ID. One archive file per run day | `2026-10-29` |
 | `reference_date` | Last observed date in the input, the data cutoff. Forecast origin | `2026-10-25` (PortWatch lags about 4 days) |
 | `horizon` | Steps after `reference_date`, from 1 to `horizon_max` (7, 14 or 30) | `1` |
@@ -221,6 +222,7 @@ It is also used across institutions [HV-HOME]. Follow it for the archive and bul
 **Rules:**
 - A series gets a new forecast only when its `reference_date` moves forward.
 - `(model_id, series_id, reference_date)` identifies a forecast. It is written once and never edited.
+- **A new `model_id` restarts the record (#151).** It forecasts the replay window again, retrospective, so the slider never mixes two models; the API publishes one forecast per reference date, the newest model's, at its dated path. `scores.json` scores only the forecasts of its `model_id`, and the live record starts again at 0.
 - Corrections go into an `errata` list in `series.json`. The original forecast stays published and scored.
 
 ### 3.2 URL layout and endpoints
@@ -244,7 +246,7 @@ The base is `https://<owner>.github.io/aseri/api/v1/`. Every URL ends in a file 
 | `bulk/datapackage.json` | Frictionless descriptor for all bulk files, with `licenses` and `sources` per resource [DP] | Daily |
 | `openapi.json`, `schemas/*.schema.json` | Contract: OpenAPI 3.1.1, and a JSON Schema per file type (`catalog`, `forecast`, `forecast-index`, `actuals`, `replay`, `scores`, `scoreboard`) with the shared `defs` | Per release |
 | `licenses/*.txt` | Full texts that must travel with the data: `CC-BY-NC-4.0` (aseri's), `CC-BY-4.0` (GPR), `CC0-1.0` (pageviews), `MIT-Klymenko`, `MIT-Ivaniuk`, and the terms of the IMF and the EIA, quoted with their links (`IMF-terms`, `EIA-public-domain`). Each licence object names its file in `text`, a path under `/api/v1/` | Rarely |
-| `model-metadata/aseri-timestral209m.yml` | Hubverse model metadata. Its `license` is `other`, since no hub's list holds CC BY-NC 4.0, and `methods_long` states the licence | Per model |
+| `model-metadata/{model_id}.yml` | Hubverse model metadata, one file per model: `aseri-timestral209m_cqr1.yml`, the model in use, whose `methods` say the bands are calibrated per series on a two-year backtest and link ADR 0001, and `aseri-timestral209m.yml`, the one before. Its `license` is `other`, since no hub's list holds CC BY-NC 4.0, and `methods_long` states the licence | Per model |
 
 The HTML page at `/api/` holds the human docs and a schema.org `Dataset` JSON-LD block [SO]. It is `web/api/index.html`, a second page of the Vite build on the site's styles, with no script.
 
@@ -501,11 +503,11 @@ https://<owner>.github.io/aseri/
 │       ├── openapi.json                these four from the repo's api/, copied by the daily run
 │       ├── schemas/{defs,catalog,forecast,forecast-index,actuals,replay,scores,scoreboard}.schema.json
 │       ├── licenses/{CC-BY-NC-4.0,CC-BY-4.0,CC0-1.0,MIT-Klymenko,MIT-Ivaniuk,IMF-terms,EIA-public-domain}.txt
-│       ├── model-metadata/aseri-timestral209m.yml      Hubverse model metadata
+│       ├── model-metadata/{model_id}.yml   Hubverse model metadata, one per model
 │       ├── series/{series_id}/
 │       │   ├── latest.json
 │       │   ├── forecasts.json          index of issued forecasts
-│       │   ├── forecasts/{reference_date}.json   immutable
+│       │   ├── forecasts/{reference_date}.json   immutable, except at a model change (#151)
 │       │   ├── replay.json             the last 120 days at seven levels
 │       │   ├── actuals.json
 │       │   └── scores.json
@@ -519,7 +521,7 @@ https://<owner>.github.io/aseri/
 
 archive branch (orphan, append-only, never deployed as-is)
 ├── README.md                           licences + how to read
-├── model-output/aseri-timestral209m/{forecast_date}-aseri-timestral209m.csv
+├── model-output/{model_id}/{forecast_date}-{model_id}.csv   one folder per model
 ├── target-data/deltas/{forecast_date}.csv      target,target_end_date,observation,as_of
 └── runs/{forecast_date}.json           manifest: provenance, input hashes, file sha256s
 ```
