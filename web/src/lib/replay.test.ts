@@ -8,6 +8,7 @@ const forecast = (actuals: (number | null)[]): Forecast => ({
   series: "",
   unit: "",
   attribution: "",
+  normal: 100,
   dates: [],
   values: [],
   averages: [],

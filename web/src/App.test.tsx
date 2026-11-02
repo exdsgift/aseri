@@ -70,13 +70,32 @@ it("shows the GPR 7-day average and the forecast for the same weekday 4 weeks on
   const wordmark = screen.getByRole("heading", { level: 1 })
   expect(wordmark.textContent).toBe("焦りあせり · aseri")
   const hero = within(wordmark.closest("section")!)
+  // Like with like: the average against normal, then one day against the same weekday.
   expect(hero.getAllByRole("paragraph").map((p) => p.textContent)).toEqual([
-    "Geopolitical risk · today",
+    "Geopolitical risk",
     "181",
-    "7-day average to Oct 26",
-    "81% above its 1985-2019 average",
-    "Monday Nov 23, 4 weeks from the last data: 8 in 10 between 111 and 251, 2 in 10 outside. Most likely 168. (Last Monday: 165)",
-    `GPR runs on a weekly cycle: compare Monday with Monday. Data as of ${monthDay(actuals.as_of)}, preliminary for about 4 weeks.`,
+    "81% above normal · 7-day average to Oct 26",
+    "Nov 23: likely 110-260 (8 in 10), about where it is now",
+  ])
+  // The range bar: the range, a tick for normal and a marker on last Monday.
+  const bar = hero.getByRole("img", { name: /^Nov 23:/ })
+  // Its ends as the sentence rounds them.
+  expect(bar.getAttribute("aria-label")).toBe(
+    "Nov 23: likely 110-260, normal 100, Last Monday 165"
+  )
+  expect(bar.textContent).toBe("Last Monday 165110260normal 100")
+  // The rest of the data's story, one tap away.
+  const about = hero.getByRole("button", { name: "About this data" })
+  expect(about.getAttribute("aria-expanded")).toBe("false")
+  expect(
+    [
+      ...document.getElementById(about.getAttribute("aria-controls")!)!
+        .children,
+    ].map((p) => p.textContent)
+  ).toEqual([
+    "GPR runs on a weekly cycle: compare Monday with Monday.",
+    "The big number averages the 7 days to Oct 26. The outlook is for one day, Monday Nov 23, against the last Monday, 165.",
+    `Normal: its 1985-2019 average, 100. Data as of ${monthDay(actuals.as_of)}, preliminary for about 4 weeks.`,
   ])
 })
 
@@ -165,7 +184,7 @@ it("keeps the copy honest, today and in replay, in index.html's tags and on the 
   } as never)
   serve(published)
   render(<App />)
-  const chart = await screen.findByRole("img")
+  const chart = await screen.findByRole("img", { name: /^Geopolitical risk:/ })
   // The record too, with its verdicts and its notes.
   await screen.findByRole("region", { name: "Record" })
   // The text nodes, and the text alternatives a screen reader gets instead.
@@ -185,14 +204,16 @@ it("keeps the copy honest, today and in replay, in index.html's tags and on the 
     )
     return {
       text: [...nodes.map((node) => node.data), ...alternatives].join(" "),
-      // Where the page says "most likely": the block around the words, or the alternative.
+      // Where the page gives a middle value: the block around the words, or the alternative.
+      // The value may be a text node of its own, so the words find the block.
       medians: [
         ...nodes
-          .filter((node) => /most likely/i.test(node.data))
+          .filter((node) => /most likely|middle estimate/i.test(node.data))
           .map(
             (node) => node.parentElement!.closest("p, li, div")!.textContent!
-          ),
-        ...alternatives.filter((text) => /most likely/i.test(text)),
+          )
+          .filter((block) => middle.test(block)),
+        ...alternatives.filter((text) => middle.test(text)),
       ],
     }
   }
@@ -207,18 +228,28 @@ it("keeps the copy honest, today and in replay, in index.html's tags and on the 
 
   expect(text).not.toMatch(/\bwill\b/i)
   expect(text).not.toMatch(/%\s*confidence/i)
+  // No em dash anywhere: a colon or a comma does its work.
+  expect(text).not.toContain(String.fromCharCode(0x2014))
   // The replay's tap readout is up, so every place a median shows was read.
-  expect(text).toMatch(/What happened \d/)
+  expect(text).toMatch(/What happened\s+\d/)
+  // The tap readout's and the numbers' middle estimates, at least.
+  expect(medians.length).toBeGreaterThan(3)
   expect(medians.filter((block) => bareMedians(block).length)).toEqual([])
 })
 
-// The text before each "most likely" value, back to the one before it, that gives no
-// "n in 10" range.
+// "Most likely" or "middle estimate" before a value: the median's words, old and new.
+const middle = /(?:most likely|middle estimate):? \d/i
+
+// The text before each middle value, back to the one before it, that gives no range: "likely
+// 119-243" or "8 in 10 between 111 and 251".
 const bareMedians = (block: string) =>
   block
-    .split(/most likely:? (?=\d)/i)
+    .split(/(?:most likely|middle estimate):? (?=\d)/i)
     .slice(0, -1)
-    .filter((before) => !/\d+ in 10\b.*?\d+(?:-| and )\d/i.test(before))
+    .filter(
+      (before) =>
+        !/(?:\d+ in 10\b.*?|likely )\d[\d,]*(?:-| and )\d/i.test(before)
+    )
 
 // For dataset search engines: schema.org's Dataset, with what Google asks of one.
 it("describes the API's data as a schema.org Dataset, under aseri's licence", () => {
@@ -243,14 +274,20 @@ it("describes the API's data as a schema.org Dataset, under aseri's licence", ()
   )
 })
 
-it("finds a most likely value given without its range first", () => {
+it("finds a middle value given without its range first", () => {
   expect(bareMedians("Nov 23: most likely 168 · 8 in 10: 111-251")).toEqual([
     "Nov 23: ",
   ])
   expect(bareMedians("8 in 10 between 111 and 251. Most likely 168")).toEqual(
     []
   )
-  expect(bareMedians("Most likely")).toEqual([])
+  expect(
+    bareMedians("Nov 02 (7 days): likely 1,119-1,243 · middle estimate 1,173")
+  ).toEqual([])
+  expect(bareMedians("Nov 02: middle estimate 173 · likely 119-243")).toEqual([
+    "Nov 02: ",
+  ])
+  expect(bareMedians("Path 1 of 20, the most likely")).toEqual([])
 })
 
 it("says so in one plain line when the data cannot be loaded", async () => {
@@ -364,7 +401,7 @@ it("shows today's forecast without the replay when the replay file is missing", 
 
   await screen.findByText("181", { selector: "p" })
   expect(
-    screen.getByRole("region", { name: /forecast made today/ })
+    screen.getByRole("region", { name: /^Geopolitical risk Likely/ })
   ).toBeTruthy()
   expect(screen.queryByRole("slider")).toBeNull()
 })
@@ -385,10 +422,12 @@ it("never scores today's forecast, even when the actuals run ahead of it", async
 
   render(<App />)
 
+  const chart = await screen.findByRole("img", { name: /^Geopolitical risk:/ })
+  expect(chart.getAttribute("aria-label")).not.toMatch(/what happened/i)
+  const numbers = screen.getByRole("button", { name: "Show the numbers" })
   expect(
-    await screen.findByText(/^Real value on Nov 23: not known yet/)
-  ).toBeTruthy()
-  expect(screen.queryByText(/^So far/)).toBeNull()
+    document.getElementById(numbers.getAttribute("aria-controls")!)!.textContent
+  ).not.toMatch(/what happened/i)
 })
 
 it("shows today's GPR forecast in the panel, from one load of each file", async () => {
@@ -399,33 +438,17 @@ it("shows today's GPR forecast in the panel, from one load of each file", async 
 
   const panel = within(
     await screen.findByRole("region", {
-      name: "[F] Geopolitical risk · forecast made today",
+      name: "Geopolitical risk Likely 110-260 by Nov 23, about where it is now",
     })
   )
-  const paragraphs = panel.getAllByRole("paragraph").map((p) => p.textContent)
-  expect(paragraphs.slice(0, 3)).toEqual([
-    "index (1985-2019 average = 100) · data to Oct 26",
-    `Data as of ${monthDay(actuals.as_of)}, preliminary for about 4 weeks.`,
-    "Nov 23 · 8 in 10: 111-251 · most likely 168",
+  // The takeaway, the series and its unit, then the chart: nothing between them to read.
+  expect(panel.getAllByRole("paragraph").map((p) => p.textContent)).toEqual([
+    "Geopolitical risk · index (1985-2019 average = 100)",
+    "Replay a past forecast",
+    "Jun 28 [‹][›] 1 day · [T] today Today",
   ])
-  expect(paragraphs.at(-1)).toBe(`Source: ${latest.attribution}`)
-  const legend = within(panel.getAllByRole("list")[0])
-  expect(legend.getAllByRole("listitem").map((li) => li.textContent)).toEqual([
-    "Daily value",
-    "7-day average",
-    "What happened",
-    "8 in 10",
-    "5 in 10",
-    "Model path",
-    "Forecast made",
-  ])
-  // Text beside the chart, not the legend, says what the band is and is not.
-  expect(panel.getByText(/^The 8 in 10 band/).textContent).toBe(
-    "The 8 in 10 band: where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call. Daily values can follow the week: compare a day with the same weekday."
-  )
-  expect(panel.getByRole("img").getAttribute("aria-label")).toBe(
-    "Geopolitical risk: daily values, 165 on Oct 26 (7-day average 181), then the forecast of the daily value to Nov 23: 8 in 10 between 111 and 251, most likely 168. The line ahead is path 1 of 20 drawn from the forecast, the most likely first."
-  )
+  expect(panel.queryByRole("list")).toBeNull()
+  expect(panel.getByText(`Source: ${latest.attribution}`)).toBeTruthy()
   // Every file but the other series' replays, which wait for their card to be picked.
   expect(fetch.mock.calls.map(([url]) => url).toSorted()).toEqual(
     Object.keys(published)
@@ -455,7 +478,7 @@ it("averages the 7 days that end on the forecast's reference date, even when the
   expect(await screen.findByText("181", { selector: "p" })).toBeTruthy()
 })
 
-it("groups a card for each series in the catalog, with its 7-day average, its change and one day's range", async () => {
+it("groups a card for each series in the catalog, with its 7-day average against normal and one day's range", async () => {
   serve(published)
 
   render(<App />)
@@ -464,21 +487,32 @@ it("groups a card for each series in the catalog, with its 7-day average, its ch
   expect(
     cards.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)
   ).toEqual(["Risk, attention and oil", "Sea lanes", "War in Ukraine"])
-  expect(cards.getAllByRole("button").map((b) => b.textContent)).toEqual([
-    "Geopolitical risk [1] 181 index (1985-2019 average = 100) 7-day average to Oct 26 81% above its 1985-2019 average In 28 days: 111-251 8 in 10 for Nov 23 alone",
-    '"World War III" [2] 2,053 Wikipedia views a day 7-day average to Oct 30 57% below its 365-day mean In 14 days: 1,455-5,423 8 in 10 for Nov 13 alone',
+  // The takeaway: the signal furthest from normal, against the others of its kind.
+  expect(
+    screen.getByRole("region", { name: "Signals" }).querySelector("h2 + p")!
+      .textContent
+  ).toBe("Strait of Hormuz 88% below normal; other lanes within 20%")
+  expect(
+    cards.getAllByRole("button").map((b) => b.textContent!.replace(/\s+/g, " "))
+  ).toEqual([
+    // Each range rounded outward from the model's: GPR's 110.8-251.0, Brent's 102.3-145.1.
+    "Geopolitical risk [1] 181 index · 7-day avg 81% above normal Nov 23: likely 110-260",
+    '"World War III" [2] 2,053 Wikipedia views a day · 7-day avg 57% below normal Nov 13: likely 1,400-5,600 a day',
     // Brent's week has 5 prices, and its 14 steps are trading days: Nov 16 is 20 days on.
-    "Brent oil [3] 124 $ a barrel 7-day average to Oct 27 38% above its 365-day mean In 14 trading days: 102-145 8 in 10 for Nov 16 alone",
-    "Suez Canal [4] 41 ships a day 7-day average to Oct 25 1% above its 365-day mean In 28 days: 33-51 8 in 10 for Nov 22 alone",
-    "Strait of Hormuz [5] 3 ships a day 7-day average to Oct 25 88% below its 365-day mean In 14 days: 0-6 8 in 10 for Nov 08 alone",
-    "Bab el-Mandeb [6] 29 ships a day 7-day average to Oct 25 14% below its 365-day mean In 14 days: 20-36 8 in 10 for Nov 08 alone",
-    "Taiwan Strait [7] 190 ships a day 7-day average to Oct 25 18% below its 365-day mean In 28 days: 183-268 8 in 10 for Nov 22 alone",
-    "Air-raid alerts [8] 62 alert hours a day, all regions 7-day average to Oct 30 1% below its 365-day mean In 7 days: 50-88 8 in 10 for Nov 06 alone",
-    "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures 7-day average to Oct 30 20% above its 365-day mean In 7 days: 1,158-1,968 8 in 10 for Nov 06 alone",
+    "Brent oil [3] 124 $ a barrel · 7-day avg 38% above normal Nov 16: likely 102-146 a barrel",
+    "Suez Canal [4] 41 ships a day · 7-day avg 1% above normal Nov 22: likely 33-51 a day",
+    "Strait of Hormuz [5] 3 ships a day · 7-day avg 88% below normal Nov 08: likely 0-7 a day",
+    "Bab el-Mandeb [6] 29 ships a day · 7-day avg 14% below normal Nov 08: likely 20-36 a day",
+    "Taiwan Strait [7] 190 ships a day · 7-day avg 18% below normal Nov 22: likely 180-270 a day",
+    "Air-raid alerts [8] 62 alert hours a day, all regions · 7-day avg 1% below normal Nov 06: likely 48-88 a day",
+    "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures · 7-day avg 20% above normal Nov 06: likely 1,150-2,000 a day",
   ])
-  // The key hint is for the eye: the button says it as a shortcut.
+  // The key hint is for the eye, and only on hover or focus: the button says it as a shortcut.
   const suez = cards.getByRole("button", { name: /^Suez Canal 41 ships/ })
   expect(suez.getAttribute("aria-keyshortcuts")).toBe("4")
+  expect(within(suez).getByText("[4]").className).toContain("invisible")
+  // Which way from normal, by shape as well as words.
+  expect(suez.querySelectorAll("svg")).toHaveLength(2)
 })
 
 it("cautions on a stale series' card, in words and with a caution's marker", async () => {
@@ -497,8 +531,8 @@ it("cautions on a stale series' card, in words and with a caution's marker", asy
   render(<App />)
 
   const suez = await screen.findByRole("button", { name: /^Suez Canal/ })
-  const dataTo = within(suez).getByText(/^7-day average to/)
-  expect(dataTo.textContent).toBe("7-day average to Oct 25, stale since Nov 04")
+  const dataTo = within(suez).getByText(/stale since/)
+  expect(dataTo.textContent).toBe("data to Oct 25, stale since Nov 04")
   expect(dataTo.className).toContain("caution")
 })
 
@@ -550,8 +584,11 @@ it("draws no group without a series in the catalog", async () => {
 })
 
 const card = (name: RegExp) => screen.getByRole("button", { name })
-const panelTitle = () =>
-  screen.getAllByRole("heading", { level: 2 })[0].textContent
+// The series the panel shows, then its title.
+const panelTitle = () => {
+  const title = document.querySelector("#forecast h2")!
+  return `${title.nextElementSibling!.querySelector("span")!.textContent} · ${title.textContent}`
+}
 
 it("opens a picked card's series in the panel and brings it into view, then loads its replay, while the hero stays on GPR", async () => {
   const fetch = vi.fn(async (url: string) => Response.json(published[url]))
@@ -561,7 +598,7 @@ it("opens a picked card's series in the panel and brings it into view, then load
 
   fireEvent.click(card(/^Suez Canal/))
 
-  expect(panelTitle()).toBe("[F] Suez Canal · forecast made today")
+  expect(panelTitle()).toMatch(/^Suez Canal · Likely 33-51 by Nov 22, /)
   expect(card(/^Suez Canal/).getAttribute("aria-pressed")).toBe("true")
   expect(card(/^Geopolitical risk/).getAttribute("aria-pressed")).toBe("false")
   // Picked reads by shape too, an inner frame, and a hover never draws one.
@@ -569,7 +606,7 @@ it("opens a picked card's series in the panel and brings it into view, then load
     /\baria-pressed:shadow-\[inset_/
   )
   expect(card(/^Suez Canal/).className).not.toMatch(/\bhover:shadow-/)
-  const panel = screen.getByRole("region", { name: /^\[F\] Suez Canal/ })
+  const panel = screen.getByRole("region", { name: /^Suez Canal Likely/ })
   expect(scrollIntoView.mock.contexts.at(-1)).toContain(panel)
   expect(fetch).toHaveBeenCalledWith("api/v1/series/suez_transits/replay.json")
   // The replay's 120 past forecasts, then today's.
@@ -598,24 +635,23 @@ it("asks for a series' replay once, however often its card is picked, even when 
   await settle()
 
   expect(fetch.mock.calls.filter(([url]) => url === replayUrl)).toHaveLength(1)
-  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
+  expect(panelTitle()).toMatch(/^Strait of Hormuz · Likely/)
 })
 
 it("opens a square of the record in the panel's replay, loading that series' replay first", async () => {
   serve(published)
   render(<App />)
   const record = within(await screen.findByRole("region", { name: "Record" }))
-  // The record of the run of 2026-10-31: no live forecast resolved yet, the backtest apart.
-  const suez = within(
+  // The record of the run of 2026-10-31: no live forecast resolved yet, so the backtest, said once.
+  expect(record.getByText(/^Live record starts/).textContent).toBe(
+    "Live record starts after 30 forecasts (0 so far). Until then, backtests made after the fact."
+  )
+  expect(record.getByText(/forecasts landed in range/).textContent).toBe(
+    "Backtest: 56 of 72 forecasts landed in range, close to the 8 in 10 promised"
+  )
+  const squares = within(
     record.getByRole("heading", { name: "Suez Canal" }).closest("li")!
-  )
-  expect(suez.getByText(/^Collecting live record/).textContent).toBe(
-    "Collecting live record: 0 of 30"
-  )
-  const backtest = within(
-    suez.getByRole("group", { name: "Backtest, not the live record" })
-  )
-  const squares = backtest.getAllByRole("button")
+  ).getAllByRole("button")
   expect(squares).toHaveLength(8)
 
   fireEvent.click(squares[0])
@@ -624,9 +660,10 @@ it("opens a square of the record in the panel's replay, loading that series' rep
   expect(
     await screen.findByRole("heading", {
       level: 2,
-      name: "[F] Suez Canal · backtest from Aug 16",
+      name: /^Backtest made Aug 16: likely/,
     })
   ).toBeTruthy()
+  expect(panelTitle()).toMatch(/^Suez Canal · /)
   expect(screen.getByRole("slider").getAttribute("aria-valuetext")).toBe(
     "Aug 16, backtest"
   )
@@ -641,12 +678,15 @@ it("reopens a square's forecast on a second tap, after the reader has moved the 
     within(
       record.getByRole("heading", { name: "Suez Canal" }).closest("li")!
     ).getAllByRole("button")[0]
-  const opened = "[F] Suez Canal · backtest from Aug 16"
   fireEvent.click(square())
-  await screen.findByRole("heading", { level: 2, name: opened })
+  await screen.findByRole("heading", {
+    level: 2,
+    name: /^Backtest made Aug 16:/,
+  })
+  const opened = panelTitle()
 
   fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
-  expect(panelTitle()).toBe("[F] Suez Canal · backtest from Jun 27")
+  expect(panelTitle()).toMatch(/^Suez Canal · Backtest made Jun 27:/)
   fireEvent.click(square())
 
   expect(panelTitle()).toBe(opened)
@@ -657,7 +697,7 @@ it("opens a square's forecast on its most likely path, with nothing playing", as
   render(<App />)
   const record = within(await screen.findByRole("region", { name: "Record" }))
   const panel = () =>
-    within(screen.getByRole("region", { name: /^\[F\] Geopolitical risk/ }))
+    within(screen.getByRole("region", { name: /^Geopolitical risk / }))
   // Today's GPR forecast, playing, on its third path.
   fireEvent.click(panel().getByRole("button", { name: "Play" }))
   fireEvent.click(panel().getByRole("button", { name: "Next path" }))
@@ -670,7 +710,9 @@ it("opens a square's forecast on its most likely path, with nothing playing", as
     ).getAllByRole("button")[0]
   )
 
-  expect(panelTitle()).toBe("[F] Geopolitical risk · backtest from Jul 27")
+  expect(panelTitle()).toMatch(
+    /^Geopolitical risk · Backtest made Jul 27: likely/
+  )
   expect(panel().getByText(/^Path \d+ of 20/).textContent).toBe(
     "Path 1 of 20, the most likely"
   )
@@ -699,20 +741,20 @@ it("opens a series with its card's key, unless a field has the focus", async () 
     fireEvent.keyDown(target, { key })
 
   press("5")
-  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
+  expect(panelTitle()).toMatch(/^Strait of Hormuz · Likely/)
   expect(scrollIntoView).toHaveBeenCalled()
 
   // The slider takes its own keys.
   const slider = await screen.findByRole("slider")
   slider.focus()
   press("1", slider)
-  expect(panelTitle()).toBe("[F] Strait of Hormuz · forecast made today")
+  expect(panelTitle()).toMatch(/^Strait of Hormuz · Likely/)
 
   // No tenth card, and no shortcut with a modifier.
   press("0")
   press("1", document.body)
   fireEvent.keyDown(document.body, { key: "2", ctrlKey: true })
-  expect(panelTitle()).toBe("[F] Geopolitical risk · forecast made today")
+  expect(panelTitle()).toMatch(/^Geopolitical risk · Likely/)
 })
 
 // As its link in the side navigation does: the address says #record, and the next Tab goes
@@ -778,7 +820,7 @@ it("links every section from the side navigation, lit while it crosses the middl
     screen.getByRole("heading", { level: 1 }).closest("section")
   )
   expect(
-    within(section(1)).getByRole("region", { name: /^\[F\] Geopolitical/ })
+    within(section(1)).getByRole("region", { name: /^Geopolitical risk / })
   ).toBeTruthy()
   expect(section(2)).toBe(screen.getByRole("region", { name: "Signals" }))
   expect(section(3)).toBe(record)
@@ -850,8 +892,9 @@ it("rings every control on keyboard focus, and gives every chart a text equivale
       'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
     ),
   ]
-  // The side navigation's 4, the panel's 3, the 9 cards, the record's squares and the credit.
-  expect(controls.length).toBeGreaterThan(17)
+  // The side navigation's 4, the panel's 3 and its disclosures, the 9 cards, the record's
+  // squares and its disclosure, and the credit.
+  expect(controls.length).toBeGreaterThan(22)
   const unringed = controls.filter(
     (control) =>
       !["focus-visible:outline-2", "focus-visible:outline-primary"].every(
@@ -871,6 +914,6 @@ it("rings every control on keyboard focus, and gives every chart a text equivale
       : canvas.getAttribute("role") === "img" &&
         canvas.getAttribute("aria-label")
   expect(
-    canvases.filter((canvas) => !/8 in 10/.test(words(canvas) || ""))
+    canvases.filter((canvas) => !/likely \d/.test(words(canvas) || ""))
   ).toEqual([])
 })

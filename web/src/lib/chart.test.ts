@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest"
 import { type Forecast } from "./api"
 import {
   chartLayout,
-  dateTicks,
+  fitsNormal,
   forecastAt,
   miniChartLayout,
   nudgeApart,
   paintChart,
+  placeLabels,
   valueScale,
   valueTicks,
 } from "./chart"
@@ -21,6 +22,7 @@ describe("paintChart", () => {
     series: "",
     unit: "",
     attribution: "",
+    normal: 100,
     dates: Array(60).fill(""),
     values,
     averages: values.map((_, day) => {
@@ -47,10 +49,11 @@ describe("paintChart", () => {
     band: "band",
     frame: "frame",
     origin: "origin",
+    normal: "normal",
     real: "real",
   }
   const chart = chartLayout(forecast, 692)
-  // One possible path, well above the most likely value (155), from the last daily value.
+  // One possible path, well above the middle of the bands (155), from the last daily value.
   const path = [values[chart.origin], ...Array(28).fill(185)]
   const paint = (drawn: number[]) => {
     const calls: { x: number; y: number; color: string }[] = []
@@ -303,6 +306,41 @@ describe("paintChart", () => {
     expect([...lit].toSorted()).toEqual(["frame", "origin"])
   })
 
+  // The owner's rule: no dashed or dotted line anywhere.
+  it("draws the origin and the normal as solid lines, and no dashed grid", () => {
+    const frame = new Map<string, string>()
+    paintChart(
+      (x, y, color) => frame.set(`${x},${y}`, color),
+      chart,
+      forecast,
+      colors,
+      path,
+      false
+    )
+    for (let y = chart.top; y <= chart.bottom; y++)
+      expect(frame.get(`${now.x},${y}`)).toBe("origin")
+    // Solid from end to end, but where a line crosses it.
+    expect(chart.normal).toBe("inside")
+    const row = chart.y(100)
+    for (let x = chart.left; x <= chart.right; x++)
+      expect(["normal", "path", "daily", "average"]).toContain(
+        seen.get(`${x},${row}`)
+      )
+    // The history has no grid: only its marks, the origin's line and the base line.
+    expect(
+      calls.filter(
+        ({ x, y, color }) =>
+          color === "frame" && x >= chart.left && x < now.x && y <= chart.bottom
+      )
+    ).toEqual([])
+  })
+
+  it("marks the value ticks with short solid ticks left of the plot", () => {
+    for (const tick of valueTicks(chart.lo, chart.hi))
+      for (const x of [chart.left - 3, chart.left - 2])
+        expect(seen.get(`${x},${chart.y(tick)}`)).toBe("frame")
+  })
+
   it("keeps the 7-day average as a dimmer line that stops at the origin", () => {
     const average = calls.filter(({ color }) => color === "average")
     expect(average).toContainEqual({
@@ -320,6 +358,7 @@ describe("chartLayout", () => {
     series: "",
     unit: "",
     attribution: "",
+    normal: 100,
     dates: Array(days).fill(""),
     values: Array(days).fill(100),
     averages: Array(days).fill(100),
@@ -327,6 +366,25 @@ describe("chartLayout", () => {
     quantiles: { "0.1": Array(28).fill(80), "0.9": Array(28).fill(120) },
     actuals: [],
     backtest: false,
+  })
+
+  it("fits the normal when it widens the scale by half at most, as Brent's 90 under prices of 97 to 153", () => {
+    const chart = chartLayout({ ...forecast(400), normal: 70 }, 692)
+    expect(chart.normal).toBe("inside")
+    expect(chart.lo).toBeLessThanOrEqual(70)
+  })
+
+  // Hormuz: a normal of 27 ships over a forecast of 0 to 6 would squash the chart to a fifth.
+  it("leaves a normal far off the scale out of it, to be marked at the edge it lies past", () => {
+    const above = chartLayout({ ...forecast(400), normal: 200 }, 692)
+    expect(above.normal).toBe("above")
+    expect(above.hi).toBeLessThan(130)
+    const below = chartLayout({ ...forecast(400), normal: -100 }, 692)
+    expect(below.normal).toBe("below")
+    expect(below.lo).toBeGreaterThan(70)
+    expect(miniChartLayout({ ...forecast(400), normal: 200 }, 300).normal).toBe(
+      "above"
+    )
   })
 
   it("shows 8 weeks when wide, the last 4 of them ahead, from end to end", () => {
@@ -399,6 +457,7 @@ describe("miniChartLayout", () => {
       series: "",
       unit: "",
       attribution: "",
+      normal: 40,
       dates: Array(400).fill(""),
       values,
       averages: values,
@@ -423,6 +482,7 @@ describe("miniChartLayout", () => {
     band: "band",
     frame: "frame",
     origin: "origin",
+    normal: "normal",
     real: "real",
   }
 
@@ -497,6 +557,7 @@ describe("a day with no value", () => {
     series: "",
     unit: "",
     attribution: "",
+    normal: 1406,
     dates: Array(40).fill(""),
     values: Array(40).fill(1500),
     averages: Array(40).fill(1500),
@@ -538,6 +599,7 @@ describe("a day with no value", () => {
         band: "band",
         frame: "frame",
         origin: "origin",
+        normal: "normal",
         real: "real",
       },
       Array(8).fill(1500)
@@ -610,24 +672,79 @@ describe("nudgeApart", () => {
   })
 })
 
-describe("dateTicks", () => {
-  const first = { date: "2026-08-31", x: 40 }
-  const origin = { date: "2026-10-26", x: 400 }
+describe("fitsNormal", () => {
+  it("fits a normal inside the data, or one that widens its span by half at most", () => {
+    // GPR's 100 among values of 47 to 312, Brent's 90 under 97 to 153, Hormuz's 27 over 0 to 9.
+    expect(fitsNormal(46.8, 311.6, 100)).toBe(true)
+    expect(fitsNormal(96.9, 153.4, 90.2)).toBe(true)
+    expect(fitsNormal(0, 8.6, 26.9)).toBe(false)
+  })
+})
 
-  it("dates the origin, the first day and the last day", () => {
-    const last = { date: "2026-11-23", x: 640 }
-    expect(dateTicks(first, origin, last)).toEqual([
-      { date: "2026-10-26", x: 400, align: "center" },
-      { date: "2026-08-31", x: 40, align: "left" },
-      { date: "2026-11-23", x: 640, align: "right" },
-    ])
+describe("placeLabels", () => {
+  const bounds = { left: 0, top: 0, right: 200, bottom: 100 }
+
+  it("takes the first spot in bounds and clear of the labels placed before it", () => {
+    const [daily, average, normal] = placeLabels(
+      [
+        { text: "daily", at: [{ x: 10, y: 10 }] },
+        // The first spot would sit on "daily".
+        {
+          text: "7-day avg",
+          at: [
+            { x: 10, y: 14 },
+            { x: 10, y: 40 },
+          ],
+        },
+        // The first spot runs out of bounds.
+        {
+          text: "normal 100",
+          at: [
+            { x: 150, y: 50 },
+            { x: 190, y: 50, align: "right" },
+          ],
+        },
+      ],
+      bounds,
+      []
+    )
+    // Press Start 2P's 8 px a character, a pixel of ground each side, 12 px a line.
+    expect(daily).toEqual({ left: 10, top: 10, width: 42, height: 12 })
+    expect(average.top).toBe(40)
+    expect(normal.left).toBe(190 - 82)
   })
 
-  it("drops an end date whose label would run into the origin's", () => {
-    const last = { date: "2026-11-23", x: 460 }
-    expect(dateTicks(first, origin, last).map((tick) => tick.date)).toEqual([
-      "2026-10-26",
-      "2026-08-31",
-    ])
+  it("prefers a spot that covers fewer points of the lines", () => {
+    const [daily] = placeLabels(
+      [
+        {
+          text: "daily",
+          at: [
+            { x: 10, y: 10 },
+            { x: 10, y: 40 },
+          ],
+        },
+      ],
+      bounds,
+      [
+        [20, 15],
+        [30, 15],
+      ]
+    )
+    expect(daily.top).toBe(40)
+  })
+
+  it("sizes a label of two lines by its longer one", () => {
+    const [band] = placeLabels(
+      [
+        {
+          text: "8 in 10 days\nland here",
+          at: [{ x: 200, y: 0, align: "right" }],
+        },
+      ],
+      bounds,
+      []
+    )
+    expect(band).toEqual({ left: 200 - 98, top: 0, width: 98, height: 24 })
   })
 })

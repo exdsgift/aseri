@@ -1,35 +1,39 @@
-import { useId } from "react"
-
 import { type ScoreRecord } from "@/lib/api"
 import { daysAhead, monthDay } from "@/lib/format"
 
-// The last weekly forecasts at 7 days ahead, oldest first: a square each, filled when the
-// real value landed inside its 8 in 10 range, hollow when not. A tap opens it in the replay,
-// which holds the forecasts from `replayFrom` on: an older square is drawn without a link.
+// The last weekly forecasts at 7 days ahead, oldest first: a square each, filled when what
+// happened landed in its range, hollow when it missed. A tap opens it in the replay, which holds
+// the forecasts from `replayFrom` on: an older square is drawn without a link. A `tag` ("live")
+// sets a second group apart, before its squares, and gives it no count: one figure never adds
+// the two up.
 export function RecordSquares({
+  name,
+  tag,
   weekly,
   horizonUnit,
   replayFrom,
   onOpen,
 }: {
+  name: string
+  tag?: string
   weekly: ScoreRecord["live"]["weekly"]
   // Brent's steps are trading days: its squares are 7 trading days ahead.
   horizonUnit: string
   replayFrom: string
   onOpen: (referenceDate: string) => void
 }) {
-  const title = useId()
   if (!weekly.length) return null
   const inside = weekly.filter((forecast) => forecast.inside_80).length
   const ahead = `${daysAhead(7, horizonUnit)} ahead`
   return (
-    <div className="flex flex-col gap-1.5">
-      <p id={title} className="text-muted-foreground">
-        Last {weekly.length} weekly forecasts, {ahead}
-      </p>
-      <ul aria-labelledby={title} className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      {tag && <span className="text-secondary">{tag}</span>}
+      <ul
+        aria-label={`${name}: the last ${weekly.length} weekly forecasts, ${ahead}`}
+        className="flex flex-wrap gap-1"
+      >
         {weekly.map(({ reference_date, inside_80 }) => {
-          const said = `${monthDay(reference_date)}: ${inside_80 ? "inside" : "outside"} its 8 in 10 range ${ahead}`
+          const said = `${monthDay(reference_date)}: ${inside_80 ? "landed in range" : "missed"} ${ahead}`
           // A hover adds only an outline, so a hollow square never fills.
           const shape = inside_80 ? "bg-primary" : "border-2 border-primary"
           return (
@@ -53,9 +57,11 @@ export function RecordSquares({
         })}
       </ul>
       {/* In words too, so the record never rests on the squares alone. */}
-      <p>
-        {inside} of {weekly.length} inside the 8 in 10 range
-      </p>
+      {!tag && (
+        <p>
+          {inside} of {weekly.length} in range
+        </p>
+      )}
     </div>
   )
 }

@@ -1,11 +1,4 @@
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
 import catalog from "@/fixtures/series.json"
@@ -85,62 +78,108 @@ beforeEach(() => {
 })
 
 const title = () => screen.getByRole("heading", { level: 2 }).textContent
+const subtitle = () =>
+  screen.getByRole("heading", { level: 2 }).nextElementSibling!.textContent
 const slider = () =>
   screen.getByRole("slider", { name: "Replay a past forecast" })
 const press = (key: string) => fireEvent.keyDown(document.body, { key })
-const lines = (element: HTMLElement) =>
-  within(element)
-    .getAllByRole("paragraph")
-    .map((p) => p.textContent)
-const readout = () => lines(screen.getByTestId("readout"))
-const intervals = () =>
-  within(screen.getByRole("list", { name: /Intervals/ }))
-    .getAllByRole("listitem")
-    .map((li) => lines(li).join(" "))
-const source = () => screen.getByText(/^Source:/).textContent
+// A disclosure's lines, whether it is open or shut.
+const layer = (name: string) =>
+  [
+    ...document.getElementById(
+      screen.getByRole("button", { name }).getAttribute("aria-controls")!
+    )!.children,
+  ].map((p) => p.textContent)
 
-it("names the day today's forecast was made, unless it is today", () => {
-  vi.setSystemTime(new Date("2026-11-02T12:00:00Z"))
+it("titles today's forecast with its takeaway, the series and its unit under it", () => {
   render(<ForecastPanel series={gpr} />)
-  expect(title()).toBe("[F] Geopolitical risk · forecast made Oct 31")
+
+  // Rounded outward, so it holds the model's 111-251.
+  expect(title()).toBe("Likely 110-260 by Nov 23, about where it is now")
+  expect(subtitle()).toBe("Geopolitical risk · index (1985-2019 average = 100)")
+  // The landmark says which series it is, then what it says.
+  expect(
+    screen.getByRole("region", {
+      name: "Geopolitical risk Likely 110-260 by Nov 23, about where it is now",
+    })
+  ).toBeTruthy()
+  expect(screen.getByRole("img").getAttribute("aria-label")).toBe(
+    "Geopolitical risk: daily values to Oct 26, the last 165 (7-day average 181), then the forecast: likely 111-251 by Nov 23, where 8 in 10 days land. The gold line is path 1 of 20 drawn from the forecast, the most likely first."
+  )
+})
+
+// The hero's chance, worked out once as the series loads.
+it("leans today's title the way the series' chance above the last value says", () => {
+  gpr.today.chances = { above: 0.9, below: 0.1 }
+  render(<ForecastPanel series={gpr} />)
+  expect(title()).toBe("Likely 110-260 by Nov 23, likely higher than now")
+})
+
+it("keeps how to read it, its numbers and its sources one tap away each, all shut at first", () => {
+  render(<ForecastPanel series={gpr} />)
+
+  const shut = ["How to read this", "Show the numbers", "Sources"].map((name) =>
+    screen.getByRole("button", { name })
+  )
+  expect(shut.map((b) => b.getAttribute("aria-expanded"))).toEqual([
+    "false",
+    "false",
+    "false",
+  ])
+  // No legend and no paragraph under the chart: the chart's labels say it on the marks.
+  expect(screen.queryByRole("list")).toBeNull()
+  expect(layer("How to read this")).toEqual([
+    "The shaded range is where 8 in 10 days should land; 2 in 10 land outside. It is not a high and a low.",
+    "The darker core: half the days land there.",
+    "The gold line is one of 20 possible paths drawn from the forecast, the most likely first. Play shows the others, one at a time. No one knows which days turn out high.",
+    "Values follow the week: compare a Monday with a Monday.",
+    "Normal: its 1985-2019 average, 100. In a replay, the white line carries on with what happened.",
+  ])
+
+  fireEvent.click(shut[1])
+  expect(shut[1].getAttribute("aria-expanded")).toBe("true")
+  expect(screen.getByText(/^Nov 02 \(7 days\)/)).toBeTruthy()
 })
 
 it("replays the forecast of the day before with ←, then today's with → or T", () => {
   render(<ForecastPanel series={gpr} />)
-  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
 
   press("ArrowLeft")
-  expect(title()).toBe("[F] Geopolitical risk · backtest from Oct 25")
+  expect(title()).toBe("Backtest made Oct 25: likely 50-170 by Nov 22")
   expect(slider().getAttribute("aria-valuetext")).toBe("Oct 25, backtest")
+  // The replay says which data what happened is, as read that day.
+  expect(subtitle()).toBe(
+    `Geopolitical risk · index (1985-2019 average = 100) · what happened as of ${monthDay(actuals.as_of)}`
+  )
   press("ArrowRight")
-  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
+  expect(title()).toBe("Likely 110-260 by Nov 23, about where it is now")
   expect(slider().getAttribute("aria-valuetext")).toBe("Today")
 
   press("ArrowLeft")
   press("ArrowLeft")
   press("t")
-  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
+  expect(title()).toBe("Likely 110-260 by Nov 23, about where it is now")
 })
 
 it("starts on the past forecast the record opened, or on today's when the replay lacks it", () => {
   render(<ForecastPanel series={gpr} opened="2026-08-03" />)
-  expect(title()).toBe("[F] Geopolitical risk · backtest from Aug 03")
+  expect(title()).toMatch(/^Backtest made Aug 03: likely/)
   expect(slider().getAttribute("aria-valuetext")).toBe("Aug 03, backtest")
   cleanup()
 
   render(<ForecastPanel series={gpr} opened="2025-08-03" />)
-  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
+  expect(title()).toMatch(/^Likely/)
 })
 
 it("goes 120 days back and no further, and no further than today", () => {
   render(<ForecastPanel series={gpr} />)
 
   press("ArrowRight")
-  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
+  expect(title()).toMatch(/^Likely/)
   fireEvent.change(slider(), { target: { value: "0" } })
-  expect(title()).toBe("[F] Geopolitical risk · backtest from Jun 28")
+  expect(title()).toMatch(/^Backtest made Jun 28:/)
   press("ArrowLeft")
-  expect(title()).toBe("[F] Geopolitical risk · backtest from Jun 28")
+  expect(title()).toMatch(/^Backtest made Jun 28:/)
   expect(slider().getAttribute("max")).toBe("120")
 })
 
@@ -151,7 +190,7 @@ it("leaves the keys to a focused input, which moves itself", () => {
 
   fireEvent.keyDown(slider(), { key: "ArrowRight" })
   fireEvent.keyDown(slider(), { key: "t" })
-  expect(title()).toBe("[F] Geopolitical risk · backtest from Jun 28")
+  expect(title()).toMatch(/^Backtest made Jun 28:/)
 })
 
 it("offers Back to today only in replay, and leaves the focus on the slider", () => {
@@ -161,62 +200,44 @@ it("offers Back to today only in replay, and leaves the focus on the slider", ()
 
   fireEvent.change(slider(), { target: { value: "0" } })
   fireEvent.click(back()!)
-  expect(title()).toBe("[F] Geopolitical risk · forecast made today")
+  expect(title()).toMatch(/^Likely/)
   expect(back()).toBeNull()
   expect(document.activeElement).toBe(slider())
 })
 
-it("reads out the target day and, in replay, what happened and how many days so far landed inside", () => {
+it("shows the numbers: that day's value, each step's range, middle half and middle estimate, and once known what happened", () => {
   render(<ForecastPanel series={gpr} />)
-  expect(readout()).toEqual([
-    "Nov 23 · 8 in 10: 111-251 · most likely 168",
-    "Real value on Nov 23: not known yet",
-    "Scored as each real value comes in",
-  ])
-
-  press("ArrowLeft")
-  expect(readout()).toEqual([
-    "Nov 22 · 8 in 10: 56-163 · most likely 101",
-    "Real value on Nov 22: not known yet",
-    "So far 1 of 1 day inside the range",
+  expect(layer("Show the numbers")).toEqual([
+    "Oct 26, last data: 165",
+    "Nov 02 (7 days): likely 119-243 · middle half 143-207 · middle estimate 173",
+    "Nov 09 (14 days): likely 115-247 · middle half 140-207 · middle estimate 170",
+    "Nov 23 (28 days): likely 111-251 · middle half 136-207 · middle estimate 168",
+    "1-year range of the daily value to Oct 26: 22-501",
   ])
 
   fireEvent.change(slider(), { target: { value: "0" } })
-  expect(readout()).toEqual([
-    "Jul 26 · 8 in 10: 59-167 · most likely 104",
-    "Real value: 168 · outside the range",
-    "So far 19 of 28 days inside the range",
+  expect(layer("Show the numbers").slice(0, 4)).toEqual([
+    "Jun 28, last data: 113",
+    "Jul 05 (7 days): likely 65-159 · middle half 84-132 · middle estimate 106 · what happened 36, outside",
+    "Jul 12 (14 days): likely 64-164 · middle half 84-133 · middle estimate 106 · what happened 163, in range",
+    "Jul 26 (28 days): likely 59-167 · middle half 80-133 · middle estimate 104 · what happened 168, outside",
   ])
-})
-
-it("lists that day's value, then each step's ranges as text and, once known, its real value", () => {
-  render(<ForecastPanel series={gpr} />)
-  expect(intervals()).toEqual([
-    "Today · Oct 26 · that day 165",
-    "In 7 days · Nov 02 5 in 10: 143-207 8 in 10: 119-243 most likely 173",
-    "In 14 days · Nov 09 5 in 10: 140-207 8 in 10: 115-247 most likely 170",
-    "In 28 days · Nov 23 5 in 10: 136-207 8 in 10: 111-251 most likely 168",
-  ])
-  expect(screen.getByText(/^Thin line/).textContent).toBe(
-    "Thin line: the 1-year range of the daily value, 22 to 501. Dotted: the day the forecast was made."
+  // In the chart's words for screen readers too.
+  expect(screen.getByRole("img").getAttribute("aria-label")).toMatch(
+    / What happened: 19 of 28 days in range\.$/
   )
-
-  fireEvent.change(slider(), { target: { value: "0" } })
-  expect(intervals()).toEqual([
-    "Forecast made · Jun 28 · that day 113",
-    "In 7 days · Jul 05 5 in 10: 84-132 8 in 10: 65-159 most likely 106 Real 36 · outside",
-    "In 14 days · Jul 12 5 in 10: 84-133 8 in 10: 64-164 most likely 106 Real 163 · inside",
-    "In 28 days · Jul 26 5 in 10: 80-133 8 in 10: 59-167 most likely 104 Real 168 · outside",
-  ])
 })
 
-it("says on the source line when the forecast shown is a backtest", () => {
+it("says in its sources when the data was read, and when the forecast shown is a backtest", () => {
   render(<ForecastPanel series={gpr} />)
-  expect(source()).toBe(`Source: ${latest.attribution}`)
+  expect(layer("Sources")).toEqual([
+    `Source: ${latest.attribution}`,
+    `Data as of ${monthDay(actuals.as_of)}, preliminary for about 4 weeks.`,
+  ])
 
   fireEvent.change(slider(), { target: { value: "0" } })
-  expect(source()).toBe(
-    `Source: ${latest.attribution} Backtest: made after the fact, with only the data up to Jun 28, but as published later: it may have been revised since. The model's training cutoff is not published, so backtests may be optimistic.`
+  expect(layer("Sources")[2]).toBe(
+    "Backtest: made after the fact, with only the data up to Jun 28, but as published later: it may have been revised since. The model's training cutoff is not published, so backtests may be optimistic."
   )
 })
 
@@ -226,23 +247,22 @@ it("calls a past live forecast a forecast, not a backtest", () => {
   render(<ForecastPanel series={gpr} />)
 
   press("ArrowLeft")
-  expect(title()).toBe("[F] Geopolitical risk · forecast made Oct 25")
+  expect(title()).toMatch(/^Forecast made Oct 25:/)
   expect(slider().getAttribute("aria-valuetext")).toBe("Oct 25")
-  expect(source()).toBe(`Source: ${latest.attribution}`)
+  expect(layer("Sources")).toHaveLength(2)
 })
 
-it("marks the data date as a caution, and says so, while the series is stale", async () => {
-  const dataTo = () => screen.getByText(/^data to/)
+it("cautions in words, with a caution's marker, while the series is stale", async () => {
   render(<ForecastPanel series={gpr} />)
-  expect(dataTo().textContent).toBe("data to Oct 26")
-  expect(dataTo().className).not.toContain("caution")
+  expect(screen.queryByText(/stale since/)).toBeNull()
   cleanup()
 
   // A run that skipped GPR keeps its last files and dates the staleness in the catalog.
   const stale = { ...entry("gpr_daily"), stale_since: "2026-11-04" }
   render(<ForecastPanel series={await loadSeries(stale, { replay: true })} />)
-  expect(dataTo().textContent).toBe("data to Oct 26, stale since Nov 04")
-  expect(dataTo().className).toContain("caution")
+  const caution = screen.getByText(/stale since/)
+  expect(caution.textContent).toBe("data to Oct 26, stale since Nov 04")
+  expect(caution.className).toContain("caution")
 })
 
 it("shows the catalog's note on the data, when it has one", async () => {
@@ -263,47 +283,30 @@ it("announces nothing as a live region, so slider steps never pile up", () => {
   expect(screen.queryByRole("log")).toBeNull()
 })
 
-it("fits a real value far outside the 1-year range on the lanes, instead of pinning it to the edge", () => {
-  const spike = gpr.forecasts[0]
-  spike.actuals = spike.actuals.map((value, k) => (k === 6 ? 5000 : value))
-  const { container } = render(<ForecastPanel series={gpr} />)
-  fireEvent.change(screen.getByRole("slider"), { target: { value: "0" } })
-
-  const reals = [...container.querySelectorAll<HTMLElement>("i.bg-white")]
-  expect(reals.length).toBeGreaterThan(0)
-  for (const mark of reals)
-    expect(parseFloat(mark.style.left)).toBeLessThan(100)
-})
-
 it("shows a sea lane with its own horizon, steps and baseline", async () => {
   const hormuz = await loadSeries(entry("hormuz_transits"), { replay: true })
   render(<ForecastPanel series={hormuz} />)
 
-  expect(title()).toBe("[F] Strait of Hormuz · forecast made today")
-  expect(screen.getByText(/^ships a day/).textContent).toBe(
-    "ships a day · data to Oct 25"
-  )
+  // Rounded outward: the model's 0.x to 6.x ships.
+  expect(title()).toMatch(/^Likely 0-7 by Nov 08, /)
+  expect(subtitle()).toBe("Strait of Hormuz · ships a day")
   // Only GPR's source revises its last month.
-  expect(screen.getByText(/^Data as of/).textContent).toBe(
+  expect(layer("Sources")[1]).toBe(
     `Data as of ${monthDay(hormuzActuals.as_of)}.`
   )
-  // No weekday note: the sea lanes have no weekly cycle.
-  expect(screen.getByText(/^The 8 in 10 band/).textContent).toBe(
-    "The 8 in 10 band: where the daily value should land 8 days in 10, outside it about 2 in 10. Not a high and a low, nor volatility: it widens because later days are harder to call."
+  // No weekday line: the sea lanes have no weekly cycle.
+  expect(layer("How to read this")).toHaveLength(4)
+  expect(layer("How to read this")[3]).toMatch(
+    /^Normal: its 365-day mean, 27\./
   )
-  expect(readout()[0]).toBe("Nov 08 · 8 in 10: 0-6 · most likely 3")
-  expect(intervals()).toEqual([
-    "Today · Oct 25 · that day 2",
-    "In 3 days · Oct 28 5 in 10: 2-4 8 in 10: 1-6 most likely 3",
-    "In 7 days · Nov 01 5 in 10: 2-4 8 in 10: 1-6 most likely 3",
-    "In 14 days · Nov 08 5 in 10: 1-4 8 in 10: 0-6 most likely 3",
+  expect(layer("Show the numbers").slice(1, 4)).toEqual([
+    "Oct 28 (3 days): likely 1-6 · middle half 2-4 · middle estimate 3",
+    "Nov 01 (7 days): likely 1-6 · middle half 2-4 · middle estimate 3",
+    "Nov 08 (14 days): likely 0-6 · middle half 1-4 · middle estimate 3",
   ])
-  expect(screen.getByText("365-day mean")).toBeTruthy()
   expect(slider().getAttribute("max")).toBe("120")
   // PortWatch's own citation starts with "Sources:": no second label before it.
-  expect(screen.getByText(/^Sources?:/).textContent).toBe(
-    hormuzLatest.attribution
-  )
+  expect(layer("Sources")[0]).toBe(hormuzLatest.attribution)
 })
 
 const weekend = (date: string) =>
@@ -313,12 +316,11 @@ it("shows Brent on trading days, today and in every replay, with no weekend date
   const brent = await loadSeries(entry("brent_spot"), { replay: true })
   render(<ForecastPanel series={brent} />)
 
-  expect(intervals().map((row) => row.split(" · ")[0])).toEqual([
-    "Today",
-    "In 3 trading days",
-    "In 7 trading days",
-    "In 14 trading days",
-  ])
+  expect(
+    layer("Show the numbers")
+      .slice(1, 4)
+      .map((row) => row!.match(/\((.*?)\)/)![1])
+  ).toEqual(["3 trading days", "7 trading days", "14 trading days"])
   expect(brent.forecasts.length).toBeGreaterThan(60)
   for (const forecast of brent.forecasts)
     expect(forecast.targetDates.filter(weekend)).toEqual([])
@@ -339,18 +341,19 @@ it("shows Brent on trading days, today and in every replay, with no weekend date
     week.reduce((sum, v) => sum + v, 0) / week.length
   )
   expect(screen.getByText(/^Note:/).textContent).toMatch(/trading days only/)
-  expect(screen.getByText(/^The 8 in 10 band/).textContent).not.toMatch(
-    /weekday/
-  )
+  expect(layer("How to read this").join(" ")).not.toMatch(/week/)
 })
 
 it("tells to compare a weekday with the same weekday where the catalog says the values follow the week", async () => {
   const views = await loadSeries(entry("wiki_ww3_views"), { replay: true })
   render(<ForecastPanel series={views} />)
 
-  expect(title()).toBe('[F] "World War III" · forecast made today')
-  expect(screen.getByText(/^The 8 in 10 band/).textContent).toMatch(
-    / Daily values can follow the week: compare a day with the same weekday\.$/
+  expect(subtitle()).toBe('"World War III" · Wikipedia views a day')
+  const day = new Date(
+    `${viewsLatest.reference_date}T00:00:00Z`
+  ).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" })
+  expect(layer("How to read this")[3]).toBe(
+    `Values follow the week: compare a ${day} with a ${day}.`
   )
   expect(screen.getByText(/^Note:/).textContent).toBe(
     "Note: Counts attention, not events: views of the English Wikipedia article by people, not bots."
@@ -363,16 +366,14 @@ it("labels the drones as one side's claims wherever their unit shows", async () 
   })
   render(<ForecastPanel series={drones} />)
 
-  expect(screen.getByText(/^drones a day/).textContent).toMatch(
-    /^drones a day, claimed by Ukraine's General Staff, one side's figures · data to /
+  expect(subtitle()).toBe(
+    "Drones downed · drones a day, claimed by Ukraine's General Staff, one side's figures"
   )
-  expect(source()).toBe(`Source: ${dronesLatest.attribution}`)
-  expect(source()).toMatch(
+  expect(layer("Sources")[0]).toBe(`Source: ${dronesLatest.attribution}`)
+  expect(layer("Sources")[0]).toMatch(
     /claimed by Ukraine's General Staff, one side's figures/
   )
-  expect(screen.getByText(/^The 8 in 10 band/).textContent).not.toMatch(
-    /weekday/
-  )
+  expect(layer("How to read this").join(" ")).not.toMatch(/week/)
 })
 
 // The possible paths turn on an interval, which these tests advance by hand.
@@ -385,35 +386,12 @@ const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))
 const pathShown = () => screen.getByText(/^Path \d+ of 20/).textContent
 const button = (name: string) => screen.getByRole("button", { name })
 
-const legendLine = () =>
-  screen
-    .getAllByRole("listitem")
-    .map((item) => item.textContent)
-    .filter((name) =>
-      /^(Model path|Most likely|One possible path)$/.test(name ?? "")
-    )
-
-it("gives every mark of the legend its own swatch, what happened's a line to the chart's ring", () => {
-  render(<ForecastPanel series={gpr} />)
-
-  const legend = screen.getByText("What happened").closest("ul")!
-  const swatches = [...legend.querySelectorAll("li > span")].map(
-    (swatch) => swatch.className
-  )
-  expect(swatches).toHaveLength(7)
-  expect(new Set(swatches).size).toBe(swatches.length)
-})
-
 it("opens on the most likely of the model's 20 paths, and turns none until asked", () => {
   turning()
   render(<ForecastPanel series={gpr} />)
 
   wait(6000)
   expect(pathShown()).toBe("Path 1 of 20, the most likely")
-  expect(screen.getByText(/^The line ahead/).textContent).toBe(
-    "The line ahead is one of 20 paths drawn from the model's forecast, the most likely first. Together they fall in the band as often as the forecast says."
-  )
-  expect(legendLine()).toEqual(["Model path"])
   expect(screen.queryByRole("button", { name: "Most likely" })).toBeNull()
 })
 
@@ -495,12 +473,16 @@ it("turns no path under reduced motion, and still steps through them on demand",
   expect(pathShown()).toBe("Path 2 of 20")
 })
 
-it("labels the slider's handle with the day it picks, on the side with room", () => {
+it("labels the slider's handle with the day it picks, Today for today's, on the side with room", () => {
   render(<ForecastPanel series={gpr} />)
   const handle = () => screen.getByTestId("handle-label")
-  // Today's forecast, at the right end: its label sits left of the handle.
-  expect(handle().textContent).toBe("Forecast")
+  // Today's forecast, at the right end: its label sits left of the handle, and the end of the
+  // track does not say it twice.
+  expect(handle().textContent).toBe("Today")
   expect(handle().style.translate).toMatch(/^calc\(-100%/)
+  expect(
+    screen.getByText("Today", { selector: "p > span" }).style.visibility
+  ).toBe("hidden")
 
   fireEvent.change(slider(), { target: { value: "0" } })
   expect(handle().textContent).toBe("Jun 28")

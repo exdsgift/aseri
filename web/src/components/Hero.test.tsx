@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from "@testing-library/react"
+import { act, cleanup, render, screen, within } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { type Today } from "@/lib/api"
@@ -16,9 +16,10 @@ const today: Today = {
   referenceValue: 165,
   asOf: "2026-10-30",
   targetDate: "2026-11-23",
-  mostLikely: 168,
   low: 111,
   high: 251,
+  middleHalf: [136, 207],
+  chances: { above: 0.55, below: 0.45 },
 }
 
 // The page reads the one list jsdom's stand-in gives for the query (see test-setup.ts).
@@ -157,7 +158,7 @@ describe.each(heroes)("%s", (hero) => {
     for (const text of [
       screen.getByRole("heading", { level: 1 }),
       screen.getByText("181"),
-      screen.getByText(/^Monday Nov 23/),
+      screen.getByText(/^Nov 23: likely/),
     ])
       expect(art.contains(text)).toBe(false)
   })
@@ -433,5 +434,35 @@ describe("signal, at 4 times the baseline on a phone", () => {
       expect(x).toBeGreaterThanOrEqual(0)
       expect(y).toBeGreaterThanOrEqual(0)
     }
+  })
+})
+
+describe("the range bar", () => {
+  const bar = () => screen.getByRole("img", { name: /^Nov 23:/ })
+
+  it("labels each end of the range under it as the sentence above rounds it, and puts the marker's arrow on its value", () => {
+    render(<Hero hero="messenger" today={today} failed={false} />)
+
+    // The model's 111-251, said "likely 110-260" just above.
+    expect(within(bar()).getByText("110")).toBeTruthy()
+    expect(within(bar()).getByText("260")).toBeTruthy()
+    expect(bar().getAttribute("aria-label")).toMatch(/^Nov 23: likely 110-260,/)
+    // Centred on the value, with no room kept after it for words.
+    const arrow = bar().querySelector("svg")!
+    expect(arrow.getAttribute("class")).not.toMatch(/\bm[rl]-/)
+  })
+
+  it("says a range too narrow for two labels once, centred under it", () => {
+    render(
+      <Hero
+        hero="messenger"
+        today={{ ...today, low: 150, high: 160, middleHalf: [153, 157] }}
+        failed={false}
+      />
+    )
+
+    expect(within(bar()).getByText("150-160")).toBeTruthy()
+    expect(within(bar()).queryByText("150")).toBeNull()
+    expect(within(bar()).queryByText("160")).toBeNull()
   })
 })

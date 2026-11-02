@@ -59,49 +59,55 @@ const suez: ScoreRecord = {
 }
 const titled = (records: ScoreRecord[]) =>
   render(<TrackRecord records={records} entries={entries} onOpen={vi.fn()} />)
+// Read open or shut: "How we score" starts shut.
 const cells = (table: HTMLElement) =>
   within(table)
-    .getAllByRole("row")
+    .getAllByRole("row", { hidden: true })
     .map((row) =>
       [...row.querySelectorAll("th, td")].map((cell) => cell.textContent)
     )
 const card = (name: string) =>
   within(screen.getByRole("heading", { name, level: 3 }).closest("li")!)
+const title = () =>
+  screen.getByRole("region", { name: "Record" }).querySelector("h2 + p")!
+    .textContent
 
-it("collects the live record until 30 live forecasts have resolved, with the backtest apart and labelled", () => {
-  titled([suez])
+it("leads with the verdict on every square, and says once that the backtest stands in for the live record", () => {
+  titled([suez, { ...suez, series_id: "hormuz_transits" }])
 
-  const suezCard = card("Suez Canal")
-  expect(suezCard.getByText(/^Collecting live record/).textContent).toBe(
-    "Collecting live record: 0 of 30"
+  expect(title()).toBe(
+    "Backtest: 12 of 16 forecasts landed in range, close to the 8 in 10 promised"
   )
-  const backtest = suezCard.getByRole("group", {
-    name: "Backtest, not the live record",
-  })
-  // The live part holds no score; every number below sits in the backtest.
-  expect(suezCard.getAllByRole("table")).toEqual([
-    within(backtest).getByRole("table"),
-  ])
+  expect(screen.getAllByText(/^Live record starts/)).toHaveLength(1)
+  expect(screen.getByText(/^Live record starts/).textContent).toBe(
+    "Live record starts after 30 forecasts (0 so far). Until then, backtests made after the fact."
+  )
+  // The key, once, with how many should miss.
+  expect(
+    screen.getByText(/squares should be hollow/).parentElement!.textContent
+  ).toBe(
+    " landed in range  missed About 2 in 10 squares should be hollow if the range is honest."
+  )
 })
 
-it("draws the last 8 weekly forecasts 7 days ahead as squares, filled inside the 8 in 10 range and hollow outside", () => {
+it("draws the last 8 weekly forecasts 7 days ahead as squares, filled in range and hollow when missed", () => {
   const onOpen = vi.fn()
   render(<TrackRecord records={[suez]} entries={entries} onOpen={onOpen} />)
 
   const squares = within(
     card("Suez Canal").getByRole("list", {
-      name: "Last 8 weekly forecasts, 7 days ahead",
+      name: "Suez Canal: the last 8 weekly forecasts, 7 days ahead",
     })
   ).getAllByRole("button")
   expect(squares.map((square) => square.getAttribute("aria-label"))).toEqual([
-    "Aug 02: inside its 8 in 10 range 7 days ahead. Open it in the replay",
-    "Aug 09: inside its 8 in 10 range 7 days ahead. Open it in the replay",
-    "Aug 16: outside its 8 in 10 range 7 days ahead. Open it in the replay",
-    "Aug 23: inside its 8 in 10 range 7 days ahead. Open it in the replay",
-    "Aug 30: inside its 8 in 10 range 7 days ahead. Open it in the replay",
-    "Sep 06: inside its 8 in 10 range 7 days ahead. Open it in the replay",
-    "Sep 13: outside its 8 in 10 range 7 days ahead. Open it in the replay",
-    "Sep 20: inside its 8 in 10 range 7 days ahead. Open it in the replay",
+    "Aug 02: landed in range 7 days ahead. Open it in the replay",
+    "Aug 09: landed in range 7 days ahead. Open it in the replay",
+    "Aug 16: missed 7 days ahead. Open it in the replay",
+    "Aug 23: landed in range 7 days ahead. Open it in the replay",
+    "Aug 30: landed in range 7 days ahead. Open it in the replay",
+    "Sep 06: landed in range 7 days ahead. Open it in the replay",
+    "Sep 13: missed 7 days ahead. Open it in the replay",
+    "Sep 20: landed in range 7 days ahead. Open it in the replay",
   ])
   // By shape, not colour: a filled square, or only its outline.
   expect(
@@ -118,14 +124,14 @@ it("draws the last 8 weekly forecasts 7 days ahead as squares, filled inside the
     "border-2",
     "bg-primary",
   ])
-  // A hover changes only the outline: a hollow square never fills, so it never reads as inside.
+  // A hover changes only the outline: a hollow square never fills, so it never reads as in range.
   for (const square of squares) {
     expect(square.className).not.toMatch(/hover:(bg|border)-/)
     expect(square.className).toContain("hover:outline-")
   }
   // In words too.
   expect(card("Suez Canal").getByText(/^6 of 8/).textContent).toBe(
-    "6 of 8 inside the 8 in 10 range"
+    "6 of 8 in range"
   )
 
   fireEvent.click(squares[2])
@@ -133,22 +139,40 @@ it("draws the last 8 weekly forecasts 7 days ahead as squares, filled inside the
   expect(onOpen).toHaveBeenCalledWith("suez_transits", "2026-08-16")
 })
 
-it("tables each bucket's 8 in 10 coverage and error against the series' primary baseline", () => {
+it("keeps how it scores one tap away, each bucket in plain words against the series' own simple rule", () => {
   titled([suez])
+  const how = screen.getByRole("button", { name: "How we score" })
+  const table = screen.getByRole("table", {
+    name: "Suez Canal, backtest",
+    hidden: true,
+  })
+  expect(table.closest("[hidden]")).not.toBeNull()
 
-  expect(cells(card("Suez Canal").getByRole("table"))).toEqual([
+  fireEvent.click(how)
+
+  expect(table.closest("[hidden]")).toBeNull()
+  expect(cells(table)).toEqual([
+    ["Days ahead", "Forecasts", "In range", "Misses"],
     [
-      "Days ahead",
-      "Forecasts",
-      "Inside the 8 in 10 range",
-      "Error vs 28-day mean",
+      "1-7",
+      "105",
+      "79% landed in range · aim 80% (76-81)",
+      "About as good as a simple 4-week average (1.00, 0.94-1.05)",
     ],
-    ["1-7", "105", "79% (76-81)", "ties 1.00 (0.94-1.05)"],
-    ["8-28", "84", "78% (76-79)", "ties 0.99 (0.90-1.09)"],
+    [
+      "8-28",
+      "84",
+      "78% landed in range · aim 80% (76-79)",
+      "About as good as a simple 4-week average (0.99, 0.90-1.09)",
+    ],
   ])
+  // The share in range as ten blocks, with a tick after the 8th: for the eye.
+  const tenths = table.querySelector("td [aria-hidden]")!
+  expect(tenths.querySelectorAll("i.bg-primary")).toHaveLength(8)
+  expect(tenths.querySelectorAll("i.border-2")).toHaveLength(2)
 })
 
-it("names a 14-day series' longer bucket by its own last day", () => {
+it("names a 14-day series' longer bucket by its own last day, and its simple rule from its record", () => {
   const hormuz = {
     ...suez,
     series_id: "hormuz_transits",
@@ -166,24 +190,26 @@ it("names a 14-day series' longer bucket by its own last day", () => {
 
   titled([hormuz])
 
-  expect(cells(card("Strait of Hormuz").getByRole("table"))).toEqual([
+  expect(
+    cells(screen.getByRole("table", { name: /Strait of Hormuz/, hidden: true }))
+  ).toEqual([
+    ["Days ahead", "Forecasts", "In range", "Misses"],
     [
-      "Days ahead",
-      "Forecasts",
-      "Inside the 8 in 10 range",
-      "Error vs last value",
+      "1-7",
+      "105",
+      "86% landed in range · aim 80% (84-88)",
+      "15% smaller misses than just repeating the last value (0.85, 0.70-0.98)",
     ],
-    ["1-7", "105", "86% (84-88)", "beats 0.85 (0.70-0.98)"],
     ["8-14", "None resolved yet"],
   ])
 })
 
 it.each([
-  ["beats", [0.7, 0.95], "beats 0.82 (0.70-0.95)"],
-  ["ties", [0.9, 1.1], "ties 0.82 (0.90-1.10)"],
-  ["loses", [1.05, 1.3], "loses 0.82 (1.05-1.30)"],
+  ["beats", [0.7, 0.95], "18% smaller misses than a simple 4-week average"],
+  ["ties", [0.9, 1.1], "About as good as a simple 4-week average"],
+  ["loses", [1.05, 1.3], "18% bigger misses than a simple 4-week average"],
 ] as const)(
-  "says %s against the baseline as the pipeline's interval decides it",
+  "says %s against the simple rule as the pipeline's interval decides it",
   (verdict, ci, said) => {
     const record = {
       ...suez,
@@ -191,7 +217,11 @@ it.each([
         ...suez.retrospective,
         buckets: {
           "1-7": bucket(105, 0.8, [0.7, 0.9], {
-            mean28: against(0.8211, [...ci], verdict),
+            mean28: against(
+              verdict === "loses" ? 1.1789 : 0.8211,
+              [...ci],
+              verdict
+            ),
           }),
         },
       },
@@ -199,11 +229,13 @@ it.each([
 
     titled([record])
 
-    expect(cells(card("Suez Canal").getByRole("table"))[1][3]).toBe(said)
+    expect(cells(screen.getByRole("table", { hidden: true }))[1][3]).toMatch(
+      new RegExp(`^${said} \\(`)
+    )
   }
 )
 
-it("gives no verdict and no number where the baseline had no error to compare with", () => {
+it("gives no verdict and no number where the simple rule had no miss to compare with", () => {
   const record = {
     ...suez,
     retrospective: {
@@ -218,12 +250,59 @@ it("gives no verdict and no number where the baseline had no error to compare wi
 
   titled([record])
 
-  expect(cells(card("Suez Canal").getByRole("table"))[1]).toEqual([
+  expect(cells(screen.getByRole("table", { hidden: true }))[1]).toEqual([
     "1-7",
     "105",
-    "80% (70-90)",
+    "80% landed in range · aim 80% (70-90)",
     "-",
   ])
+})
+
+it("shows the live forecasts already resolved after the backtest's, labelled live and openable, while it collects", () => {
+  const onOpen = vi.fn()
+  const collecting = {
+    ...suez,
+    n: 2,
+    live: {
+      ...none,
+      n: 2,
+      since: "2026-10-31",
+      weekly: [
+        { reference_date: "2026-10-03", inside_80: true },
+        { reference_date: "2026-10-10", inside_80: false },
+      ],
+    },
+  }
+  render(
+    <TrackRecord records={[collecting]} entries={entries} onOpen={onOpen} />
+  )
+
+  const row = card("Suez Canal")
+  const live = row.getByRole("list", {
+    name: "Suez Canal, live: the last 2 weekly forecasts, 7 days ahead",
+  })
+  expect(
+    within(live)
+      .getAllByRole("button")
+      .map((square) => square.getAttribute("aria-label"))
+  ).toEqual([
+    "Oct 03: landed in range 7 days ahead. Open it in the replay",
+    "Oct 10: missed 7 days ahead. Open it in the replay",
+  ])
+  // After the backtest's 8, with one word to tell them apart, and no sum of the two.
+  expect(row.getAllByRole("button")).toHaveLength(10)
+  expect(row.getByText("live")).toBeTruthy()
+  expect(
+    row.getAllByText(/ of \d+ in range$/).map((p) => p.textContent)
+  ).toEqual(["6 of 8 in range"])
+  // The backtest still makes the title, and the banner counts the live ones.
+  expect(title()).toMatch(/^Backtest: 6 of 8 /)
+  expect(screen.getByText(/^Live record starts/).textContent).toMatch(
+    /\(2 so far\)/
+  )
+
+  fireEvent.click(within(live).getAllByRole("button")[1])
+  expect(onOpen).toHaveBeenCalledWith("suez_transits", "2026-10-10")
 })
 
 it("draws a square whose forecast has left the replay without a link, and says so", () => {
@@ -236,43 +315,60 @@ it("draws a square whose forecast has left the replay without a link, and says s
   render(<TrackRecord records={[suez]} entries={later} onOpen={vi.fn()} />)
 
   const squares = within(
-    card("Suez Canal").getByRole("list", {
-      name: "Last 8 weekly forecasts, 7 days ahead",
-    })
+    card("Suez Canal").getByRole("list", { name: /^Suez Canal:/ })
   ).getAllByRole("listitem")
   expect(
     squares.map((square) => within(square).queryByRole("button") !== null)
   ).toEqual([false, false, false, true, true, true, true, true])
   expect(within(squares[2]).getByRole("img").getAttribute("aria-label")).toBe(
-    "Aug 16: outside its 8 in 10 range 7 days ahead, no longer in the replay"
+    "Aug 16: missed 7 days ahead, no longer in the replay"
   )
 })
 
-it("shows the live record once 30 live forecasts have resolved, and no backtest", () => {
+it("counts the live record once 30 live forecasts have resolved, and never adds a backtest to it", () => {
   const live = {
     ...suez.retrospective,
     n: 30,
     since: "2026-11-01",
     buckets: { "1-7": suez.retrospective.buckets["1-7"] },
+    weekly: weekly([true, true, true, true, true, true, true, true]),
   }
+  const collecting = { ...suez, series_id: "hormuz_transits" }
+
+  titled([{ ...suez, n: 30, live }, collecting])
+
+  // The live series' 8 squares alone, with no "Backtest:".
+  expect(title()).toBe(
+    "8 of 8 forecasts landed in range, close to the 8 in 10 promised"
+  )
+  expect(card("Suez Canal").getAllByRole("button")).toHaveLength(8)
+  // The one still collecting says it shows a backtest.
+  expect(
+    screen.getByRole("heading", {
+      level: 3,
+      name: "Strait of Hormuz, backtest",
+    })
+  ).toBeTruthy()
+  expect(
+    screen.getByRole("table", {
+      name: "Suez Canal, live, 30 forecasts",
+      hidden: true,
+    })
+  ).toBeTruthy()
+  cleanup()
 
   titled([{ ...suez, n: 30, live }])
-
-  const suezCard = card("Suez Canal")
-  expect(suezCard.queryByText(/^Collecting/)).toBeNull()
-  expect(suezCard.queryByRole("group")).toBeNull()
-  expect(suezCard.getByText(/^Live record/).textContent).toBe(
-    "Live record: 30 forecasts since Nov 01"
-  )
-  expect(suezCard.getByRole("table")).toBeTruthy()
+  expect(screen.queryByText(/^Live record starts/)).toBeNull()
 })
 
-it("says what the ranges in brackets assume and how the verdict is read", () => {
+it("says what the brackets hold and how the verdict is read", () => {
   titled([suez])
 
-  const notes = screen.getByText(/assume independent days/)
-  expect(notes.textContent).toBe(
-    "In brackets, 95% ranges. Those of the 8 in 10 coverage assume independent days, which neighbouring forecasts are not: read them as too narrow. Error: the most likely value's mean miss over the baseline's. Beats only when its whole range is under 1, loses when over 1, ties otherwise."
+  expect(screen.getByText(/assume independent days/).textContent).toBe(
+    "In brackets, 95% ranges, and the ratio of the misses. Those of the share in range assume independent days, which neighbouring forecasts are not: read them as too narrow."
+  )
+  expect(screen.getByText(/^Each square/).textContent).toBe(
+    "Each square is one weekly forecast, scored 7 days ahead. Misses: how far the middle estimate fell from what happened, on average, against the series' own simple rule. Better or worse only when the whole 95% range of the comparison says so; about as good otherwise."
   )
 })
 
@@ -280,16 +376,16 @@ it("counts Brent's days ahead in trading days, from its real backtest", () => {
   const brent = scores.series.find((s) => s.series_id === "brent_spot")!
   titled([brent as ScoreRecord])
 
-  const backtest = within(
-    card("Brent oil").getByRole("group", {
-      name: "Backtest, not the live record",
-    })
+  expect(
+    card("Brent oil")
+      .getByRole("list", { name: /^Brent oil:/ })
+      .getAttribute("aria-label")
+  ).toBe("Brent oil: the last 8 weekly forecasts, 7 trading days ahead")
+  const table = screen.getByRole("table", { hidden: true })
+  expect(cells(table)[0][0]).toBe("Trading days ahead")
+  expect(cells(table)[1][3]).toMatch(
+    /^About as good as just repeating the last value \(/
   )
-  expect(backtest.getByText(/weekly forecasts/).textContent).toBe(
-    "Last 8 weekly forecasts, 7 trading days ahead"
-  )
-  expect(cells(backtest.getByRole("table"))[0][0]).toBe("Trading days ahead")
-  expect(cells(backtest.getByRole("table"))[0][3]).toBe("Error vs last value")
 })
 
 it("leaves out a series the page has not loaded", () => {
