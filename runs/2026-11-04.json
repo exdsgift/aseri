@@ -1,0 +1,95 @@
+{
+  "forecast_date": "2026-11-04",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-11-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-04",
+        "input_sha256": "147fd33fa3b163de613cb603a48bd77e50b842758db423975cb55344c520b25e"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-04",
+        "input_sha256": "167ce3af49b2350e4ec3cb2da9b059278d89f709520d40d69398a35a8dee1930"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-04",
+        "input_sha256": "f2c03018e01272ea71d357e88e3a79eac2755b33a0eda31b8b08f74ce28012b8"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-04",
+        "input_sha256": "fdb226910b3dd8b9de954bbb88d7c0490cf6f5299d5a69b66fecc9754ec9cc6c"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-04",
+        "input_sha256": "729acab162f89d84a1e95d48899b797d177b50752cb1cde61ea275d3b5ddbe83"
+      }
+    }
+  ],
+  "upstream": {
+    "wiki_ww3_views": {
+      "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+      "sha256": "0b6259c167b1fbb603b82dd64360dc2eef24eaf68f356be10c83d907bc4b3d4c"
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "7ac19338bee3e490506c796d9a116b7a0c8427e1301a4c5dadf2e348757ce806",
+      "etag": "\"0554f3984346447680eaeb17a63239892f0ee182090b2b79e430986490784d66\"",
+      "freshness_cutoff": "2026-11-04T05:25:56Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "e4e78712e53288cb468a48a78a75dd9e0cc08473af9979894d3c67fac2ab6928",
+      "etag": "\"7cf7bfc3a776b24bd03d5aee1453ae08ad063862b60d56fb6dc5cbc64fe9f65c\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "cc3f6e80d0fa593ab40268bd6b9523d3fbe59eee",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/41856199218"
+    },
+    "generated_at": "2026-11-04T15:22:24Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-04-aseri-timestral209m_c1.csv": "31a97693a16ed3cf959cdc6b13dccf026c5057b820ab738e4d72e51a7eb55bbf",
+    "target-data/deltas/2026-11-04.csv": "631ae7a835e8405934149f8cc6e7da72550b9e128d0ea3f019010d887c829e50"
+  }
+}
