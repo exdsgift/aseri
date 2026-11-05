@@ -1,0 +1,140 @@
+{
+  "forecast_date": "2026-11-05",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-05",
+        "input_sha256": "8a9108b0c3c6dc3ff64ae6ea80094a5f10d878d53462d105ecb30efb93726400"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-28",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-05",
+        "input_sha256": "be7ee0c527cd6482332edcf93e7b42e41b26bca937a3f24ecf858e11a2b00cdb"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-29",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-05",
+        "input_sha256": "569a3a8f78acd4c172cc3b789b8df6c6018ab70475f5ab1c3f47a4e4022ea0a0"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-10-30",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-05",
+        "input_sha256": "ca37e96afae5fbb3f4ca40cc073dff3b798a36a5d574bcba5a066a7a35a5882f"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-05",
+        "input_sha256": "d8ac63a5c72329837a5e9b0c9c493187f2cce650a981755446cd1ebc4f166c0c"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-05",
+        "input_sha256": "a006a78f43712dbab1ec00ba923f13b23da84f5a14a0ebb0033d66a259457ce8"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-05",
+        "input_sha256": "37c3384bfa0161d8610be2631a35513a0d37631ae2a4b92b5ee78e6686f51fd1"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-05",
+        "input_sha256": "250d3dd1e712493e42ce02ba92042ee0b159a16ea6a5ae7d015031ea72ad97c5"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-05",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-05",
+        "input_sha256": "913f416abc470fa82a5a8d0e1c6b2e4ee2c0dbc35d252c2a0f852db12455b1b1"
+      }
+    }
+  ],
+  "upstream": {
+    "wiki_ww3_views": {
+      "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+      "sha256": "f2640c745dc23c1b27fccb97f224446abc6b0cdec05b72dbf32e70663648528a"
+    },
+    "brent_spot": {
+      "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+      "sha256": "b30cdc14ddae1f72df40bb942f6926acc9df627cb3c68844d6e18ea65b5cf6f0",
+      "last_modified": "Wed, 04 Nov 2026 18:18:32 GMT"
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "645fe16c9b7898066f9f6d1620381e2d1b921565df5b0e3a450464473979c348",
+      "etag": "\"790a9147a5ada62becef5faec3516d0c6e6c40c18c7056cd35667c6c52d0cda1\"",
+      "freshness_cutoff": "2026-11-05T05:33:36Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "362230699191d9dff69e4b252b6dd0c6796907ee46a132127117c29f2a525012",
+      "etag": "\"8a4ef393cc01da154dad1b676f009c46f16eda11bffdb0ce73e4a71e4a575ded\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "cc3f6e80d0fa593ab40268bd6b9523d3fbe59eee",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/42053621851"
+    },
+    "generated_at": "2026-11-05T15:23:15Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-05-aseri-timestral209m_c1.csv": "e12a8c77624ac1b2b65ed71c9ea35f25863244106e0a162a87eae8707a51931b",
+    "target-data/deltas/2026-11-05.csv": "f2dbabf3a752dae196014db5598de346462b05f9aa475155ffaf469af8279a4c"
+  }
+}
