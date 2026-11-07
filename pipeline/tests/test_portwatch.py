@@ -225,3 +225,42 @@ def test_a_count_just_under_twice_the_highest_before_it_passes(serve):
     )
 
     assert portwatch.fetch(QUERY)[0].iloc[-1] == 15.0
+
+
+def test_json_rate_limit_waits_the_requested_minute_before_retrying(serve):
+    limited = json.dumps({"error": {"code": 429, "details": ["Retry after 60 sec."]}}).encode()
+    server = serve(layer=[limited])
+    portwatch.fetch(QUERY)
+    assert server.sleeps == [60]
+
+
+def test_http_rate_limit_honors_retry_after(serve):
+    limited = HTTPError(QUERY, 429, "Too many requests", {"Retry-After": "90"}, None)
+    server = serve(layer=[limited])
+    portwatch.fetch(QUERY)
+    assert server.sleeps == [90]
+
+
+def test_long_server_cooldown_stops_instead_of_retrying_early(serve):
+    limited = HTTPError(QUERY, 429, "Too many requests", {"Retry-After": "600"}, None)
+    server = serve(layer=[limited])
+    with pytest.raises(HTTPError):
+        portwatch.fetch(QUERY)
+    assert server.sleeps == []
+    assert len(server.requests) == 1
+
+
+def test_retry_after_accepts_http_dates_and_ignores_invalid_values(serve):
+    serve()
+    assert portwatch.retry_after("Fri, 30 Oct 2026 07:04:00 GMT", 10) == 120
+    for value in (None, "invalid", "NaN", "-1", "0"):
+        assert portwatch.retry_after(value, 10) == 10
+
+
+def test_repeated_throttling_stays_inside_the_wait_budget(serve):
+    limited = json.dumps({"error": {"code": 429, "message": "Too many requests"}}).encode()
+    server = serve(layer=[limited] * 8)
+    with pytest.raises(ValueError, match="Too many requests"):
+        portwatch.fetch(QUERY)
+    assert server.sleeps == [60] * 5
+    assert len(server.requests) == 6
