@@ -934,7 +934,8 @@ def test_data_past_its_expected_lag_warns_in_the_run_summary_and_on_the_page_and
     assert entry["stale_since"] == stale_since
     assert (
         outputs.read_text(encoding="utf-8")
-        == ("stale=gpr_daily\n" if stale_since else "stale=\n")
+        == "source_failed=\n"
+        + ("stale=gpr_daily\n" if stale_since else "stale=\n")
         + "revision_hold=\nbounds_hold=\ncalibration_red=\n"
     )
 
@@ -1001,6 +1002,8 @@ def test_a_source_that_fails_its_contract_is_skipped_and_keeps_its_last_forecast
     )
     archive_before = files(archive_dir)
     monkeypatch.setattr(cli, "load_model", no_model)
+    outputs = tmp_path / "outputs"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(outputs))
 
     run_on(
         monkeypatch,
@@ -1019,6 +1022,7 @@ def test_a_source_that_fails_its_contract_is_skipped_and_keeps_its_last_forecast
     assert (latest["reference_date"], latest["forecast_mode"]) == ("2026-10-19", "live")
     entry = read(tmp_path / "day2" / "series.json")["series"][0]
     # Acquisition failure is visible even before the data becomes late.
+    assert "source_failed=gpr_daily\n" in outputs.read_text()
     assert entry["source_status"] == "failed"
     assert entry["stale_since"] is None
 
@@ -1026,6 +1030,8 @@ def test_a_source_that_fails_its_contract_is_skipped_and_keeps_its_last_forecast
 def test_a_run_with_nothing_to_publish_fails_and_says_why(
     tmp_path, monkeypatch, stub_model, summary
 ):
+    outputs = tmp_path / "outputs"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(outputs))
     with pytest.raises(SystemExit, match="Nothing to publish"):
         run_on(
             monkeypatch,
@@ -1037,6 +1043,7 @@ def test_a_run_with_nothing_to_publish_fails_and_says_why(
 
     assert "| gpr_daily | failed | - |" in summary()
     assert not (tmp_path / "api").exists()
+    assert outputs.read_text() == "source_failed=gpr_daily\n"
 
 
 # The four sea lanes, with GPR: every source of the daily run.

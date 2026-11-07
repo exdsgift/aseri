@@ -78,3 +78,14 @@ it("shows acquisition failure independently of freshness", async () => {
   expect(button.textContent).toContain("Data to Oct 25")
   expect(button.textContent).not.toContain("stale since")
 })
+
+it("keeps the observation date distinct from an older forecast cutoff", async () => {
+  const series = await loadSeries(
+    { ...suez, last_observation_date: "2026-10-26", stale_since: "2026-11-08" },
+    { replay: false }
+  )
+  const button = card(series)
+  expect(button.textContent).toContain("Data to Oct 26")
+  expect(button.textContent).toContain("stale since Nov 08")
+  expect(button.textContent).not.toContain("data to Oct 25")
+})

@@ -82,8 +82,7 @@ export function SignalCard({
       {staleSince && (
         <>
           <span className="caution">
-            data to {monthDay(today.referenceDate)}, stale since{" "}
-            {monthDay(staleSince)}
+            stale since {monthDay(staleSince)}
           </span>{" "}
         </>
       )}

@@ -101,8 +101,8 @@ export function ForecastPanel({
       {/* Said in words too, so the warning never rests on its marker alone. */}
       {staleSince && (
         <p className="caution">
-          data to {monthDay(forecasts[last].dates.at(-1)!)}, stale since{" "}
-          {monthDay(staleSince)}
+          data to {monthDay(series.dataTo ?? forecasts[last].dates.at(-1)!)},
+          stale since {monthDay(staleSince)}
         </p>
       )}
       {/* Such as Taiwan's tracking dropouts, or a newest value under review. */}
@@ -176,7 +176,7 @@ export function ForecastPanel({
           ))}
           <p>
             1-year range of the daily value to{" "}
-            {monthDay(forecasts[last].dates.at(-1)!)}:{" "}
+            {monthDay(series.dataTo ?? forecasts[last].dates.at(-1)!)}:{" "}
             {yearRange(forecasts[last].dates, forecasts[last].values)
               .map(formatValue)
               .join("-")}

@@ -71,6 +71,9 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         except Exception as error:  # noqa: BLE001
             skipped[series.id] = ("failed", f"{type(error).__name__}: {error}")
     failed_sources = set(skipped)
+    if "GITHUB_OUTPUT" in os.environ:
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as file:
+            file.write(f"source_failed={','.join(sorted(failed_sources))}\n")
     # First, so a deep rewrite holds its series before any of its data is archived: it keeps its last good files,
     # and daily.yml opens an issue. A manual run with accept_revisions ticked, after a human review, records it.
     # A deep revision that passes is archived, and named in the run summary.
@@ -329,7 +332,6 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             file.write(
                 f"stale={','.join(late)}\nrevision_hold={','.join(held)}\n"
                 f"bounds_hold={','.join(bounded)}\ncalibration_red={','.join(red)}\n"
-                f"source_failed={','.join(sorted(failed_sources))}\n"
             )
 
 
