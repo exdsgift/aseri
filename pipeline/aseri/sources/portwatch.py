@@ -2,10 +2,15 @@
 
 import hashlib
 import json
+import math
+import re
 import time
 import urllib.request
 from datetime import UTC, date, datetime
+from email.utils import parsedate_to_datetime
 from http.client import HTTPException
+from urllib.error import HTTPError
+from urllib.parse import urlsplit
 
 import pandas as pd
 
@@ -13,6 +18,8 @@ from aseri.sources import USER_AGENT
 
 # The layer's maxRecordCount: the history since 2019 comes in pages.
 PAGE = 1000
+# A throttled lane must not make the next lane immediately hit the same service.
+_cooldowns: dict[str, float] = {}
 
 
 def fetch(url: str) -> tuple[pd.Series, date, dict]:
@@ -51,26 +58,69 @@ def fetch(url: str) -> tuple[pd.Series, date, dict]:
 
 
 def get(url: str) -> dict:
-    """The JSON at `url`, retried with backoff (10 s, doubling to 60 s) for about 5 minutes before giving up.
+    """The JSON at `url`, retried with backoff and server cooldowns, with at most 310 seconds of waiting.
 
     ArcGIS reports errors inside HTTP 200 bodies. On 2026-10-30 it failed from 1 query in 10 to 9 in 10,
     in spells of minutes, and one lane in four still failed in each of three runs, with 2.5 or 5 minutes
     of attempts: that lane is published from the archive, and the next day's run tries again.
     """
+    host = urlsplit(url).netloc
+    if _cooldowns.get(host, 0) > time.monotonic():
+        raise ValueError("PortWatch service is cooling down after throttling")
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    waited = 0.0
     for attempt in range(8):
+        delay = min(10 * 2**attempt, 60)
+        throttled = False
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 # A body cut off mid-way fails here, as a JSONDecodeError.
                 body = json.loads(response.read())
+                header_delay = response.headers.get("Retry-After")
+            if isinstance(body.get("error"), dict) and body["error"].get("code") == 429:
+                details = json.dumps(body["error"])
+                match = re.search(
+                    r"retry after (\d+(?:\.\d+)?) sec", details, re.IGNORECASE
+                )
+                throttled = True
+                delay = max(
+                    retry_after(match[1] if match else None, 60),
+                    retry_after(header_delay, 60),
+                )
             if "error" in body or body.get("features") == []:
                 raise ValueError(f"PortWatch answered {body.get('error', 'no rows')}")
             return body
         # Even a 4xx: the layer's outage of 2026-10-29 said 400 and cleared within 15 minutes.
-        except (OSError, HTTPException, ValueError):
-            if attempt == 7:
+        except (OSError, HTTPException, ValueError) as error:
+            if isinstance(error, HTTPError):
+                throttled = error.code == 429 or bool(
+                    error.headers and error.headers.get("Retry-After")
+                )
+                delay = retry_after(
+                    error.headers.get("Retry-After") if error.headers else None,
+                    60 if error.code == 429 else delay,
+                )
+            # Never retry earlier than requested; leave a longer cooldown to the next run.
+            if attempt == 7 or waited + delay > 310:
+                if throttled:
+                    _cooldowns[host] = time.monotonic() + delay
                 raise
-            time.sleep(min(10 * 2**attempt, 60))
+            time.sleep(delay)
+            waited += delay
+
+
+def retry_after(value: str | None, default: float) -> float:
+    """A server's seconds or HTTP date, at least the ordinary retry delay."""
+    if value is None:
+        return default
+    try:
+        seconds = float(value)
+    except ValueError:
+        try:
+            seconds = (parsedate_to_datetime(value) - datetime.now(UTC)).total_seconds()
+        except (ValueError, TypeError, OverflowError):
+            return default
+    return max(default, seconds) if math.isfinite(seconds) else default
 
 
 def parse(rows: list[dict], edited: pd.Timestamp) -> pd.Series:
