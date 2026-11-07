@@ -1,0 +1,75 @@
+{
+  "forecast_date": "2026-11-07",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-07",
+        "input_sha256": "d45eda7f85b05f3a8995cc99ec5c2eaccc2e2787bd2aa1841c6b1b420a882e7b"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-07",
+        "input_sha256": "1656a42f41334fc127153927e0f08d214d13392a4c00887330a7c0911a772a73"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-07",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-07",
+        "input_sha256": "d734462a74f47f68d6b805972619b718f2f04834e42d943da9ef3d533321aa2b"
+      }
+    }
+  ],
+  "upstream": {
+    "wiki_ww3_views": {
+      "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+      "sha256": "98c24be4b47b05c36ce723f07d1aafe621e37ec28b202773f829af3c7e78378a"
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "cffab3b9b8d67e038fbe4df869c31b6302346004cd657785d3074d9092c59cd2",
+      "etag": "\"b06e7d41b475d3054e373d2ed45820568e913f8d55a2a9297bad63e0c5885851\"",
+      "freshness_cutoff": "2026-11-07T05:11:17Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "5eb0b12cd0c823d36ad8fe7f9db1325bdbd2878dd8f6ded0350be83ecc5023e2",
+      "etag": "\"9789593b204b872e89df8d3d29ec9f0a498e001ca58855a632f917cd02054613\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "ecda9f668f0f6e9416bd1584793bcb99abf18eaa",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/42378805842"
+    },
+    "generated_at": "2026-11-07T13:53:46Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-07-aseri-timestral209m_c1.csv": "3f660e676f1d4f20b2f5837d9db8859b8ea677bcc58ee9a990c71d8c30195b86",
+    "target-data/deltas/2026-11-07.csv": "3a177178117027170a7e9233db5b6c63a5e16c2a5d8112231b74f0959c469962"
+  }
+}
