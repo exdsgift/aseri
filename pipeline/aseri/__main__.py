@@ -70,6 +70,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
         # Whatever breaks a download, a file or a contract fails its own series, never the run.
         except Exception as error:  # noqa: BLE001
             skipped[series.id] = ("failed", f"{type(error).__name__}: {error}")
+    failed_sources = set(skipped)
     # First, so a deep rewrite holds its series before any of its data is archived: it keeps its last good files,
     # and daily.yml opens an issue. A manual run with accept_revisions ticked, after a human review, records it.
     # A deep revision that passes is archived, and named in the run summary.
@@ -241,7 +242,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
                 as_of=as_of,
                 generated_at=generated_at,
                 note=note,
-                # A failure before the data is late leaves the page as current as on any day: the summary says it failed.
+                source_status="failed" if series.id in failed_sources else "ok",
                 stale_since=since if today >= since else None,
             )
         )
@@ -328,6 +329,7 @@ def main(api_dir: Path, archive_dir: Path) -> None:
             file.write(
                 f"stale={','.join(late)}\nrevision_hold={','.join(held)}\n"
                 f"bounds_hold={','.join(bounded)}\ncalibration_red={','.join(red)}\n"
+                f"source_failed={','.join(sorted(failed_sources))}\n"
             )
 
 

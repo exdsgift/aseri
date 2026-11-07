@@ -37,6 +37,7 @@ jobs:
       revision_hold: ${{ steps.run.outputs.revision_hold }}
       bounds_hold: ${{ steps.run.outputs.bounds_hold }}
       stale: ${{ steps.run.outputs.stale }}
+      source_failed: ${{ steps.run.outputs.source_failed }}
       calibration_red: ${{ steps.run.outputs.calibration_red }}
     defaults:
       run:
@@ -299,6 +300,29 @@ jobs:
           Run: $RUN_URL
 
           The run summary gives each held forecast and the bound it broke. Check the data first: a source fault or a level shift. The next runs forecast the same days again and hold them again until the data moves or the code changes (the bounds, recalibrated with a reason, or the model, under a new model ID)."
+
+  source-alert:
+    needs: build
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' && needs.build.outputs.source_failed != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Report failed acquisition independently of freshness
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FAILED: ${{ needs.build.outputs.source_failed }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Source acquisition failed"
+          open=$(gh issue list --state open --search '"Source acquisition failed" in:title' --json number,title --jq '[.[] | select(.title == "Source acquisition failed")][0].number // empty')
+          body="Failed sources: $FAILED. Last available forecasts are retained; this is independent of data age. See the acquisition details: $RUN_URL"
+          if [ -n "$open" ]; then
+            gh issue edit "$open" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
 
   # Opens an issue when the page shows a series as late; like revision-alert it runs only gh, with issues: write alone.
   stale-alert:

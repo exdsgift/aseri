@@ -62,8 +62,19 @@ it("says at normal, with no arrow, when the 7-day average is on it", async () =>
   )
 
   expect(button.textContent!.replace(/\s+/g, " ")).toMatch(
-    /· 7-day avg at normal Nov 22/
+    /· 7-day avg Data to Oct 25 at normal Nov 22/
   )
   // The pictogram alone: no arrow says a way the value does not go.
   expect(button.querySelectorAll("svg")).toHaveLength(1)
+})
+
+it("shows acquisition failure independently of freshness", async () => {
+  const series = await loadSeries(
+    { ...suez, source_status: "failed", stale_since: null },
+    { replay: false }
+  )
+  const button = card(series)
+  expect(button.textContent).toContain("Source update failed")
+  expect(button.textContent).toContain("Data to Oct 25")
+  expect(button.textContent).not.toContain("stale since")
 })

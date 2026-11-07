@@ -222,3 +222,5 @@ If you use aseri's forecasts or code, cite it as below, and cite the data source
 [GitHub](https://github.com/exdsgift)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[LinkedIn](https://www.linkedin.com/in/gabrieledurante/)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Buy me a coffee](https://buymeacoffee.com/exdsgift)
 
 </div>
+
+The catalog’s optional `source_status` is `ok` or `failed` for the latest acquisition attempt, independently of `stale_since`. Cards always show the last observation date and label acquisition failures while keeping the last available forecast. Failed acquisitions open one deduplicated operational issue; data freshness retains its existing thresholds.

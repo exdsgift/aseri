@@ -1018,7 +1018,8 @@ def test_a_source_that_fails_its_contract_is_skipped_and_keeps_its_last_forecast
     latest = read(tmp_path / "day2" / "series" / "gpr_daily" / "latest.json")
     assert (latest["reference_date"], latest["forecast_mode"]) == ("2026-10-19", "live")
     entry = read(tmp_path / "day2" / "series.json")["series"][0]
-    # Its data, to Oct 19, is not late yet: the page is as current as on any day, and only the summary says it failed.
+    # Acquisition failure is visible even before the data becomes late.
+    assert entry["source_status"] == "failed"
     assert entry["stale_since"] is None
 
 

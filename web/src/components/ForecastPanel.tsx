@@ -93,6 +93,11 @@ export function ForecastPanel({
           {!live && ` · what happened as of ${monthDay(today.asOf)}`}
         </p>
       </div>
+      {series.sourceFailed && (
+        <p className="caution">
+          Source update failed; last available data shown.
+        </p>
+      )}
       {/* Said in words too, so the warning never rests on its marker alone. */}
       {staleSince && (
         <p className="caution">
