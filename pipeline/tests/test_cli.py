@@ -934,7 +934,7 @@ def test_data_past_its_expected_lag_warns_in_the_run_summary_and_on_the_page_and
     assert entry["stale_since"] == stale_since
     assert (
         outputs.read_text(encoding="utf-8")
-        == "source_failed=\n"
+        == f"source_failed={','.join(sorted(s.id for s, _ in cli.SOURCES if s.id != 'gpr_daily'))}\n"
         + ("stale=gpr_daily\n" if stale_since else "stale=\n")
         + "revision_hold=\nbounds_hold=\ncalibration_red=\n"
     )
@@ -1022,7 +1022,9 @@ def test_a_source_that_fails_its_contract_is_skipped_and_keeps_its_last_forecast
     assert (latest["reference_date"], latest["forecast_mode"]) == ("2026-10-19", "live")
     entry = read(tmp_path / "day2" / "series.json")["series"][0]
     # Acquisition failure is visible even before the data becomes late.
-    assert "source_failed=gpr_daily\n" in outputs.read_text()
+    assert "gpr_daily" in outputs.read_text().splitlines()[0].split("=", 1)[1].split(
+        ","
+    )
     assert entry["source_status"] == "failed"
     assert entry["stale_since"] is None
 
@@ -1043,7 +1045,10 @@ def test_a_run_with_nothing_to_publish_fails_and_says_why(
 
     assert "| gpr_daily | failed | - |" in summary()
     assert not (tmp_path / "api").exists()
-    assert outputs.read_text() == "source_failed=gpr_daily\n"
+    assert (
+        outputs.read_text()
+        == f"source_failed={','.join(sorted(s.id for s, _ in cli.SOURCES))}\n"
+    )
 
 
 # The four sea lanes, with GPR: every source of the daily run.
