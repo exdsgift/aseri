@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import re
 import time
 import urllib.request
@@ -70,7 +71,9 @@ def get(url: str) -> dict:
                 body = json.loads(response.read())
             if isinstance(body.get("error"), dict) and body["error"].get("code") == 429:
                 details = json.dumps(body["error"])
-                match = re.search(r"retry after (\d+(?:\.\d+)?) sec", details, re.IGNORECASE)
+                match = re.search(
+                    r"retry after (\d+(?:\.\d+)?) sec", details, re.IGNORECASE
+                )
                 delay = retry_after(match[1] if match else None, 60)
             if "error" in body or body.get("features") == []:
                 raise ValueError(f"PortWatch answered {body.get('error', 'no rows')}")
@@ -100,7 +103,7 @@ def retry_after(value: str | None, default: float) -> float:
             seconds = (parsedate_to_datetime(value) - datetime.now(UTC)).total_seconds()
         except (ValueError, TypeError, OverflowError):
             return default
-    return max(default, seconds) if seconds == seconds else default
+    return max(default, seconds) if math.isfinite(seconds) else default
 
 
 def parse(rows: list[dict], edited: pd.Timestamp) -> pd.Series:
