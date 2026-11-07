@@ -176,7 +176,7 @@ export function ForecastPanel({
           ))}
           <p>
             1-year range of the daily value to{" "}
-            {monthDay(series.dataTo ?? forecasts[last].dates.at(-1)!)}:{" "}
+            {monthDay(forecasts[last].dates.at(-1)!)}:{" "}
             {yearRange(forecasts[last].dates, forecasts[last].values)
               .map(formatValue)
               .join("-")}
