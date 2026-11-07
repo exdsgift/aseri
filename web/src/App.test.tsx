@@ -497,16 +497,16 @@ it("groups a card for each series in the catalog, with its 7-day average against
     cards.getAllByRole("button").map((b) => b.textContent!.replace(/\s+/g, " "))
   ).toEqual([
     // Each range rounded outward from the model's: GPR's 110.8-251.0, Brent's 102.3-145.1.
-    "Geopolitical risk [1] 181 index · 7-day avg 81% above normal Nov 23: likely 110-260",
-    '"World War III" [2] 2,053 Wikipedia views a day · 7-day avg 57% below normal Nov 13: likely 1,400-5,600 a day',
+    "Geopolitical risk [1] 181 index · 7-day avg Data to Oct 26 81% above normal Nov 23: likely 110-260",
+    '"World War III" [2] 2,053 Wikipedia views a day · 7-day avg Data to Oct 30 57% below normal Nov 13: likely 1,400-5,600 a day',
     // Brent's week has 5 prices, and its 14 steps are trading days: Nov 16 is 20 days on.
-    "Brent oil [3] 124 $ a barrel · 7-day avg 38% above normal Nov 16: likely 102-146 a barrel",
-    "Suez Canal [4] 41 ships a day · 7-day avg 1% above normal Nov 22: likely 33-51 a day",
-    "Strait of Hormuz [5] 3 ships a day · 7-day avg 88% below normal Nov 08: likely 0-7 a day",
-    "Bab el-Mandeb [6] 29 ships a day · 7-day avg 14% below normal Nov 08: likely 20-36 a day",
-    "Taiwan Strait [7] 190 ships a day · 7-day avg 18% below normal Nov 22: likely 180-270 a day",
-    "Air-raid alerts [8] 62 alert hours a day, all regions · 7-day avg 1% below normal Nov 06: likely 48-88 a day",
-    "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures · 7-day avg 20% above normal Nov 06: likely 1,150-2,000 a day",
+    "Brent oil [3] 124 $ a barrel · 7-day avg Data to Oct 27 38% above normal Nov 16: likely 102-146 a barrel",
+    "Suez Canal [4] 41 ships a day · 7-day avg Data to Oct 25 1% above normal Nov 22: likely 33-51 a day",
+    "Strait of Hormuz [5] 3 ships a day · 7-day avg Data to Oct 25 88% below normal Nov 08: likely 0-7 a day",
+    "Bab el-Mandeb [6] 29 ships a day · 7-day avg Data to Oct 25 14% below normal Nov 08: likely 20-36 a day",
+    "Taiwan Strait [7] 190 ships a day · 7-day avg Data to Oct 25 18% below normal Nov 22: likely 180-270 a day",
+    "Air-raid alerts [8] 62 alert hours a day, all regions · 7-day avg Data to Oct 30 1% below normal Nov 06: likely 48-88 a day",
+    "Drones downed [9] 1,684 drones a day, claimed by Ukraine's General Staff, one side's figures · 7-day avg Data to Oct 30 20% above normal Nov 06: likely 1,150-2,000 a day",
   ])
   // The key hint is for the eye, and only on hover or focus: the button says it as a shortcut.
   const suez = cards.getByRole("button", { name: /^Suez Canal 41 ships/ })
@@ -533,7 +533,7 @@ it("cautions on a stale series' card, in words and with a caution's marker", asy
 
   const suez = await screen.findByRole("button", { name: /^Suez Canal/ })
   const dataTo = within(suez).getByText(/stale since/)
-  expect(dataTo.textContent).toBe("data to Oct 25, stale since Nov 04")
+  expect(dataTo.textContent).toBe("stale since Nov 04")
   expect(dataTo.className).toContain("caution")
 })
 

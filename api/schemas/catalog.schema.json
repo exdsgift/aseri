@@ -71,6 +71,7 @@
         "latest_reference_date": {"$ref": "defs.schema.json#/$defs/date", "description": "The data cutoff of latest.json."},
         "latest_forecast_date": {"$ref": "defs.schema.json#/$defs/date", "description": "The run day that issued latest.json."},
         "stale_since": {"description": "The day its data turned late, or null while it is on time.", "anyOf": [{"$ref": "defs.schema.json#/$defs/date"}, {"type": "null"}]},
+        "source_status": {"description": "Outcome of the latest acquisition attempt, independent of freshness or forecast generation. Absent in older catalogs.", "enum": ["ok", "failed"]},
         "note": {"description": "Why the latest forecast starts before the last observation, then any standing caveat on the data.", "type": ["string", "null"]},
         "weekly": {"description": "Whether its values follow the week, so a day compares with the same weekday.", "type": "boolean"},
         "day_to_day_tie": {

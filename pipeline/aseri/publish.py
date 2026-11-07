@@ -57,6 +57,7 @@ def publish(
     generated_at: datetime,
     stale_since: date | None = None,
     note: str | None = None,
+    source_status: str = "ok",
 ) -> dict:
     """Write each day's first archived forecast of `series`, their index, the latest one, the replay and the observed values, under `api_dir`; return its catalog entry.
 
@@ -114,7 +115,9 @@ def publish(
         first_seen,
         trading=series.horizon_unit == "trading_day",
     )
-    return _entry(series, observed, newest, links, stale_since, note, tie)
+    return _entry(
+        series, observed, newest, links, stale_since, note, tie, source_status
+    )
 
 
 def publish_catalog(
@@ -307,7 +310,9 @@ def _actuals(series, observed, as_of, generated_at) -> dict:
     }
 
 
-def _entry(series, observed, newest, links, stale_since, note, tie) -> dict:
+def _entry(
+    series, observed, newest, links, stale_since, note, tie, source_status
+) -> dict:
     return {
         "series_id": series.id,
         "title": series.title,
@@ -327,6 +332,7 @@ def _entry(series, observed, newest, links, stale_since, note, tie) -> dict:
         "latest_forecast_date": newest.forecast_date,
         # Additive to v1: null while the series is fresh and its forecast starts from its last observation.
         "stale_since": stale_since and stale_since.isoformat(),
+        "source_status": source_status,
         # Why the latest forecast starts before the last observation, then any standing caveat on the data.
         "note": " ".join(n for n in (note, series.note) if n) or None,
         # Additive to v1: whether the values follow the week, so a day compares with the same weekday.

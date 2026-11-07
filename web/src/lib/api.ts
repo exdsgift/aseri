@@ -13,6 +13,8 @@ export type CatalogEntry = {
   interval_steps: number[]
   // Where the replay ends: it holds this day's forecast and those of the 120 days before.
   latest_reference_date: string
+  last_observation_date?: string
+  source_status?: "ok" | "failed"
   // Set when the day's run skipped the series and kept its last good files.
   stale_since?: string | null
   // What a reader must know about the data, such as Taiwan's tracking dropouts.
@@ -97,6 +99,8 @@ export type Series = {
   forecasts: Forecast[]
   steps: number[]
   staleSince: string | null
+  dataTo?: string
+  sourceFailed?: boolean
   note: string | null
   weekly: boolean
   rho: number
@@ -306,6 +310,8 @@ export async function loadSeries(
     ],
     steps: entry.interval_steps,
     staleSince: entry.stale_since ?? null,
+    dataTo: entry.last_observation_date ?? latest.reference_date,
+    sourceFailed: entry.source_status === "failed",
     note: entry.note ?? null,
     weekly: entry.weekly ?? false,
     // A catalog cached from before the tie was published draws independent days.

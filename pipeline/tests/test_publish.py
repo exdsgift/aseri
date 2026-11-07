@@ -482,6 +482,7 @@ def test_catalog_lists_the_series_with_its_latest_forecast(api_dir):
             "latest_reference_date": "2026-10-26",
             "latest_forecast_date": "2026-10-29",
             "stale_since": None,
+            "source_status": "ok",
             "note": None,
             "weekly": True,
             # One pair so far, the two days of 2026-10-25's forecast: far too few for a tie.

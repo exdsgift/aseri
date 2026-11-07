@@ -854,3 +854,5 @@ The research's skeleton is now the real document, `api/openapi.json` (#135): Ope
 - https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json
 
 **Internal:** [timestral-model.md](timestral-model.md), [data-sources.md](data-sources.md), [spike-timestral-backtest.md](spike-timestral-backtest.md), [forecast-horizons.md](forecast-horizons.md), [prior-art-and-gaps.md](prior-art-and-gaps.md). The size measurements read `data/fc_Timestral-209M.npz` of [`timestral-backtest/`](https://github.com/exdsgift/aseri/tree/prototypes/timestral-backtest) on the `prototypes` branch. They were built with pandas 2.2.3 and pyarrow 24.0.0 (CSV, gzip level 9, Parquet zstd) and were not committed.
+
+The catalog’s optional `source_status` is `ok` or `failed` for the latest acquisition attempt, independently of `stale_since`. Cards always show the last observation date and label acquisition failures while keeping the last available forecast. Failed acquisitions open one deduplicated operational issue; data freshness retains its existing thresholds.

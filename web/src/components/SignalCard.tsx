@@ -72,12 +72,17 @@ export function SignalCard({
           {unit} <span className="whitespace-nowrap">· 7-day avg</span>
         </span>
       </span>{" "}
+      <span className="text-muted-foreground">
+        Data to {monthDay(series.dataTo ?? today.referenceDate)}
+      </span>{" "}
+      {series.sourceFailed && (
+        <span className="caution">Source update failed</span>
+      )}
       {/* Said in words too, so the warning never rests on its marker alone. */}
       {staleSince && (
         <>
           <span className="caution">
-            data to {monthDay(today.referenceDate)}, stale since{" "}
-            {monthDay(staleSince)}
+            stale since {monthDay(staleSince)}
           </span>{" "}
         </>
       )}
