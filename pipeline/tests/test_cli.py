@@ -1083,6 +1083,7 @@ class Response:
 
     def __init__(self, body):
         self.body = body
+        self.headers = {}
 
     def __enter__(self):
         return self
