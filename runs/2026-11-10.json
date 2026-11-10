@@ -1,0 +1,375 @@
+{
+  "forecast_date": "2026-11-10",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "suez_transits",
+      "reference_date": "2026-11-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "097910a264d1afd04a52133dfc04ec579a36c5f59ba88e99d466f344300f639e"
+      }
+    },
+    {
+      "target": "suez_transits",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "0b1cafd9f13f89af4d57ba8564e97bffc728df49454b5f5e9d7c22b73df74538"
+      }
+    },
+    {
+      "target": "suez_transits",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "30c6d3680f0fa2c6480843f0252c1c5a48c404591ff4edc63a81c5d2695bda8a"
+      }
+    },
+    {
+      "target": "suez_transits",
+      "reference_date": "2026-11-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "20938eecb777633ccf26e7bda4e72ccd8f46ecc9e684df1bfa6a63dc4eb27913"
+      }
+    },
+    {
+      "target": "suez_transits",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "e2fd0109cc15f734bf7beaa7f725bacfac3bba1fc5d43a967b13c4e342d250ad"
+      }
+    },
+    {
+      "target": "suez_transits",
+      "reference_date": "2026-11-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "750e97c0e3a151b3da627d2735c67e9ecfe878837d032385587dc4ce70f0f704"
+      }
+    },
+    {
+      "target": "suez_transits",
+      "reference_date": "2026-11-08",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "fc4d330a114249228c086db671215617257a54f8fe20aaa08e632b92e3de6f0b"
+      }
+    },
+    {
+      "target": "hormuz_transits",
+      "reference_date": "2026-11-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "2d269e14558933cde76d80ffc64a5ba6f1c73658541c08755a551773abafe0d2"
+      }
+    },
+    {
+      "target": "hormuz_transits",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "4e818506a895b98c974c18ef58cc91231f7c210a5efc7e5517c2c0cc85990918"
+      }
+    },
+    {
+      "target": "hormuz_transits",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "8fb86be9df35e85006c9af1a12601f809b35570b2c1936d21f749e17bb58f760"
+      }
+    },
+    {
+      "target": "hormuz_transits",
+      "reference_date": "2026-11-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "574d97f3b29ca5304ea197df8fbfbd8ae415554f7bab7ca6ebc18c1dc2636944"
+      }
+    },
+    {
+      "target": "hormuz_transits",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "a98cad615b92b94c22b845713c89296be82b0d22318d337805c472c14bb43121"
+      }
+    },
+    {
+      "target": "hormuz_transits",
+      "reference_date": "2026-11-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "a3c16b8b817d59799e37c6a084094af04ae08e9128621f21bb920da9de293e0d"
+      }
+    },
+    {
+      "target": "hormuz_transits",
+      "reference_date": "2026-11-08",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "d355f6df4bfeb2a2a1cbdde7e228151a4102e322a974a35f97ed7032bba992c2"
+      }
+    },
+    {
+      "target": "bab_el_mandeb_transits",
+      "reference_date": "2026-11-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "2210f5eb57567defa528615760f1e3bd2e4ba362b239c81e7572a53c24a7ef23"
+      }
+    },
+    {
+      "target": "bab_el_mandeb_transits",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "58694c55b75c9eb350cac3d5183124984f81d211b2212100b735069b5d87ee19"
+      }
+    },
+    {
+      "target": "bab_el_mandeb_transits",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "c27e5f47a63c32c7b3c4b016d791af95f68be293806cdd06747773fba212a946"
+      }
+    },
+    {
+      "target": "bab_el_mandeb_transits",
+      "reference_date": "2026-11-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "1e3481da9a6147821a523cb2ea1b27a080422e49cdd7a466952a1712de3b9245"
+      }
+    },
+    {
+      "target": "bab_el_mandeb_transits",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "88f9af77f0eee2fb842ebf368309ac12c3e34c6e611b6a5f4c4fc8292e78e777"
+      }
+    },
+    {
+      "target": "bab_el_mandeb_transits",
+      "reference_date": "2026-11-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "454098aa6204598c3c7c46ef2b08d2b59c04535fb5419aadf24fd755b7ab6aff"
+      }
+    },
+    {
+      "target": "bab_el_mandeb_transits",
+      "reference_date": "2026-11-08",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "211660147ce5a9bcbb155fc4201aa7fb1ac079f3c22fe6d4065db7899a98a18f"
+      }
+    },
+    {
+      "target": "taiwan_strait_transits",
+      "reference_date": "2026-11-02",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "b08abf0af6477e185f6f8608c5941fefc04d7e54c80855c00beb7611365d4820"
+      }
+    },
+    {
+      "target": "taiwan_strait_transits",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "e369367048e82273f67783a43d04cfb9762b222f111ceb506de429d472b28376"
+      }
+    },
+    {
+      "target": "taiwan_strait_transits",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "fbc7ccb7570aecd5f327c0c1c24135a98b6ea7ffb8ff552bd5c0c8c10eed33af"
+      }
+    },
+    {
+      "target": "taiwan_strait_transits",
+      "reference_date": "2026-11-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "01c69556b54f5ab98da025ad290fdb933a0c6ed656a475126d4d31815d46de59"
+      }
+    },
+    {
+      "target": "taiwan_strait_transits",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "96d096ead84c48b70b1d23336f4798e4136662f9714530cb4fa0566ad9cbb0d4"
+      }
+    },
+    {
+      "target": "taiwan_strait_transits",
+      "reference_date": "2026-11-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "973bacb3808e8689cc792630f8de2a094d347c3447e0fa88cbcced24f062ca80"
+      }
+    },
+    {
+      "target": "taiwan_strait_transits",
+      "reference_date": "2026-11-08",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+        "as_of": "2026-11-10",
+        "input_sha256": "d23ba607efb861c2f064b953f451092d0343186305efa7c21733294dea14263a"
+      }
+    },
+    {
+      "target": "wiki_ww3_views",
+      "reference_date": "2026-11-09",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+        "as_of": "2026-11-10",
+        "input_sha256": "394ace7f3e215c3c32492d894e136c137ae0fe945b4907c72d1e8baeb223aeb2"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-09",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-10",
+        "input_sha256": "9a2f128584ab8d4e9e60cd3394f87e4c3d2b0345c59c0ae339ae1564b058bcd8"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-10",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-10",
+        "input_sha256": "58662eaf11c93fbea1f31c6c2f458382464f0fea2f830d57fa9eacf2098926e2"
+      }
+    }
+  ],
+  "upstream": {
+    "suez_transits": {
+      "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Suez+Canal%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+      "sha256": "3d62c88518ba400ab4ba9053447c7bd1813ccf81adef6ff79e24db3a096e9569",
+      "data_last_edit_date": "2026-11-10T11:17:02Z"
+    },
+    "hormuz_transits": {
+      "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Strait+of+Hormuz%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+      "sha256": "11e017f3f9a1e169e403e4fb6bf48d07fb8498b377425748dc0e3942408773e4",
+      "data_last_edit_date": "2026-11-10T11:17:02Z"
+    },
+    "bab_el_mandeb_transits": {
+      "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Bab+el-Mandeb+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+      "sha256": "30e60dad422c19f657ba364640b39a85e4c9a9d2333794b87239dc508638c295",
+      "data_last_edit_date": "2026-11-10T11:17:02Z"
+    },
+    "taiwan_strait_transits": {
+      "source_url": "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query?where=portname%3D%27Taiwan+Strait%27&outFields=date%2Cn_total&orderByFields=date&f=json",
+      "sha256": "55d2ce9908cad39b7e73a1c5f8a6c8e9868adaa4e4cde5fd99163f76a9da7bb3",
+      "data_last_edit_date": "2026-11-10T11:17:02Z"
+    },
+    "wiki_ww3_views": {
+      "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/World_War_III/daily/20150701/20991231",
+      "sha256": "76634fc1e3fb041c9ac694bc518a623dd6dd74983de44b40d90490aba52d144b"
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "4f0d5f799db6e307ec1c3a4356aeeb29fc0d774eff8f13362a84546c37552166",
+      "etag": "\"e2eccac4e8e32f4dd37e551432731a3d794eef543b06a3921028db5c793c2434\"",
+      "freshness_cutoff": "2026-11-10T06:30:59Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "1cfa645e82085a53d05635092d8b520726a2dae6605c260af93b32310c6ce03a",
+      "etag": "\"836dc7f606c88d8f9f6f37153dd62cdeaef4f1da4dc95df53754d988ef7ae9dd\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "ecda9f668f0f6e9416bd1584793bcb99abf18eaa",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/42844853905"
+    },
+    "generated_at": "2026-11-10T15:34:21Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-10-aseri-timestral209m_c1.csv": "245b82ef9239c226baf865d84dd370534f4918cb68edba2bbd02716ab32bc54d",
+    "target-data/deltas/2026-11-10.csv": "892df1a6abf3407f059e1a4124365601b5aad2f641eb4dddf418f0b0d91a9af1"
+  }
+}
