@@ -1,0 +1,110 @@
+{
+  "forecast_date": "2026-11-13",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-13",
+        "input_sha256": "fe55a0527df35e7bafecd3fae9bbcaf65beb7e1ff7efb5f0deec98927724d64b"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-13",
+        "input_sha256": "57e177a621911cb14496e35468d7487e49068fee41f6121726c64967cbd23519"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-13",
+        "input_sha256": "955f83e84e66ecd8b9b90fa455a0fcf5f8dfd5a686631a17efbf8282a0e1589d"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-13",
+        "input_sha256": "b2e352179cafce34c53ae9e0cccf476668e05b31c63879b0c800df22ef0a128e"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-13",
+        "input_sha256": "fc6abba834a7c9eb652e9a8b337c67f9404b881a2d5aceb917a5c4cc90260ad8"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-11",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-13",
+        "input_sha256": "1b939302c010b8cfd249d9630ca5bf146b7d9b642390442a3fb495044146bba7"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-12",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-13",
+        "input_sha256": "b79c654c6e9beb72871cada75ff210196d69fe5ccbb7c21b2a6334a1f0b75694"
+      }
+    }
+  ],
+  "upstream": {
+    "brent_spot": {
+      "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+      "sha256": "24c21dcefd22454f23390f58e8472c6b8a3cdea283d6cc5b7cfade9fede1d985",
+      "last_modified": "Fri, 13 Nov 2026 01:31:23 GMT"
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "76a2ef97169b1dbece7765ca5a0674f8c6d5e932e6df838f5539559b7fcc7b42",
+      "etag": "\"6859dbd885aecba41b3ed5709152202ee06593646787c6f4539f783007a7a2de\"",
+      "freshness_cutoff": "2026-11-13T05:44:08Z"
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "ecda9f668f0f6e9416bd1584793bcb99abf18eaa",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/43450799228"
+    },
+    "generated_at": "2026-11-13T15:18:33Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-13-aseri-timestral209m_c1.csv": "f72bc6e9c778c6681358f7778146d7fad18610147fd14ca933aca362bbe67c8f",
+    "target-data/deltas/2026-11-13.csv": "d72e8637893572187067d217c0dd45477da9dada618fe7f8499dcec847e5cd29"
+  }
+}
