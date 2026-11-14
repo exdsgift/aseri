@@ -1,0 +1,45 @@
+{
+  "forecast_date": "2026-11-14",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-13",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-14",
+        "input_sha256": "b020ad9e122da4d098a0a03ed9f5d91e013a90e4b1f6e7b43459e49f7a2c2f0d"
+      }
+    }
+  ],
+  "upstream": {
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "9afd96b00a4949296c20e2d5e3fe06fb51ea407ab8fb81095d64cba9116d6cc8",
+      "etag": "\"a5b439d958b6eec7ae17d0bc254eade6a29c2eb0217961ffb3db4549c215a658\"",
+      "freshness_cutoff": "2026-11-14T05:29:53Z"
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "ecda9f668f0f6e9416bd1584793bcb99abf18eaa",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/43602698553"
+    },
+    "generated_at": "2026-11-14T14:05:08Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-14-aseri-timestral209m_c1.csv": "57bb61db102fdd260b174e4de2ffe0aaa65e5d1e5d63f77ec88b5a6e11e4ea56",
+    "target-data/deltas/2026-11-14.csv": "6b738dcd020f58f48837a08262b88c800ff48f53cbb692b0655f6cd31b5628b9"
+  }
+}
