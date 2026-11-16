@@ -1,0 +1,207 @@
+{
+  "forecast_date": "2026-11-16",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-03",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "e8a3fe775b756c5dd42d971e93d4d4a6b9b7a9e7c6c2924601b76407a5027656"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-04",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "af5987c0b0e098af275c4995077dd5e1a4d82c5e499fbe2bfc449681d30fbbe9"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-05",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "d400395e7285e46204f3381a4b09209a0d62cd41d4d9daccdaf800f61d1c9bfc"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-06",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "27a178bf48e7332d67f23fd46060bce852def6c5afdb1e995146c52b671946e0"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-07",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "9385609a4ff5cd1288a02d321d8c42d13b4555379ec811ac606febd7cf8c869c"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-08",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "230f55b66966c74c8c25cba14abe826b8550fdcdfacafc4b4ebdf3cb52f557b4"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-09",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "555a85e694eda1d1131fb244f87a0020f2ba337420139566faa2abb1009f8a84"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-10",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "2100f743c761606f64db6f0dc8658c5bed667aba0c9149e156edb3b6f692572f"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-11",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "c739dd310a5ea88e5d6f52f99d46637a7ba47394ec7314a21a967aba151218da"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "a614acdf45e5cf8d02aaa80214e70ad200d3faa22a4911d636b4d2cc7f3fb7ef"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "3a0979d3d388a0c08ba582741605b7b439dc76d22a9e88dc8418a43bd3073001"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-14",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "621d4e954b8d525a4be422edc1555c9085c3c5858409b5bc9770e8798efaa878"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-15",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "c5cc4ef3d3023b91f3dbc0ff54a5336295e25ade44686a39a959035911228527"
+      }
+    },
+    {
+      "target": "gpr_daily",
+      "reference_date": "2026-11-16",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+        "as_of": "2026-11-16",
+        "input_sha256": "cf287f5e25527c7b37b941a45576e979da0ea4551c2a8d5309b204c041340871"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-15",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-16",
+        "input_sha256": "a0a6c1eb0a52e607a4e263a7bdfe184da32ed83f03c62fa492fb195653ca4626"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-16",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-16",
+        "input_sha256": "0e6dbbf82e55f96304182e067c41a3d928e8a891a488e103426b52aafa5e5dc0"
+      }
+    }
+  ],
+  "upstream": {
+    "gpr_daily": {
+      "source_url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.dta",
+      "sha256": "daeab4404933fb0188f67f264ef5852f29f31f4d390d21c4874fba9e7d36d022",
+      "last_modified": "Mon, 16 Nov 2026 15:07:00 GMT",
+      "etag": "\"6afb1c14-186768\""
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "a8edea7e9144447906ee30d922807195a402150382fcb7efd28197729e997128",
+      "etag": "\"e1c7db8221b28e088116ebaa1eee38c910b72468ae2ba02458101438033d973e\"",
+      "freshness_cutoff": "2026-11-16T05:30:55Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "c47f4716f81c60ec036c671765c6bbdf32392a624c94219cb49770ce0953557c",
+      "etag": "\"27ea1d7caa7b5ae8198aa38e11d6452987e777ed2858de869b3e7251b68e9eda\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "ecda9f668f0f6e9416bd1584793bcb99abf18eaa",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/43912453577"
+    },
+    "generated_at": "2026-11-16T16:58:21Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-16-aseri-timestral209m_c1.csv": "2ef7017ad0f4bba7d1cfdd0903e9a10c3a13c114ca7ab236e4eea84d38a8ce1e",
+    "target-data/deltas/2026-11-16.csv": "4ecf85470ba8f3645984f02cdff3188e4d5c25bdbaaeba27b5a4fdebbf13e680"
+  }
+}
