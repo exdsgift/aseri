@@ -1,0 +1,106 @@
+{
+  "forecast_date": "2026-11-19",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-12",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-19",
+        "input_sha256": "760b9fdd0cfbb3b6894a4aecd9d37d78ab1f0add3273107c63d8bf6d33e1541b"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-13",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-19",
+        "input_sha256": "e75e9aee23b608811d819fd878691b0a62cebf6f9d64280217c45270758dc595"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-16",
+      "forecast_mode": "retrospective",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-19",
+        "input_sha256": "af309641e26827d0e13e7f5563d10415d5825348816d3da79ca1310c4fe06a10"
+      }
+    },
+    {
+      "target": "brent_spot",
+      "reference_date": "2026-11-17",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+        "as_of": "2026-11-19",
+        "input_sha256": "3a1721a01958b28333d80f9c8158811226a2853dd47a5762c785e9a144c409e0"
+      }
+    },
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-18",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-19",
+        "input_sha256": "ff6fedcfeac80198556cf0e17cfdef7c649d0e8da9446821b754e8905705965d"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-19",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-19",
+        "input_sha256": "2879144552ab3c74361951f284a70df9845b0a9a793d7e834e2ea6fff9174333"
+      }
+    }
+  ],
+  "upstream": {
+    "brent_spot": {
+      "source_url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU",
+      "sha256": "aa587e1c6edc32b9e3cdfe2dd332245c9d1076868d5735909b1f1644b325eb85",
+      "last_modified": "Wed, 18 Nov 2026 18:18:23 GMT"
+    },
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "8f28582d961742a9505b30bbb57267b55f6639e77a9ef91b5d820bb1f6507cb3",
+      "etag": "\"1d17c9b9501544d6f9f9740b4bfc83568693512317ec8e027133dfd80cd6b083\"",
+      "freshness_cutoff": "2026-11-19T06:17:05Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "201435a654cf5b8c0c4de05acd29ac0390bd1ebef07e38ea2af51ac54d59a522",
+      "etag": "\"c03ab3a723032766a954b788dc100aa2cb59f2405e21e238d3d131309d944865\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "ecda9f668f0f6e9416bd1584793bcb99abf18eaa",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/44566372362"
+    },
+    "generated_at": "2026-11-19T16:32:51Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-19-aseri-timestral209m_c1.csv": "96229f31df994e340fa05bd45ec571f586f6a338a236165b77859df4cb7a6d56",
+    "target-data/deltas/2026-11-19.csv": "da34132644db9fda6252804b3e178c543fca4bb810b8a1b1b26fea155100794e"
+  }
+}
