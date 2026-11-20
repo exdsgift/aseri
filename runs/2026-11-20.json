@@ -1,0 +1,61 @@
+{
+  "forecast_date": "2026-11-20",
+  "model_id": "aseri-timestral209m_c1",
+  "forecasts": [
+    {
+      "target": "ua_air_raid_hours",
+      "reference_date": "2026-11-19",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+        "as_of": "2026-11-20",
+        "input_sha256": "5911c908b57ab7c6016a9386cd47c8c47353ce5cdb3470a1a245d809b11f7476"
+      }
+    },
+    {
+      "target": "ua_drones_downed_claimed",
+      "reference_date": "2026-11-20",
+      "forecast_mode": "live",
+      "data": {
+        "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+        "as_of": "2026-11-20",
+        "input_sha256": "fd89b57e59fa2802b57d7ec6cea7c9bbee17051a541dc7dfaa5765f1208b7c16"
+      }
+    }
+  ],
+  "upstream": {
+    "ua_air_raid_hours": {
+      "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+      "sha256": "91d1e61a873de83192f03d1e9dc0d4e674249845ac6e38af812bf6cb45bcc250",
+      "etag": "\"169da56d43721e3b962846fdd84f5443c28f567d613e925b853ffe406b1b7e9e\"",
+      "freshness_cutoff": "2026-11-20T06:21:16Z"
+    },
+    "ua_drones_downed_claimed": {
+      "source_url": "https://raw.githubusercontent.com/PetroIvaniuk/2022-Ukraine-Russia-War-Dataset/main/data/russia_losses_equipment.json",
+      "sha256": "787a6fb41a9bf386cd8ff7e2baa81c00eb01fcc4a18628980de0c598ea281e93",
+      "etag": "\"471fa3691a68d00008094e2a8356fbafffc9b27390b26ee3c398d48f343ca336\"",
+      "revisions": []
+    }
+  },
+  "provenance": {
+    "model": {
+      "id": "mistralai/Timestral-209M",
+      "revision": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+      "url": "https://huggingface.co/mistralai/Timestral-209M"
+    },
+    "inference": {
+      "package": "timestral",
+      "package_commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+    },
+    "code": {
+      "commit": "ecda9f668f0f6e9416bd1584793bcb99abf18eaa",
+      "run": "https://github.com/exdsgift/aseri/actions/runs/44768753582"
+    },
+    "generated_at": "2026-11-20T16:04:02Z",
+    "leakage_note": "Timestral's training-data cutoff is not published; backtests may be optimistic."
+  },
+  "files": {
+    "model-output/aseri-timestral209m_c1/2026-11-20-aseri-timestral209m_c1.csv": "15a088a83e4cc87cd673d7b3b0e0b8b5fccdfcf88701e62bac4c0bd362d9b82f",
+    "target-data/deltas/2026-11-20.csv": "376919eaafcfd5cdcd4ad96c1821de86534964567253d67a87ea7546b4061e19"
+  }
+}
