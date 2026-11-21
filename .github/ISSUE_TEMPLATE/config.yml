@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security problem
+    url: https://github.com/exdsgift/aseri/security/advisories/new
+    about: Report a vulnerability privately, not in a public issue.
+  - name: How to use the API
+    url: https://exdsgift.github.io/aseri/api/
+    about: Every file, the OpenAPI contract and the licences.
