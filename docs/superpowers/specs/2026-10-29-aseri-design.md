@@ -160,7 +160,7 @@ Notes:
 ### 6.3 Daily pipeline
 
 One workflow, `daily.yml`, on a cron.
-- **Schedule (my call):** 07:00 UTC, plus manual dispatch.
+- **Schedule (my call):** cron 23 07 UTC, off the top of the hour, plus manual dispatch (#159). The cron is a request: runs started 7-9 hours late, so the run summary records the lag, and the deploy is followed by a check that the public catalog matches the artifact (`aseri/delivery.py`).
 - **Stages:** each is a separate module with a clear input and output.
 
 1. **Fetch:** one adapter per source.

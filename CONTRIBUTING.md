@@ -75,7 +75,7 @@ This covers a series added, removed or renamed; a file, a field or a format; a l
 - **One issue, one branch, one pull request:** `ticket-<number>-<name>` for work, `prototype-<name>` for throwaway prototypes.
 - **Commit subjects** name the area, then what changed, in plain words, with the issue: `pipeline: a forecast out of bounds is held alone (#151)`. The areas are `pipeline`, `web`, `api`, `docs`, `ci` and `branding`, joined with commas when a commit spans several.
 - **Pull requests** fill in the template, pass CI, and answer review findings in their own commits: `web: address the #152 review`.
-- **Deploys.** A push to master that touches only `web/` deploys the page in about 2 minutes, on the API files of the last deploy. Anything else waits for the next daily run at 07:00 UTC, or for a manual run of the `daily` workflow with `page_only` ticked, which deploys the page alone.
+- **Deploys.** A push to master that touches only `web/` deploys the page in about 2 minutes, on the API files of the last deploy. Anything else waits for the next daily run (cron 07:23 UTC, in practice often hours later: the run summary records the lag), or for a manual run of the `daily` workflow with `page_only` ticked, which deploys the page alone.
 
 ## Decisions
 

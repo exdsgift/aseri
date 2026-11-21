@@ -2,7 +2,9 @@ name: daily
 
 on:
   schedule:
-    - cron: "0 7 * * *"
+    # Off the top of the hour, where GitHub's schedule queue is busiest. It is a request, not a promise: runs start late,
+    # so each run's summary records how late (aseri/delivery.py). Keep it a daily "M H * * *" cron, which that reads.
+    - cron: "23 7 * * *"
   # A change to the page alone deploys on its own, through the page job.
   push:
     branches: [master]
@@ -39,11 +41,16 @@ jobs:
       stale: ${{ steps.run.outputs.stale }}
       source_failed: ${{ steps.run.outputs.source_failed }}
       calibration_red: ${{ steps.run.outputs.calibration_red }}
+      catalog_sha: ${{ steps.catalog.outputs.catalog_sha }}
     defaults:
       run:
         working-directory: pipeline
     steps:
       - uses: actions/checkout@v7
+      - name: Record how late this run started
+        env:
+          SCHEDULE_CRON: ${{ github.event.schedule }}
+        run: python3 aseri/delivery.py lag
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           working-directory: pipeline
@@ -118,6 +125,10 @@ jobs:
           name: archive-adds
           path: ${{ runner.temp }}/archive-adds
           if-no-files-found: error
+      # The catalog the deploy is verified against once it is public.
+      - name: Hash the catalog this run publishes
+        id: catalog
+        run: python3 aseri/delivery.py sha ../site/api/v1/series.json
       # Kept a week, so the page job can take its API files even after a missed cron.
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -134,6 +145,7 @@ jobs:
       actions: read
     outputs:
       deploy: ${{ steps.scope.outputs.deploy }}
+      catalog_sha: ${{ steps.catalog.outputs.catalog_sha }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -180,6 +192,10 @@ jobs:
           mkdir -p site/api
           cp -r "$RUNNER_TEMP/last/api/v1" site/api/
           test -f site/api/v1/series.json
+      - name: Hash the catalog this run publishes
+        if: steps.scope.outputs.deploy == 'true'
+        id: catalog
+        run: python3 pipeline/aseri/delivery.py sha site/api/v1/series.json
       - name: Check the first load against its budget
         if: steps.scope.outputs.deploy == 'true'
         working-directory: web
@@ -398,7 +414,42 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.retry.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deploy.outputs.page_url || steps.retry.outputs.page_url }}
     steps:
       - id: deploy
         uses: actions/deploy-pages@v5
+        continue-on-error: true
+      # A Pages deployment sometimes fails for a moment (a timeout, a 5xx): one more try, after a pause, before the run fails.
+      - name: Wait before the one retry
+        if: steps.deploy.outcome == 'failure'
+        run: |
+          echo "::warning::The Pages deployment failed; retrying once in 60 s"
+          sleep 60
+      - id: retry
+        if: steps.deploy.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+
+  # After the deploy: the public catalog must be the one the artifact holds. Reads only the one script, from a public URL.
+  verify:
+    needs: [build, page, deploy]
+    if: ${{ github.ref == 'refs/heads/master' && !cancelled() && needs.deploy.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: pipeline/aseri/delivery.py
+          sparse-checkout-cone-mode: false
+      - name: Record how late the data went public
+        env:
+          SCHEDULE_CRON: ${{ github.event.schedule }}
+        run: python3 pipeline/aseri/delivery.py lag
+      # Bounded retries (about 2 minutes) for the CDN to serve the new files.
+      - name: Check the public catalog is the deployed one
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+          EXPECTED: ${{ needs.build.outputs.catalog_sha || needs.page.outputs.catalog_sha }}
+        run: python3 pipeline/aseri/delivery.py verify "${PAGE_URL%/}/api/v1/series.json" "$EXPECTED"
