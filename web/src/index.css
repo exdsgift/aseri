@@ -287,6 +287,12 @@
   }
   html {
     @apply font-sans;
+    /* Safari on a phone enlarges text on its own when turned sideways; the type is set in
+       whole pixels and stays as it was drawn. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* No grey flash over a tapped control, which already shows its own pressed state. */
+    -webkit-tap-highlight-color: transparent;
   }
   /* A picked card brings the panel into view: smoothly, unless the reader asks for less motion. */
   @media (prefers-reduced-motion: no-preference) {
