@@ -501,6 +501,7 @@ Checked on 2026-10-31 (#135): the GPR page's "Creative Commons BY license" links
 
 - In public repositories, scheduled workflows are disabled after 60 days without repository activity [GH-SCHED]. Whether bot commits to an orphan branch count as activity is **unverified**.
 - An external freshness check on `latest.json` catches this.
+- Delayed starts: the daily cron is set at 07:23 UTC, off the top of the hour, but runs have started 7 to 9 hours late. The run summary records the lag behind the scheduled time (`aseri/delivery.py lag`) and promises no exact time. After the deploy, a `verify` job fetches `{page_url}api/v1/series.json` and compares its SHA-256 with the deployed artifact's, up to 6 times, 20 s apart, for CDN propagation; a failed Pages deployment is retried once first. The API contract is unchanged.
 
 ### 4.13 Article renames
 
